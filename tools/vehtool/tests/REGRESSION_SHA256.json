@@ -1,0 +1,27 @@
+{
+ "note": "content-phase veh example packs (kit 0.4.0 staging S3c, make_veh_packs.py with vehtool 0.1.1)",
+ "packs": {
+  "README.txt": "788cfbf565f04df64256cf56e582b76135c6c035d20bb6c66089a75c8a52eae7",
+  "bm-veh-bad-dup/bmpack.json": "cd8440a18ef0445f6d5f3a1699ea6d3c515a6642e9ce2dd064251ee25f8e2384",
+  "bm-veh-bad-dup/mod.toml": "cb20e3d0307bb044d5c6c8ce933e1ef561d861d75982b1a1d1d37fc8393e1b9a",
+  "bm-veh-bad-missing/bmpack.json": "d460e61029be050eaac7c9f95dfddae890da96a68309935e80d75aa611a9a380",
+  "bm-veh-bad-missing/mod.toml": "5d22d88d4f97663359fe3c889c623d08a42d4d7c563cb855686f4552c0ba0b56",
+  "bm-veh-cross/bmpack.json": "320b43d2dafc784142c7314787294b5f85e79e74e7708c95928482bdcd857cc5",
+  "bm-veh-cross/mod.toml": "a60b4450f7ec1669972c97a73344f80c876232301e1960beba37ce5925b20d53",
+  "bm-veh-dust/bmpack.json": "04899c07e2c1d973891b1034c0ba1d4c0981638babf03c8ea9d24ac70fbfbb0d",
+  "bm-veh-dust/mod.toml": "93a0c1954016c8d2ba16bf6e651b32c3c2daa35df3af3392bf19d9800174d52b",
+  "bm-veh-fixture-21/part00/bmpack.json": "2fb8baa4325fd84fc003ad7edd48f07dd61001232edcd8308b2840800f3db7e3",
+  "bm-veh-fixture-21/part00/mod.toml": "fad969bb77740cf86beaa2be0c9dfa3ce9a011015ced813c9a5aa7d16b9577c6",
+  "bm-veh-fixture-512/part00/bmpack.json": "7b2950d6f6128bd4022ef5b66c5697077d06528636a2c467d689165a50fc1a7e",
+  "bm-veh-fixture-512/part00/mod.toml": "0b9c6108310112aa0663298c449373c334099603770a077babdbe0ee2138b602",
+  "bm-veh-fixture-917/part00/bmpack.json": "1e2163af32645b6216905f5083658d7ad2fba7c67815f094df44e13c0e0333cd",
+  "bm-veh-fixture-917/part00/mod.toml": "1f550bb6a0c182ba277e4d8b6b3b229111f42a0bab29776a487b3bece3c33fc8",
+  "bm-veh-fixture-917/part01/bmpack.json": "5009923a9acea513a0fc9e52ef7e7c6c315d84af830e4f7f69fb6b81aa7ceb52",
+  "bm-veh-fixture-917/part01/mod.toml": "5e0144ae736b10c974c7eb5d45030ed98d13f1aaf29da01938a20c3671cd9486",
+  "bm-veh-neon/bmpack.json": "f9f80016e89ac52e0d0718ea0a0de3bdfb03d926af313062c51a9822a1ceb17d",
+  "bm-veh-neon/mod.toml": "92c348ec742ff5319f6b48a75cca2960e568cf11b81414eb9f0b293c4cf0af4d",
+  "bm-veh-retail-paints/bmpack.json": "6e6bc99c60db69f60f3cade220f08437a3f38b86c2fcfd88b8ceb87ac11b5da5",
+  "bm-veh-retail-paints/files/paints/chrome.bmpal": "a3e8e03637016c8f7a855dc6a08a6ad7cab9a8db2db33f365b6dc8f1ac200490",
+  "bm-veh-retail-paints/mod.toml": "df5c7ada2b8dfdd75baa920f14ed27f38aef71b09b13427d761eeb66efcefe12"
+ }
+}

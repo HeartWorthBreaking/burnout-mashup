@@ -1,0 +1,128 @@
+{
+ "bundle": "bmashup-alpha-tester-0.4.0",
+ "tools": {
+  "carimport": {
+   "available": true,
+   "dir": "tools/kit/carimport",
+   "entry": "carimport.py",
+   "version": "0.1.1",
+   "from": "kit 0.7.0 (d54957de3263)",
+   "note": ""
+  },
+  "trackbuild": {
+   "available": true,
+   "dir": "tools/kit/trackbuild",
+   "entry": "tb.py",
+   "version": "0.3.0",
+   "from": "kit 0.7.0 (d54957de3263)",
+   "note": ""
+  }
+ },
+ "demos": {
+  "coupe": {
+   "folder": "bm-coupes-series",
+   "source": "sources/carimport/coupe",
+   "series_source": "sources/bm-coupes/series",
+   "validate": [
+    "validate",
+    "{car}",
+    "--game-data",
+    "{game}"
+   ],
+   "package": [
+    "package",
+    "{car}",
+    "{set}",
+    "--game-data",
+    "{game}"
+   ],
+   "expected": {
+    "files/pveh/BMCO/CIC1.bgv": "ed977c8ab9847476adbea36841f69927e891bb5bf2e3b300904c26db483e5b4f",
+    "files/pveh/BMCO/CIC1.hwd": "c030385cc92ba11fb1f4a1f5477d6307f2670c809a0c9590429b63f6321fdd8b",
+    "files/pveh/BMCO/CIC1.lwd": "b6ff319ada0c73fbcb34571f00c3d7621942abc0a43e9cd2e9b22fb87c85cfb2"
+   }
+  },
+  "loop": {
+   "folder": "bm-test-loop",
+   "package_toml": "tools/kit/trackbuild/examples/test_loop_package.toml",
+   "gen": [
+    "gen-testloop",
+    "{src}"
+   ],
+   "build": [
+    "build",
+    "{src}",
+    "{desc}",
+    "{build}",
+    "--game-data",
+    "{game}"
+   ],
+   "validate": [
+    "validate",
+    "{build}"
+   ],
+   "package": [
+    "package",
+    "{build}",
+    "{package}",
+    "{set}"
+   ],
+   "expected": {
+    "bmpack.json": "2c28fa46b74b46ac1a54ad0bcf5f3ac52d58ba006d8ef450953a373ca34f35a9",
+    "files/Tracks/EU/T1_V1/CRASH1.RWS": "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+    "files/Tracks/EU/T1_V1/CRASH2.RWS": "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+    "files/Tracks/EU/T1_V1/CRASH3.RWS": "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+    "files/Tracks/EU/T1_V1/E_DJRACE.xwb": "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+    "files/Tracks/EU/T1_V1/Gamedata.bgd": "a8c838f09aa8e0708d9b09f4755e64649359d8fe1c7a5d62469a9ca2ddd90e79",
+    "files/Tracks/EU/T1_V1/MUSIC.RWS": "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+    "files/Tracks/EU/T1_V1/SOUND.AWD": "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+    "files/Tracks/EU/T1_V1/enviro.dat": "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+    "files/Tracks/EU/T1_V1/static.dat": "1249fd9a9636becf16a9552f65f733a5cf61abe7ead0bb65568d54f6b3dc1f37",
+    "files/Tracks/EU/T1_V1/streamed.dat": "f5ab78975a714a2515cd8dfe516c987a8410447a501f0baa47383249965a45da",
+    "mod.toml": "1cdccede525d2b5c13b882b0bd65695c69dc869e63be023cec90725264f984ea"
+   }
+  },
+  "canyon": {
+   "folder": "bm-canyon-ring",
+   "package_toml": "tools/kit/trackbuild/examples/canyon_package.toml",
+   "gen": [
+    "gen-testloop",
+    "{src}",
+    "--variant",
+    "canyon"
+   ],
+   "build": [
+    "build",
+    "{src}",
+    "{desc}",
+    "{build}",
+    "--game-data",
+    "{game}"
+   ],
+   "validate": [
+    "validate",
+    "{build}"
+   ],
+   "package": [
+    "package",
+    "{build}",
+    "{package}",
+    "{set}"
+   ],
+   "expected": {
+    "bmpack.json": "92ae04d7e4e5a5905f6d60bba93e6007e7cce1b276645593b9cf4252e0d8a6bf",
+    "files/Tracks/EU/T6_V1/CRASH1.RWS": "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+    "files/Tracks/EU/T6_V1/CRASH2.RWS": "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+    "files/Tracks/EU/T6_V1/CRASH3.RWS": "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+    "files/Tracks/EU/T6_V1/E_DJRACE.xwb": "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+    "files/Tracks/EU/T6_V1/Gamedata.bgd": "a47e5e9e82e37cb3b6bf9c140e657e41a7177cc5d3b2656105d3798a08298ba2",
+    "files/Tracks/EU/T6_V1/MUSIC.RWS": "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+    "files/Tracks/EU/T6_V1/SOUND.AWD": "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+    "files/Tracks/EU/T6_V1/enviro.dat": "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+    "files/Tracks/EU/T6_V1/static.dat": "49ac9678793df2e8c4d8944f2feec05060f3bdbe4252ac26fe231e3e2b743d39",
+    "files/Tracks/EU/T6_V1/streamed.dat": "9c4c8e4d656909b331dc5d9eb0cda984e55c648cf05d7bc2182f89af73a4c2a4",
+    "mod.toml": "0f4258b164ea011496711d017b76e58ab5d79b23985d3c2990c3f94ece21f3ca"
+   }
+  }
+ }
+}

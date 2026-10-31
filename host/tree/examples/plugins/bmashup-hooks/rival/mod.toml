@@ -1,0 +1,14 @@
+# Burnout Mashup's private coordinated-hooks demo, the rival (include/bmashup_hooks.h). The module is ../bm_hooks_demo.c
+# built with BM_HOOKS_DEMO_RIVAL; put it beside this file and approve its code on the MODS page: until then it is never
+# loaded. It asks for RACE_EXIT exclusively too (refused while the owner holds it: CONFLICT in the log) and observes
+# takedowns after the owner (priority 10). It changes nothing.
+id = "bmashup.hooks-rival"
+name = "Hooks Rival (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: bmashup.hooks conflict example (a refused exclusive registration); changes nothing."
+
+[plugin]
+api = 1
+windows = "bm_hooks_rival.asi"
+linux = "libbm_hooks_rival.so"
+macos = "libbm_hooks_rival.dylib"

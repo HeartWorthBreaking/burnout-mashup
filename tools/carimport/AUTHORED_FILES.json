@@ -1,0 +1,48 @@
+{
+ "note": "every binary file of this tool folder (paths relative to it): AUTHORED (original), with how it is made; the pre-push scan allows exactly these path + sha256 pairs",
+ "tool": "carimport",
+ "files": [
+  {
+   "path": "examples/coupe/coupe.bin",
+   "sha256": "7c3dff5333389d8bdf07e2801394b4c48a39a6f8e9de941f0a1624896eb61c28",
+   "bytes": 99144,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo coupe (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/coupe)"
+  },
+  {
+   "path": "examples/coupe/paint_mask.png",
+   "sha256": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "bytes": 1527,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo coupe (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/coupe)"
+  },
+  {
+   "path": "examples/coupe/texture.png",
+   "sha256": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d",
+   "bytes": 7158,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo coupe (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/coupe)"
+  },
+  {
+   "path": "examples/wedge/paint_mask.png",
+   "sha256": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "bytes": 1527,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo wedge (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/wedge)"
+  },
+  {
+   "path": "examples/wedge/texture.png",
+   "sha256": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d",
+   "bytes": 7158,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo wedge (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/wedge)"
+  },
+  {
+   "path": "examples/wedge/wedge.bin",
+   "sha256": "63bba3149a16248bb40d011c335bce5a3ebcb6ad9089c3a64856dfa321a56395",
+   "bytes": 2856,
+   "label": "AUTHORED",
+   "made_by": "carimport.py demo wedge (procedural, ORIGINAL; = mod kit 0.4.0 examples/authored/carimport/wedge)"
+  }
+ ]
+}

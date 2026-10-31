@@ -1,0 +1,131 @@
+{
+ "format": "trackbuild.reference/1",
+ "produced_by": "trackbuild 0.1.6 (gp tools), donor EU/M1_V1 (pinned in trackbuild.donor)",
+ "note": "sha256 of every file of the 0.1.6 package sets; 0.2.0 must reproduce them byte for byte",
+ "sets": {
+  "test_loop": {
+   "variant": null,
+   "package_toml": "examples/test_loop_package.toml",
+   "files": {
+    "LABELS.json": [
+     "2cc0dd533c23c80320fcfcce3083cee52fd413ffdb55c93c48c617b97f191557",
+     1313
+    ],
+    "SHA256SUMS.txt": [
+     "61cb4aa3d67c18e672deae5f249998583ba04349763af02a11c38ead469a9985",
+     1531
+    ],
+    "gp_trkimp_examples/bm-test-loop/bmpack.json": [
+     "1412626ee2a95571a38a76c7844f25f7f68256fa5cd0b1c8b9e792e4e05d263a",
+     5061
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH1.RWS": [
+     "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+     7735296
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH2.RWS": [
+     "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+     7735296
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH3.RWS": [
+     "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+     14682112
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/E_DJRACE.xwb": [
+     "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+     7919616
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/Gamedata.bgd": [
+     "a8c838f09aa8e0708d9b09f4755e64649359d8fe1c7a5d62469a9ca2ddd90e79",
+     73728
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/MUSIC.RWS": [
+     "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+     124
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/SOUND.AWD": [
+     "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+     575488
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/enviro.dat": [
+     "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+     315392
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/static.dat": [
+     "1249fd9a9636becf16a9552f65f733a5cf61abe7ead0bb65568d54f6b3dc1f37",
+     65536
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/streamed.dat": [
+     "992fa046c486b0879b97a22f73b59d78f3fe0132cc9b8127cf7709047fd38e0b",
+     778240
+    ],
+    "gp_trkimp_examples/bm-test-loop/mod.toml": [
+     "1cdccede525d2b5c13b882b0bd65695c69dc869e63be023cec90725264f984ea",
+     868
+    ]
+   }
+  },
+  "canyon": {
+   "variant": "canyon",
+   "package_toml": "examples/canyon_package.toml",
+   "files": {
+    "LABELS.json": [
+     "d34582c45751cc333698eb9537c4042c91e39f0c87aac6c76aa42e1388802132",
+     1313
+    ],
+    "SHA256SUMS.txt": [
+     "b88308a64b211ed9e0054f5468b3e1a514ede5dcb7e649f0a9d8368b51ca5f2c",
+     1579
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/bmpack.json": [
+     "13bace5c265953ced47e3038b45e1a16fd41b608f8743f8d2abde3250d7d245e",
+     5071
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH1.RWS": [
+     "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+     7735296
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH2.RWS": [
+     "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+     7735296
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH3.RWS": [
+     "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+     14682112
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/E_DJRACE.xwb": [
+     "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+     7919616
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/Gamedata.bgd": [
+     "a47e5e9e82e37cb3b6bf9c140e657e41a7177cc5d3b2656105d3798a08298ba2",
+     102400
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/MUSIC.RWS": [
+     "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+     124
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/SOUND.AWD": [
+     "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+     575488
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/enviro.dat": [
+     "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+     315392
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/static.dat": [
+     "49ac9678793df2e8c4d8944f2feec05060f3bdbe4252ac26fe231e3e2b743d39",
+     65536
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/streamed.dat": [
+     "7e4c2decf4c56591eb8dc522e720c6dd9d318208bf8ab941eef34e675347eec4",
+     1310720
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/mod.toml": [
+     "0f4258b164ea011496711d017b76e58ab5d79b23985d3c2990c3f94ece21f3ca",
+     994
+    ]
+   }
+  }
+ }
+}

@@ -1,0 +1,17 @@
+# main21 (next SDK) example: bmashup.traffic near_vehicles / wreck (hook request v2 P5b). Every 2 s of race time the nearest
+# same-direction traffic vehicle 5 .. 35 m ahead in your lane wrecks itself. EXPERIMENTAL. CHANGES GAMEPLAY.
+# Release step: set platform to the combined release's platform version.
+id = "bmashup.traffic-kamikaze-example"
+name = "Traffic Kamikaze Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, EXPERIMENTAL: the car ahead wrecks itself every 2 s (bmashup.traffic near_vehicles / wreck)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.traffic>=5"]
+
+[plugin]
+api = 1
+windows = "bm_traffic_kamikaze.asi"
+linux = "libbm_traffic_kamikaze.so"
+macos = "libbm_traffic_kamikaze.dylib"

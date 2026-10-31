@@ -1,0 +1,16 @@
+# bmashup-sdk 0.5.0 example (per-player-settings) for Burnout Mashup platform 0.1.8 hosts (private, experimental).
+# Read only: logs its own settings, changes nothing in the game.
+# Put this folder in a mods folder with the built module beside this file and approve its bytes.
+id = "bmashup-sdk.player-settings"
+name = "SDK example: per-player MOD SETTINGS (settings v2)"
+version = "0.5.0"
+description = "A per-player ENUM (P1 / P2) and a global BOOL on MOD SETTINGS; logs the values (subscribe2 / get_player)."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.settings>=2"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_player_settings.asi"
+# Only Windows x64 is built and tested by this SDK.

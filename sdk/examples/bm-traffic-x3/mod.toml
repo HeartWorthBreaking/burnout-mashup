@@ -1,0 +1,17 @@
+# SDK 0.5.0 example: bmashup.traffic version 2 set_density_v2(3.0). EXPERIMENTAL above 2.0: the game's pool / spawn /
+# draw limits are unchanged. Logs the traffic status every 5 s of race time (the traffic 3.0 measuring plugin).
+# CHANGES GAMEPLAY.
+id = "bmashup.traffic-x3-example"
+name = "Traffic x3 Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, EXPERIMENTAL: traffic density 3.0 (bmashup.traffic 2) and a status line every 5 s."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.traffic>=2"]
+
+[plugin]
+api = 1
+windows = "bm_traffic_x3.asi"
+linux = "libbm_traffic_x3.so"
+macos = "libbm_traffic_x3.dylib"

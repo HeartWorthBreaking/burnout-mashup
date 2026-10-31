@@ -1,0 +1,14 @@
+# Burnout Mashup's private engine-event demo, observer B (docs/bmashup-events.md).
+# The module is ../bm_events_demo.c built with BM_EVENTS_DEMO_TAG "B"; put it
+# beside this file and approve its code on the MODS page: until then it is never
+# loaded. It only observes player 1's car updates and logs a count once a second.
+id = "bmashup.events-demo-b"
+name = "Events Demo B (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: observes player 1's car updates through bmashup.events; changes nothing."
+
+[plugin]
+api = 1
+windows = "bm_events_demo_b.asi"
+linux = "libbm_events_demo_b.so"
+macos = "libbm_events_demo_b.dylib"

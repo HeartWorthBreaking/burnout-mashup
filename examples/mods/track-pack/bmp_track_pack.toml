@@ -1,0 +1,20 @@
+# bmpack spec - mod 2 of the platform content runtime fixtures: an independent content mod, one added Europe track (a
+# renamed copy of retail EU_C3_V1) + one World Tour event in Europe (EU_C1). PLACEHOLDER content: retail data under a new ID.
+[mod]
+id = "bmashup.bmp-track-pack"
+version = "1.0.0"
+name = "BMP track pack (test fixture)"
+description = "Platform fixture: added Europe track EU_C8_V1 (EU_C3_V1 data) named Canal Lights, one World Tour event at EU_C1."
+folder = "track-pack"
+
+[[track]]
+id = "EU_C8_V1"
+donor = "EU_C3_V1"
+name = "Canal Lights"
+location = "CANAL"
+
+[[event]]
+id = "canal-dash"
+track = "EU_C8_V1"
+location = "EU_C1"
+# no stage: the location's first type-A retail race (0A0200EUC1V1)

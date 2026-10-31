@@ -1,0 +1,9 @@
+# bmkit.example.toml - mod kit 0.4.1 configuration example. Copy it to bmkit.toml in the kit folder (or anywhere, and set
+# BMKIT_CONFIG=<that file>), then fill in YOUR paths. Every value is optional: a tool's own option (--game-data, --cc ...) and the
+# BMKIT_* environment variables win over this file. Use single quotes so backslashes stay as written.
+[paths]
+# your prepared NTSC-U game data: the folder holding default.xbe, Data, Tracks, pveh (docs\GAME_DATA.md)
+# game_data = 'D:\Games\Takedawn\Game\Burnout 3 Takedown'
+# llvm-mingw: either its folder or the clang file itself (docs\PREREQUISITES.md)
+# llvm_mingw = 'C:\tools\llvm-mingw-20260922-ucrt-x86_64'
+# cc = 'C:\tools\llvm-mingw-20260922-ucrt-x86_64\bin\x86_64-w64-mingw32-clang.exe'

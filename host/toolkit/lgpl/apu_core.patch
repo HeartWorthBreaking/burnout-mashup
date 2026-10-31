@@ -1,0 +1,55 @@
+# um layer toolkit (LGPL-2.1-or-later file): 1 modified file(s); position-free hunks, each old block unique in its file
+#
+--- a/toolkit/src/apu/apu_core.c
++++ b/toolkit/src/apu/apu_core.c
+@@ -113,6 +113,18 @@
+ 
+ extern uint32_t xbox_PhysicalToGuest(uint32_t pa);
+ 
++/* The contiguous window's size, as kernel.h's XBOX_CONTIG_SIZE (this file
++ * takes no kernel headers). MEM256 (Burnout Mashup modification, 2026-10-28):
++ * with a window larger than 64 MB, window offsets 64 MB .. the window's end
++ * are host-allocated pages (the high zone); they resolve to the window like
++ * the low ones. Without XBOX_CONTIG_WINDOW_MB this file is unchanged in
++ * behaviour. */
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++#define APU_CONTIG_SIZE (XBOX_CONTIG_WINDOW_MB * 1024u * 1024u)
++#else
++#define APU_CONTIG_SIZE (64u << 20)
++#endif
++
+ /* The guest address the title itself translated this physical page from
+  * (MmGetPhysicalAddress records each one; kernel_memory.c), or 0 when it never
+  * did or the answer is not memory the APU can reach. Asked first: it is
+@@ -127,7 +139,7 @@
+     uint32_t va = xbox_PhysicalToGuest(a);
+     if (!va)
+         return 0;
+-    if (va >= 0x80000000u && va - 0x80000000u < (64u << 20))
++    if (va >= 0x80000000u && va - 0x80000000u < APU_CONTIG_SIZE)
+         return va;                                  /* the contiguous window */
+     if (va < 0x80000000u && va < apu_mapped_ram())
+         return va;                                  /* RAM */
+@@ -150,6 +162,11 @@
+      * music that lost its upper half each time its ring crossed the boundary.
+      * There is no window ambiguity up here, so it is RAM, as far as the host
+      * mapped it. */
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++    /* MEM256: a page of the high zone the allocator handed out is the window. */
++    if (a >= (64u << 20) && a < APU_CONTIG_SIZE && xbox_ContiguousPageMap()[a >> 12])
++        return g_apu_ram_ptr + 0x80000000u + a;
++#endif
+     if (a >= (64u << 20)) {
+         if (a < apu_mapped_ram())
+             return g_apu_ram_ptr + a;
+@@ -182,6 +199,10 @@
+     uint32_t va = apu_translated(a);
+     if (va)
+         return va >= 0x80000000u ? "xlat-win" : "xlat-ram";
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++    if (a >= (64u << 20) && a < APU_CONTIG_SIZE && xbox_ContiguousPageMap()[a >> 12])
++        return "hzwin";                             /* MEM256: a high-zone window page */
++#endif
+     if (a >= (64u << 20))
+         return a < apu_mapped_ram() ? "ram" : "wrap";
+     if (xbox_ContiguousPageMap()[a >> 12])

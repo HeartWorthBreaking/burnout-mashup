@@ -1,0 +1,30 @@
+# bmpack 1.2 spec - host p3 runtime fixture (host3\runtime\P3_RUNTIME_PLAN.md launch 1): one added track (US_C1_V1 data under
+# a new ID) and TWO World Tour events on it at Silver Lake (US_C3, the location a fresh profile reaches), each with its own
+# list row name and help-bar text ([bmashup.extra_events] version 2). PLACEHOLDER content: retail data, local only.
+[mod]
+id = "bmashup.bmp-p3-events"
+version = "1.0.0"
+name = "BMP p3 events (test fixture)"
+description = "Host p3 fixture: two Silver Lake events on US_C8_V1 with their own row names and help texts."
+folder = "p3-events"
+
+[[track]]
+id = "US_C8_V1"
+donor = "US_C1_V1"
+name = "Harbour Lights"
+location = "HARBOUR"
+
+[[event]]
+id = "harbour-night"
+track = "US_C8_V1"
+location = "US_C3"
+name = "Harbour Night"
+help = "Race the harbour loop after dark. Added by a mod."
+
+[[event]]
+id = "harbour-sprint"
+track = "US_C8_V1"
+location = "US_C3"
+stage = "020006USC1V1"
+name = "Harbour Sprint"
+help = "A short sprint along the harbour. Added by a mod!"

@@ -1,0 +1,17 @@
+{
+ "bmpack": "1",
+ "files": {
+  "mod.toml": {
+   "sha256": "a60b4450f7ec1669972c97a73344f80c876232301e1960beba37ce5925b20d53",
+   "size": 433
+  }
+ },
+ "folder": "bm-veh-cross",
+ "label": "AUTHORED",
+ "mod": {
+  "id": "bmashup.veh-cross",
+  "name": "Gold paint for Neon Dart (veh1 example)",
+  "version": "1.0.0"
+ },
+ "packaged_by": "gp\\tools\\vehtool 0.1.0"
+}

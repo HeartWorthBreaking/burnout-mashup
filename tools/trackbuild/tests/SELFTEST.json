@@ -1,0 +1,1 @@
+{"suites": [{"name": "all", "command": ["{py}", "-B", "{tool}/tests/run_tests.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": true}]}

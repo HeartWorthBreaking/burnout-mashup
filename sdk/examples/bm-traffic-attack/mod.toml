@@ -1,0 +1,17 @@
+# main21 (next SDK) example: bmashup.traffic version 4 - a traffic seed (FIXED for this game session, so a race and its replay
+# start from the same spawn generator state) and a lane floor of 2 cars / minute (Traffic Attack style: no lane runs dry).
+# With traffic 5: section minimum 1 car + spawn spread. CHANGES GAMEPLAY. Release step: set platform to the combined release's platform version (traffic 4 is new there).
+id = "bmashup.traffic-attack-example"
+name = "Traffic Attack Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example: traffic seed + lane floor 2 cars/min (bmashup.traffic 4) and a status line every 5 s."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.traffic>=4"]
+
+[plugin]
+api = 1
+windows = "bm_traffic_attack.asi"
+linux = "libbm_traffic_attack.so"
+macos = "libbm_traffic_attack.dylib"

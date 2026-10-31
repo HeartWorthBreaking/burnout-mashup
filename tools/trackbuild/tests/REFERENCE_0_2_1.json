@@ -1,0 +1,131 @@
+{
+ "format": "trackbuild.reference/1",
+ "note": "trackbuild 0.2.1 packages (capdbg T1: mesh +0x7D = -1). Versus REFERENCE_0_1_6.json only streamed.dat differs (one byte per unit, 0x00 -> 0xFF) and the manifests that hash it (bmpack.json, SHA256SUMS.txt, LABELS.json); proof: capdbg scripts\\test_chevron_fix.py F1 / F2.",
+ "produced_by": "trackbuild 0.1.6 (gp tools), donor EU/M1_V1 (pinned in trackbuild.donor)",
+ "sets": {
+  "canyon": {
+   "files": {
+    "LABELS.json": [
+     "6646cc8e490061d6c6a057d4c73674e5513d8e38806e3d06184741cb751116bc",
+     1313
+    ],
+    "SHA256SUMS.txt": [
+     "acf4a75588891194439dcdf3cfd6737de2ccc702c6b6751b0476b0528700f9b6",
+     1579
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/bmpack.json": [
+     "92ae04d7e4e5a5905f6d60bba93e6007e7cce1b276645593b9cf4252e0d8a6bf",
+     5071
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH1.RWS": [
+     "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+     7735296
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH2.RWS": [
+     "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+     7735296
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/CRASH3.RWS": [
+     "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+     14682112
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/E_DJRACE.xwb": [
+     "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+     7919616
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/Gamedata.bgd": [
+     "a47e5e9e82e37cb3b6bf9c140e657e41a7177cc5d3b2656105d3798a08298ba2",
+     102400
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/MUSIC.RWS": [
+     "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+     124
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/SOUND.AWD": [
+     "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+     575488
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/enviro.dat": [
+     "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+     315392
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/static.dat": [
+     "49ac9678793df2e8c4d8944f2feec05060f3bdbe4252ac26fe231e3e2b743d39",
+     65536
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/files/Tracks/EU/T6_V1/streamed.dat": [
+     "9c4c8e4d656909b331dc5d9eb0cda984e55c648cf05d7bc2182f89af73a4c2a4",
+     1310720
+    ],
+    "gp_trkimp_canyon_set/bm-canyon-ring/mod.toml": [
+     "0f4258b164ea011496711d017b76e58ab5d79b23985d3c2990c3f94ece21f3ca",
+     994
+    ]
+   },
+   "package_toml": "examples/canyon_package.toml",
+   "variant": "canyon"
+  },
+  "test_loop": {
+   "files": {
+    "LABELS.json": [
+     "cfc8e9b927eae4a7c554c807ea4adcd371bf9a6eaae76ece63371ae0efd5fad2",
+     1313
+    ],
+    "SHA256SUMS.txt": [
+     "fb82b159a9eec5507c27ba56fc149aff00b84d71b45f0121ea7c5ced8d208cce",
+     1531
+    ],
+    "gp_trkimp_examples/bm-test-loop/bmpack.json": [
+     "2c28fa46b74b46ac1a54ad0bcf5f3ac52d58ba006d8ef450953a373ca34f35a9",
+     5061
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH1.RWS": [
+     "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+     7735296
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH2.RWS": [
+     "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+     7735296
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/CRASH3.RWS": [
+     "e26e286fed4ac5255dc73a735839bc58c76abfb2573d2351f6479dfd47da0194",
+     14682112
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/E_DJRACE.xwb": [
+     "d49694b9bd68ffec7414f60465416f12c92e4dd30d49fe055148e3f9c0f8e2ac",
+     7919616
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/Gamedata.bgd": [
+     "a8c838f09aa8e0708d9b09f4755e64649359d8fe1c7a5d62469a9ca2ddd90e79",
+     73728
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/MUSIC.RWS": [
+     "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+     124
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/SOUND.AWD": [
+     "ff61a7c908890977b3b08736a85c4739bf29eaa36c90ebbf5405f7df4f168b90",
+     575488
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/enviro.dat": [
+     "124423cb1838a8f29d2eb38c888d5cef7101ebb963d51333dfb93c0d1938125b",
+     315392
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/static.dat": [
+     "1249fd9a9636becf16a9552f65f733a5cf61abe7ead0bb65568d54f6b3dc1f37",
+     65536
+    ],
+    "gp_trkimp_examples/bm-test-loop/files/Tracks/EU/T1_V1/streamed.dat": [
+     "f5ab78975a714a2515cd8dfe516c987a8410447a501f0baa47383249965a45da",
+     778240
+    ],
+    "gp_trkimp_examples/bm-test-loop/mod.toml": [
+     "1cdccede525d2b5c13b882b0bd65695c69dc869e63be023cec90725264f984ea",
+     868
+    ]
+   },
+   "package_toml": "examples/test_loop_package.toml",
+   "variant": null
+  }
+ }
+}

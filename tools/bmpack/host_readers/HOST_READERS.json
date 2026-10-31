@@ -1,0 +1,354 @@
+{
+ "files": [
+  {
+   "changes": [],
+   "file": "LICENSE-takedawn.txt",
+   "licence": "the licence text",
+   "origin": "main19/LICENSE",
+   "origin_sha256": "0de8327ee50d7638222c6590a40aed91f2d2565557a72f134061b65fe918da99",
+   "sha256": "0de8327ee50d7638222c6590a40aed91f2d2565557a72f134061b65fe918da99"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_admit.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_admit.c",
+   "origin_sha256": "a3757ba57822393a687005c1386fca507cc059944ecea7cebf98b3735e676067",
+   "sha256": "a3757ba57822393a687005c1386fca507cc059944ecea7cebf98b3735e676067"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_admit.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_admit.h",
+   "origin_sha256": "c15aa59ec15d938b4fd7dc84bd0e7a1622f33e0d0ddbfc8e24464c1a4a3716d7",
+   "sha256": "c15aa59ec15d938b4fd7dc84bd0e7a1622f33e0d0ddbfc8e24464c1a4a3716d7"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_fetex.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_fetex.c",
+   "origin_sha256": "ae084fb9d34f290cc6c989646b87a4452bc1e1e9929d7821a58ac331abe06592",
+   "sha256": "ae084fb9d34f290cc6c989646b87a4452bc1e1e9929d7821a58ac331abe06592"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_fetex.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_fetex.h",
+   "origin_sha256": "172755af028eace62e50926b77238089b239d93fc13dbe9e69d4d7301ed910de",
+   "sha256": "172755af028eace62e50926b77238089b239d93fc13dbe9e69d4d7301ed910de"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_fetex_parse.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_fetex_parse.inc",
+   "origin_sha256": "c47f9674952985f8107afdcfcd700e697a7eac1e581914bce05422478d7ccee2",
+   "sha256": "c47f9674952985f8107afdcfcd700e697a7eac1e581914bce05422478d7ccee2"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_guest.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_guest.c (public fork host layer)",
+   "origin_sha256": "cda016ad1cc66bb4e6beaf1d29cbe01e3a7df63a150097146e826a5380c340ce",
+   "sha256": "cda016ad1cc66bb4e6beaf1d29cbe01e3a7df63a150097146e826a5380c340ce"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_guest.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_guest.h (public fork host layer)",
+   "origin_sha256": "fb8689699fc48f63b21a6c9fafd09cb552fb6d68c19e3f108893712cce8b152d",
+   "sha256": "fb8689699fc48f63b21a6c9fafd09cb552fb6d68c19e3f108893712cce8b152d"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_modreq.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_modreq.h",
+   "origin_sha256": "259aed2d5bf2d85cb847429819bc7e4a574ebfe974afbbdcee1525b9aa9f9bc3",
+   "sha256": "259aed2d5bf2d85cb847429819bc7e4a574ebfe974afbbdcee1525b9aa9f9bc3"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_music.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_music.h",
+   "origin_sha256": "54c127102d4274b9e8399bead1f21dddbc18845a7a6a62b6b149cb6377b223ee",
+   "sha256": "54c127102d4274b9e8399bead1f21dddbc18845a7a6a62b6b149cb6377b223ee"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_music_parse.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_music_parse.inc",
+   "origin_sha256": "7d4761dcd33f16b5fe79675cbd080c7e54320a55f29ef56ed3da757b5fb78865",
+   "sha256": "7d4761dcd33f16b5fe79675cbd080c7e54320a55f29ef56ed3da757b5fb78865"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_names.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_names.c",
+   "origin_sha256": "da0b07a613490d7a33b0d542032526d414d0f630326bef74936f025aca873330",
+   "sha256": "da0b07a613490d7a33b0d542032526d414d0f630326bef74936f025aca873330"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_names.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_names.h (public fork host layer)",
+   "origin_sha256": "8e138e17f3aecb7c87d94fc3e9a6075ef1a016662de71484c2ebb3f8193db5ae",
+   "sha256": "8e138e17f3aecb7c87d94fc3e9a6075ef1a016662de71484c2ebb3f8193db5ae"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_platform_gate.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_platform_gate.inc",
+   "origin_sha256": "570f029f5be523e0008fba04f8cec4af59fc37c9d61ba30007565bd9a356ab66",
+   "sha256": "570f029f5be523e0008fba04f8cec4af59fc37c9d61ba30007565bd9a356ab66"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_platform_table.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_platform_table.h",
+   "origin_sha256": "7637137f876723783befa4febf01c6cac00f77d86e9a52673ad8b6bda514d8f4",
+   "sha256": "7637137f876723783befa4febf01c6cac00f77d86e9a52673ad8b6bda514d8f4"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_progress.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_progress.c",
+   "origin_sha256": "589670ed74aa8fd44a6a210b631a5eb194860511b984dc2bda556b9eb6739f0c",
+   "sha256": "589670ed74aa8fd44a6a210b631a5eb194860511b984dc2bda556b9eb6739f0c"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_progress.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_progress.h",
+   "origin_sha256": "a59861bfa45fb04796f82e8f430ae9a89e6bdd16a960f569f825bcc04e892939",
+   "sha256": "a59861bfa45fb04796f82e8f430ae9a89e6bdd16a960f569f825bcc04e892939"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_progress_io.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_progress_io.c",
+   "origin_sha256": "4b11f41f28a3e433ad513e145b76149449826f22e74e544f875bd3263a5a19fc",
+   "sha256": "4b11f41f28a3e433ad513e145b76149449826f22e74e544f875bd3263a5a19fc"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_regions.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_regions.c",
+   "origin_sha256": "e58bc36c662ede32edb77ecddc95835875d5cb1b344af47b5dab6ca38e43dbfa",
+   "sha256": "e58bc36c662ede32edb77ecddc95835875d5cb1b344af47b5dab6ca38e43dbfa"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_regions.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_regions.h (public fork host layer)",
+   "origin_sha256": "eca7865112086fac34750eb653743546c913b2aefacbdbaac40b4fdd496ff892",
+   "sha256": "eca7865112086fac34750eb653743546c913b2aefacbdbaac40b4fdd496ff892"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tracks.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tracks.c",
+   "origin_sha256": "4ad1474d4d5996b7ec6c9a334cbb336590df4a9791c89d240f8137d3e9cb9ebc",
+   "sha256": "4ad1474d4d5996b7ec6c9a334cbb336590df4a9791c89d240f8137d3e9cb9ebc"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tracks.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_tracks.h (public fork host layer)",
+   "origin_sha256": "5a567ba44514257c37fc3b8fd30806fb10a084fd8f2d23057b44e0c6465dfc77",
+   "sha256": "5a567ba44514257c37fc3b8fd30806fb10a084fd8f2d23057b44e0c6465dfc77"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tracks_progress.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tracks_progress.c",
+   "origin_sha256": "8aba626558467624a138a245c438d6dadb5efa3f16d375e0182b8fe5da48104d",
+   "sha256": "8aba626558467624a138a245c438d6dadb5efa3f16d375e0182b8fe5da48104d"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_ai.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tune_ai.h",
+   "origin_sha256": "3708d0c8d40929a69572561b7b7c2f21ca481ed64e19526bbe29ab81a0d9aa11",
+   "sha256": "3708d0c8d40929a69572561b7b7c2f21ca481ed64e19526bbe29ab81a0d9aa11"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_tune_catalog.h (public fork host layer)",
+   "origin_sha256": "59277a74d8913d1784311aebb0e4ccbfb9de7893856c93b9fe70921f80ff2208",
+   "sha256": "59277a74d8913d1784311aebb0e4ccbfb9de7893856c93b9fe70921f80ff2208"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog_ai.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tune_catalog_ai.inc",
+   "origin_sha256": "bb41ed7619f04a350f74dcb7824bfd44cebf457a8ac6a9acbdaf22fd2f48dc0f",
+   "sha256": "bb41ed7619f04a350f74dcb7824bfd44cebf457a8ac6a9acbdaf22fd2f48dc0f"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_wt4.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_wt4.c",
+   "origin_sha256": "2934001e6fdd0ebf4d08549dbff59bd184b7a356099538aa330af4d602dced2d",
+   "sha256": "2934001e6fdd0ebf4d08549dbff59bd184b7a356099538aa330af4d602dced2d"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_wt4.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_wt4.h",
+   "origin_sha256": "300e6919b451932a515c733c4e419b97c90f69cff8f40ad585bb92ad8251b80a",
+   "sha256": "300e6919b451932a515c733c4e419b97c90f69cff8f40ad585bb92ad8251b80a"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_wtour.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_wtour.c (public fork host layer)",
+   "origin_sha256": "3356ffbefdf86d6225d31e48fdb49949fed0871401c32f8f02207097fa48f34a",
+   "sha256": "3356ffbefdf86d6225d31e48fdb49949fed0871401c32f8f02207097fa48f34a"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_wtour.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_wtour.h (public fork host layer)",
+   "origin_sha256": "7865f892aadc377372ef3e05873f53b22c446f1dfe657c8980747e858bab33ef",
+   "sha256": "7865f892aadc377372ef3e05873f53b22c446f1dfe657c8980747e858bab33ef"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_xevents.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_xevents.c",
+   "origin_sha256": "3f2472f784d75f9e6c265a289d162b652d9c534389ad591ee6317ea0d9a14fbd",
+   "sha256": "3f2472f784d75f9e6c265a289d162b652d9c534389ad591ee6317ea0d9a14fbd"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_xevents.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_xevents.h (public fork host layer)",
+   "origin_sha256": "2a13bfc5fe8ca1ca00cdf5dcb9389b8441b89ea44c056fb4942e2d55dea81390",
+   "sha256": "2a13bfc5fe8ca1ca00cdf5dcb9389b8441b89ea44c056fb4942e2d55dea81390"
+  },
+  {
+   "changes": [],
+   "file": "src/game/modmanifest.c",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/modmanifest.c",
+   "origin_sha256": "b5fdac3a5d232907783e9e420b76b4d5a78d34f231e1ff60cc3d7740c4d75d77",
+   "sha256": "b5fdac3a5d232907783e9e420b76b4d5a78d34f231e1ff60cc3d7740c4d75d77"
+  },
+  {
+   "changes": [],
+   "file": "src/game/modmanifest.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/modmanifest.h",
+   "origin_sha256": "b4efc710c78d79288457d48e83089ecb3d2928b3cfd94a8771560c59f41d42e5",
+   "sha256": "b4efc710c78d79288457d48e83089ecb3d2928b3cfd94a8771560c59f41d42e5"
+  },
+  {
+   "changes": [],
+   "file": "xboxrecomp/LICENSE.txt",
+   "licence": "the licence text",
+   "origin": "xboxrecomp-021/LICENSE",
+   "origin_sha256": "969c26f4e5da359fea84127dfecd3057729cfed75211fb324bdb42af6c087614",
+   "sha256": "969c26f4e5da359fea84127dfecd3057729cfed75211fb324bdb42af6c087614"
+  },
+  {
+   "changes": [],
+   "file": "xboxrecomp/src/enhance/recomp_cfg.c",
+   "licence": "MIT (xboxrecomp LICENSE)",
+   "origin": "xboxrecomp-021/src/enhance/recomp_cfg.c",
+   "origin_sha256": "31e8e514fdef15824e06ffb485ebdc1ef18c8870391ada208448d0c1e24ba117",
+   "sha256": "31e8e514fdef15824e06ffb485ebdc1ef18c8870391ada208448d0c1e24ba117"
+  },
+  {
+   "changes": [],
+   "file": "xboxrecomp/src/enhance/recomp_cfg.h",
+   "licence": "MIT (xboxrecomp LICENSE)",
+   "origin": "xboxrecomp-021/src/enhance/recomp_cfg.h",
+   "origin_sha256": "1bba1467e4144f99cd0982e5d061465098574984f5dfbead667ea252220e2fb3",
+   "sha256": "1bba1467e4144f99cd0982e5d061465098574984f5dfbead667ea252220e2fb3"
+  },
+  {
+   "changes": [],
+   "file": "src/game/modfs.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/modfs.h",
+   "origin_sha256": "a66f93e8f6bd175943af37cbb5190a248640c5cdfc80cedf54a16c05b5095192",
+   "sha256": "a66f93e8f6bd175943af37cbb5190a248640c5cdfc80cedf54a16c05b5095192"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog_shadow.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "host/tree/src/game/bm_tune_catalog_shadow.inc (public fork host layer)",
+   "origin_sha256": "544744b050d877a51a2cbe6dee689ab810d94bd70e3d89094179f827f862c02d",
+   "sha256": "544744b050d877a51a2cbe6dee689ab810d94bd70e3d89094179f827f862c02d"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog_fx.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tune_catalog_fx.inc",
+   "origin_sha256": "ad796c472d539d413480600bc4c393c05a6a51a2b3eaad548fba7993387a1425",
+   "sha256": "ad796c472d539d413480600bc4c393c05a6a51a2b3eaad548fba7993387a1425"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog_cam.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tune_catalog_cam.inc",
+   "origin_sha256": "39d5025b455c65aa3825f81560ef5d951b7133b2db6d0845b4b538873fd77ce9",
+   "sha256": "39d5025b455c65aa3825f81560ef5d951b7133b2db6d0845b4b538873fd77ce9"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bm_tune_catalog_cad.inc",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bm_tune_catalog_cad.inc",
+   "origin_sha256": "804b19a21721aebe5b7770776279c251d11ff4317c3efe8dff5411c61820ae94",
+   "sha256": "804b19a21721aebe5b7770776279c251d11ff4317c3efe8dff5411c61820ae94"
+  },
+  {
+   "changes": [],
+   "file": "src/game/bo3_cars_gen.h",
+   "licence": "MIT (Takedawn, tree LICENSE)",
+   "origin": "main21/src/game/bo3_cars_gen.h",
+   "origin_sha256": "6fed15bb5c8af83e437ee4306f96e0e33c22c81804bbfed2c84ebf352fe95661",
+   "sha256": "6fed15bb5c8af83e437ee4306f96e0e33c22c81804bbfed2c84ebf352fe95661"
+  }
+ ],
+ "host_exe_sha256": "f0b9c8a9bf3baa7ed41703569a23236efd2b7e503fdbf6a73cf8c0d3d5f27656",
+ "host_identity": "bmp-0.1.9+2c8142e65f20",
+ "licences": "Takedawn host code: MIT (LICENSE-takedawn.txt); xboxrecomp recomp_cfg: MIT (xboxrecomp/LICENSE.txt)",
+ "platform": "0.1.9",
+ "public_fork_note": "src/game files are generated from host/tree at assembly (pf_assemble.py); 10 entries were re-hashed",
+ "what": "source of the HOST's own mod readers / admission code, compiled by bmpack 1.5.0 validate (mod kit 0.7.0; mainline host main19 = main18 + the 256 MB guest window + hook request P2 / P3, platform 0.1.9). No generated game code, no game data."
+}

@@ -1,0 +1,13 @@
+# SDK 0.6.0 example: bmashup.hooks 3 HUD_PASS + bmashup.hud 2 draw list (the list is not available on platform 0.1.9). Visual only.
+id = "bmashup.hud-meter-example"
+name = "HUD Meter Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: a bar and a label drawn in HUD_PASS (bmashup.hud 2); on 0.1.9 it only counts HUD passes."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.hooks>=3", "bmashup.hud>=2"]
+
+[plugin]
+api = 1
+windows = "bm_hud_rpm_meter.asi"

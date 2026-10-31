@@ -1,0 +1,15 @@
+# AUTHORED paints on retail CONTROL cars (gp veh1): only authored colours ship; the retail models / palettes are untouched
+# (a ramp paint recolours the car's own paint-ramp entries in memory; the file paint is an authored gradient).
+id = "bmashup.veh-retail-paints"
+name = "Extra Paints for Compact Type 1 and Sports Type 1 (veh1 example)"
+version = "1.0.0"
+description = "Adds paints beyond the retail ones: Compact Type 1 gets sunset, ice, moss and a chrome gradient; Sports Type 1 two more."
+
+[bmashup]
+platform = ">=0.1.5"
+
+[bmashup.paints]
+version = 1
+add = ["comp-sunset = COMPCAR1 | ramp FF8800 301000", "comp-ice = COMPCAR1 | ramp E0F0FF 102040",
+       "comp-moss = COMPCAR1 | ramp 80FF40 103000", "comp-chrome = COMPCAR1 | file paints/chrome.bmpal",
+       "sprt-gold = SPRTCAR1 | ramp FFD040 402800", "sprt-ink = SPRTCAR1 | ramp 4050A0 000010"]

@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.racers version 3 (set_light indicators, lamp_counts).
+id = "bmashup.lights-blinkers-example"
+name = "Lights Blinkers Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: player 0's left indicator blinks (host blink); lamp group counts of every racer logged once a race (bmashup.racers 3)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.racers>=3"]
+
+[plugin]
+api = 1
+windows = "bm_lights_blinkers.asi"
+linux = "libbm_lights_blinkers.so"
+macos = "libbm_lights_blinkers.dylib"

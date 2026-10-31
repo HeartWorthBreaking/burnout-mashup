@@ -1,0 +1,5 @@
+{"suites": [
+ {"name": "carimport format / round-trip / negatives / mutants (48)", "command": ["{py}", "-B", "{tool}/tests/run_tests.py", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "carimport actionable errors (27)", "command": ["{py}", "-B", "{tool}/tests/test_errors.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "carimport regression: demo + coupe / wedge packages = content-phase bytes (5)", "command": ["{py}", "-B", "{tool}/tests/test_regression.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false}
+]}

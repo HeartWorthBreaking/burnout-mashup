@@ -1,0 +1,16 @@
+# bmashup-sdk 0.2.0 example (b): BOOST_AWARD modifier with caps (Burnout Mashup builds only; private, experimental).
+# Changes gameplay: player 1 gets more boost from drifting and oncoming driving, capped per award and per race.
+# Put this folder in a mods folder with the built module beside this file and approve the module's bytes.
+id = "bmashup-sdk.boost-modifier"
+name = "SDK example: capped boost bonus"
+version = "0.2.0"
+description = "Player 1: drift / oncoming boost x1.5, at most +5 per award and +40 per race (bmashup.events 5)."
+
+[bmashup]
+platform = ">=0.1"          # Burnout Mashup platform 0.1 or later; older platform hosts and plain Takedawn ignore [bmashup]
+requires = ["bmashup.events>=5"]   # a platform host refuses THIS mod alone (the game starts without it) when one is not offered
+
+[plugin]
+api = 1
+windows = "bm_sdk_boost_modifier.asi"
+# Only Windows x64 is built and tested by this SDK.

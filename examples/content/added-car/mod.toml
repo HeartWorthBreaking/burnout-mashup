@@ -1,0 +1,15 @@
+# mod kit 0.3.1 content example ([bmashup.cars] v1, docs/services/CARS.md): an ADDED car in the Compact series. Data only, no
+# code. Its files are made by make_added_car.py from YOUR OWN game data (retail-derived): local only, never upload.
+id = "bmashup.gp-cars2"
+name = "GP cars2 added car (Compact Mashup)"
+version = "1.0.0"
+description = "Adds COMPBM01 Compact Mashup (Compact Type 1 recoloured magenta with stripes) to the Compact series."
+
+[bmashup]
+platform = ">=0.1.5"
+requires = ["bmashup.cars>=1"]
+
+[bmashup.cars]
+version = 1
+add = ["COMPBM01 = COMPCAR1"]
+names = ["COMPBM01 = Compact Mashup"]

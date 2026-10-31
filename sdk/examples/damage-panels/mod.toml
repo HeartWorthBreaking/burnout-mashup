@@ -1,0 +1,16 @@
+# bmashup-sdk 0.5.0 example (damage-panels) for Burnout Mashup platform 0.1.8 hosts (private, experimental).
+# Changes the game: the part damage loop's kind filters (two switch index tables in the code section, verified for this build) for every mode that runs it.
+# Put this folder in a mods folder with the built module beside this file and approve its bytes.
+id = "bmashup-sdk.damage-panels"
+name = "SDK example: damage panels (patch v2 TABLE sites)"
+version = "0.5.0"
+description = "Every car part kind 0..6 counted and detached by the damage loop (count + detach pairs, values 0 / 1); process-wide; in-game effect not runtime-verified."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.patch>=2", "bmashup.hooks>=1"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_damage_panels.asi"
+# Only Windows x64 is built and tested by this SDK.

@@ -1,0 +1,132 @@
+Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
+(a project record, not legal advice; section numbers refer to LICENSES/LGPL-2.1-or-later.txt)
+
+1. File changed
+   src/apu/apu_core.c of xboxrecomp (https://github.com/xenophobentx/xboxrecomp), commit e3756d1b2fefdae6888038384c748cbdd37a41ba, blob 45c3334f4e33fdc930934a84b6bc7a9f547ae9cd, which xboxrecomp
+   extracted from xemu (https://github.com/xemu-project/xemu).
+   Changed by: the Burnout Mashup contributors, 2026-10-28 (guest-memory window enlarged to 256 MB, "MEM256").
+   The patch (apu_core.patch) adds a comment in the file that states the modification and its date; the comment sits at the changed
+   code, not in the file header (whether that is "prominent" is left to a qualified reading). A later change to this file needs its own
+   dated notice.
+
+2. Header of the file (lines 1-20 of the blob, verbatim; the copyright holders, the licence and the warranty disclaimer)
+   | /*
+   |  * MCPX APU Core - Standalone extraction from xemu
+   |  *
+   |  * Copyright (c) 2012 espes
+   |  * Copyright (c) 2018-2019 Jannik Vogel
+   |  * Copyright (c) 2019-2025 Matt Borgerson
+   |  *
+   |  * This library is free software; you can redistribute it and/or
+   |  * modify it under the terms of the GNU Lesser General Public
+   |  * License as published by the Free Software Foundation; either
+   |  * version 2 of the License, or (at your option) any later version.
+   |  *
+   |  * This library is distributed in the hope that it will be useful,
+   |  * but WITHOUT ANY WARRANTY; without even the implied warranty of
+   |  * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   |  * Lesser General Public License for more details.
+   |  *
+   |  * You should have received a copy of the GNU Lesser General Public
+   |  * License along with this library; if not, see <http://www.gnu.org/licenses/>.
+   |  */
+
+   Licence wording, exactly as the header says: the GNU Lesser General Public License "either version 2 of the License, or (at your
+   option) any later version". Other xemu-derived files of the same package use the short form "LGPL v2+". The licence text shipped
+   with this tree is version 2.1 of the GNU Lesser General Public License (LICENSES/LGPL-2.1-or-later.txt, byte-equal to
+   https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt). Version 2 of that licence was titled "GNU Library General Public License".
+   Identifier, from the evidence (not chosen by preference; not legal advice):
+   - the authors' grant (the header above; the same wording, without an SPDX line, in xemu's own hw/xbox/mcpx/apu/apu.c, checked
+     2026-10-31) is "version 2 ... or any later version"; its literal SPDX form is LGPL-2.0-or-later;
+   - xboxrecomp, from which this tree takes the files (pinned commit), distributes them as "GNU Lesser General Public License, version
+     2.1 or (at your option) any later version" with the LGPL-2.1 text (its NOTICE and LICENSES/README.md) - a version selection
+     the header permits.
+   The Burnout Mashup hunks are offered under the same terms as the file as received from xboxrecomp: LGPL-2.1-or-later (REUSE.toml,
+   NOTICE.md). The header is kept verbatim, so the authors' own grant reaches every recipient unchanged. No file here is "-only".
+   The xboxrecomp texture upscaler shaders (LGPL-3.0-or-later) are not in this tree; the build fetches them with xboxrecomp.
+
+3. Our hunks
+   host/toolkit/lgpl/apu_core.patch (sha256 dde28f7388dc950253310192aa800f84e3fbd0ed5dc93f3c0471485522b2d444; 4 hunks).
+   Pre-image: the file as checked out by the pinned archive (git archive, core.autocrlf=true), sha256 ded1da83b903d0938b66bc957f592d1a78d8b26aa6efcbe0d61832c7f60a5a42.
+   Post-image: sha256 55c0614aa55c9073aa94245a89b3c2fad570353a99424db31d0277f836f1185f (host/LAYERS.json; build/apply_layers.py refuses anything else).
+
+4. Corresponding source of the modified file
+   Not stored here as a whole file. The complete modified source is the pinned upstream file plus apu_core.patch: fetch xboxrecomp at
+   the pin (build/fetch_upstream.py, host/PINS.json) and apply the host layers (build/apply_layers.py host); the result is
+   work\xboxrecomp\src\apu\apu_core.c. docs/BUILDING.md section 7 says how to rebuild with a modified copy.
+
+5. The 12 LGPL-marked files of xboxrecomp at the pin (git blob id; sha256 of the blob bytes; header wording; copyright as stated)
+   src/apu/apu_core.c
+      blob 45c3334f4e33fdc930934a84b6bc7a9f547ae9cd
+      sha256 e81ddc6c76e63aa9bc64452e083ae61946f4358693c436fbd9aae552b658f42b
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson
+      here: MODIFIED by Burnout Mashup (4 hunks, MEM256)
+   src/apu/apu_dsp.c
+      blob c47d840d0284edee7ade89ce7128deb2dd354b1c
+      sha256 e1dea7e6f4fd274b67f85e97133679a4a4e689d0570d42b16a728ee018467b3c
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2019-2025 Matt Borgerson
+      here: unmodified
+   src/apu/apu_vp.c
+      blob c13aabce05c5360a251d7828cfed4ffe03f0b635
+      sha256 8b516290937b9a030123570cb2c164479b1939193979cfa014e43cdc8537c3c8
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson
+      here: unmodified
+   src/apu/apu_regs.h
+      blob 2c8bc6147d4c51950e05492f7dbebe0b62433a48
+      sha256 4db5e084d962c05895e3f72cd1b26c7dcc4a56608d1f006d0101bdf5caca02ee
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2018-2019 Jannik Vogel; 2019-2021 Matt Borgerson
+      here: unmodified
+   src/apu/apu_state.h
+      blob d0e75cebeb5bd4a5ec030bbabb560f59111d6c64
+      sha256 30a576ac48c9047a07033b444a8853d7dce60916cb0c4288a85efd2840843ce9
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson (+ HRTF 2025 Matt Borgerson; + ADPCM-XQ decoder (c) David Bryant, BSD-3-Clause)
+      here: unmodified
+   src/apu/apu_debug.h
+      blob 5e8988d74f4ce7ac673d2cbe7d1961359acbf273
+      sha256 66b2d71143b9f3a4d4d7bd7ed54a5b83bcb0667e424a4b9ec44c9ee353454110
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2020-2021 Matt Borgerson
+      here: unmodified
+   src/apu/fpconv.h
+      blob 8216808c96e973a92b26be8f2a5fbb26ab839270
+      sha256 7bea5069da542c4b3270afb74d3ee5bc6a5be4fdca6c4e1b47c46e399db4581e
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2020-2025 Matt Borgerson
+      here: unmodified
+   src/apu/apu.h
+      blob 03ef1500ba8d6c48d16458b2e8838aec0eb64bfe
+      sha256 f784cc3f6028a3140b606bfb7f96c6e6bc38d067e652eb71f6189b0f5ca9d91d
+      header says: "Extracted from xemu (LGPL v2+), adapted for standalone use."
+      copyright: none stated in the file (NOTICE lists it with the xemu files)
+      here: unmodified
+   src/apu/apu_shim.h
+      blob 05613c77917d23554dc871b2afc3f16ea494680c
+      sha256 768e7a05fe99c5a85c76aed6803377a3942f7b502070586d9449b6a57c1fd80d
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2026 Burnout 3 Static Recompilation Project; based on xemu code (c) 2012 espes, 2018-2025 Matt Borgerson et al.
+      here: unmodified
+   src/nv2a/nv2a_regs.h
+      blob 81ad93f9a839f5e2db66dd128c64f0c969c8d776
+      sha256 c999725f7fad35881b31ba35e63f65e38975fdea1fb6777a01c98703b683055d
+      header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
+      copyright: 2012 espes; 2015 Jannik Vogel
+      here: unmodified
+   src/nv2a/nv2a_core.c
+      blob 96c336b99b5e14c122756b795b87bc0845ee9f04
+      sha256 43a1d43ed63a4046aaf94b7f908f9b436b63a0a13ce60eed84d1968d9ec8cabd
+      header says: "2018-2025 Matt Borgerson) - LGPL v2+"
+      copyright: 2012 espes, 2015 Jannik Vogel, 2018-2025 Matt Borgerson (adapted from xemu nv2a.c)
+      here: unmodified; builds into xbox_nv2a, which the Burnout 3 program calls nothing in (upstream NOTICE; clearance s2: no member in the map)
+   src/nv2a/nv2a_state.h
+      blob edd04534276bb9d7195fbc3a0fbe441f733dd1a5
+      sha256 6d96dad83152f27b6c4a499413b86d5311f86aca2f18ec6d91b080bb077bbbbf
+      header says: "2018-2025 Matt Borgerson) - LGPL v2+"
+      copyright: 2012 espes, 2015 Jannik Vogel, 2018-2025 Matt Borgerson (adapted from xemu nv2a_int.h)
+      here: unmodified
+
+This notice concerns source files only. No executable or object code is distributed by this repository (docs/PUBLIC_STATUS.md).

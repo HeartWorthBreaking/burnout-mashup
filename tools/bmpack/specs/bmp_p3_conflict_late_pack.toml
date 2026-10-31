@@ -1,0 +1,24 @@
+# bmpack 1.2 spec - host p3 conflict fixture, the LATER mod: valid alone, but it adds US_C8_V1 (the early mod's track) with
+# another name and location, an event on it and a tuning value. After bmp_p3_conflict_early the host refuses THIS mod as a
+# whole (track id / name / location clash): none of its declarations - track, names, event, tune - is registered.
+[mod]
+id = "bmashup.bmp-p3-late"
+version = "1.0.0"
+name = "BMP p3 late (test fixture)"
+description = "Host p3 fixture: the later, conflicting mod (refused alone)."
+folder = "p3-late"
+
+[[track]]
+id = "US_C8_V1"
+donor = "US_C1_V1"
+name = "Harbour Clash"
+location = "CLASH"
+
+[[event]]
+id = "late-race"
+track = "US_C8_V1"
+location = "US_C3"
+name = "Late Race"
+
+[tune]
+set = ["Score/Burnout Points | Takedown BP = 1500"]

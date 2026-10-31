@@ -1,0 +1,16 @@
+# Burnout Mashup's private boost demo (docs/bmashup-boost.md). Put this folder
+# in a mod folder (TAKEDAWN_MODS) with the built module beside this file, and
+# approve its code on the MODS page: until then it is never loaded. About 5 s
+# into a race it asks once for player 1's boost bar to be topped up by the
+# game's own routine, and logs the bar once a second; the player still decides
+# when to boost.
+id = "bmashup.boost-demo"
+name = "Boost Demo (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: one boost-bar top-up about 5 s into a race, by the game's own routine."
+
+[plugin]
+api = 1
+windows = "bm_boost_demo.asi"
+linux = "libbm_boost_demo.so"
+macos = "libbm_boost_demo.dylib"

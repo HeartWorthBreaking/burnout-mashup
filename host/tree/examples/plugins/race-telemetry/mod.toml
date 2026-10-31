@@ -1,0 +1,14 @@
+# The race telemetry example's mod (docs/native-plugins.md, The race). Put
+# this folder in a mod folder (TAKEDAWN_MODS) with the built module beside
+# this file, and approve its code on the MODS page. It logs the race, and
+# changes nothing in it.
+id = "example.race-telemetry"
+name = "Race Telemetry"
+version = "1.0.0"
+description = "An example native plugin: the race's state, time, place and speed in the game's log."
+
+[plugin]
+api = 1
+windows = "race_telemetry.asi"
+linux = "librace_telemetry.so"
+macos = "librace_telemetry.dylib"

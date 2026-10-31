@@ -1,0 +1,15 @@
+# gp slice music1 example (private, experimental): a music pack as a data mod. Original synthetic test tones.
+id = "gp.music.tones"
+name = "BM TEST TONES"
+version = "1.0.0"
+author = "Burnout Mashup gp s7"
+description = "Two sine test tones as a soundtrack in EA GAMES TRAX, with their names in the track banner."
+
+[bmashup]
+requires = ["bmashup.music>=1"]
+
+[bmashup.music]
+version = 1
+soundtrack = "BM Test Tones"
+add = ["a440 = music/tone_440.wav | Tone 1 - 440 Hz | BM Test Lab | Synthetic Tones",
+       "b1000 = music/tone_1000.wav | Tone 2 - 1000 Hz | BM Test Lab | Synthetic Tones"]

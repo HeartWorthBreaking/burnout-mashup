@@ -1,0 +1,3 @@
+# byte-exact checkouts: the build layers (patches, anchors, added files) are hashed as bytes,
+# so git must not convert line ends. Do not remove (docs/BUILDING.md, build/apply_layers.py).
+* -text

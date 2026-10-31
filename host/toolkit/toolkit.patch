@@ -1,0 +1,1451 @@
+# um layer toolkit (MIT files): 12 modified file(s); position-free hunks, each old block unique in its file
+#
+--- a/toolkit/docs/runtime/overlay.md
++++ b/toolkit/docs/runtime/overlay.md
+@@ -457,6 +457,21 @@
+ is no row, and the foot shows the yellow line "Restart the game to apply N
+ changes" instead (nothing to press).
+ 
++### A port's own pages (gp main20m)
++
++`xbox_OverlaySetPortPages(n, ops)` (`xbox_settings.h`) adds up to two pages of the port's own rows, first in the tabs.
++The port keeps the model; every frame the overlay asks for the rows (`rows`, `row`: an item with a label, a value - a
++status chip, or a choice with arrows - and a hint; a section header; a wrapped paragraph; a line of small text) and hands
++it the actions on the selected row (`input`: A, left, right, X, Y, B; the answer says whether it acted, asked, changed
++view or did nothing, which picks the sound). There is no row limit (up to `XBOX_PORT_ROWS`, drawn only where in view);
++a label too long for its column shrinks to 72 %, and on the selected row then scrolls (a second's hold, along, a
++second's hold); other rows end it with an ellipsis. The footer shows the pad's or the keyboard's prompts with the
++port's word for each button on that row; LT / RT jump a screen of rows. The port's pending changes (`restart`) are
++counted in "Restart now to apply N changes"; `xbox_OverlayRequestOpenPage` opens the overlay on a port page (as the
++title's menu entry does), `xbox_OverlayShowPortPage` switches to one, `xbox_OverlayRestartNow` restarts as the pinned
++row does. The callbacks run on the overlay's thread with its lock held. No page registered: the overlay as before.
++Burnout 3: the Mods and Mod settings pages (`src/game/modsmenu_ov.c`).
++
+ ### Restart now and Quit game (the foot of every page)
+ 
+ Every page ends with rows that stay in view below the page's own rows (the
+--- a/toolkit/src/d3d/nv2a_pb_d3d11.c
++++ b/toolkit/src/d3d/nv2a_pb_d3d11.c
+@@ -2053,8 +2053,8 @@
+         return NULL;
+     for (i = 0; i < RT_MAX; i++) {
+         RenderTarget *rt = &s_rt[i];
+-        /* Low 27 bits: the same memory through either window. */
+-        if (!rt->tex || ((rt->addr ^ t->offset) & 0x07FFFFFFu))
++        /* Low 27 bits (28 with MEM256): the same memory through either window. */
++        if (!rt->tex || ((rt->addr ^ t->offset) & NV2A_RT_ADDR_MASK))
+             continue;
+         if (rt_drop_if_stale(rt, "bind"))
+             continue;   /* the texture decodes from the title's bytes */
+--- a/toolkit/src/d3d/nv2a_pb_metal.m
++++ b/toolkit/src/d3d/nv2a_pb_metal.m
+@@ -2890,10 +2890,10 @@
+      * evicted name) is written back first, so the decode sees what was
+      * drawn there. */
+     if (bytes) {
+-        uint32_t lo = t->offset & 0x07FFFFFFu, hi = lo + bytes;
++        uint32_t lo = t->offset & NV2A_RT_ADDR_MASK, hi = lo + bytes;
+         for (i = 0; i < RT_MAX; i++) {
+             RenderTarget *rt = &s_rt[i];
+-            uint32_t rlo = rt->addr & 0x07FFFFFFu;
++            uint32_t rlo = rt->addr & NV2A_RT_ADDR_MASK;
+             if (rt->tex && rt->dirty && rt->pitch
+                     && lo < rlo + rt->pitch * rt->h && rlo < hi) {
+                 if (rt_drop_if_stale(rt, "sync"))
+@@ -4122,7 +4122,7 @@
+     int i;
+     for (i = 0; i < RT_MAX; i++) {
+         RenderTarget *rt = &s_rt[i];
+-        if (!rt->tex || ((rt->addr ^ addr) & 0x07FFFFFFu) || rt->w < w || rt->h < w)
++        if (!rt->tex || ((rt->addr ^ addr) & NV2A_RT_ADDR_MASK) || rt->w < w || rt->h < w)
+             continue;
+         if (rt_drop_if_stale(rt, "bind"))
+             continue;   /* the title rewrote it: the face decodes from memory */
+@@ -4287,7 +4287,7 @@
+         return NULL;
+     for (i = 0; i < RT_MAX; i++) {
+         RenderTarget *rt = &s_rt[i];
+-        if (!rt->tex || ((rt->addr ^ t->offset) & 0x07FFFFFFu))
++        if (!rt->tex || ((rt->addr ^ t->offset) & NV2A_RT_ADDR_MASK))
+             continue;
+         /* 16-bit textures only on 16-bit surfaces of the same size, a linear
+          * one at the same pitch, a swizzled one only on a swizzled surface
+@@ -4937,7 +4937,7 @@
+ static void metal_sync_guest(uint32_t offset, uint32_t pitch, uint32_t w, uint32_t h)
+ {
+     RenderTarget *rt = NULL;
+-    uint32_t addr = nv2a_pb_dma_resolve(offset) & 0x07FFFFFFu;
++    uint32_t addr = nv2a_pb_dma_resolve(offset) & NV2A_RT_ADDR_MASK;
+     int i;
+ 
+     guard_open();
+@@ -4949,7 +4949,7 @@
+     if (!rt) {
+         for (i = 0; i < RT_MAX; i++) {
+             RenderTarget *c = &s_rt[i];
+-            if (c->tex && (c->addr & 0x07FFFFFFu) == addr
++            if (c->tex && (c->addr & NV2A_RT_ADDR_MASK) == addr
+                     && (!rt || c->last_use > rt->last_use))
+                 rt = c;
+         }
+--- a/toolkit/src/d3d/nv2a_pb_vulkan.c
++++ b/toolkit/src/d3d/nv2a_pb_vulkan.c
+@@ -4413,10 +4413,10 @@
+     /* A render target over the bytes is written back first (Metal's decode
+      * sync). */
+     if (bytes) {
+-        uint32_t lo = t->offset & 0x07FFFFFFu, hi = lo + bytes;
++        uint32_t lo = t->offset & NV2A_RT_ADDR_MASK, hi = lo + bytes;
+         for (i = 0; i < RT_MAX; i++) {
+             RenderTarget *rt = &s_rt[i];
+-            uint32_t rlo = rt->addr & 0x07FFFFFFu;
++            uint32_t rlo = rt->addr & NV2A_RT_ADDR_MASK;
+             if (rt->im.img && rt->dirty && rt->pitch
+                     && lo < rlo + rt->pitch * rt->h && rlo < hi) {
+                 if (rt_drop_if_stale(rt, "sync"))
+@@ -4764,7 +4764,7 @@
+         return NULL;
+     for (i = 0; i < RT_MAX; i++) {
+         RenderTarget *rt = &s_rt[i];
+-        if (!rt->im.img || ((rt->addr ^ t->offset) & 0x07FFFFFFu))
++        if (!rt->im.img || ((rt->addr ^ t->offset) & NV2A_RT_ADDR_MASK))
+             continue;
+         if (r565 && (rt->pitch / rt->w != 2u || rt->w != t->width || rt->h != t->height
+                      || (t->color == 0x11 ? rt->swz || t->pitch != rt->pitch : !rt->swz)))
+@@ -4878,7 +4878,7 @@
+     int i;
+     for (i = 0; i < RT_MAX; i++) {
+         RenderTarget *rt = &s_rt[i];
+-        if (!rt->im.img || ((rt->addr ^ addr) & 0x07FFFFFFu) || rt->w < w || rt->h < w)
++        if (!rt->im.img || ((rt->addr ^ addr) & NV2A_RT_ADDR_MASK) || rt->w < w || rt->h < w)
+             continue;
+         if (rt_drop_if_stale(rt, "bind"))
+             continue;
+@@ -6397,7 +6397,7 @@
+ static void vk_sync_guest(uint32_t offset, uint32_t pitch, uint32_t w, uint32_t h)
+ {
+     RenderTarget *rt = NULL;
+-    uint32_t addr = nv2a_pb_dma_resolve(offset) & 0x07FFFFFFu;
++    uint32_t addr = nv2a_pb_dma_resolve(offset) & NV2A_RT_ADDR_MASK;
+     int i;
+ 
+     if (s_failed)
+@@ -6408,7 +6408,7 @@
+     if (!rt) {
+         for (i = 0; i < RT_MAX; i++) {
+             RenderTarget *c = &s_rt[i];
+-            if (c->im.img && (c->addr & 0x07FFFFFFu) == addr
++            if (c->im.img && (c->addr & NV2A_RT_ADDR_MASK) == addr
+                     && (!rt || c->last_use > rt->last_use))
+                 rt = c;
+         }
+--- a/toolkit/src/kernel/kernel.h
++++ b/toolkit/src/kernel/kernel.h
+@@ -399,7 +399,23 @@
+  * MmClaimGpuInstanceMemory reports GPU instance memory at its top. Shared so
+  * the layout and the bridges cannot disagree about where it is. */
+ #define XBOX_CONTIG_BASE 0x80000000u
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++/* MEM256 (Burnout Mashup, build option BO3_GUEST_WINDOW_MB): a larger window.
++ * The low 64 MB (XBOX_CONTIG_LOW_SIZE) is what every title request, the low
++ * reserve, the GPU instance memory, the framebuffer rule and the tiled view
++ * keep using exactly as before; the rest is the high zone, handed out only by
++ * xbox_ContiguousAllocHigh. 256 MB is the hard bound: titles convert with
++ * `VA & 0x0FFFFFFF` / `| 0x80000000`, so offset 256 MB would alias offset 0. */
++#if XBOX_CONTIG_WINDOW_MB != 128 && XBOX_CONTIG_WINDOW_MB != 256
++#error "XBOX_CONTIG_WINDOW_MB must be 64, 128 or 256"
++#endif
++#define XBOX_CONTIG_SIZE (XBOX_CONTIG_WINDOW_MB * 1024u * 1024u)
++#define XBOX_CONTIG_HIGH_ZONE 1
++#else
+ #define XBOX_CONTIG_SIZE (64u * 1024u * 1024u)
++#endif
++/* The part of the window titles are served from (MEM256: always 64 MB). */
++#define XBOX_CONTIG_LOW_SIZE (64u * 1024u * 1024u)
+ 
+ /* Default GPU instance size, used when a caller asks to claim everything. */
+ #define XBOX_GPU_INSTANCE_DEFAULT (128u * 1024u)
+--- a/toolkit/src/kernel/kernel_bridge.c
++++ b/toolkit/src/kernel/kernel_bridge.c
+@@ -1088,6 +1088,23 @@
+ /* ── MmAllocateContiguousMemory (ordinal 165) ─────────────
+  * PVOID MmAllocateContiguousMemory(ULONG NumberOfBytes)
+  */
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++/* MEM256 layer 0 (fail-fast): a host-installed handler for a refused title
++ * request. A title has no recovery for a NULL contiguous block (Burnout 3 used
++ * it as window address 0x80000000 and wrote file data over page 0); the
++ * handler stops the run with a message instead. Called with the arena's
++ * answer already logged; it does not return when it stops the run. */
++static void (*s_contig_refused)(uint32_t caller, uint32_t size, uint32_t low,
++                                uint32_t high, uint32_t align);
++
++void xbox_SetContiguousRefusalHandler(void (*fn)(uint32_t caller, uint32_t size,
++                                                 uint32_t low, uint32_t high,
++                                                 uint32_t align))
++{
++    s_contig_refused = fn;
++}
++#endif
++
+ static void bridge_MmAllocateContiguousMemory(void)
+ {
+     uint32_t size = STACK_ARG(0);
+@@ -1098,6 +1115,10 @@
+      * hands the hardware. See xbox_ContiguousAlloc. */
+     uint32_t xbox_va = xbox_ContiguousAlloc(size, 4096);
+ 
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++    if (!xbox_va && s_contig_refused)
++        s_contig_refused(g_xbox_kernel_caller, size, 0, 0xFFFFFFFFu, 4096);
++#endif
+     if (KERNEL_LOG_ON_HALF()) {
+         fprintf(stderr, "  [KERNEL] MmAllocateContiguousMemory: size=%u → Xbox VA 0x%08X\n",
+                 size, xbox_va);
+@@ -1217,6 +1238,10 @@
+                 fprintf(stderr, " %08X", STACK_ARG(k));
+             fprintf(stderr, "\n");
+         }
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++        if (s_contig_refused)
++            s_contig_refused(g_xbox_kernel_caller, size, low, high, align);
++#endif
+     }
+     if (KERNEL_LOG_ON_HALF()) {
+         fprintf(stderr, "  [KERNEL] MmAllocateContiguousMemoryEx: size=%u align=%u → Xbox VA 0x%08X\n",
+@@ -2290,7 +2315,7 @@
+          * directly lands in the loaded image instead, which is why the window
+          * showed black while the executor was clearing and rasterising
+          * correctly a few megabytes away. */
+-        if (fb_va && fb_va < XBOX_CONTIG_SIZE)
++        if (fb_va && fb_va < XBOX_CONTIG_LOW_SIZE)   /* MEM256: framebuffers are title memory (low 64 MB) */
+             fb_va = XBOX_CONTIG_BASE + fb_va;
+ 
+         xbox_FramebufferWindowSet(fb_va, pitch);
+@@ -3470,7 +3495,7 @@
+     if (padding_va) {
+         BRIDGE_MEM32(padding_va) = 0;
+     }
+-    g_eax = XBOX_CONTIG_BASE + XBOX_CONTIG_SIZE - bytes;
++    g_eax = XBOX_CONTIG_BASE + XBOX_CONTIG_LOW_SIZE - bytes;   /* MEM256: stays at the low 64 MB top */
+ }
+ 
+ /* VOID HalRegisterShutdownNotification(PHAL_SHUTDOWN_REGISTRATION, BOOLEAN)
+--- a/toolkit/src/kernel/nv2a_backend_common.h
++++ b/toolkit/src/kernel/nv2a_backend_common.h
+@@ -236,12 +236,26 @@
+  * bytes no longer hash the same was overwritten by the title and is stale.
+  * One check per target per flip at most (checked_flip caches a good
+  * result), plus one after each reset. */
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++/* MEM256: a window above 128 MB. 27 bits would let a texture at window offset
++ * P + 128 MB match a render target at P; 28 bits are what titles themselves
++ * keep (`VA & 0x0FFFFFFF`) and stay unique over the whole 256 MB window. */
++#define NV2A_RT_WINDOW 0x10000000u   /* address compares use the low 28 bits */
++#else
+ #define NV2A_RT_WINDOW 0x08000000u   /* address compares use the low 27 bits */
++#endif
++/* The mask every backend compares addresses with ("the same memory through
++ * either window"). */
++#define NV2A_RT_ADDR_MASK (NV2A_RT_WINDOW - 1u)
+ /* The windows a resolved address lies in, as kernel.h's XBOX_CONTIG_BASE and
+  * XBOX_CONTIG_SIZE and the 128 MB low mapping (this header takes no kernel
+  * headers). */
+ #define NV2A_RT_CONTIG_BASE 0x80000000u
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++#define NV2A_RT_CONTIG_SIZE (XBOX_CONTIG_WINDOW_MB * 0x00100000u)
++#else
+ #define NV2A_RT_CONTIG_SIZE 0x04000000u
++#endif
+ struct nv2a_rt_own {
+     uint64_t mem_hash;
+     uint32_t draw_flip;      /* the flip of the last draw or clear into it */
+@@ -266,11 +280,12 @@
+ uint64_t nv2a_rt_own_hashes(void);
+ 
+ /* Whether [a, a + an) and [b, b + bn) share a byte, through the low 27 bits
+- * (the backends' rule for "the same memory through either window"). */
++ * (28 with MEM256; the backends' rule for "the same memory through either
++ * window"). */
+ static inline int nv2a_rt_overlap(uint32_t a, uint32_t an, uint32_t b, uint32_t bn)
+ {
+-    a &= NV2A_RT_WINDOW - 1u;
+-    b &= NV2A_RT_WINDOW - 1u;
++    a &= NV2A_RT_ADDR_MASK;
++    b &= NV2A_RT_ADDR_MASK;
+     return an && bn && a < b + bn && b < a + an;
+ }
+ 
+--- a/toolkit/src/kernel/xbox_memory_layout.c
++++ b/toolkit/src/kernel/xbox_memory_layout.c
+@@ -2339,8 +2339,8 @@
+          * 0xF... address is the only one that sees those writes, since a
+          * protection on one view does not trap writes through another. */
+         { g_tiled_view,    XBOX_TILED_BASE,
+-          xbox_TiledApertureSize() < XBOX_CONTIG_SIZE
+-              ? (uint64_t)xbox_TiledApertureSize() : XBOX_CONTIG_SIZE },
++          xbox_TiledApertureSize() < XBOX_CONTIG_LOW_SIZE
++              ? (uint64_t)xbox_TiledApertureSize() : XBOX_CONTIG_LOW_SIZE },
+         { g_nv2a_memory,   XBOX_NV2A_BASE,    XBOX_NV2A_SIZE },
+         { g_mcpx_memory,   XBOX_MCPX_BASE,    XBOX_MCPX_SIZE },
+         { g_flash_memory,  XBOX_FLASH_BASE,   XBOX_FLASH_SIZE },
+@@ -2859,9 +2859,9 @@
+     /* The same page in the other view of the contiguous pages. */
+     g_watch_alias = NULL;
+     if (g_tiled_view && g_contig_memory) {
+-        uint32_t tiled_size = xbox_TiledApertureSize() < XBOX_CONTIG_SIZE
++        uint32_t tiled_size = xbox_TiledApertureSize() < XBOX_CONTIG_LOW_SIZE
+                             ? (uint32_t)xbox_TiledApertureSize()
+-                            : (uint32_t)XBOX_CONTIG_SIZE;
++                            : (uint32_t)XBOX_CONTIG_LOW_SIZE;
+         if (va >= XBOX_CONTIG_BASE && va - XBOX_CONTIG_BASE < tiled_size)
+             g_watch_alias = (uint8_t *)g_tiled_view + (va - XBOX_CONTIG_BASE);
+         else if (va >= XBOX_TILED_BASE && va - XBOX_TILED_BASE < tiled_size)
+@@ -4097,8 +4097,8 @@
+          * texture at 0x81C63000, and the sampler read zeros: 1.8 billion black
+          * pixels rasterised, perfectly, from an empty texture.
+          */
+-        if (tiled_size > XBOX_CONTIG_SIZE)
+-            tiled_size = XBOX_CONTIG_SIZE;
++        if (tiled_size > XBOX_CONTIG_LOW_SIZE)   /* MEM256: the tiled view stays the low 64 MB */
++            tiled_size = XBOX_CONTIG_LOW_SIZE;
+         g_tiled_view = g_contig_mapping
+             ? layout_map_view(g_contig_mapping, tiled_size,
+                               (LPVOID)tiled_native)
+@@ -4505,7 +4505,8 @@
+  * Locked: textures are created from loader threads as well as the main one. */
+ #define CONTIG_PAGE       4096u
+ #define CONTIG_PAGES      (XBOX_CONTIG_SIZE / CONTIG_PAGE)
+-#define CONTIG_USABLE     ((XBOX_CONTIG_SIZE - XBOX_GPU_INSTANCE_DEFAULT) / CONTIG_PAGE)
++#define CONTIG_USABLE     ((XBOX_CONTIG_LOW_SIZE - XBOX_GPU_INSTANCE_DEFAULT) / CONTIG_PAGE)
++                                   /* MEM256: title requests stay in the low 64 MB */
+ 
+ /* The last megabyte below 16 MB is kept for requests that must sit there.
+  *
+@@ -4548,6 +4549,10 @@
+ static uint32_t g_contig_first_free = 1;       /* no free page below this */
+ static uint32_t g_contig_allocs, g_contig_frees;
+ static uint32_t g_contig_peak_pages;
++#ifdef XBOX_CONTIG_HIGH_ZONE
++#define CONTIG_LOW_PAGES  (XBOX_CONTIG_LOW_SIZE / CONTIG_PAGE)   /* MEM256: the high zone starts here */
++static uint32_t g_contig_high_pages, g_contig_high_peak, g_contig_low_peak;
++#endif
+ static DWORD    g_contig_t0;
+ static volatile LONG g_contig_lock;
+ 
+@@ -4595,6 +4600,15 @@
+     g_contig_pages_in_use += n;
+     if (g_contig_pages_in_use > g_contig_peak_pages)
+         g_contig_peak_pages = g_contig_pages_in_use;
++#ifdef XBOX_CONTIG_HIGH_ZONE
++    if (first >= CONTIG_LOW_PAGES) {
++        g_contig_high_pages += n;
++        if (g_contig_high_pages > g_contig_high_peak)
++            g_contig_high_peak = g_contig_high_pages;
++    } else if (g_contig_pages_in_use - g_contig_high_pages > g_contig_low_peak) {
++        g_contig_low_peak = g_contig_pages_in_use - g_contig_high_pages;
++    }
++#endif
+     if (end > g_contig_high)
+         g_contig_high = end;
+     while (g_contig_first_free < CONTIG_PAGES
+@@ -4672,6 +4686,78 @@
+ {
+     return xbox_ContiguousAllocEx(size, alignment, 0, 0xFFFFFFFFu);
+ }
++
++#ifdef XBOX_CONTIG_HIGH_ZONE
++/* MEM256: the high zone, window pages CONTIG_LOW_PAGES .. CONTIG_PAGES.
++ *
++ * Only the host asks for it (Burnout Mashup's capacity expansions). Title
++ * requests keep the low 64 MB and therefore exactly the placement they always
++ * had: nothing a title allocates moves. First fit from the zone's bottom,
++ * the same page map and block lengths as the low arena, so Free, BlockSize,
++ * the page map and the high-water mark (dma_resolve, the APU, the OHCI) treat
++ * a high block like any other window block. Physical numbers stay below
++ * 256 MB, the bound of the titles' `& 0x0FFFFFFF` conversion. */
++uint32_t xbox_ContiguousAllocHigh(uint32_t size, uint32_t alignment)
++{
++    uint32_t n, align_pages, p, q, result = 0;
++
++    if (alignment < CONTIG_PAGE) alignment = CONTIG_PAGE;
++    if (alignment & (alignment - 1)) {
++        uint32_t a = CONTIG_PAGE;
++        while (a && a < alignment) a <<= 1;
++        alignment = a ? a : 0x80000000u;
++    }
++    if (size == 0) size = 1;
++    n = (uint32_t)(((uint64_t)size + CONTIG_PAGE - 1) / CONTIG_PAGE);
++    align_pages = alignment / CONTIG_PAGE;
++
++    contig_lock();
++    p = (CONTIG_LOW_PAGES + align_pages - 1) & ~(align_pages - 1);
++    while ((uint64_t)p + n <= CONTIG_PAGES) {
++        for (q = p; q < p + n && !g_contig_used[q]; q++)
++            ;
++        if (q == p + n) {
++            contig_take(p, n);
++            result = XBOX_CONTIG_BASE + p * CONTIG_PAGE;
++            break;
++        }
++        while (q < CONTIG_PAGES && g_contig_used[q]) q++;
++        p = (q + align_pages - 1) & ~(align_pages - 1);
++    }
++    if (!g_contig_t0)
++        g_contig_t0 = GetTickCount();
++    if (result) {
++        g_contig_allocs++;
++        fprintf(stderr, "  [CONTIG] t=%.1fs high-zone alloc 0x%08X %u KB: high zone in "
++                "use %u KB (peak %u KB) of %u KB; low 64 MB in use %u KB "
++                "(peak %u KB)\n", (GetTickCount() - g_contig_t0) / 1000.0, result,
++                n * (CONTIG_PAGE / 1024),
++                g_contig_high_pages * (CONTIG_PAGE / 1024),
++                g_contig_high_peak * (CONTIG_PAGE / 1024),
++                (unsigned)((CONTIG_PAGES - CONTIG_LOW_PAGES) * (CONTIG_PAGE / 1024)),
++                (g_contig_pages_in_use - g_contig_high_pages) * (CONTIG_PAGE / 1024),
++                g_contig_low_peak * (CONTIG_PAGE / 1024));
++    } else {
++        fprintf(stderr, "  [CONTIG] high zone refused %u bytes (align %u): %u of "
++                "%u KB in use\n", size, alignment,
++                g_contig_high_pages * (CONTIG_PAGE / 1024),
++                (unsigned)((CONTIG_PAGES - CONTIG_LOW_PAGES) * (CONTIG_PAGE / 1024)));
++    }
++    fflush(stderr);
++    contig_unlock();
++
++    if (result)
++        memset((void *)((uintptr_t)result + g_memory_offset), 0,
++               (size_t)n * CONTIG_PAGE);
++    return result;
++}
++
++uint32_t xbox_ContiguousWindowBytes(void)    { return XBOX_CONTIG_SIZE; }
++uint32_t xbox_ContiguousHighZoneBytes(void)  { return (CONTIG_PAGES - CONTIG_LOW_PAGES) * CONTIG_PAGE; }
++uint32_t xbox_ContiguousHighInUseBytes(void) { return g_contig_high_pages * CONTIG_PAGE; }
++uint32_t xbox_ContiguousHighPeakBytes(void)  { return g_contig_high_peak * CONTIG_PAGE; }
++uint32_t xbox_ContiguousLowPeakBytes(void)   { return g_contig_low_peak * CONTIG_PAGE; }
++#endif
+ 
+ /* A block the caller placed itself (MmAllocateContiguousMemoryEx with a range
+  * exactly one allocation wide). Recorded so nothing else is handed the same
+@@ -4725,6 +4811,10 @@
+     memset(&g_contig_used[first], 0, n);
+     g_contig_len[first] = 0;
+     g_contig_pages_in_use -= n;
++#ifdef XBOX_CONTIG_HIGH_ZONE
++    if (first >= CONTIG_LOW_PAGES)
++        g_contig_high_pages -= n;
++#endif
+     if (first < g_contig_first_free)
+         g_contig_first_free = first;
+     g_contig_frees++;
+--- a/toolkit/src/kernel/xbox_memory_layout.h
++++ b/toolkit/src/kernel/xbox_memory_layout.h
+@@ -212,6 +212,22 @@
+  * (or claimed). Read without the arena lock; a device model's view. */
+ const volatile uint8_t *xbox_ContiguousPageMap(void);
+ uint32_t xbox_ContiguousInUseBytes(void);
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++/* MEM256: the high zone (window offsets 64 MB .. the window's end). Only a
++ * caller that asks for it gets it: title requests stay in the low 64 MB with
++ * exactly the old placement. 0 when the high zone cannot hold the request. */
++uint32_t xbox_ContiguousAllocHigh(uint32_t size, uint32_t alignment);
++uint32_t xbox_ContiguousWindowBytes(void);     /* the mapped window, bytes */
++uint32_t xbox_ContiguousHighZoneBytes(void);   /* the high zone's size, bytes */
++uint32_t xbox_ContiguousHighInUseBytes(void);  /* allocated in the high zone */
++uint32_t xbox_ContiguousHighPeakBytes(void);   /* its peak */
++uint32_t xbox_ContiguousLowPeakBytes(void);    /* peak of the low 64 MB */
++/* MEM256 layer 0: called when MmAllocateContiguousMemory(Ex) refuses a title
++ * request (after the refusal is logged). NULL = the old behaviour (0 back). */
++void xbox_SetContiguousRefusalHandler(void (*fn)(uint32_t caller, uint32_t size,
++                                                 uint32_t low, uint32_t high,
++                                                 uint32_t align));
++#endif
+ 
+ int xbox_Nv2aMirrorFence(uint32_t device_ptr_va,
+                          uint32_t put_off, uint32_t get_ptr_off);
+--- a/toolkit/src/overlay/overlay_ui.cpp
++++ b/toolkit/src/overlay/overlay_ui.cpp
+@@ -129,8 +129,33 @@
+     "Display", "Graphics", "Audio", "Input", "Power", "Advanced"
+ };
+ static int s_page;
+-static int s_sel[P_COUNT];
++static int s_sel[P_COUNT + XBOX_PORT_PAGES];
+ static bool s_scroll_to_sel;
++
++/* gp main20m patch 60: the port's pages (xbox_OverlaySetPortPages), ids
++ * P_COUNT.. after the overlay's own; in the tabs they come first. */
++static const xbox_port_page_ops *s_port;
++static int s_nport;
++static int s_port_x, s_port_jump;      /* X, and LT / RT (a screen of rows up / down) */
++static unsigned s_port_view;           /* counts the port's view changes (the hint band starts again) */
++static bool is_port(int page) { return page >= P_COUNT && page < P_COUNT + s_nport; }
++static int page_total() { return P_COUNT + s_nport; }
++static int page_at(int pos) { return pos < s_nport ? P_COUNT + pos : pos - s_nport; }   /* tab position -> page */
++static int page_pos(int page) { return page >= P_COUNT ? page - P_COUNT : page + s_nport; }
++static const char *page_name(int page)
++{
++    if (is_port(page)) {
++        const char *t = s_port->name ? s_port->name(page - P_COUNT) : NULL;
++        return t && t[0] ? t : "Mods";
++    }
++    return page >= 0 && page < P_COUNT ? k_page_name[page] : "";
++}
++static void rows_in_page();
++static int page_step(int page, int d)   /* the next (d 1) or previous (d -1) page in the tabs' order */
++{
++    const int n = page_total();
++    return page_at((page_pos(page) + (d > 0 ? 1 : -1) + n) % n);
++}
+ 
+ /* Settings written a moment after the last change. */
+ static bool s_save_pending;
+@@ -349,9 +374,18 @@
+  * slot: the port's reason (a music folder) must not overwrite it. */
+ static char s_restart_cheat[200];
+ 
++/* main20m patch 60: the port's pages' own changes (their restart callback). */
++static int port_restarts(char *why, unsigned n)
++{
++    if (why && n)
++        why[0] = 0;
++    return s_port && s_nport && s_port->restart ? s_port->restart(why, n) : 0;
++}
++
+ static bool restart_wanted()
+ {
+-    return xbox_SettingsNeedRestart() || s_restart_why[0] || s_restart_save[0] || s_restart_cheat[0];
++    return xbox_SettingsNeedRestart() || s_restart_why[0] || s_restart_save[0] || s_restart_cheat[0]
++           || port_restarts(NULL, 0) > 0;
+ }
+ 
+ /* How many changes wait for a restart: the settings changed that are read at
+@@ -364,7 +398,8 @@
+         if ((s->flags & XS_RESTART) && s->value != s->launch)
+             n++;
+     }
+-    return n + (s_restart_why[0] ? 1 : 0) + (s_restart_save[0] ? 1 : 0) + (s_restart_cheat[0] ? 1 : 0);
++    return n + (s_restart_why[0] ? 1 : 0) + (s_restart_save[0] ? 1 : 0) + (s_restart_cheat[0] ? 1 : 0)
++           + port_restarts(NULL, 0);
+ }
+ 
+ /* Why: the settings changed that are read at start, by their table flag,
+@@ -1043,6 +1078,21 @@
+                  xr_log_source());
+     else
+         snprintf(s_diag_info, sizeof s_diag_info, "Log: %s", shown);
++}
++
++/* The foot of every page (main20m patch 60: also a port page's): Restart now
++ * while a restart is pending, Quit game always, from r[n] on; the count. */
++static int foot_rows(Row *r, int n, bool staged)
++{
++    if (recomp_restart_available() && (restart_wanted() || staged)) {
++        static char label[96];
++        const int k = restart_count() + (staged && !s_restart_save[0] ? 1 : 0);
++        snprintf(label, sizeof label, "Restart now to apply %d change%s", k, k == 1 ? "" : "s");
++        r[n++] = Row{ R_ACTION, XS_COUNT, A_RESTART_PIN, label };
++    }
++    r[n++] = Row{ R_ACTION, XS_COUNT, A_QUIT, s_cs == CS_DISCARDED ? "Quit game (progress is not being saved until a restart)"
++                  : s_cs != CS_NONE ? "Quit game (progress made with cheats is not saved)" : "Quit game" };
++    return n;
+ }
+ 
+ static int page_rows(int page, Row *r)
+@@ -1377,14 +1427,7 @@
+      * last rows; see pin_count): Quit game always, and Restart only while a
+      * restart is pending (the one place for it: there is no Restart row in
+      * the pages). Each asks once more before it acts. */
+-    if (recomp_restart_available() && (restart_wanted() || staged)) {
+-        static char label[96];
+-        const int k = restart_count() + (staged && !s_restart_save[0] ? 1 : 0);
+-        snprintf(label, sizeof label, "Restart now to apply %d change%s", k, k == 1 ? "" : "s");
+-        ACT(A_RESTART_PIN, label);
+-    }
+-    ACT(A_QUIT, s_cs == CS_DISCARDED ? "Quit game (progress is not being saved until a restart)"
+-                : s_cs != CS_NONE ? "Quit game (progress made with cheats is not saved)" : "Quit game");
++    n = foot_rows(r, n, staged);
+ #undef SET
+ #undef ACT
+ #undef INFO
+@@ -1404,8 +1447,22 @@
+     FILE *f = fopen(path, "w");
+     if (!f)
+         return;
+-    fprintf(f, "open %d\npage %s\npaused %d\n", s_open ? 1 : 0, k_page_name[s_page],
++    fprintf(f, "open %d\npage %s\npaused %d\n", s_open ? 1 : 0, page_name(s_page),
+             xbox_HostPaused());
++    if (is_port(s_page)) {
++        /* main20m patch 60: a port page's rows, "> " on the cursor's. */
++        static const char *const pk[] = { "item", "header", "text", "info" };
++        static xbox_port_row pr;
++        const int pn = s_port->rows(s_page - P_COUNT);
++        for (int i = 0; i < pn && i < XBOX_PORT_ROWS; i++) {
++            memset(&pr, 0, sizeof pr);
++            s_port->row(s_page - P_COUNT, i, &pr);
++            fprintf(f, "%c %s: %s%s%s\n", s_open && i == s_sel[s_page] ? '>' : ' ', pk[pr.kind & 3], pr.label,
++                    pr.value[0] ? " = " : "", pr.value);
++        }
++        fclose(f);
++        return;
++    }
+     if (xsb_is_open()) {
+         /* The folder browser, over the page: where it is and its rows. */
+         char where[1024], c[48];
+@@ -1439,6 +1496,17 @@
+  * with `prefix` is, -1 when it has none. */
+ int xbox_OverlayTestRowIndex(const char *prefix)
+ {
++    if (is_port(s_page)) {
++        static xbox_port_row pr;
++        const int pn = s_port->rows(s_page - P_COUNT);
++        for (int i = 0; i < pn && i < XBOX_PORT_ROWS; i++) {
++            memset(&pr, 0, sizeof pr);
++            s_port->row(s_page - P_COUNT, i, &pr);
++            if (!strncmp(pr.label, prefix, strlen(prefix)))
++                return i;
++        }
++        return -1;
++    }
+     Row r[OVERLAY_ROWS];
+     int n = page_rows(s_page, r);
+     for (int i = 0; i < n; i++) {
+@@ -1876,6 +1944,7 @@
+     memset(s_key, 0, sizeof s_key);
+     memset(s_steps, 0, sizeof s_steps);
+     s_activate = s_back = s_page_delta = s_reset = 0;
++    s_port_x = s_port_jump = 0;
+     s_confirm = 0;
+ }
+ 
+@@ -1959,7 +2028,12 @@
+     if (s_restart_save[0] && at < n)
+         at += (size_t)snprintf(out + at, n - at, "%s%s", at ? " " : "", s_restart_save);
+     if (s_restart_cheat[0] && at < n)
+-        snprintf(out + at, n - at, "%s%s", at ? " " : "", s_restart_cheat);
++        at += (size_t)snprintf(out + at, n - at, "%s%s", at ? " " : "", s_restart_cheat);
++    if (at < n) {
++        char pw[400];
++        if (port_restarts(pw, sizeof pw) > 0 && pw[0])
++            snprintf(out + at, n - at, "%s%s", at ? " " : "", pw);
++    }
+ }
+ 
+ /* The overlay closes as at any time (the settings are written), then the
+@@ -2014,6 +2088,83 @@
+         return 0;
+     s_open_request.store(1);
+     return 1;
++}
++
++/* main20m patch 60: the port's pages. */
++static std::atomic<int> s_open_page{-1};
++
++void xbox_OverlaySetPortPages(int n, const xbox_port_page_ops *ops)
++{
++    std::lock_guard<std::mutex> g(s_ov_mu);
++    s_port = n > 0 && ops && ops->rows && ops->row && ops->input ? ops : NULL;
++    s_nport = s_port ? (n < XBOX_PORT_PAGES ? n : XBOX_PORT_PAGES) : 0;
++    if (!is_port(s_page) && s_page >= P_COUNT)
++        s_page = 0;
++}
++
++int xbox_OverlayRequestOpenPage(int page)
++{
++    if (!s_enabled || page < 0 || page >= s_nport)
++        return 0;
++    s_open_page.store(P_COUNT + page);
++    s_open_request.store(1);
++    return 1;
++}
++
++int xbox_OverlayIsOpen(void)
++{
++    return s_open ? 1 : 0;
++}
++
++int xbox_OverlayShowPortPage(int page, int row)
++{
++    if (page < 0 || page >= s_nport)
++        return 0;
++    if (s_page != P_COUNT + page) {
++        s_page = P_COUNT + page;
++        menusnd_play(XBOX_OVERLAY_SND_PAGE);
++        rows_in_page();
++        s_confirm = 0;
++    }
++    s_sel[s_page] = row;
++    s_port_view++;
++    s_scroll_to_sel = true;
++    return 1;
++}
++
++int xbox_OverlayCanRestart(void)
++{
++    return recomp_restart_available() ? 1 : 0;
++}
++
++int xbox_OverlayRestartNow(void)
++{
++    if (!recomp_restart_available())
++        return 0;
++    restart_now();
++    return 1;
++}
++
++/* An action on the port page's row `i`: the port's answer turned into the
++ * sound, and for another view the cursor and the rows' coming in. 1 when the
++ * port acted (or asked), 0 when it did nothing there. */
++static int port_act(int page, int i, int action)
++{
++    const unsigned r = s_port->input(page - P_COUNT, i, action);
++    if (r & XBOX_PI_VIEW) {
++        s_port_view++;
++        const int c = s_port->cursor ? s_port->cursor(page - P_COUNT) : -1;
++        s_sel[page] = c >= 0 ? c : -1;     /* -1: the first selectable, at the next frame */
++        s_scroll_to_sel = true;
++        rows_in_page();
++    }
++    if (r & (XBOX_PI_DONE | XBOX_PI_VIEW | XBOX_PI_ASK))
++        menusnd_play(action == XBOX_PA_BACK ? XBOX_OVERLAY_SND_BACK
++                     : action == XBOX_PA_LEFT || action == XBOX_PA_RIGHT ? XBOX_OVERLAY_SND_CHANGE
++                     : XBOX_OVERLAY_SND_SELECT);
++    else if (r & XBOX_PI_NONE)
++        menusnd_play(XBOX_OVERLAY_SND_MOVE);
++    return (r & (XBOX_PI_DONE | XBOX_PI_VIEW | XBOX_PI_ASK)) ? 1 : 0;
+ }
+ 
+ /* A direction goes down or up on one of the three sources. A press counts a
+@@ -2102,6 +2253,7 @@
+         case SDLK_ESCAPE: s_back++; break;
+         case SDLK_DELETE:
+         case SDLK_BACKSPACE: s_reset++; break;
++        case SDLK_x: s_port_x++; break;           /* main20m patch 60: a port page's X */
+         default:
+             /* Page Up and Down, [ and ], Q and E, Tab and Shift+Tab. */
+             s_page_delta += xbox_overlay_page_key(k, ev->key.keysym.mod);
+@@ -2164,6 +2316,7 @@
+         case SDL_CONTROLLER_BUTTON_A: if (down) s_activate++; break;
+         case SDL_CONTROLLER_BUTTON_B: if (down) s_back++; break;
+         case SDL_CONTROLLER_BUTTON_Y: if (down) s_reset++; break;
++        case SDL_CONTROLLER_BUTTON_X: if (down) s_port_x++; break;     /* main20m patch 60: a port page's X */
+         case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:  if (down) s_page_delta--; break;
+         case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: if (down) s_page_delta++; break;
+         default: break;
+@@ -2176,6 +2329,15 @@
+         if (ev->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || ev->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY) {
+             s_last_input_pad = true;
+             stick_axis(ev->caxis.axis, ev->caxis.value);
++        } else if (ev->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERLEFT || ev->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT) {
++            /* main20m patch 60: LT / RT pulled past half: a screen of a port page's rows up / down (once a pull). */
++            static bool held[2];
++            const int k = ev->caxis.axis == SDL_CONTROLLER_AXIS_TRIGGERRIGHT;
++            const bool on = ev->caxis.value > 16384;
++            if (on && !held[k])
++                s_port_jump += k ? 1 : -1;
++            held[k] = on;
++            s_last_input_pad = true;
+         }
+         return 1;
+ 
+@@ -2318,8 +2480,14 @@
+     std::lock_guard<std::mutex> g(s_ov_mu);
+     test_poll();
+ 
+-    if (s_open_request.exchange(0) && !s_open)
++    if (s_open_request.exchange(0) && !s_open) {
++        const int pg = s_open_page.exchange(-1);
++        if (is_port(pg)) {
++            s_page = pg;                  /* main20m patch 60: opened on a port page (its rows from the top view) */
++            s_port->input(pg - P_COUNT, -1, XBOX_PA_OPEN);
++        }
+         set_open(true, true);
++    }
+     /* The on-screen controls' menu button. */
+     if (xbox_InputTouchTakeMenu() && !s_open)
+         set_open(true);
+@@ -2378,6 +2546,8 @@
+                 s_fb_sel = sel;
+                 s_fb_scroll = true;
+             }
++        } else if (s_open && is_port(s_page) && port_act(s_page, s_sel[s_page], XBOX_PA_BACK)) {
++            /* main20m patch 60: B within a port page (out of a view or a question); else it closes */
+         } else if (s_open)
+             set_open(false);
+     }
+@@ -3862,12 +4032,14 @@
+  * the folder browser. */
+ static const char *s_foot_keys;
+ static bool s_foot_attn, s_foot_prompts;
++static int s_foot_port = -2;            /* main20m patch 60: the port page's row whose prompts the footer shows (-2 none) */
+ 
+ static void foot_set(const char *keys, bool attn = false)
+ {
+     s_foot_keys = keys;
+     s_foot_attn = attn;
+     s_foot_prompts = false;
++    s_foot_port = -2;
+ }
+ 
+ /* After foot_set: the page's footer is B Back, Y Default, d-pad Change, A Select. */
+@@ -3927,10 +4099,68 @@
+     }
+ }
+ 
++/* main20m patch 60: a port page's footer: B, then the d-pad, X, Y, and A at
++ * the right, each only where the port names a word for it on that row. */
++static void draw_port_prompts(ImDrawList *dl)
++{
++    const int page = s_page - P_COUNT, row = s_foot_port;
++    const bool pad = pad_hints();
++    const int set = pad ? (int)xbox_InputGlyphSet() : 0;
++    const float sz = LY.foot, cy = (LY.y_foot + LY.H) * 0.5f, k = sz * 1.25f / 30.0f, gap = sz * 0.55f;
++    const ImU32 c = col(T->hint);
++    Face body(s_f_body, SHEAR);
++    float x = LY.cx + 0.056f * LY.cw;
++    const float x1 = LY.cx + 0.944f * LY.cw;
++    auto word = [&](int b) -> const char * {
++        const char *w = s_port->prompt ? s_port->prompt(page, row, b) : NULL;
++        return w && w[0] ? w : NULL;
++    };
++    auto glyph = [&](float gx, int b) -> float {
++        static const int cell[XBOX_PB_COUNT] = { AP_A, AP_B, AP_X, AP_Y, 0 };
++        static const char *const key[XBOX_PB_COUNT] = { "Enter", "Esc", "X", "Del", "" };
++        if (b == XBOX_PB_DPAD) {
++            if (pad && set != XBOX_GLYPH_SET_KEYBOARD) {
++                dpad_glyph(dl, gx + sz * 0.625f, cy, sz * 1.25f, col({255, 255, 255}));
++                return sz * 1.25f;
++            }
++            Face up(s_f_ui);
++            return arrows_cap(dl, gx, cy, sz, c);
++        }
++        if (pad)
++            return pad_glyph(dl, set, cell[b], gx, cy, k);
++        Face up(s_f_ui);
++        return key_cap(dl, gx, cy, sz, key[b], c);
++    };
++    static const int left[] = { XBOX_PB_B, XBOX_PB_DPAD, XBOX_PB_X, XBOX_PB_Y };
++    for (int b : left) {
++        const char *w = word(b);
++        if (!w)
++            continue;
++        const float gw = glyph(x, b);
++        txt(dl, sz, ImVec2(x + gw + gap, top_for(cy, sz)), c, w);
++        x += gw + gap + tw(sz, w) + sz * 1.6f;
++    }
++    if (const char *w = word(XBOX_PB_A)) {
++        float gw;
++        if (pad) {
++            ArtRect r;
++            gw = gameart_pad_cell(set, AP_A, &r) ? r.w * k : sz;
++        } else {
++            gw = key_width(sz, "Enter");
++        }
++        txt(dl, sz, ImVec2(x1 - gw - gap - tw(sz, w), top_for(cy, sz)), c, w);
++        glyph(x1 - gw, XBOX_PB_A);
++    }
++}
++
+ static void draw_footer(ImDrawList *dl)
+ {
+     dl->AddRectFilled(ImVec2(0, LY.y_foot), ImVec2(LY.W, LY.H), col(T->bar, 0.94f));
+     dl->AddLine(ImVec2(0, LY.y_foot), ImVec2(LY.W, LY.y_foot), col(T->rule_hi), fmaxf(1.0f, 0.0025f * LY.H));
++    if (s_foot_port >= -1 && art_on()) {
++        draw_port_prompts(dl);
++        return;
++    }
+     if (s_foot_prompts && art_on()) {
+         draw_prompts(dl);
+         return;
+@@ -4043,21 +4273,24 @@
+ {
+     dl->AddRectFilled(ImVec2(0, 0), ImVec2(LY.W, LY.y_rule), col(T->head_band, 0.55f));
+     {
++        /* main20m patch 60: a port page's big word is MODS (the title's large font has no W: no SETTINGS change). */
++        const char *word = is_port(s_page) ? "MODS" : "SETTINGS";
+         Face title(s_f_title, SHEAR);
+         const float sz = LY.title, x = LY.cx + 0.056f * LY.cw;
+         const float y = top_for(0.105f * LY.H, sz);
+         const float o = fmaxf(1.0f, sz * 0.022f);           /* the outline */
+-        txt(dl, sz, ImVec2(x + sz * 0.03f, y + sz * 0.04f), col(T->shadow, 0.85f), "SETTINGS");
++        txt(dl, sz, ImVec2(x + sz * 0.03f, y + sz * 0.04f), col(T->shadow, 0.85f), word);
+         for (int k = 0; k < 8; k++) {
+             static const float dx[8] = { -1, 1, -1, 1, 0, 0, -1, 1 }, dy[8] = { -1, -1, 1, 1, -1, 1, 0, 0 };
+-            txt(dl, sz, ImVec2(x + dx[k] * o, y + dy[k] * o), col(T->outline), "SETTINGS");
+-        }
+-        txt(dl, sz, ImVec2(x, y), col(T->title), "SETTINGS");
++            txt(dl, sz, ImVec2(x + dx[k] * o, y + dy[k] * o), col(T->outline), word);
++        }
++        txt(dl, sz, ImVec2(x, y), col(T->title), word);
+     }
+     {
+         /* The page: < NAME >, a click on an arrow turns the page. */
+         Face body(s_f_body, SHEAR);
+-        const char *name = caps(k_page_name[s_page]);
++        const char *crumb = is_port(s_page) && s_port->crumb ? s_port->crumb(s_page - P_COUNT) : NULL;
++        const char *name = caps(crumb && crumb[0] ? crumb : page_name(s_page));
+         const float sz = LY.head, cy = 0.105f * LY.H;
+         const float ar = sz * 0.22f, nw = tw(sz, name) + sz * SHEAR * 0.5f, right = LY.cx + 0.944f * LY.cw;
+         const float xn = right - ar * 2.8f - nw;
+@@ -4075,7 +4308,7 @@
+             ImGui::PushID(k + 100);
+             ImGui::InvisibleButton("##pg", ImVec2(x1 - x0, sz * 1.2f));
+             if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
+-                s_page = (s_page + (k ? 1 : -1) + P_COUNT) % P_COUNT;
++                s_page = page_step(s_page, k ? 1 : -1);
+                 menusnd_play(XBOX_OVERLAY_SND_PAGE);
+                 rows_in_page();
+                 s_scroll_to_sel = true;
+@@ -4093,8 +4326,9 @@
+         const float th = LY.y_rows - LY.y_rule - 0.004f * LY.H, y0 = LY.y_rule + 0.002f * LY.H;
+         const float gap = LY.tab * 0.9f, cy = y0 + th * 0.5f;
+         float x = LY.cx + 0.094f * LY.cw;
+-        for (int i = 0; i < P_COUNT; i++) {
+-            const char *t = caps(k_page_name[i]);
++        for (int pos = 0; pos < page_total(); pos++) {
++            const int i = page_at(pos);
++            const char *t = caps(page_name(i));
+             const float w = tw(LY.tab, t);
+             ImGui::SetCursorScreenPos(ImVec2(x - gap * 0.5f, y0));
+             ImGui::PushID(i);
+@@ -4442,6 +4676,386 @@
+     return locked_out;
+ }
+ 
++/* ── a port's page (main20m patch 60, xbox_OverlaySetPortPages) ─────── */
++
++static xbox_port_row s_pr[XBOX_PORT_ROWS];   /* this frame's rows, from the port */
++
++static ImU32 port_tone(int tone, bool sel)
++{
++    switch (tone) {
++    case XBOX_PT_DIM:  return col(T->text_dim);
++    case XBOX_PT_ATTN: return col(T->attn);
++    case XBOX_PT_BAD:  return col(T->title);
++    case XBOX_PT_GOOD: return col(T->text_hi);
++    default:           return sel ? col(T->text_hi) : col(T->text);
++    }
++}
++
++/* t cut with an ellipsis to fit w at size (the current face). */
++static const char *port_ellipsis(float size, const char *t, float w)
++{
++    static char b[300];
++    size_t n = strlen(t), lo = 0, hi = n;
++    if (tw(size, t) <= w)
++        return t;
++    while (lo < hi) {                           /* the longest prefix that fits with the ellipsis */
++        size_t mid = (lo + hi + 1) / 2;
++        while (mid > 0 && (t[mid] & 0xC0) == 0x80)
++            mid--;                              /* never inside a UTF-8 character */
++        snprintf(b, sizeof b, "%.*s\xE2\x80\xA6", (int)mid, t);
++        if (mid > lo && tw(size, b) <= w)
++            lo = mid;
++        else
++            hi = mid > lo ? mid - 1 : lo;
++    }
++    while (lo > 0 && t[lo - 1] == ' ')
++        lo--;
++    snprintf(b, sizeof b, "%.*s\xE2\x80\xA6", (int)lo, t);
++    return b;
++}
++
++/* A label in w, always at the row's size: whole when it fits, else on the
++ * selected row scrolling (a second's hold, along at three letters' height a
++ * second, a second's hold at its end, again), on the others cut with an
++ * ellipsis. */
++static void port_label(ImDrawList *dl, float fs, ImVec2 p, ImU32 c, const char *t, float w, bool sel, uint32_t t0)
++{
++    const float full = tw(fs, t);
++    if (full <= w) {
++        txt(dl, fs, p, c, t);
++        return;
++    }
++    if (!sel) {
++        txt(dl, fs, p, c, port_ellipsis(fs, t, w));
++        return;
++    }
++    const float over = full - w, speed = fs * 3.0f;
++    const float run = over / speed * 1000.0f, cycle = 1000.0f + run + 1000.0f;
++    const float ms = fmodf((float)(now_ms() - t0), cycle);
++    const float off = ms < 1000.0f ? 0.0f : ms < 1000.0f + run ? (ms - 1000.0f) / 1000.0f * speed : over;
++    dl->PushClipRect(ImVec2(p.x - fs * 0.1f, p.y - fs * 0.2f), ImVec2(p.x + w + fs * s_shear, p.y + fs * 1.4f), true);
++    txt(dl, fs, ImVec2(p.x - off, p.y), c, t);
++    dl->PopClipRect();
++}
++
++static bool port_selectable(const xbox_port_row &r) { return r.kind == XBOX_PR_ITEM; }
++
++static void build_port(float fs, ImDrawList *dl)
++{
++    ImGuiIO &io = ImGui::GetIO();
++    const int page = s_page - P_COUNT;
++    int n = s_port->rows(page);
++    if (n < 0) n = 0;
++    if (n > XBOX_PORT_ROWS) n = XBOX_PORT_ROWS;
++    for (int i = 0; i < n; i++) {
++        memset(&s_pr[i], 0, sizeof s_pr[i]);
++        s_port->row(page, i, &s_pr[i]);
++        s_pr[i].label[sizeof s_pr[i].label - 1] = s_pr[i].value[sizeof s_pr[i].value - 1] = 0;
++        s_pr[i].hint[sizeof s_pr[i].hint - 1] = 0;
++    }
++    /* The pinned rows (Restart now while one is pending, Quit game): the
++     * overlay's own, after the port's in the cursor's order. */
++    Row pins[4];
++    const int np = foot_rows(pins, 0, false);
++    const int total = n + np;
++    int &sel = s_sel[s_page];
++    auto ok = [&](int i) { return i >= n ? i < total : i >= 0 && port_selectable(s_pr[i]); };
++    if (sel < 0 || sel >= total || !ok(sel)) {
++        sel = 0;
++        while (sel < total && !ok(sel))
++            sel++;
++    }
++
++    collect_steps();
++    {
++        const int was = sel;
++        auto move = [&](int dir) {
++            for (int k = 0; k < total; k++) {
++                sel = (sel + dir + total) % total;
++                if (ok(sel))
++                    break;
++            }
++            s_scroll_to_sel = true;
++        };
++        while (s_steps[D_UP]-- > 0) move(-1);
++        while (s_steps[D_DOWN]-- > 0) move(1);
++        {
++            /* main20m patch 65: the mouse wheel moves the selection, one row a notch, stopping at the
++             * list's ends (the rows' child does not scroll with the wheel: NoScrollWithMouse below). */
++            static float wheel_acc;
++            static int wheel_page = -1;
++            if (wheel_page != s_page)
++                wheel_acc = 0.0f;
++            wheel_page = s_page;
++            wheel_acc += io.MouseWheel;
++            auto wheel_step = [&](int dir) {
++                for (int j = sel + dir; j >= 0 && j < total; j += dir)
++                    if (ok(j)) {
++                        sel = j;
++                        s_scroll_to_sel = true;
++                        s_last_input_pad = false;
++                        return;
++                    }
++            };
++            for (; wheel_acc >= 1.0f; wheel_acc -= 1.0f) wheel_step(-1);
++            for (; wheel_acc <= -1.0f; wheel_acc += 1.0f) wheel_step(1);
++        }
++        if (s_port_jump && sel < n) {
++            /* LT / RT: about a screen of rows, stopping at the list's ends. */
++            const int screen = (int)((LY.y_foot - LY.y_rows) / LY.pitch * 0.7f) + 1;
++            int at = sel;
++            for (int k = 0, d = s_port_jump > 0 ? 1 : -1; k < screen; k++) {
++                int j = at + d;
++                while (j >= 0 && j < n && !port_selectable(s_pr[j]))
++                    j += d;
++                if (j < 0 || j >= n)
++                    break;
++                at = j;
++            }
++            sel = at;
++            s_scroll_to_sel = true;
++        }
++        if (sel != was)
++            menusnd_play(XBOX_OVERLAY_SND_MOVE);
++    }
++    s_steps[D_UP] = s_steps[D_DOWN] = 0;
++    s_port_jump = 0;
++    if (s_confirm && !(sel >= n && pins[sel - n].action == s_confirm))
++        s_confirm = 0;                       /* moved off the pinned row that was asked */
++    {
++        static int mq_page = -1, mq_row = -1;
++        static uint32_t mq_t0;
++        if (mq_page != s_page || mq_row != sel) {
++            mq_page = s_page;
++            mq_row = sel;
++            mq_t0 = now_ms();
++        }
++        /* Actions on the row: the port's (or a pinned row's own). */
++        const int cur = sel;
++        const unsigned view = s_port_view;
++        if (cur < n) {
++            while (s_steps[D_LEFT]-- > 0) port_act(s_page, cur, XBOX_PA_LEFT);
++            while (s_steps[D_RIGHT]-- > 0) port_act(s_page, cur, XBOX_PA_RIGHT);
++            while (s_activate-- > 0) port_act(s_page, cur, XBOX_PA_SELECT);
++            while (s_port_x-- > 0) port_act(s_page, cur, XBOX_PA_X);
++            while (s_reset-- > 0) port_act(s_page, cur, XBOX_PA_DEFAULT);
++        } else {
++            while (s_activate-- > 0) activate(pins[cur - n]);
++        }
++        s_steps[D_LEFT] = s_steps[D_RIGHT] = 0;
++        s_activate = s_port_x = s_reset = 0;
++        if (!s_open || s_page != P_COUNT + page || view != s_port_view || s_port->rows(page) != n)
++            return;                          /* the port's view changed under the action: drawn from the next frame */
++
++        char hint[sizeof s_pr[0].hint + 200];
++        hint[0] = 0;
++        bool hint_attn = false;
++        if (sel < n)
++            snprintf(hint, sizeof hint, "%s", s_pr[sel].hint);
++        else if (sel < total)
++            hint_attn = row_hint(pins[sel - n], hint, sizeof hint);
++        const bool note_only = !recomp_restart_available() && (restart_wanted() || xbox_SettingsNeedRestart());
++        const float pitch = LY.pitch, gap = 0.009f * LY.H;
++        const float hx = LY.cx + 0.06f * LY.cw, hw = 0.88f * LY.cw;
++        const float pins_h = np * pitch + (note_only ? pitch * 0.75f : 0.0f) + (np || note_only ? gap : 0.0f);
++        /* The hint's band: as tall as the tallest hint shown on this view so far (at most three lines'
++         * worth before it shrinks), so the rows stay where they are while the cursor moves. */
++        static int band_page = -1;
++        static unsigned band_view;
++        static float band_h, band_hs;
++        if (band_page != s_page || band_view != s_port_view || !s_open) {
++            band_page = s_page;
++            band_view = s_port_view;
++            band_h = 0.0f;
++            band_hs = LY.hint;
++        }
++        float hs = band_hs, hint_h = 0.0f;
++        for (int k = 0; hint[0] && k < 10; k++) {
++            hint_h = ImGui::GetFont()->CalcTextSizeA(hs, FLT_MAX, hw, hint).y;
++            if (hint_h <= 0.13f * LY.H || hs <= LY.hint * 0.62f)
++                break;
++            hs *= 0.92f;
++        }
++        band_h = fmaxf(band_h, hint_h);
++        band_hs = fminf(band_hs, hs);
++        hint_h = band_h;
++        const float y_hint = LY.y_foot - gap - hint_h;
++        const float y_pins = y_hint - gap - pins_h;
++        float rows_h = y_pins - LY.y_rows;
++        if (rows_h < pitch * 1.5f)
++            rows_h = pitch * 1.5f;
++
++        ImGui::SetCursorScreenPos(ImVec2(LY.body_x0, LY.y_rows));
++        ImGui::BeginChild("prows", ImVec2(LY.body_x1 - LY.body_x0, rows_h), ImGuiChildFlags_None,
++                          ImGuiWindowFlags_NoNav | ImGuiWindowFlags_NoBackground | ImGuiWindowFlags_NoScrollWithMouse);
++        gesture_scroll();
++        ImDrawList *cdl = ImGui::GetWindowDrawList();
++        const float rw = ImGui::GetContentRegionAvail().x;
++        const float view0 = ImGui::GetScrollY(), view1 = view0 + rows_h;
++        const float ar = fs * 0.3f, ah = fs * 0.75f, lx = LY.x_label;
++        const float chip0 = LY.cx + 0.68f * LY.cw, vr = LY.x_val1;
++        float y = 0.0f;
++        for (int i = 0; i < n; i++) {
++            const xbox_port_row &r = s_pr[i];
++            const bool is_sel = i == sel;
++            float rh = pitch;
++            if (r.kind == XBOX_PR_HEADER)
++                rh = pitch * 0.85f;
++            else if (r.kind == XBOX_PR_INFO)
++                rh = pitch * 0.62f;
++            else if (r.kind == XBOX_PR_TEXT) {
++                Face body(s_f_body);
++                rh = cur_font()->CalcTextSizeA(LY.hint * 1.1f, FLT_MAX, vr - lx, r.label).y + pitch * 0.25f;
++            }
++            const ImVec2 p = ImGui::GetCursorScreenPos();
++            if (y + rh < view0 - pitch || y > view1 + pitch) {
++                ImGui::Dummy(ImVec2(rw, rh));   /* out of view: its room only */
++                if (is_sel && s_scroll_to_sel) {
++                    ImGui::SetScrollHereY(0.5f);
++                    s_scroll_to_sel = false;
++                }
++                y += rh;
++                continue;
++            }
++            const int v0 = cdl->VtxBuffer.Size;
++            ImGui::PushID(i);
++            const bool clicked = ImGui::InvisibleButton("##prow", ImVec2(rw, rh)) && gesture_tap();
++            const bool hov = ImGui::IsItemHovered();
++            ImGui::PopID();
++            const float cy = p.y + rh * 0.5f;
++            if (r.kind == XBOX_PR_HEADER) {
++                Face it(s_f_body, SHEAR);
++                const float hsz = fs * 0.8f;
++                txt_fit(cdl, hsz, ImVec2(lx - fs * 0.4f, top_for(cy + rh * 0.12f, hsz)), r.tone ? port_tone(r.tone, false)
++                        : col(T->title), caps(r.label), vr - lx);
++                cdl->AddLine(ImVec2(lx - fs * 0.4f, p.y + rh - 1.0f), ImVec2(vr, p.y + rh - 1.0f), col(T->rule));
++            } else if (r.kind == XBOX_PR_INFO) {
++                Face ui(s_f_ui);
++                txt_fit(cdl, LY.hint, ImVec2(lx, top_for(cy, LY.hint)), r.tone ? port_tone(r.tone, false) : col(T->hint),
++                        r.label, vr - lx);
++            } else if (r.kind == XBOX_PR_TEXT) {
++                Face body(s_f_body);
++                txt(cdl, LY.hint * 1.1f, ImVec2(lx, p.y + pitch * 0.12f), r.tone ? port_tone(r.tone, false) : col(T->text),
++                    r.label, vr - lx);
++            } else {
++                const bool choice = (r.flags & XBOX_PRF_CHOICE) != 0, action = (r.flags & XBOX_PRF_ACTION) != 0;
++                const float v0x = choice ? LY.x_val0 : chip0;
++                const float bh = fmaxf(rh * 0.74f, fs * 1.2f), bpad = bh * 0.4f;
++                const float label_w = (r.value[0] && !action ? v0x - ar * 4.0f : vr) - lx;
++                if (is_sel) {
++                    if (art_on())
++                        cursor_spr(cdl, lx - fs * 0.9f, cy, fs * 0.85f, col({255, 255, 255}), T->arrow);
++                    else {
++                        cdl->AddRectFilled(p, ImVec2(p.x + rw, p.y + rh), col(T->sel_fill, T->sel_fill_a), fs * 0.2f);
++                        arrow_tri(cdl, lx - fs * 0.9f, cy, ar, 1, col(T->arrow));
++                    }
++                }
++                {
++                    Face it(s_f_body, SHEAR);
++                    const ImU32 lc = action ? (is_sel ? col(T->text_hi) : r.tone ? port_tone(r.tone, false) : col(T->action))
++                                   : is_sel ? col(T->text_hi) : col(T->text);
++                    const char *lt = (r.flags & XBOX_PRF_NOCAPS) ? r.label : caps(r.label);
++                    port_label(cdl, fs, ImVec2(lx, top_for(cy, fs)), lc, lt, label_w, is_sel, mq_t0);
++                }
++                if (r.value[0] && !action) {
++                    Face body(s_f_body);
++                    value_box(cdl, v0x, cy - bh * 0.5f, vr, cy + bh * 0.5f, is_sel);
++                    txt_fit(cdl, fs * (choice ? 1.0f : 0.82f), ImVec2((v0x + vr) * 0.5f, top_for(cy, fs * (choice ? 1.0f : 0.82f))),
++                            port_tone(r.tone, is_sel), r.value, vr - v0x - 2.0f * bpad, false, true);
++                    if (choice && is_sel && !(r.flags & XBOX_PRF_LOCKED)) {
++                        arrow_spr(cdl, v0x - ah * 0.9f, cy, ah, -1, col({255, 255, 255}), T->arrow);
++                        arrow_spr(cdl, vr + ah * 0.9f, cy, ah, 1, col({255, 255, 255}), T->arrow);
++                    }
++                    if (r.flags & XBOX_PRF_LOCKED)
++                        padlock_spr(cdl, v0x - ah * 0.9f, cy, bh * 0.9f);
++                }
++                if (hov && (io.MouseDelta.x != 0 || io.MouseDelta.y != 0)) {
++                    sel = i;
++                    s_last_input_pad = false;
++                }
++                if (clicked) {
++                    sel = i;
++                    const float mx = io.MousePos.x;
++                    port_act(s_page, i, choice && mx > v0x && mx < (v0x + vr) * 0.5f ? XBOX_PA_LEFT
++                                        : choice && mx >= (v0x + vr) * 0.5f ? XBOX_PA_RIGHT : XBOX_PA_SELECT);
++                }
++            }
++            rows_in_apply(cdl, v0, p.y < LY.y_rows ? 0 : (int)((p.y - LY.y_rows) / pitch));
++            if (is_sel && s_scroll_to_sel) {
++                ImGui::SetScrollHereY(0.5f);
++                s_scroll_to_sel = false;
++            }
++            y += rh;
++        }
++        ImGui::EndChild();
++        if (np || note_only) {
++            dl->AddLine(ImVec2(LY.body_x0, y_pins), ImVec2(LY.body_x1, y_pins), col(T->rule));
++            float yy = y_pins + gap * 0.5f;
++            if (note_only) {
++                const int k = restart_count();
++                char t[96];
++                snprintf(t, sizeof t, "Restart the game to apply %d change%s", k > 0 ? k : 1, k > 1 ? "s" : "");
++                Face it(s_f_body, SHEAR);
++                txt_fit(dl, fs, ImVec2(LY.x_label, top_for(yy + pitch * 0.375f, fs)), col(T->attn), caps(t),
++                        LY.x_val1 - LY.x_label);
++                yy += pitch * 0.75f;
++            }
++            ImGui::SetCursorScreenPos(ImVec2(LY.body_x0, yy));
++            ImGui::PushID("pfoot");
++            for (int k = 0; k < np; k++) {
++                bool clicked, hov;
++                int cdir;
++                double drag = -1;
++                draw_row(pins[k], n + k, sel == n + k, LY.body_x1 - LY.body_x0, pitch, fs, dl, &clicked, &cdir, &hov, &drag);
++                if (hov && (io.MouseDelta.x != 0 || io.MouseDelta.y != 0))
++                    sel = n + k;
++                if (clicked) {
++                    sel = n + k;
++                    activate(pins[k]);
++                }
++            }
++            ImGui::PopID();
++        }
++        if (hint[0]) {
++            dl->PushClipRect(ImVec2(hx, y_hint), ImVec2(hx + hw, LY.y_foot), true);
++            dl->AddText(ImGui::GetFont(), hs, ImVec2(hx, y_hint), hint_attn ? col(T->attn) : col(T->hint), hint, nullptr, hw);
++            dl->PopClipRect();
++        }
++        if (art_on()) {
++            foot_set(NULL);
++            s_foot_port = sel < n ? sel : -1;
++        } else {
++            static char keys[240];
++            const char *w[XBOX_PB_COUNT];
++            for (int b = 0; b < XBOX_PB_COUNT; b++) {
++                w[b] = s_port->prompt && sel < n ? s_port->prompt(page, sel, b) : NULL;
++                if (!w[b]) w[b] = "";
++            }
++            if (sel >= n)
++                w[XBOX_PB_A] = "Select";
++            snprintf(keys, sizeof keys, "%s%s%s  %s%s%s  %s%s%s  %s%s%s",
++                     w[XBOX_PB_B][0] ? act_name(1) : "", w[XBOX_PB_B][0] ? "  " : "", w[XBOX_PB_B],
++                     w[XBOX_PB_DPAD][0] ? (pad_hints() ? "D-pad" : "Arrows") : "", w[XBOX_PB_DPAD][0] ? "  " : "", w[XBOX_PB_DPAD],
++                     w[XBOX_PB_X][0] ? "X" : "", w[XBOX_PB_X][0] ? "  " : "", w[XBOX_PB_X],
++                     w[XBOX_PB_A][0] ? act_name(0) : "", w[XBOX_PB_A][0] ? "  " : "", w[XBOX_PB_A]);
++            foot_set(keys);
++        }
++    }
++}
++
++/* A page change (LB / RB, Q / E ...) shows from the next frame. */
++static void page_turn()
++{
++    if (s_page_delta) {
++        s_page = page_step(s_page, s_page_delta);
++        s_page_delta = 0;
++        menusnd_play(XBOX_OVERLAY_SND_PAGE);
++        rows_in_page();
++        s_confirm = 0;
++        s_scroll_to_sel = true;
++    }
++}
++
+ static void build_pages_inner()
+ {
+     ImGuiIO &io = ImGui::GetIO();
+@@ -4500,6 +5114,17 @@
+         draw_footer(dl);
+         ImGui::End();
+         ImGui::PopStyleVar(6);
++        return;
++    }
++    if (is_port(s_page)) {
++        /* main20m patch 60: a port's page, its own rows, the same foot. */
++        build_port(fs, dl);
++        draw_footer(dl);
++        ImGui::End();
++        ImGui::PopStyleVar(6);
++        if (s_rows_t0 && now_ms() - s_rows_t0 > ROWS_IN_SLOTS * s_rows_step_ms + ROWS_IN_MS)
++            s_rows_t0 = 0;
++        page_turn();
+         return;
+     }
+ 
+@@ -4720,14 +5345,7 @@
+     if (s_rows_t0 && now_ms() - s_rows_t0 > ROWS_IN_SLOTS * s_rows_step_ms + ROWS_IN_MS)
+         s_rows_t0 = 0;
+     /* A page change shows from the next frame. */
+-    if (s_page_delta) {
+-        s_page = (s_page + (s_page_delta > 0 ? 1 : -1) + P_COUNT) % P_COUNT;
+-        s_page_delta = 0;
+-        menusnd_play(XBOX_OVERLAY_SND_PAGE);
+-        rows_in_page();
+-        s_confirm = 0;
+-        s_scroll_to_sel = true;
+-    }
++    page_turn();
+ }
+ 
+ /* The whole page at the label's size (what the browser and the Mixer page
+@@ -4897,8 +5515,8 @@
+                 Face body(s_f_body, SHEAR);
+                 const float sz = LY.head, ar = sz * 0.22f, right = LY.cx + 0.944f * LY.cw;
+                 float nw = 0.0f;
+-                for (int i = 0; i < P_COUNT; i++) {
+-                    const float w = tw(sz, caps(k_page_name[i])) + sz * SHEAR * 0.5f;
++                for (int i = 0; i < page_total(); i++) {
++                    const float w = tw(sz, caps(page_name(i))) + sz * SHEAR * 0.5f;
+                     if (w > nw) nw = w;
+                 }
+                 x1 = right - ar * 2.8f - nw - ar * 3.4f - 0.025f * LY.cw;
+--- a/toolkit/src/overlay/xbox_settings.h
++++ b/toolkit/src/overlay/xbox_settings.h
+@@ -421,6 +421,82 @@
+  * "Restart game". Nothing restarts unless the player picks the row. */
+ void xbox_OverlayWantRestart(const char *reason);
+ 
++/* A port's own pages (gp main20m patch 60): up to XBOX_PORT_PAGES pages of the
++ * port's rows, before the overlay's own in the tabs, drawn in the overlay's
++ * look (the title's fonts, sprites, sounds, the rows' coming in, the hint and
++ * the pinned Restart now / Quit game rows at the foot). The port keeps the
++ * model; the overlay asks for it every frame it draws, on its own thread with
++ * its lock held (the title is paused once the overlay has opened), and never
++ * keeps a pointer past the call.
++ *   rows(page)            the number of rows now (0..XBOX_PORT_ROWS)
++ *   row(page, i, out)     row i, into *out (zeroed before the call)
++ *   input(page, i, act)   an XBOX_PA_* on row i (i -1: the page has no
++ *                         selectable row); returns XBOX_PI_* bits
++ *   cursor(page)          after XBOX_PI_VIEW: the row to put the cursor on
++ *                         (-1 the first selectable)
++ *   name(page)            the tab's name (stable; the overlay capitalises it)
++ *   crumb(page)           the header's page name now (NULL: name(page))
++ *   prompt(page, i, b)    the footer's word for button b (XBOX_PB_*) on row i,
++ *                         NULL or "" when b does nothing there
++ *   restart(why, n)       how many of the port's changes wait for a restart,
++ *                         the reason into why (counted in "Restart now to
++ *                         apply N changes", besides xbox_OverlayWantRestart's)
++ * A label longer than its column scrolls on the selected row; an
++ * XBOX_PR_TEXT row is a paragraph, wrapped to the page's width. */
++#define XBOX_PORT_PAGES 2
++#define XBOX_PORT_ROWS 1024
++enum { XBOX_PR_ITEM = 0,   /* selectable: label, value (a chip or a choice), hint */
++       XBOX_PR_HEADER,     /* a section's name, not selectable */
++       XBOX_PR_TEXT,       /* a paragraph (label), wrapped; not selectable */
++       XBOX_PR_INFO };     /* one line of small text (label), not selectable */
++enum { XBOX_PT_PLAIN = 0, XBOX_PT_DIM, XBOX_PT_ATTN, XBOX_PT_BAD, XBOX_PT_GOOD };   /* a value's or a label's tone */
++#define XBOX_PRF_NOCAPS  1u        /* the label as written (a name), not in the game's capitals */
++#define XBOX_PRF_CHOICE  2u        /* the value is a choice: arrows beside it on the selected row */
++#define XBOX_PRF_ACTION  4u        /* an action: the label in the actions' colour, no value box */
++#define XBOX_PRF_LOCKED  8u        /* the padlock where the left arrow would be */
++typedef struct xbox_port_row {
++    int kind;                      /* XBOX_PR_* */
++    unsigned flags;                /* XBOX_PRF_* */
++    int tone;                      /* the value's tone (XBOX_PR_ITEM), the label's (the others) */
++    char label[256];               /* UTF-8 */
++    char value[64];                /* "" none */
++    char hint[1024];               /* shown under the rows while the row is selected */
++} xbox_port_row;
++enum { XBOX_PA_OPEN = -1,        /* (row -1) the overlay opens on the page from the port's call: its top view */
++       XBOX_PA_SELECT = 0, XBOX_PA_LEFT, XBOX_PA_RIGHT, XBOX_PA_X, XBOX_PA_DEFAULT, XBOX_PA_BACK };
++#define XBOX_PI_DONE    1u         /* acted (the overlay plays the action's sound) */
++#define XBOX_PI_VIEW    2u         /* the rows are another view now: cursor(page), the rows come in */
++#define XBOX_PI_NONE    4u         /* nothing to do there (a short move sound) */
++#define XBOX_PI_ASK     8u         /* a question is shown (the confirm sound) */
++enum { XBOX_PB_A = 0, XBOX_PB_B, XBOX_PB_X, XBOX_PB_Y, XBOX_PB_DPAD, XBOX_PB_COUNT };
++typedef struct xbox_port_page_ops {
++    int (*rows)(int page);
++    void (*row)(int page, int i, xbox_port_row *out);
++    unsigned (*input)(int page, int i, int action);
++    int (*cursor)(int page);
++    const char *(*name)(int page);
++    const char *(*crumb)(int page);
++    const char *(*prompt)(int page, int i, int button);
++    int (*restart)(char *why, unsigned n);
++} xbox_port_page_ops;
++/* Before the overlay first opens (main thread); n 0 or ops NULL: none. */
++void xbox_OverlaySetPortPages(int n, const xbox_port_page_ops *ops);
++/* Open the overlay on port page `page` (as xbox_OverlayRequestOpen from the
++ * title's menu: no opening sound, the pause waits for the title's select).
++ * 0 when there is no overlay or no such page. */
++int xbox_OverlayRequestOpenPage(int page);
++/* From a port page's input (the overlay's thread): show port page `page`
++ * with the cursor on its row `row` (-1 the first selectable); 0 no such page. */
++int xbox_OverlayShowPortPage(int page, int row);
++/* 1 while the overlay is open (any page). */
++int xbox_OverlayIsOpen(void);
++/* 1 when the overlay can restart the program (recomp_restart_init was called);
++ * xbox_OverlayRestartNow restarts it as "Restart now" does (from a port
++ * page's input, on the overlay's thread): the overlay closes, the settings are
++ * written, the program restarts. 0 when it cannot. */
++int xbox_OverlayCanRestart(void);
++int xbox_OverlayRestartNow(void);
++
+ #ifdef __cplusplus
+ }
+ #endif
+--- a/toolkit/src/usb/ohci.c
++++ b/toolkit/src/usb/ohci.c
+@@ -460,7 +460,11 @@
+ /* The contiguous (physical-mirror) window. Mapped separately from main RAM
+  * and far above it, so a size check against the mapped RAM size rejects it. */
+ #define OHCI_CONTIG_BASE 0x80000000u
++#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
++#define OHCI_CONTIG_SIZE (XBOX_CONTIG_WINDOW_MB * 1024u * 1024u)   /* MEM256: kernel.h XBOX_CONTIG_SIZE */
++#else
+ #define OHCI_CONTIG_SIZE (64u * 1024u * 1024u)
++#endif
+ 
+ static int guest_ok(uint32_t va, uint32_t bytes)
+ {
+@@ -524,7 +528,7 @@
+ {
+     if (addr >= g_xbox_image_lo && addr < g_xbox_image_hi)
+         return addr;
+-    if (addr && addr < (64u << 20) && xbox_ContiguousPageMap()[addr >> 12])
++    if (addr && addr < OHCI_CONTIG_SIZE && xbox_ContiguousPageMap()[addr >> 12])
+         return OHCI_CONTIG_BASE + addr;
+     if (addr && addr < xbox_ContiguousAllocatedBytes())
+         return OHCI_CONTIG_BASE + addr;

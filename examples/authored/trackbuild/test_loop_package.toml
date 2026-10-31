@@ -1,0 +1,22 @@
+# Package decisions for the ORIGINAL test area (trackbuild pack). Geometry / textures / route are AUTHORED; the Gamedata
+# header, event records, traffic sets, lane network, enviro.dat and audio are DONOR copies of EU/M1_V1 (local only).
+[package]
+set = "gp_trkimp_examples"
+folder = "bm-test-loop"
+track_id = "EU_T1_V1"
+track_name = "BM Test Loop"
+track_location = "TEST AREA"
+mod_id = "bmashup.trackbuild.test-loop"
+mod_name = "BM Test Loop (authored)"
+version = "0.1.6"
+author = "bmashup trackbuild"
+description = "Original procedural test area built with trackbuild 0.1.6: a 714 m walled loop with a concrete pad, 17 streamed units, authored collision, route and start grid. Gamedata header / traffic sets, enviro and audio are borrowed from EU_M1_V1 (donor, local only)."
+platform = ">=0.1"
+
+[package.comments]
+header = "# BM Test Loop - ORIGINAL track geometry authored with gp\\tools\\trackbuild 0.1.6 (procedural source in\n# gp\\tools\\trackbuild\\source). Donor parts (Gamedata header / traffic, enviro, audio) come from EU_M1_V1: LOCAL ONLY.\n"
+tracks = "# Added to the retail Europe region (no region declaration needed). A circuit: no point_to_point entry.\n"
+
+[package.provenance]
+packaged_by = "gp\\tools\\trackbuild 0.1.6 (trackconv package, bmpack rename_gamedata)"
+donor_note = "EU_M1_V1 = Gamedata host (header, event records, S2 traffic sets, S3 lane network) and enviro / audio donor; static.dat, streamed.dat, the S1 page and the S4 route are authored"

@@ -1,0 +1,252 @@
+{
+ "format": "trackbuild.vendor/1",
+ "licence": "all vendored files are Burnout Mashup project code (same owner, same licence as trackbuild); no third-party code",
+ "files": [
+  {
+   "file": "_vendor/__init__.py",
+   "source": [],
+   "source_sha256": [],
+   "vendored_sha256": "ae2e758f95a5a55dba7ca25da676d82530e12b8d92546091b21b6b2f955ada07",
+   "edits": "extracted",
+   "comment_sanitised": 0,
+   "note": "package marker"
+  },
+  {
+   "file": "_vendor/bmpack_min.py",
+   "source": [
+    "<dev-tree>/PC/research/native_gameplay_api/platform/host3/tools/bmpack/bmpack.py"
+   ],
+   "source_sha256": [
+    "35d4e90c8bef5bdea4f57a947c19be8aee9daae531cd3b07e8447d4520d5778b"
+   ],
+   "vendored_sha256": "bddc171c970c052458a5b4b4d0a52a272098a68c1c0b1436c4add33f5fdfb2c0",
+   "edits": "extracted",
+   "comment_sanitised": 0,
+   "note": "extracted functions, verbatim"
+  },
+  {
+   "file": "_vendor/bolib/__init__.py",
+   "source": "<dev-tree>/PS2/tools/bolib/__init__.py",
+   "source_sha256": "8a06e6ac7a2e9b8a157d0d3cc10abe3b507dec63f692a2e845f92fce799064f0",
+   "vendored_sha256": "920fc01b0b90be75f4b815107ce03abae4430cc74a80354b82a88fd9d8b73881",
+   "edits": [
+    {
+     "why": "the PS2 workspace folder constants pointed outside the package",
+     "old": "ROOT = Path(__file__).resolve().parents[2]\nISOS = ROOT / \"isos\"\nEXTRACTED = ROOT / \"extracted\"\nREPORTS = ROOT / \"reports\"\n",
+     "new": "ROOT = ISOS = EXTRACTED = REPORTS = None   # vendored copy: no PS2 workspace folders\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/bolib/collision.py",
+   "source": "<dev-tree>/PS2/tools/bolib/collision.py",
+   "source_sha256": "3daecd7e5c9b8c98ac81e332e2f45a1674fddfa110385755a1d325e0e0370aad",
+   "vendored_sha256": "3daecd7e5c9b8c98ac81e332e2f45a1674fddfa110385755a1d325e0e0370aad",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/bolib/gtid.py",
+   "source": "<dev-tree>/PS2/tools/bolib/gtid.py",
+   "source_sha256": "32cda41841d3dcfae0dc35970679cce7a27d8ed6aed5f0577ed490b801499902",
+   "vendored_sha256": "32cda41841d3dcfae0dc35970679cce7a27d8ed6aed5f0577ed490b801499902",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/bolib/lanes.py",
+   "source": "<dev-tree>/PS2/tools/bolib/lanes.py",
+   "source_sha256": "fdebe6e1232abf8bfa210d7bbbcc98536252c8eb6707b299ad82ae16ffb7b92b",
+   "vendored_sha256": "fdebe6e1232abf8bfa210d7bbbcc98536252c8eb6707b299ad82ae16ffb7b92b",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/bolib/routes.py",
+   "source": "<dev-tree>/PS2/tools/bolib/routes.py",
+   "source_sha256": "2b0e0cfaacf8a1cc0e2ac87b4dcf615e1e2bfb21d4e900755e62880b3cc44af3",
+   "vendored_sha256": "2b0e0cfaacf8a1cc0e2ac87b4dcf615e1e2bfb21d4e900755e62880b3cc44af3",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/bolib/traffic.py",
+   "source": "<dev-tree>/PS2/tools/bolib/traffic.py",
+   "source_sha256": "b0ddca4ceaa94a389dbfba1e363675ebb0cf61e2df9e120a22d344040a363197",
+   "vendored_sha256": "b0ddca4ceaa94a389dbfba1e363675ebb0cf61e2df9e120a22d344040a363197",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/ct2_gamedata.py",
+   "source": "<dev-tree>/PC/research/custom_track_2/scripts/ct2_gamedata.py",
+   "source_sha256": "552484abc67f7ca2c488208c39380f92f52152f2cc54d3ff64ef97ceefb4ccd0",
+   "vendored_sha256": "a068d13a9536bc8d59daed2ef2c31ee2848707674d5eb6372a6f8e14d3f478ce",
+   "edits": [
+    {
+     "why": "workspace retail folder removed",
+     "old": "BASE = Path(r\"<workspace> 3 Takedown\\Tracks\")\n",
+     "new": "BASE = None   # vendored copy: no retail folder (the research CLI functions are not used by trackbuild)\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/ct2_route.py",
+   "source": "<dev-tree>/PC/research/custom_track_2/scripts/ct2_route.py",
+   "source_sha256": "3f356996e99e90a9eb291fd9f02c7d05a56ee6f7021026123cc1abe41fc67fc9",
+   "vendored_sha256": "873f1298cb7b660f84aad294410dc566261b01adcb45f8eca863b598b2dd5613",
+   "edits": [
+    {
+     "why": "sys.path manipulation replaced by a package-relative import",
+     "old": "HERE = Path(__file__).resolve().parent\nsys.path.insert(0, str(HERE))\nimport ct2_s4 as S  # noqa: E402\n",
+     "new": "from . import ct2_s4 as S  # noqa: E402   (vendored: package-relative import)\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/ct2_s4.py",
+   "source": "<dev-tree>/PC/research/custom_track_2/scripts/ct2_s4.py",
+   "source_sha256": "f05aeb7e45a0b1bcee05f044079c3f7a12d86c46c2fc9743fbfb6a07b87424f0",
+   "vendored_sha256": "441949dfbebe45e1e520c12f810ed66d31d4d39cf6f58bb7851fa4c9e56b18ea",
+   "edits": [
+    {
+     "why": "workspace retail folder removed",
+     "old": "BASE = Path(r\"<workspace> 3 Takedown\\Tracks\")\n",
+     "new": "BASE = None   # vendored copy: no retail folder (the research CLI functions are not used by trackbuild)\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/ctnav_min.py",
+   "source": [
+    "<dev-tree>/PC/tools/ctnav/camera.py",
+    "<dev-tree>/PC/tools/ctnav/grid.py",
+    "<dev-tree>/PC/research/custom_track_2_x5e2/scripts/e2_steer_model.py"
+   ],
+   "source_sha256": [
+    "d43b6e74ff2a07fb976c9b3edc41bd837b84153b1bb5e44e72c68428838ad970",
+    "2eb5dc88525510b4429577c2f53ef2a13ccd6a753bffa2647497d80f4c44c38b",
+    "bc10f189ba4f5759486409734a360939a0dbd9f982d0ca2d6786c91d21cd4597"
+   ],
+   "vendored_sha256": "4f541618d503bce5c8a1328d2bf2402f077d9021749ecccedf9188a6c26707be",
+   "edits": "extracted",
+   "comment_sanitised": 0,
+   "note": "extracted, verbatim except Geo rename"
+  },
+  {
+   "file": "_vendor/trackconv/__init__.py",
+   "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/__init__.py",
+   "source_sha256": "0d2c46be97baf4b2c557be73df23702c19dfd1c95d9b611a3827613f56038421",
+   "vendored_sha256": "0d2c46be97baf4b2c557be73df23702c19dfd1c95d9b611a3827613f56038421",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": "vendored subset: common, b3static, streamed, package"
+  },
+  {
+   "file": "_vendor/trackconv/b3static.py",
+   "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/b3static.py",
+   "source_sha256": "138fc56ee9b79c184b252d792a172ecc3369f3b005a2836a591cc49a8becbf05",
+   "vendored_sha256": "e8042d5915260d3c7966d83f9ed437d2615614cde0fdc11bb1d14078ae05a276",
+   "edits": [],
+   "comment_sanitised": 2,
+   "note": ""
+  },
+  {
+   "file": "_vendor/trackconv/common.py",
+   "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/common.py",
+   "source_sha256": "90faa130e1efc37f6fcac92a1c8b1e586ab7c8fc4e20f824ee909149ce27166c",
+   "vendored_sha256": "90faa130e1efc37f6fcac92a1c8b1e586ab7c8fc4e20f824ee909149ce27166c",
+   "edits": [],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/trackconv/package.py",
+   "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/package.py",
+   "source_sha256": "efde6890ecef1b452331733f79166d9189be9fdfe215b307fb03830114e7d749",
+   "vendored_sha256": "a8a328f54c60a91c3d9f675c4a0fab5f0840abd2fa8389ce7c411afe6cd110d9",
+   "edits": [
+    {
+     "why": "trackconv.deps.bmpack (workspace bmpack + C checker) replaced by the vendored pure-Python subset",
+     "old": "from . import deps\n",
+     "new": "from .. import bmpack_min as _bmpack   # vendored: bmpack 1.2 rename / verify (pure Python)\n"
+    },
+    {
+     "why": "same",
+     "old": "    BP = deps.bmpack(cache_dir)\n",
+     "new": "    BP = _bmpack   # cache_dir unused (no compiled checker in the vendored subset)\n"
+    },
+    {
+     "why": "comment only",
+     "old": "    if validate:\n        rep = BP.validate([out_root.path(*set_rel.split(\"/\"))])\n",
+     "new": "    if validate:   # host-reader validation is an explicit, optional step in trackbuild 0.2.0 (tb.py package --bmpack)\n        rep = BP.validate([out_root.path(*set_rel.split(\"/\"))])\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/trackconv/streamed.py",
+   "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/streamed.py",
+   "source_sha256": "f51db30814145a7878fd9d58db23afd3df3e33e96407281a563751b9644315b2",
+   "vendored_sha256": "27aa73e86cb8d256242149fec4597ad644eb4c9a281e295b0cfb3ecbf0c29fd5",
+   "edits": [
+    {
+     "why": "trackconv.deps (workspace discovery) replaced by the vendored bolib",
+     "old": "from . import deps\n",
+     "new": "from ..bolib import collision as _bolib_collision   # vendored: no trackconv.deps (workspace)\n"
+    },
+    {
+     "why": "same",
+     "old": "def K():\n    return deps.bolib().K\n",
+     "new": "def K():\n    return _bolib_collision\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  },
+  {
+   "file": "_vendor/xbmesh.py",
+   "source": "<dev-tree>/PC/research/custom_track_1/scripts/xbmesh.py",
+   "source_sha256": "0655715a8fd28fd4deb6ab7f03172b57650f2e0d1482636e9ce4561a96e513ef",
+   "vendored_sha256": "e8719f14fc5f989ff5a2a90f7cfacc7f9bba46af942d8bdb1afd77f8b5061847",
+   "edits": [
+    {
+     "why": "workspace retail / output folders removed",
+     "old": "BASE = Path(r\"<workspace> 3 Takedown\\Tracks\")\nOUT = Path(__file__).resolve().parent.parent / \"out\"\n",
+     "new": "BASE = None   # vendored copy: no retail folder (trackbuild passes bytes; its tests take --game-data)\nOUT = None\n"
+    }
+   ],
+   "comment_sanitised": 1,
+   "note": ""
+  },
+  {
+   "file": "_vendor/xbtopo.py",
+   "source": "<dev-tree>/PC/research/custom_track_1/scripts/xbtopo.py",
+   "source_sha256": "2f098d20acab43b30e5373e202d3fb8258d44d56638eaaabaf9a456978bf3494",
+   "vendored_sha256": "488f2e63de4071e2fb3e132e43a997ec51acb34ff612f589c30a8e4b5947d08c",
+   "edits": [
+    {
+     "why": "sys.path manipulation into the workspace replaced by package-relative imports",
+     "old": "HERE = Path(__file__).resolve().parent\nsys.path.insert(0, str(HERE))\nsys.path.insert(0, r\"<workspace>\")                    # PS2 project, read only\nimport xbmesh as X  # noqa: E402\nfrom bolib import collision as C  # noqa: E402\n",
+     "new": "from . import xbmesh as X  # noqa: E402   (vendored: package-relative imports)\nfrom .bolib import collision as C  # noqa: E402\n"
+    }
+   ],
+   "comment_sanitised": 0,
+   "note": ""
+  }
+ ]
+}

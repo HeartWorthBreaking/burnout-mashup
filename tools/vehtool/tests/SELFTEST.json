@@ -1,0 +1,5 @@
+{"suites": [
+ {"name": "vehtool manifest-limit tests (5 + 2 mutants)", "command": ["{py}", "-B", "{tool}/tests/test_vehtool_limit.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "vehtool actionable errors (22)", "command": ["{py}", "-B", "{tool}/tests/test_errors.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "vehtool regression: example packs = content-phase bytes + validate (4)", "command": ["{py}", "-B", "{tool}/tests/test_regression.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false}
+]}

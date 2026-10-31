@@ -1,0 +1,17 @@
+# main21 (next SDK) example: bmashup.camera version 3 - the free camera (hook request "zackypoo" 05 right-stick orbit, 12 third
+# person when looking back). Only the picture's camera changes. Release step: set platform to the combined release's platform
+# version (camera 3 / racers 4 are new there).
+id = "bmashup.free-camera-example"
+name = "Free Camera Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example: right-stick orbit camera and a third-person look-back (bmashup.camera 3 free camera)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.camera>=3", "bmashup.racers>=4", "bmashup.input>=1"]
+
+[plugin]
+api = 1
+windows = "bm_free_camera.asi"
+linux = "libbm_free_camera.so"
+macos = "libbm_free_camera.dylib"

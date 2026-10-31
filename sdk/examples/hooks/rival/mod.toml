@@ -1,0 +1,17 @@
+# bmashup-sdk 0.2.0 example (f), rival: the conflict side of coordinated hooks (bmashup.hooks 1; Burnout Mashup platform
+# hosts only; private, experimental). The module is ../bm_sdk_hooks_demo.c built with BM_HOOKS_DEMO_RIVAL. Its exclusive
+# RACE_EXIT registration is refused while the owner holds it ("[HOOKS] ... refused: CONFLICT (bmashup-sdk.hooks-demo holds it
+# exclusively)"); its TAKEDOWN observer runs after the owner's (priority 10). It changes nothing.
+id = "bmashup-sdk.hooks-rival"
+name = "SDK example: hooks rival"
+version = "0.2.0"
+description = "Shows a refused exclusive registration (CONFLICT) and priority order (bmashup.hooks 1); changes nothing."
+
+[bmashup]
+platform = ">=0.1"
+requires = ["bmashup.hooks>=1"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_hooks_rival.asi"
+# Only Windows x64 is built and tested by this SDK.

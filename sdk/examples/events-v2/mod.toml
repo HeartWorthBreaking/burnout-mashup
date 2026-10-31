@@ -1,0 +1,34 @@
+# bmashup-sdk 0.3.0 example (i): a DATA-ONLY World Tour events template with per-event list-row names and help texts
+# ([bmashup.extra_events] version 2). Needs Burnout Mashup platform 0.1.1 (host p3) or later: a platform 0.1.0 host (p2)
+# refuses THIS mod alone ("needs a newer platform: [bmashup.extra_events] version 2; platform 0.1.0 reads version 1") and the
+# game starts without it. No plugin, no code, no approval.
+# NO GAME FILES ARE INCLUDED: the track's files go in files\Tracks\US\C9_V1\ beside this mod.toml (Gamedata.bgd, static.dat,
+# streamed.dat, enviro.dat) and come from your own track build (README.md).
+id = "example.events-v2"
+name = "SDK example: World Tour events with names and help"
+version = "0.3.0"
+author = "you"
+description = "Template: one added track and two Silver Lake World Tour events with their own row names and help texts."
+
+[bmashup]
+platform = ">=0.1.1"                    # [bmashup.extra_events] version 2 exists from platform 0.1.1 on
+requires = ["bmashup.tracks>=1", "bmashup.extra_events>=2"]
+
+[bmashup.tracks]
+version = 1
+add = ["US_C9_V1"]
+names = ["US_C9_V1 = Harbour Loop"]     # the track's own name (Single Event, and the default row text of its events)
+locations = ["US_C9_V1 = HARBOUR"]
+
+# Version 2 = version 1 + names / help. Each event id named must be in add; at most one name and one help per event.
+#   names: the event's row in the location's event list, 1..19 characters, A-Z a-z 0-9 space - ' . &
+#          (default: the track's name)
+#   help:  the help bar under the list when the row is selected, 1..97 characters, the same set plus !; shown in upper
+#          case like the game's own help texts (default: "AN EVENT ADDED BY A MOD.")
+# US_C3 (Silver Lake) has 4 retail events: 2 free rows of its 6.
+[bmashup.extra_events]
+version = 2
+add = ["loop-night = US_C9_V1 @ US_C3", "loop-sprint = US_C9_V1 @ US_C3"]
+stage = ["loop-sprint = 020006USC1V1"]
+names = ["loop-night = Harbour Night", "loop-sprint = Harbour Sprint"]
+help = ["loop-night = Race the harbour loop after dark.", "loop-sprint = A short sprint along the harbour!"]

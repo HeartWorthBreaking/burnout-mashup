@@ -1,0 +1,204 @@
+{
+ "exe_file": "burnout3.exe (staged copy: stage/BurnoutMashup.exe)",
+ "exe_sha256": "cae5f5ff4d85fdcce2f1f66fc28e6edaffe20a7bf28a7e2bdc4ade53f058f78d",
+ "exe_size": 28062208,
+ "format": 1,
+ "generator": "build/host_info.py 1",
+ "host_name": "bmp-0.1.9+6f17b9e08be3",
+ "identity": "bmp-0.1.9+6f17b9e08be3",
+ "inputs": {
+  "anchors_json_sha256": "7794adf4784b00be75ce665e397a43afe29192be73fee92860298c06fe38af18",
+  "bm_gen_access_h_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985",
+  "gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
+  "marks": 512,
+  "takedawn_commit": "4f074e211822eaf43d4a3902c744d5ed0e9c9adf",
+  "takedawn_tree_id": "26cdbea6f8c4a0f6092900c5715ac18393aeb41f",
+  "xboxrecomp_commit": "e3756d1b2fefdae6888038384c748cbdd37a41ba",
+  "xboxrecomp_tree_id": "480d8993bb58fa61ae48ec275d2059536ffe494f"
+ },
+ "platform": "0.1.9",
+ "plugin_api": 1,
+ "services": {
+  "bmashup.ai": 1,
+  "bmashup.autopilot": 2,
+  "bmashup.boost": 2,
+  "bmashup.camera": 4,
+  "bmashup.crash": 1,
+  "bmashup.engine": 1,
+  "bmashup.events": 7,
+  "bmashup.hooks": 3,
+  "bmashup.host": 1,
+  "bmashup.hud": 2,
+  "bmashup.input": 1,
+  "bmashup.memory": 1,
+  "bmashup.menu": 1,
+  "bmashup.names": 1,
+  "bmashup.paints": 1,
+  "bmashup.patch": 2,
+  "bmashup.racers": 6,
+  "bmashup.route": 2,
+  "bmashup.rules": 6,
+  "bmashup.settings": 2,
+  "bmashup.streaming": 2,
+  "bmashup.traffic": 8,
+  "bmashup.tune": 3,
+  "bmashup.vphysics": 3,
+  "takedawn.race": 1
+ },
+ "source_digest_sha256": "6f17b9e08be399c2078a081f3c1e8bd2a31fc4695f3d033cd41304be0ef1b009",
+ "source_files": {
+  "bmp_files": 338,
+  "toolkit_files": 394
+ },
+ "sources": {
+  "exe_file": "the build output name; stage/BurnoutMashup.exe compared byte for byte when present",
+  "exe_sha256": "sha256 of <build>/bin/burnout3.exe (verify.py: identical to EXPECTED.json build.exe_sha256)",
+  "exe_size": "size of the same file",
+  "format": "schema of the release's kit_tools/make_host_info.py (format 1); additive fields are ignored by bmcompat.py",
+  "host_name": "= identity (a build has no other name)",
+  "identity": "the string bmp-<platform>+<12 hex> read from the exe's bytes; equals bo3_build_id.h, build_result.json and the recomputed digest of the source tree",
+  "inputs.anchors_json_sha256": "sha256 of host/marks/anchors.json of the checkout, equal to host/PINS.json marks.anchors_sha256",
+  "inputs.bm_gen_access_h_sha256": "sha256 of <host tree>/src/game/bm_gen_access.h, equal to host/PINS.json marks.header_sha256",
+  "inputs.gen_tree_hash": "<host tree>/src/game/recomp/gen/regen.stamp, equal to host/PINS.json pristine_gen_tree_hash",
+  "inputs.takedawn_*, inputs.xboxrecomp_*": "host/PINS.json (checked by fetch_upstream.py against the fetched archives; not re-derived here)",
+  "platform": "BO3_PLATFORM_VERSION in <host tree>/src/game/bm_platform_table.h (also the platform part of the identity)",
+  "plugin_api": "TD_PLUGIN_API_VERSION in <host tree>/include/takedawn_plugin.h",
+  "services": "X(name, version, ...) rows of <host tree>/src/game/bm_platform_table.h",
+  "source_digest_sha256": "recomputed from the files of the host tree on disk (cmake/bo3_source_id.cmake's rule) + the build's bo3_build_config.txt; equals the digest of the build's bo3_build_manifest.txt",
+  "source_files": "number of files the two digests were taken over (counted while recomputing them)",
+  "tables": "T(name, version, keys) rows of the same file",
+  "toolchain": "<build>.logs/build_result.json (tool versions queried by build.ps1; checked against EXPECTED.json by verify.py)",
+  "toolkit_digest_sha256": "the same digest, in full",
+  "toolkit_identity": "digest of the toolkit tree files (same rule); equals the 'toolkit' line of the build manifest",
+  "verification": "verify.py run on this build with EXPECTED.json"
+ },
+ "tables": {
+  "capacity": {
+   "keys": [
+    "version",
+    "lanes",
+    "low_unit_bytes",
+    "static_bytes",
+    "gamedata_bytes"
+   ],
+   "version": 1
+  },
+  "cars": {
+   "keys": [
+    "version",
+    "add",
+    "names",
+    "physics_scale",
+    "photos",
+    "model",
+    "unlock",
+    "ai"
+   ],
+   "version": 2
+  },
+  "extra_events": {
+   "keys": [
+    "version",
+    "add",
+    "stage",
+    "names",
+    "help"
+   ],
+   "version": 2
+  },
+  "music": {
+   "keys": [
+    "version",
+    "soundtrack",
+    "add",
+    "replace"
+   ],
+   "version": 1
+  },
+  "paints": {
+   "keys": [
+    "version",
+    "add",
+    "default"
+   ],
+   "version": 1
+  },
+  "regions": {
+   "keys": [
+    "version",
+    "add",
+    "dj"
+   ],
+   "version": 1
+  },
+  "series": {
+   "keys": [
+    "version",
+    "add",
+    "names",
+    "unlock",
+    "ai_class"
+   ],
+   "version": 1
+  },
+  "textures": {
+   "keys": [
+    "version",
+    "txd",
+    "class"
+   ],
+   "version": 1
+  },
+  "tracks": {
+   "keys": [
+    "version",
+    "add",
+    "point_to_point",
+    "names",
+    "locations"
+   ],
+   "version": 1
+  },
+  "tune": {
+   "keys": [
+    "version",
+    "set",
+    "sliders"
+   ],
+   "version": 3
+  },
+  "world_tour": {
+   "keys": [
+    "version",
+    "region",
+    "map",
+    "location"
+   ],
+   "version": 1
+  },
+  "wt_map_art": {
+   "keys": [
+    "version",
+    "region",
+    "art",
+    "place",
+    "ticker"
+   ],
+   "version": 1
+  }
+ },
+ "toolchain": {
+  "clang": "23.1.2",
+  "cmake": "4.4.4",
+  "ninja": "1.13.2",
+  "sdl2": "2.32.10"
+ },
+ "toolkit_digest_sha256": "e6f090bafbbbffdf6865d763e36503827c77f3c0945c5e0eb7e009437234f89b",
+ "toolkit_identity": "xr+e6f090bafbbb",
+ "verification": {
+  "exe": "identical to the reference in EXPECTED.json",
+  "expected_exe_sha256": "cae5f5ff4d85fdcce2f1f66fc28e6edaffe20a7bf28a7e2bdc4ade53f058f78d",
+  "expected_json_sha256": "5e9c36ed1438b14e73ed44a16f18cbd7cd26975f75a696d9f414c989aacc79ed",
+  "generated_objects": "27/27 identical"
+ }
+}

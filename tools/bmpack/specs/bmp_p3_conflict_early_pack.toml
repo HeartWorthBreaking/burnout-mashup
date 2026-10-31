@@ -1,0 +1,21 @@
+# bmpack 1.2 spec - host p3 conflict fixture, the EARLIER mod (its set is listed first in TAKEDAWN_MODS): track US_C8_V1 and
+# one Silver Lake event. With bmp_p3_conflict_late after it, the host refuses the LATE mod alone and starts with this one.
+[mod]
+id = "bmashup.bmp-p3-early"
+version = "1.0.0"
+name = "BMP p3 early (test fixture)"
+description = "Host p3 fixture: the earlier mod of the conflict test (keeps US_C8_V1)."
+folder = "p3-early"
+
+[[track]]
+id = "US_C8_V1"
+donor = "US_C1_V1"
+name = "Harbour Lights"
+location = "HARBOUR"
+
+[[event]]
+id = "early-race"
+track = "US_C8_V1"
+location = "US_C3"
+name = "Early Race"
+help = "The earlier mod keeps this event."

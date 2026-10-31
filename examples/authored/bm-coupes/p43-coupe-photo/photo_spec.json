@@ -1,0 +1,17 @@
+{
+ "tag": 0,
+ "entries": [
+  {
+   "name": "bmcocic1_photo",
+   "png": "src/paint0.png",
+   "format": "P8",
+   "palettes": [
+    "src/paint1.png",
+    "src/paint2.png",
+    "src/paint3.png",
+    "src/paint4.png",
+    "src/paint5.png"
+   ]
+  }
+ ]
+}

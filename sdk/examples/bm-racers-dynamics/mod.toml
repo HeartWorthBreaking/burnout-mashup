@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.racers version 3 reads (gear, speed, derived yaw rate / accelerations, parts, lights). Read only.
+id = "bmashup.racers-dynamics-example"
+name = "Racers Dynamics Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: logs player 1's gear, speed, yaw rate and accelerations once a second (bmashup.racers 3); changes nothing."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.racers>=3"]
+
+[plugin]
+api = 1
+windows = "bm_racers_dynamics.asi"
+linux = "libbm_racers_dynamics.so"
+macos = "libbm_racers_dynamics.dylib"

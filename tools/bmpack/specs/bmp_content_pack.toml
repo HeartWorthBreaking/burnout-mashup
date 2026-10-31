@@ -1,0 +1,27 @@
+# bmpack spec - mod 1 of the platform content runtime fixtures (platform\content\runtime\CONTENT_RUNTIME_PLAN.md):
+# one added track (a renamed copy of retail US_C1_V1, Waterfront geometry) + its name + two World Tour events at
+# Silver Lake (US_C3, the only World Tour location a fresh profile reaches). PLACEHOLDER content: retail data under a new ID.
+[mod]
+id = "bmashup.bmp-content-pack"
+version = "1.0.0"
+name = "BMP content pack (test fixture)"
+description = "Platform fixture: added track US_C8_V1 (US_C1_V1 data) named Harbour Lights, two World Tour events at Silver Lake."
+folder = "content-pack"
+
+[[track]]
+id = "US_C8_V1"
+donor = "US_C1_V1"
+name = "Harbour Lights"
+location = "HARBOUR"
+
+[[event]]
+id = "harbour-sprint"
+track = "US_C8_V1"
+location = "US_C3"
+stage = "020006USC1V1"
+
+# no stage: the location's first type-A retail race (0A0000USC3V1, Silver Lake's own race record)
+[[event]]
+id = "harbour-night"
+track = "US_C8_V1"
+location = "US_C3"

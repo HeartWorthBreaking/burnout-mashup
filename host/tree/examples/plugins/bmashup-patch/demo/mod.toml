@@ -1,0 +1,14 @@
+# Burnout Mashup's private verified-patch demo (include/bmashup_patch.h). The module is ../bm_patch_demo.c built without
+# BM_PATCH_DEMO_RIVAL; put it beside this file and approve its code on the MODS page: until then it is never loaded. It sets
+# the published site "game.byte_fade_rate" (shipped 510) to 255 when the plugins' start ends, and logs the patch's state at
+# the first load end.
+id = "bmashup.patch-demo"
+name = "Patch Demo (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: bmashup.patch example (a published read-only data site set to a bounded value)."
+
+[plugin]
+api = 1
+windows = "bm_patch_demo.asi"
+linux = "libbm_patch_demo.so"
+macos = "libbm_patch_demo.dylib"

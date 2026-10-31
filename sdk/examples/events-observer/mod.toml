@@ -1,0 +1,16 @@
+# bmashup-sdk 0.2.0 example (a): gameplay events observer (Burnout Mashup builds only; private, experimental services).
+# Put this folder in a mods folder (TAKEDAWN_MODS) with the built module beside this file, and approve the module's bytes
+# in plugin-approvals.toml (the game's log names the exact line to add): until then it is never loaded.
+id = "bmashup-sdk.events-observer"
+name = "SDK example: events observer"
+version = "0.2.0"
+description = "Logs player 1's takedowns, wrecks and boost awards at each race exit (bmashup.events 2..5)."
+
+[bmashup]
+platform = ">=0.1"          # Burnout Mashup platform 0.1 or later; older platform hosts and plain Takedawn ignore [bmashup]
+requires = ["bmashup.events>=5"]   # a platform host refuses THIS mod alone (the game starts without it) when one is not offered
+
+[plugin]
+api = 1
+windows = "bm_sdk_events_observer.asi"
+# Only Windows x64 is built and tested by this SDK; linux / macos module names are left out on purpose.

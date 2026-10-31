@@ -1,0 +1,4 @@
+bmp p4.3 = p4.2 + fetex1 + veh1 (platform 0.1.6): label only, the identity is the source digest
+bmp capmega1 = capfix1 + mega1 row extension + GAMEDATA slot (platform 0.1.7): label only, the identity is the source digest
+bmp main18 = capmega1 + mod limits (256 mods / 256 folders + list file) + hook request P1 (platform 0.1.8): label only, the identity is the source digest
+bmp main19 = main18 + mem256 (256 MB guest window) + hook request P2 / P3 (platform 0.1.9): label only, the identity is the source digest

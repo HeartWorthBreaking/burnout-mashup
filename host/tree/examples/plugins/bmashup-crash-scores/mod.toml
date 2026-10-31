@@ -1,0 +1,13 @@
+# Burnout Mashup's Crash score keeper (docs/bmashup-crash.md): bmashup.events v6 CRASH_RESULT + bmashup.crash v1.
+# The module is bm_crash_scores.c built as bm_crash_scores.asi; put it beside this file and approve its code on the MODS
+# page: until then it is never loaded. It only reads: it logs each Crash attempt and the session's best per junction.
+id = "bmashup.crash-scores"
+name = "Crash Scores (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: logs every Crash result with its junction and keeps the session best; changes nothing."
+
+[plugin]
+api = 1
+windows = "bm_crash_scores.asi"
+linux = "libbm_crash_scores.so"
+macos = "libbm_crash_scores.dylib"

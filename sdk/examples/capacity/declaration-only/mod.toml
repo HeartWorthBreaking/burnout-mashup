@@ -1,0 +1,21 @@
+# bmashup-sdk 0.2.0 example (d), data side: a capacity DECLARATION (G8-MCAP; Burnout Mashup builds only; private,
+# experimental). No plugin, no code, no approval: the host reads [bmashup.capacity] itself before the plugins start and
+# requests each value from bmashup.engine / bmashup.streaming for this mod, with the same checks as a plugin's request
+# (largest wins, in any order). A requirement the host cannot meet stops the start with exit 91 naming this mod and the
+# field. Hosts without the extension (plain Takedawn) ignore the table; there the content guards stop an oversized track
+# at its load instead (exit 88 / 89 / 90).
+# The mod's track files are not included: see ../README.md and ../../content-template/README.md.
+id = "example.capacity-declaration"
+name = "SDK example: capacity declaration (no code)"
+version = "0.2.0"
+description = "Declares 96 AI lanes, 0x1A000 low-detail slots and a 0xD01000 STATIC pool for its tracks."
+
+[bmashup]
+platform = ">=0.1"
+requires = ["bmashup.capacity>=1"]   # the table this mod declares (a platform host checks its version)
+
+[bmashup.capacity]
+version = 1                 # required: the table's schema version this host reads (1)
+lanes = 96                  # total AI route lanes its tracks need (the game has 64; 65..255 need the lane extension)
+low_unit_bytes = 0x1A000    # low-detail unit slot size, a 4 KiB multiple 0x18000..0x30000
+static_bytes = 0xD01000     # STATIC track pool, a 4 KiB multiple above 0xA00000, at most 0x20C4000

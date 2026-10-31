@@ -1,0 +1,13 @@
+# SDK 0.6.0 example: bmashup.camera version 2 finish poses. Visual only.
+id = "bmashup.finish-camera-example"
+name = "Finish Camera Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: one authored end-of-race camera pose next to the game's outro camera (bmashup.camera 2)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.camera>=2"]
+
+[plugin]
+api = 1
+windows = "bm_finish_camera.asi"

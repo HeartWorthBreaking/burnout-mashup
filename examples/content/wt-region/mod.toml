@@ -1,0 +1,35 @@
+# GP-WT4 example (gp\slices\wt4): a fourth World Tour region. PLACEHOLDER research content: OC_C1_V1 is retail US_C1_V1 data
+# under an added ID (g8rg4_region_set), not new content. Local only, never upload.
+# BORROWED MAP: map = "USA" shows the USA map art, its first location's place name (SILVER LAKE), its ticker ("WELCOME TO THE
+# USA..."), globe view and counters for OCEANIA; only the region name and the events' names / help are this mod's (docs
+# bmashup-world-tour.md, "Borrowed assets").
+id = "bmashup.wt4-oceania"
+name = "World Tour: OCEANIA (gp wt4 example)"
+version = "1.0.0"
+description = "Example: a fourth World Tour region on the USA map with one location and two race events on an added track."
+
+[bmashup]
+requires = ["bmashup.world_tour>=1"]
+
+[bmashup.tracks]
+version = 1
+add = ["OC_C1_V1"]
+names = ["OC_C1_V1 = Harbour Ring"]
+
+[bmashup.regions]
+version = 1
+add = ["O = OCEANIA"]
+dj = ["O = DJUS"]
+
+[bmashup.world_tour]
+version = 1
+region = "O"
+map = "USA"
+location = "OC_L1"
+
+[bmashup.extra_events]
+version = 2
+add = ["oc-sprint = OC_C1_V1 @ OC_L1", "oc-night = OC_C1_V1 @ OC_L1"]
+stage = ["oc-sprint = 020006USC1V1", "oc-night = 020006USC1V1"]
+names = ["oc-sprint = Oceania Sprint", "oc-night = Oceania Night"]
+help = ["oc-sprint = A race of the fourth World Tour region. Added by a mod!", "oc-night = The harbour ring after dark. Added by a mod!"]

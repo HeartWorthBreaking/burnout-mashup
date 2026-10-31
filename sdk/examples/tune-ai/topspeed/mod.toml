@@ -1,0 +1,13 @@
+# gp slice aitune1 example (private, experimental): an AI tuning value as a pure data mod (bmashup.tune v3).
+id = "gp.aitune.topspeed"
+name = "AI TOP SPEED 40"
+version = "1.0.0"
+author = "Burnout Mashup gp s7"
+description = "Caps the AI rivals' top speed at 40 m/s (the game's ValueDB: 88): a measurable AI change for a test run."
+
+[bmashup]
+requires = ["bmashup.tune>=3"]
+
+[bmashup.tune]
+version = 2
+set = ["AI/Car | Top speed mps = 40"]

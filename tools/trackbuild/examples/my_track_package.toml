@@ -1,0 +1,23 @@
+# Package decisions for YOUR track (tb.py package BUILD_DIR this.toml SET_ROOT). Copy this file and edit every value.
+# Geometry / textures / route are AUTHORED by you; the Gamedata header / event records, enviro.dat and audio are DONOR copies
+# of the retail EU/M1_V1 track: the packaged mod contains retail game data and stays LOCAL ONLY.
+[package]
+set = "my_tracks"                      # folder created under SET_ROOT (the mod set)
+folder = "my-first-track"              # the mod's folder inside the set
+track_id = "EU_T7_V1"                  # RR_NN_VN, A-Z 0-9; EU / US / AS = a retail region; must not clash with any other track
+track_name = "MY FIRST TRACK"          # 1..27 characters
+track_location = "MY TRACKS"           # 1..17 characters
+mod_id = "example.mytracks.first"      # [a-z0-9] then [a-z0-9._-], <= 64
+mod_name = "My first track"
+version = "0.1.0"
+author = "your name"
+description = "An original track built with trackbuild 0.2.0. Gamedata header, enviro and audio are borrowed from EU_M1_V1 (donor, local only)."
+platform = ">=0.1"
+
+[package.comments]
+header = "# My first track - ORIGINAL geometry authored with trackbuild 0.2.0. Donor parts (Gamedata header, enviro, audio) come from EU_M1_V1: LOCAL ONLY.\n"
+tracks = "# Added to the retail Europe region (no region declaration needed). A circuit: no point_to_point entry.\n"
+
+[package.provenance]
+packaged_by = "trackbuild 0.2.0 (trackconv package, bmpack rename_gamedata)"
+donor_note = "EU_M1_V1 = Gamedata host (header, event records) and enviro / audio donor; static.dat, streamed.dat, the S1 page and the S4 route are authored"

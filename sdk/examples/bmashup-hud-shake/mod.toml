@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.5.0 example: "bmashup.hud" v1 (docs/services/HUD.md). Put this folder in a mod folder
+# (TAKEDAWN_MODS) with the built module beside this file, and approve its code on the MODS page. While player 1 boosts,
+# the boost bar shakes a little; the host puts the title's own values back after every picture.
+id = "bmashup.hud-shake"
+name = "HUD Boost Bar Shake (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: the boost bar shakes while boosting (bmashup.hud transforms)."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.hud>=1", "bmashup.boost>=1"]
+
+[plugin]
+api = 1
+windows = "bm_hud_shake.asi"
+linux = "libbm_hud_shake.so"
+macos = "libbm_hud_shake.dylib"

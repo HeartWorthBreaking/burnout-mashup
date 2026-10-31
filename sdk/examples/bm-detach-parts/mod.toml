@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.racers version 3 (detach_part).
+id = "bmashup.detach-parts-example"
+name = "Detach Parts Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: a hanging body part of player 1's car comes off through the game's own DetachBodyPart (bmashup.racers 3)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.racers>=3"]
+
+[plugin]
+api = 1
+windows = "bm_detach_parts.asi"
+linux = "libbm_detach_parts.so"
+macos = "libbm_detach_parts.dylib"

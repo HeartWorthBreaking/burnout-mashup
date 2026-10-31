@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.5.0 example: "bmashup.input" v1 (docs/services/INPUT.md). Put this folder in a mod folder
+# (TAKEDAWN_MODS) with the built module beside this file, and approve its code on the MODS page. It logs the first
+# host pad's presses and releases (read only).
+id = "bmashup.input-log"
+name = "Input Log (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: logs pad presses through bmashup.input (read only)."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.input>=1"]
+
+[plugin]
+api = 1
+windows = "bm_input_log.asi"
+linux = "libbm_input_log.so"
+macos = "libbm_input_log.dylib"

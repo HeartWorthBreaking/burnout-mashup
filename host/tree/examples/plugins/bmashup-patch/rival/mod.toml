@@ -1,0 +1,14 @@
+# Burnout Mashup's private verified-patch demo, the rival (include/bmashup_patch.h). The module is ../bm_patch_demo.c built
+# with BM_PATCH_DEMO_RIVAL; put it beside this file and approve its code on the MODS page: until then it is never loaded. Its
+# address patch of the same bytes as the demo's site is refused (CONFLICT), and so are an out-of-bounds value and a code
+# address. It changes nothing while the demo holds the site.
+id = "bmashup.patch-rival"
+name = "Patch Rival (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: bmashup.patch refusal examples (overlap conflict, out of bounds, not data)."
+
+[plugin]
+api = 1
+windows = "bm_patch_rival.asi"
+linux = "libbm_patch_rival.so"
+macos = "libbm_patch_rival.dylib"

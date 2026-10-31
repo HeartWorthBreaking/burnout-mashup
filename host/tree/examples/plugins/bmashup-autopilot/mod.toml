@@ -1,0 +1,15 @@
+# Burnout Mashup's private autopilot demo (docs/bmashup-autopilot.md). Put
+# this folder in a mod folder (TAKEDAWN_MODS) with the built module beside
+# this file, and approve its code on the MODS page: until then it is never
+# loaded. About 5 s into every race it asks for the game's own AI to drive
+# player 1's car (bmashup.autopilot 2: once per race, bound to that race).
+id = "bmashup.autopilot-demo"
+name = "Autopilot Demo (Burnout Mashup)"
+version = "0.2.0"
+description = "Private, experimental: the game's AI takes over player 1's car about 5 s into every race."
+
+[plugin]
+api = 1
+windows = "bm_autopilot_demo.asi"
+linux = "libbm_autopilot_demo.so"
+macos = "libbm_autopilot_demo.dylib"

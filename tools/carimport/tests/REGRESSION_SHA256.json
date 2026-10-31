@@ -1,0 +1,39 @@
+{
+ "demo": {
+  "coupe": {
+   "car.toml": "db1f0ae04ffe0081a10071d4ff0243fc6d12bd88244db13477f1ce2fbfc24ba9",
+   "coupe.bin": "7c3dff5333389d8bdf07e2801394b4c48a39a6f8e9de941f0a1624896eb61c28",
+   "coupe.gltf": "87e11c6513d8ee2da4fdee005b874c53895ebe49e4f315281965f0731d0b991c",
+   "paint_mask.png": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "texture.png": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d"
+  },
+  "wedge": {
+   "car.toml": "7b965fa5283f82fc914d9e9c036bd74454f216a973b84ebc3e76a48befbb05c0",
+   "paint_mask.png": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "texture.png": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d",
+   "wedge.bin": "63bba3149a16248bb40d011c335bce5a3ebcb6ad9089c3a64856dfa321a56395",
+   "wedge.gltf": "db265c3128124b62a36663b834cc5f526bc268eb376ade384509bb5626ada77e"
+  }
+ },
+ "note": "content-phase carimport outputs (runtime_data modsets gp_carimp_examples = kit 0.4.0 staging S3c); the demo sources = kit 0.4.0 examples/authored/carimport",
+ "packages": {
+  "carimp-coupe": {
+   "LABELS.txt": "02942214f03ba2d9c6917d449c5421ce4708877253ba3fa71d15344ceba0261c",
+   "SHA256SUMS.txt": "832312455d68bcbae6e8fa9fd11f3625b3bc5aa4b25efef98fbb00b305678e30",
+   "carimport.json": "cfc52526e28ab93f6793c74d4788d71137ea059c4cf9066958b152fb46d1464d",
+   "files/pveh/COMP/CIC1.bgv": "ed977c8ab9847476adbea36841f69927e891bb5bf2e3b300904c26db483e5b4f",
+   "files/pveh/COMP/CIC1.hwd": "c030385cc92ba11fb1f4a1f5477d6307f2670c809a0c9590429b63f6321fdd8b",
+   "files/pveh/COMP/CIC1.lwd": "b6ff319ada0c73fbcb34571f00c3d7621942abc0a43e9cd2e9b22fb87c85cfb2",
+   "mod.toml": "51b58b1f9b81a14ad0f34084b67e39558e3925bd78cb1d67391c595cde5f6cc7"
+  },
+  "carimp-wedge": {
+   "LABELS.txt": "c626fd9281f0967b64c7e7e2f8746693b8925d15603e747e05ffa6279a54e689",
+   "SHA256SUMS.txt": "91da40192828f6d2d415fc1217643252e43e383cec057718f972c0c616c4d781",
+   "carimport.json": "610c07380ac42e0c0adcf04cf3121c75519f08bbf32c08dbb04fd716ad5f371d",
+   "files/pveh/COMP/CIW1.bgv": "d1258dc924089a28edc07bb1419d749e26d99d471ccb53c4a95118e665fa3eec",
+   "files/pveh/COMP/CIW1.hwd": "c030385cc92ba11fb1f4a1f5477d6307f2670c809a0c9590429b63f6321fdd8b",
+   "files/pveh/COMP/CIW1.lwd": "b6ff319ada0c73fbcb34571f00c3d7621942abc0a43e9cd2e9b22fb87c85cfb2",
+   "mod.toml": "3f5862edeab218eb6077687a22636558f2d97d89d26ae3e5c3ea9d5edfb8d1d0"
+  }
+ }
+}

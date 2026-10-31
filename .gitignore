@@ -1,0 +1,38 @@
+# build outputs and local data never belong here
+*.asi
+*.dll
+*.exe
+*.zip
+build/
+out/
+staging*/
+__pycache__/
+*.bgd
+*.dat
+*.rws
+*.xbe
+*.xwb
+*.awd
+*.bmprog
+_build/
+cache/
+*.img
+*.xbx
+
+# the public build scripts live in /build (the pattern 'build/' above would hide them);
+# local work folders
+!/build/
+/work/
+
+# written by the build (build/host_info.py) and the launcher: describes YOUR local host build
+/HOST_INFO.json
+/launcher/host-local/
+
+# BUILD MASHUP (launcher): the previous build, a staged install, swap folders
+/launcher/host-local.prev/
+/launcher/host-local.new/
+/launcher/host-local.old/
+/launcher/host-local.swap/
+
+# the launcher's updater: the source in use / previous one, the pending update (local state)
+/launcher/update-state/

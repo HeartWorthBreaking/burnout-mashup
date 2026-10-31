@@ -1,0 +1,17 @@
+{
+ "bmpack": "1",
+ "files": {
+  "mod.toml": {
+   "sha256": "92c348ec742ff5319f6b48a75cca2960e568cf11b81414eb9f0b293c4cf0af4d",
+   "size": 1775
+  }
+ },
+ "folder": "bm-veh-neon",
+ "label": "AUTHORED",
+ "mod": {
+  "id": "bmashup.veh-neon",
+  "name": "Neon Series (veh1 example)",
+  "version": "1.0.0"
+ },
+ "packaged_by": "gp\\tools\\vehtool 0.1.0"
+}

@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.traffic version 3 (crash pool counts, near_vehicles). Read only.
+id = "bmashup.traffic-check-example"
+name = "Traffic Check Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: logs the traffic count, the crash pool's occupancy and the nearest vehicles once a second (bmashup.traffic 3)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.traffic>=3"]
+
+[plugin]
+api = 1
+windows = "bm_traffic_check.asi"
+linux = "libbm_traffic_check.so"
+macos = "libbm_traffic_check.dylib"

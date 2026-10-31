@@ -1,0 +1,5 @@
+{"suites": [
+ {"name": "fetex suite (11; F1 / F2 rebuild the retail Frontend.txd)", "command": ["{py}", "-B", "{tool}/tests/test_fetex.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "fetex actionable errors (23)", "command": ["{py}", "-B", "{tool}/tests/test_errors.py", "{out}", "--game-data", "{game}"], "needs": ["game_data"], "slow": false},
+ {"name": "fetex regression: art, TXDs, packs = content-phase bytes (7)", "command": ["{py}", "-B", "{tool}/tests/test_regression.py", "{out}"], "needs": [], "slow": false}
+]}

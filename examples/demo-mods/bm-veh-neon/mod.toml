@@ -1,0 +1,35 @@
+# AUTHORED example (gp veh1): a new car series. Cars use their donors' models / audio (model = donor): no game data in
+# this package; names, series, paints and colours are original.
+id = "bmashup.veh-neon"
+name = "Neon Series (veh1 example)"
+version = "1.0.0"
+description = "A new car series Neon: six cars with authored neon paints; three of them race as AI opponents."
+
+[bmashup]
+platform = ">=0.1.5"
+
+[bmashup.series]
+version = 1
+add = ["neon = BMNE"]
+names = ["neon = Neon"]
+ai_class = ["neon = SPRT"]
+
+[bmashup.cars]
+version = 2
+add = ["BMNEC01 = SPRTCAR1", "BMNEC02 = SPRTCAR4", "BMNEC03 = SUPRCAR2", "BMNEC04 = CUPECAR3", "BMNEC05 = MSCLCAR2",
+       "BMNEC06 = SUPRCAR5"]
+names = ["BMNEC01 = Neon Dart", "BMNEC02 = Neon Arc", "BMNEC03 = Neon Pulse", "BMNEC04 = Neon Halo", "BMNEC05 = Neon Volt",
+         "BMNEC06 = Neon Flux"]
+model = ["BMNEC01 = donor", "BMNEC02 = donor", "BMNEC03 = donor", "BMNEC04 = donor", "BMNEC05 = donor", "BMNEC06 = donor"]
+ai = ["BMNEC01", "BMNEC02", "BMNEC03"]
+
+[bmashup.paints]
+version = 1
+add = ["dart-magenta = BMNEC01 | ramp FF30E0 300020", "dart-cyan = BMNEC01 | ramp 30FFF0 003040",
+       "arc-lime = BMNEC02 | ramp C0FF20 203000", "arc-violet = BMNEC02 | ramp B060FF 200040",
+       "pulse-orange = BMNEC03 | ramp FFA020 401000", "pulse-teal = BMNEC03 | ramp 20FFC0 003020",
+       "halo-pink = BMNEC04 | ramp FF80C0 400020", "halo-blue = BMNEC04 | ramp 4080FF 001040",
+       "volt-yellow = BMNEC05 | ramp FFF020 302800", "volt-green = BMNEC05 | ramp 40FF60 003010",
+       "flux-red = BMNEC06 | ramp FF3030 300000", "flux-white = BMNEC06 | ramp FFFFFF 303040"]
+default = ["BMNEC01 = dart-magenta", "BMNEC02 = arc-lime", "BMNEC03 = pulse-orange", "BMNEC04 = halo-pink",
+           "BMNEC05 = volt-yellow", "BMNEC06 = flux-red"]

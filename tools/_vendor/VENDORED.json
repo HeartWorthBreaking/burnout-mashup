@@ -1,0 +1,22 @@
+{
+ "files": [
+  {
+   "file": "bgvlib.py",
+   "origin": "PC/research/native_gameplay_api/platform/gp/atlas/scripts/cars/bgvlib.py",
+   "origin_sha256": "b5df11b92d4a9fff8bc3ba5f5e5bdb3566b7a390710616d0cdb1ec2f8ca80a61",
+   "patches": [],
+   "sha256": "b5df11b92d4a9fff8bc3ba5f5e5bdb3566b7a390710616d0cdb1ec2f8ca80a61"
+  },
+  {
+   "file": "cars1_recolour.py",
+   "origin": "PC/research/native_gameplay_api/platform/gp/atlas/scripts/cars/make_cars1_mod.py",
+   "origin_sha256": "c2e9796f837ade721dd670c2402b6f176213cc6901f09c68220059111a93f24b",
+   "patches": [
+    "slice of the original from 'LIME = (120, 255, 40)' up to 'def build_frontend(b):', with a new module header"
+   ],
+   "sha256": "048ef8bdba59dd1a5cff17e57b3bb5b8769aa066d8f8a6f17518021cf2b078b7"
+  }
+ ],
+ "licence": "this project's own code (owner-authored research modules); distributed with the kit under the kit's terms",
+ "what": "readers vendored into the mod kit 0.4.1 so that no tool imports from a developer workspace"
+}

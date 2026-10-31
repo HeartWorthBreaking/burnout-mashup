@@ -1,0 +1,1 @@
+{"suites": [{"name": "exclusions", "command": ["{py}", "-B", "{tool}/tests/test_bmdiag.py", "{out}", "--mutants"], "needs": []}]}

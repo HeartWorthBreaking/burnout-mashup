@@ -1,0 +1,28 @@
+# GP-FETEX1 example: OCEANIA's own map page for the wt4 4th region (AUTHORED art + texts). Data only.
+# The region, its location and events stay the wt4 mod's ([bmashup.world_tour] / [bmashup.extra_events]); this pack only binds
+# art to the donor map's texture slots and corrects the map texts while the OCEANIA map is shown.
+id = "bmashup.fetex-oceania-art"
+name = "World Tour: OCEANIA map art"
+version = "1.0.0"
+description = "OCEANIA's own satellite map, overview, marker, place name and ticker (shown only on the OCEANIA map page)."
+
+[bmashup]
+platform = ">=0.1.5"
+requires = ["bmashup.textures>=1", "bmashup.wt_map_art>=1"]
+requires_mods = ["bmashup.wt4-oceania"]
+
+[bmashup.textures]
+version = 1
+txd = "art/oceania.txd"
+class = "frontend"
+
+[bmashup.wt_map_art]
+version = 1
+region = "O"
+art = ["SatMapU1_1 = oceania_tile_1_1", "SatMapU2_1 = oceania_tile_2_1", "SatMapU3_1 = oceania_tile_3_1",
+       "SatMapU1_2 = oceania_tile_1_2", "SatMapU2_2 = oceania_tile_2_2", "SatMapU3_2 = oceania_tile_3_2",
+       "USA1 = oceania_overview", "US_LSat = oceania_area",
+       "SatMapU_L1 = oceania_city_l1", "SatMapU_L2 = oceania_city_l2", "SatMapU_L3 = oceania_city_l3", "SatMapU_L4 = oceania_city_l4",
+       "RaceIcon = oceania_marker", "RacePulse = oceania_marker_pulse", "RaceHollow = oceania_marker_hollow"]
+place = "Harbour City"
+ticker = "WELCOME TO OCEANIA...    PLEASE SELECT A LOCATION"

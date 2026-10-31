@@ -1,0 +1,6 @@
+{
+ "format": "bmkit.authored_files/1",
+ "tool": "trackbuild 0.3.0",
+ "files": [],
+ "note": "trackbuild ships no binary file. The demo assets (OBJ mesh, PNG textures, track description) are ORIGINAL and generated deterministically by `tb.py gen-testloop` (trackbuild/testloop.py); tests/REFERENCE_0_1_6.json holds only sha256 values."
+}

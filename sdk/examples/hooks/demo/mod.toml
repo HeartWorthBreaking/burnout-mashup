@@ -1,0 +1,17 @@
+# bmashup-sdk 0.2.0 example (f), owner: coordinated hooks (bmashup.hooks 1; Burnout Mashup platform hosts only; private,
+# experimental). The module is ../bm_sdk_hooks_demo.c built without BM_HOOKS_DEMO_RIVAL. Changes gameplay: player 1's
+# perfect-lap boost award x1.25. Holds RACE_EXIT exclusively (a race summary line) and counts player 1's takedowns.
+# Put this folder in a mods folder with the built module beside this file and approve the module's bytes.
+id = "bmashup-sdk.hooks-demo"
+name = "SDK example: hooks owner"
+version = "0.2.0"
+description = "RACE_EXIT exclusive owner, TAKEDOWN observer (priority -10), perfect-lap boost x1.25 (bmashup.hooks 1)."
+
+[bmashup]
+platform = ">=0.1"
+requires = ["bmashup.hooks>=1"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_hooks_demo.asi"
+# Only Windows x64 is built and tested by this SDK.

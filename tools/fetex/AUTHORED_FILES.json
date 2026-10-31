@@ -1,0 +1,48 @@
+{
+ "note": "every binary file of this tool folder (paths relative to it): AUTHORED (original), with how it is made; the pre-push scan allows exactly these path + sha256 pairs",
+ "tool": "fetex",
+ "files": [
+  {
+   "path": "examples/p43-coupe-photo/src/paint0.png",
+   "sha256": "810f9db5c19c9a6b282a1b8bc603f6650855a44bedb1b22b49e2192ff4c5b59d",
+   "bytes": 522,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  },
+  {
+   "path": "examples/p43-coupe-photo/src/paint1.png",
+   "sha256": "b3987958ac946ef10b6ddfc509069621a2c638cf504cd8455bb54982f4e39e1a",
+   "bytes": 516,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  },
+  {
+   "path": "examples/p43-coupe-photo/src/paint2.png",
+   "sha256": "3126419dc1087c86b0145fa6bbe1117bdf6810a166bd61fb807270a59c9dea0e",
+   "bytes": 514,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  },
+  {
+   "path": "examples/p43-coupe-photo/src/paint3.png",
+   "sha256": "fe818df810d266d6510f5ceadb71fe5ec5a25e10308a830a4742710dee8482b8",
+   "bytes": 501,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  },
+  {
+   "path": "examples/p43-coupe-photo/src/paint4.png",
+   "sha256": "fe1f89858ebaaaf7fdf9d99cd5ba61ab22ac5324140b9301cdb61e59ec36d84c",
+   "bytes": 498,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  },
+  {
+   "path": "examples/p43-coupe-photo/src/paint5.png",
+   "sha256": "774bce454426fca908d183717325b43721a2b3bd73e1fd9399fc45f1d747e76d",
+   "bytes": 521,
+   "label": "AUTHORED",
+   "made_by": "p4.3 make_p43_packs.py procedural coupe photo (ORIGINAL; = mod kit 0.4.0 examples/authored/bm-coupes/p43-coupe-photo)"
+  }
+ ]
+}

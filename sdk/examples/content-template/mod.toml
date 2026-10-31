@@ -1,0 +1,43 @@
+# bmashup-sdk 0.2.0 example (e): a DATA-ONLY content mod template (no plugin, no code, no approval). Burnout Mashup builds
+# only; the tables below are private and experimental; plain Takedawn reads id / name / version / description and ignores
+# them. Every table is optional - delete the ones you do not need. NO GAME FILES ARE INCLUDED: a track's files go in
+# files\Tracks\<RR>\<NN_VN>\ beside this mod.toml and come from your own track build (README.md says which).
+id = "example.content-template"
+name = "SDK example: content template"
+version = "0.2.0"
+author = "you"
+description = "Template: two added tracks (one in a new region), their names, a region, two World Tour events."
+
+# What this mod needs from the host (Burnout Mashup platform 0.1 and later check it when the mod list is made). An unmet
+# need refuses THIS mod alone with a [PLATFORM] line naming the need; the game starts without it. Older hosts ignore it.
+[bmashup]
+platform = ">=0.1"                      # a lower bound, MAJOR.MINOR[.PATCH]
+requires = ["bmashup.regions>=1", "bmashup.tracks>=1", "bmashup.extra_events>=1"]   # services or tables, optional >=N
+
+# A new main region (up to 23 in all; one letter A-Z other than U / E / A, the game's own).
+[bmashup.regions]
+version = 1
+add = ["O = OCEANIA"]                   # "LETTER = TEXT": text 1..17 characters A-Z a-z 0-9 space - ' . &
+dj = ["O = DJUS"]                       # optional: the announcer bank, one of DJUS / DJEU / DJAS (default DJUS)
+
+# Added track entries "RR_NN_VN": RR a region (US / EU / AS, or a declared letter + any letter, e.g. OC), NN the course,
+# VN the variant. Each needs files\Tracks\<RR>\<NN_VN>\Gamedata.bgd, static.dat, streamed.dat and enviro.dat.
+[bmashup.tracks]
+version = 1
+add = ["US_C6_V1", "OC_C1_V1"]
+names = ["US_C6_V1 = Harbour Loop", "OC_C1_V1 = Coral Coast"]        # 1..27 characters (same set as above)
+locations = ["US_C6_V1 = HARBOUR", "OC_C1_V1 = OCEANIA"]             # 1..17 characters
+
+# Added World Tour race events: "<event id> = <track> @ <location>". The track must be one a mod adds, in a retail region
+# (US / EU / AS: the World Tour map has 3 regions); the location a race location of that region. A location's list shows
+# 6 rows (retail + added), so the platform host takes at most 35 added events over the 18 race locations (US_C3 has 4
+# retail events: 2 free rows). Events are ordered by "mod id / event id", never by the mod list.
+[bmashup.extra_events]
+version = 1
+add = ["harbour-sprint = US_C6_V1 @ US_C3", "harbour-night = US_C6_V1 @ US_C3"]
+stage = ["harbour-sprint = 020006USC1V1"]   # optional: the retail race whose stage record the event uses
+
+# Only when the tracks need more engine capacity than the game's (see examples\capacity\declaration-only):
+# [bmashup.capacity]
+# version = 1
+# lanes = 80

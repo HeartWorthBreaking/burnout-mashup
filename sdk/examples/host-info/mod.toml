@@ -1,0 +1,17 @@
+# bmashup-sdk 0.2.0 example (h): host-info probe (bmashup.host 1 when the host has it). Changes nothing: it logs the
+# platform version, the build, the game image signature and the services the host offers. Runs on any host with native
+# plugins (on older hosts it says so at shutdown). Put this folder in a mods folder with the built module beside this file
+# and approve the module's bytes.
+id = "bmashup-sdk.host-info"
+name = "SDK example: host info"
+version = "0.2.0"
+description = "Logs the Burnout Mashup platform version, build, game signature and offered services (bmashup.host 1)."
+
+[bmashup]
+platform = ">=0.1"
+requires = ["bmashup.host>=1"]   # every platform host has it; older hosts ignore [bmashup]
+
+[plugin]
+api = 1
+windows = "bm_sdk_host_info.asi"
+# Only Windows x64 is built and tested by this SDK.

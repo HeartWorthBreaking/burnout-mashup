@@ -1,0 +1,16 @@
+# bmashup-sdk 0.5.0 example (crash-hooks) for Burnout Mashup platform 0.1.8 hosts (private, experimental).
+# Read only: changes nothing in the game.
+# Put this folder in a mods folder with the built module beside this file and approve its bytes.
+id = "bmashup-sdk.crash-hooks"
+name = "SDK example: CRASH_RESULT hook (hooks v2)"
+version = "0.5.0"
+description = "Observes the hooks v2 point CRASH_RESULT and logs each Crash junction result and the best score."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.hooks>=2"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_crash_hooks.asi"
+# Only Windows x64 is built and tested by this SDK.

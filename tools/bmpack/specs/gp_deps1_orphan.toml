@@ -1,0 +1,8 @@
+# bmpack 1.3 spec - GP-DEPS1 runtime fixture (gp_deps1_set): a data mod without content (retail tracks only), NEGATIVE: requires gp.deps-absent, which is not installed - refused (NEEDS MOD).
+[mod]
+id = "gp.deps-orphan"
+version = "1.0.0"
+name = "DEPS ORPHAN"
+description = "GP-DEPS1 fixture: needs a mod that is not installed."
+folder = "deps-orphan"
+requires_mods = ["gp.deps-absent"]

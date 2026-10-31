@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.vphysics version 3 (the gearbox). CHANGES GAMEPLAY.
+id = "bmashup.gearbox-toggle-example"
+name = "Gearbox Toggle Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: player 1's gearbox MANUAL in every race; shifts up every 3 s to the top gear, then back to 1 (bmashup.vphysics 3)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.vphysics>=3"]
+
+[plugin]
+api = 1
+windows = "bm_gearbox_toggle.asi"
+linux = "libbm_gearbox_toggle.so"
+macos = "libbm_gearbox_toggle.dylib"

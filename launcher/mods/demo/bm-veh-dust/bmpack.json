@@ -1,0 +1,17 @@
+{
+ "bmpack": "1",
+ "files": {
+  "mod.toml": {
+   "sha256": "93a0c1954016c8d2ba16bf6e651b32c3c2daa35df3af3392bf19d9800174d52b",
+   "size": 1196
+  }
+ },
+ "folder": "bm-veh-dust",
+ "label": "AUTHORED",
+ "mod": {
+  "id": "bmashup.veh-dust",
+  "name": "Dust Runners Series (veh1 example)",
+  "version": "1.0.0"
+ },
+ "packaged_by": "gp\\tools\\vehtool 0.1.0"
+}

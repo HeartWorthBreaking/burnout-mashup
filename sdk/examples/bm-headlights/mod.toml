@@ -1,0 +1,17 @@
+# Burnout Mashup SDK example: "bmashup.racers" set_light (docs/services/RACERS.md) - headlights and running tail lamps for every car.
+# Put this folder in a mod folder (TAKEDAWN_MODS) with the built module beside this file, and approve its
+# code on the MODS page. MOD SETTINGS: HEADLIGHTS Game / On / Off.
+id = "bmashup.headlights"
+name = "Headlights (Burnout Mashup)"
+version = "0.3.0"
+description = "Private, experimental: headlights and tail lamps on (or forced off) for every car through bmashup.racers; with bmashup.racers 6 a tail glow on models without tail lamps."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.racers>=3", "bmashup.settings>=1"]
+
+[plugin]
+api = 1
+windows = "bm_headlights.asi"
+linux = "libbm_headlights.so"
+macos = "libbm_headlights.dylib"

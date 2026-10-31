@@ -1,0 +1,14 @@
+# bmashup-sdk example (m), built from bm_gp_ai.c with GP_PACE=0.8 (docs/services/AI.md).
+id = "bmashup-sdk.ai-slow"
+name = "SDK Slower Rivals"
+version = "0.1.0"
+description = "Private, experimental: AI rivals pace 0.8 (their speed cap x0.8; players untouched); logs the AI state."
+
+[bmashup]
+platform = ">=0.1.4"
+requires = ["bmashup.ai>=1"]
+
+[plugin]
+api = 1
+windows = "bm_gp_ai.asi"
+# Only Windows x64 is built and tested.

@@ -1,0 +1,21 @@
+{
+ "bmpack": "1",
+ "files": {
+  "files/paints/chrome.bmpal": {
+   "sha256": "a3e8e03637016c8f7a855dc6a08a6ad7cab9a8db2db33f365b6dc8f1ac200490",
+   "size": 1024
+  },
+  "mod.toml": {
+   "sha256": "df5c7ada2b8dfdd75baa920f14ed27f38aef71b09b13427d761eeb66efcefe12",
+   "size": 857
+  }
+ },
+ "folder": "bm-veh-retail-paints",
+ "label": "AUTHORED",
+ "mod": {
+  "id": "bmashup.veh-retail-paints",
+  "name": "Extra Paints for Compact Type 1 and Sports Type 1 (veh1 example)",
+  "version": "1.0.0"
+ },
+ "packaged_by": "gp\\tools\\vehtool 0.1.0"
+}

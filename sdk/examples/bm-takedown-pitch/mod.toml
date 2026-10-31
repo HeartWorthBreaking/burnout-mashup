@@ -1,0 +1,13 @@
+# SDK 0.6.0 example: bmashup.hooks version 3 EVENT_SOUND (takedown-sign pitch level). CHANGES GAMEPLAY AUDIO.
+id = "bmashup.takedown-pitch-example"
+name = "Takedown Pitch Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: plays every takedown sign one step higher on the game's pitch ladder (bmashup.hooks 3 EVENT_SOUND)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.hooks>=3"]
+
+[plugin]
+api = 1
+windows = "bm_takedown_pitch.asi"

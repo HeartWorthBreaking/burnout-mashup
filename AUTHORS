@@ -1,0 +1,23 @@
+Authors of Burnout Mashup (the record of this tree; "Burnout Mashup contributors" is a collective credit, copyright stays
+with the actual authors and nothing is transferred)
+
+Evidence-based list (only what the records show):
+
+HeartWorthBreaking <341864646+HeartWorthBreaking@users.noreply.github.com>
+    git author and committer of the private development repository (8 commits, 2026-10-26 .. 2026-10-31) from which the
+    original Burnout Mashup files were taken, and author of the takedawn_* plugin headers and of the native mod folders
+    (Takedawn PR #67, merged) and related branches (PRs #80, #81, #82, #96) on the upstream project.
+
+AI assistance (a recorded fact, not an assessment of authorship or copyright): every commit of the private repository carries a
+"Co-Authored-By: Claude" trailer; the code, tools and documents were written with the help of the Claude AI assistant
+(Anthropic). The host-layer files come from a private workspace that has no git history of its own (its records are
+workspace notes only); no claim about who wrote what is made beyond the records above. No retroactive sign-off is made for anyone.
+
+Upstream authors, by reference to upstream's own records (their material keeps their copyright and licence):
+    Takedawn LICENSE: sp00nz, xenophobentx
+    Takedawn CONTRIBUTORS.md (docs/upstream/TAKEDAWN_CONTRIBUTORS.md): xenophobentx, Ned Heller (sp00nz), apexJCL, Naitrate,
+    jillsandwich1998, d-b-c-e, HeartWorthBreaking; reports: VincxBlox
+    xboxrecomp LICENSE / NOTICE: sp00nz; xemu files: espes, Jannik Vogel, Matt Borgerson; ADPCM-XQ: David Bryant
+    (A further git author name appears in the Takedawn history; its relation to a listed contributor is not established here.)
+
+Future contributors are added by their own sign-off (see CONTRIBUTING.md).

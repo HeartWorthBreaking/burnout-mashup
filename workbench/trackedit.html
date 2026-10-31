@@ -1,0 +1,1176 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Track editor (first slice)</title>
+<style>
+:root { --bg:#f4f4f2; --panel:#ffffff; --ink:#1d1d1b; --mut:#5c5c58; --line:#d8d8d2; --acc:#2a5db0; --bad:#c0392b; --warn:#b7791f; }
+@media (prefers-color-scheme: dark) { :root { --bg:#1b1b1d; --panel:#242427; --ink:#ececea; --mut:#a3a3a0; --line:#3a3a3e; --acc:#7aa7ff; --bad:#ff7b6b; --warn:#f0b44c; } }
+* { box-sizing:border-box; }
+body { margin:0; font:13px/1.4 system-ui, Segoe UI, sans-serif; background:var(--bg); color:var(--ink); display:flex; height:100vh; overflow:hidden; }
+#view { flex:1; position:relative; min-width:0; }
+canvas { width:100%; height:100%; display:block; background:#87a3bd; }
+#hud { position:absolute; left:8px; top:8px; background:rgba(0,0,0,.55); color:#fff; padding:4px 8px; border-radius:4px; font-size:12px; }
+#side { width:380px; max-width:45vw; overflow:auto; background:var(--panel); border-left:1px solid var(--line); padding:10px 12px; }
+h1 { font-size:15px; margin:0 0 2px; } h2 { font-size:12px; text-transform:uppercase; letter-spacing:.04em; color:var(--mut); margin:14px 0 4px; }
+.note { color:var(--mut); font-size:12px; }
+button { font:inherit; padding:3px 9px; margin:2px 2px 2px 0; border:1px solid var(--line); background:var(--bg); color:var(--ink); border-radius:4px; cursor:pointer; }
+button:disabled { opacity:.45; cursor:default; }
+input[type=number], input[type=text], select { font:inherit; width:70px; padding:2px 4px; background:var(--bg); color:var(--ink); border:1px solid var(--line); border-radius:3px; }
+input[type=text] { width:100%; } select { width:auto; }
+pre { white-space:pre-wrap; word-break:break-word; background:var(--bg); border:1px solid var(--line); padding:6px; max-height:220px; overflow:auto; margin:4px 0; font-size:11px; }
+.bad { color:var(--bad); } .warn { color:var(--warn); } .ok { color:#2e8b57; }
+.vitem { border-left:3px solid var(--bad); padding:2px 6px; margin:3px 0; cursor:pointer; font-size:12px; }
+.flag { border-left:3px solid var(--warn); padding:2px 6px; margin:3px 0; font-size:12px; }
+#robanner { display:none; border:2px solid var(--warn); padding:6px 8px; margin:6px 0; border-radius:4px; font-weight:600; }
+label { display:block; }
+#mats div { cursor:pointer; padding:1px 4px; } #mats div:hover { background:var(--bg); }
+</style>
+</head>
+<body>
+<div id="view"><canvas id="c"></canvas><div id="hud">loading...</div></div>
+<div id="side">
+  <h1 id="title">Track editor - first slice</h1>
+  <div class="note" id="intro">Not a complete editor. Source = the project's track description, OBJ and textures; game files come only from Build. Drag: orbit, right-drag / shift-drag: pan, wheel: zoom, W A S D Q E: fly, click: select (a start object, unit, corner, or a face group of the mesh).</div>
+  <div id="robanner"></div>
+  <div id="statebox" class="note"></div>
+  <h2>Layers</h2>
+  <label><input type="checkbox" id="L_mesh" checked> textured mesh</label>
+  <label><input type="checkbox" id="L_collision"> collision (green floor, red car-solid wall, yellow not car-solid, grey no collision)</label>
+  <label><input type="checkbox" id="L_units"> streaming bounds (units / sections)</label>
+  <label><input type="checkbox" id="L_route" checked> routes</label>
+  <label><input type="checkbox" id="L_starts" checked> starts</label>
+  <div class="note" id="pvslod"></div>
+  <h2>Selection</h2>
+  <div id="selname" class="note">nothing selected</div>
+  <pre id="insp"></pre>
+  <div id="editbox" style="display:none">move by (m): <input type="number" id="dx" value="0" step="0.5"> <input type="number" id="dy" value="0" step="0.5"> <input type="number" id="dz" value="0" step="0.5"> <button id="apply">Apply</button></div>
+  <div id="matbox" style="display:none">
+    <div>scope <select id="mscope"><option value="group">this face group</option><option value="material">every group of its material</option></select></div>
+    <div>material <select id="mmat"></select> <button id="massign">Assign</button></div>
+    <div>vertex colour (0..1, baked light; 0.2 = demo neutral) <input type="number" id="cr" value="0.2" step="0.05" min="0" max="1"> <input type="number" id="cg" value="0.2" step="0.05" min="0" max="1"> <input type="number" id="cb" value="0.2" step="0.05" min="0" max="1"> <button id="mcolour">Set colour</button></div>
+    <div><button id="mprops">Edit this material's properties</button></div>
+    <div id="gsel" class="note"></div>
+    <div><button id="gclear">Clear selection</button> <span class="note">Ctrl-click adds / removes face groups</span></div>
+    <div>move the selection by (m, exact; source precision) <input type="number" id="gx" value="0" step="0.5"> <input type="number" id="gy" value="0" step="0.5"> <input type="number" id="gz" value="0" step="0.5"></div>
+    <div><label><input type="checkbox" id="gsnap"> snap the offset to</label> <select id="gstep"><option>0.1</option><option>0.25</option><option>0.5</option><option selected>1</option><option>2</option><option>5</option></select> m</div>
+    <div>boundary <select id="gmode"><option value="isolate">isolate: duplicate shared corners (gaps / steps open)</option><option value="connected">keep connected: move shared corners (neighbours stretch)</option></select></div>
+    <div><button id="gprev">Preview affected neighbours</button> <button id="gmove">Move selection</button></div>
+    <div>turn about the vertical axis <input type="number" id="ta" value="0" step="5" min="-360" max="360"> deg <label><input type="checkbox" id="tsnap"> snap to</label> <select id="tstep"><option>1</option><option>5</option><option selected>15</option><option>45</option><option>90</option></select> deg</div>
+    <div>uniform scale <input type="number" id="tk" value="1" step="0.05" min="0.1" max="10"> (0.1 .. 10)</div>
+    <div>pivot <select id="tpm"><option value="bbox">selection bounding-box centre</option><option value="xyz">entered XYZ (m)</option></select> <input type="number" id="tpx" value="0" step="1"> <input type="number" id="tpy" value="0" step="1"> <input type="number" id="tpz" value="0" step="1"> <button id="tpfill">Use bbox centre</button></div>
+    <div><button id="tapply">Transform selection</button> <span class="note" id="tinfo"></span></div>
+    <div><button id="gdup">Duplicate selection</button> <span class="note">v0.22: exact copies (materials, uv, normals, colours) placed at the "move the selection by" offset above (exact, source precision; 0 0 0 = in place, which trackbuild's LOD decimation may refuse), appended as new face groups at the end of the OBJ; the copies become the selection - then move / turn / scale them (each its own undo step)</span></div>
+    <div class="note">Transform preview: cyan = the selection after the turn / scale, white cross = the pivot. Positive angle = counter-clockwise seen from above (+x towards -z). Corners are rounded to their source precision; normals turn with the faces. Boundary mode, neighbour preview and clip check as for moves.</div>
+    <div class="note">Selected faces move together (corners shared inside the selection stay shared). Orange = neighbour faces' groups affected at the boundary. Red = faces trackbuild would clip at the unit regions (intended position), magenta = the unit edges they cross: such a move is refused. Routes, starts, checkpoints and unit regions are never moved or expanded.</div>
+    <pre id="geomout" style="display:none"></pre>
+  </div>
+  <div id="propbox" style="display:none">
+    <div id="propinfo" class="note"></div>
+    <div>texture <select id="ptex"></select> <button id="ptexb">Set</button></div>
+    <div>surface <input type="text" id="psurf" list="surfwords" style="width:80px"> <button id="psurfb">Set</button></div>
+    <datalist id="surfwords"></datalist>
+    <div id="psurfm" class="note"></div>
+    <label><input type="checkbox" id="pcol"> collide (the faces are collision)</label>
+    <label><input type="checkbox" id="pcs"> car_solid (false only for non-solid back faces)</label>
+    <div class="note" id="pcsnote"></div>
+    <label id="pconfl" class="warn"><input type="checkbox" id="pconf"> <span id="pconft"></span></label>
+  </div>
+  <div id="weldbox">
+    <h2>Boundary / weld</h2>
+    <div>tolerance <input type="number" id="wtol" value="0.05" step="0.01" min="0.001" max="1"> m <button id="wshow">Show open edges + gaps</button> <label><input type="checkbox" id="L_open" checked> open edges</label></div>
+    <div>keep <select id="wkeep"><option value="a">side A in place (B moves onto it)</option><option value="b">side B in place (A moves)</option><option value="mid">both move to the midpoint</option></select></div>
+    <div><button id="wpickb">Pick 2 boundary vertices</button> <span class="note" id="wpicked"></span></div>
+    <div id="wgaps"></div>
+    <div><button id="wprev">Preview weld</button> <button id="wapply">Weld</button></div>
+    <div class="note">Orange = open edges (one face; uv / colour seams closed by position are not open). Green = gap distances of the candidates / the previewed pairs, pink = chosen vertices, blue = faces the weld stretches. A weld moves corners only (uv / normal / colour references kept); ambiguous matches, gaps wider than the tolerance, collapsed / flipped faces and non-manifold results are refused. Gaps are never filled automatically.</div>
+    <pre id="weldout" style="display:none"></pre>
+    <h2>Bridge two open-edge chains (new faces)</h2>
+    <div>chain A <input type="text" id="bca" style="width:150px" placeholder="v indices along open edges"> <button id="bpa">Pick A</button></div>
+    <div>chain B <input type="text" id="bcb" style="width:150px" placeholder="v indices along open edges"> <button id="bpb">Pick B</button> <label><input type="checkbox" id="bclosed"> closed loops</label></div>
+    <div>material <select id="bmat"></select> <button id="bgap">Use the chosen gap's chains</button> <span class="note" id="bpicked"></span></div>
+    <div><button id="bprev">Preview bridge</button> <button id="bapply">Bridge</button></div>
+    <div class="note">Explicit chains only (click Pick A / Pick B, then the open-edge vertices in order; or the chosen gap candidate). Equal vertex counts: one quad per chain edge. The winding of the new faces follows both neighbours (this fixes the correspondence); existing material; uv: u along chain A, v across (4 m per texture repeat); one new normal per face. Purple = new faces, green = vertex pairs. Unequal / ambiguous / twisted / folded / sliver / non-manifold / clipped results are refused. Holes are never filled automatically.</div>
+    <pre id="bridgeout" style="display:none"></pre>
+  </div>
+  <div id="layoutbox">
+    <h2>Construct (v0.23+)</h2>
+    <div><b>Unit regions</b> unit <input type="number" id="uk" value="0" min="0" style="width:50px"> <select id="uop"><option value="fit">fit lateral bounds</option><option value="lateral">set lateral bounds</option><option value="split">split at station (add a region)</option><option value="merge">merge with the next unit</option><option value="cut">move its end cut to station</option><option value="include">include a rectangle (grow the units spanning it)</option></select></div>
+    <div>lateral lo / hi (m) <input type="number" id="ulo" step="0.5" style="width:80px"> <input type="number" id="uhi" step="0.5" style="width:80px"> station <input type="number" id="ust" value="0" min="0" style="width:60px"> <button id="uprev">Preview</button> <button id="uapply">Apply</button></div>
+    <div>include rect x0 z0 x1 z1 (m) <input type="text" id="urect" style="width:220px" placeholder="for 'include' and terrain"></div>
+    <div class="note" id="uinfo"></div>
+    <div class="note">Cyan = previewed unit regions (bright: changed), red = faces that would lose area (refused: Build would drop them). Capacity = the kit's unit count, mesh / LOD block slots, vertices and records per unit.</div>
+    <div><b>Road strip</b> <select id="rid"><option value="">new road</option></select> material <select id="rmat"></select> width <input type="number" id="rw" value="8" step="0.5" style="width:55px"> m <label><input type="checkbox" id="rclosed"> closed loop</label></div>
+    <div>control points (one "x y z" per line; y = elevation) <button id="rpick">Click points</button> lift <input type="number" id="rlift" value="0.05" step="0.05" style="width:55px"> m</div>
+    <textarea id="rpts" rows="4" style="width:95%"></textarea>
+    <div>step <input type="number" id="rstep" value="4" step="0.5" style="width:50px"> m, uv <input type="number" id="ruv" value="14" step="1" style="width:50px"> m per repeat <button id="rprev">Preview road</button> <button id="rapply">Apply road</button></div>
+    <div class="note">Centripetal Catmull-Rom curve through the points; one quad per step; uv u across (0..1), v along; normals = each quad's plane; existing materials only. Purple = the new road, yellow = control points. A drivable route must stay at one height (kit V2): a road over the route at another height is warned and Build -> Validate refuses it. Re-generating a road replaces its block.</div>
+    <div><b>Race layout</b> <button id="xcheck">Check race layout</button> <span class="note">structural only - AI / laps / respawn need an in-game run</span></div>
+    <div>closed control points at ONE height (route; "x y z" per line) <button id="xpick">Click points</button></div>
+    <textarea id="xpts" rows="4" style="width:95%"></textarea>
+    <div>road <select id="xmat"></select> width <input type="number" id="xw" value="14" step="1" style="width:50px"> walls <input type="number" id="xwh" value="1.5" step="0.5" style="width:45px"> m, verges out / in <input type="number" id="xvo" value="10" step="1" style="width:45px"> <input type="number" id="xvi" value="8" step="1" style="width:45px"> m, checkpoints <input type="number" id="xcp" value="6" min="1" max="12" style="width:40px"> <label><input type="checkbox" id="xtraffic" checked> traffic</label></div>
+    <div>replace <select id="xrep"><option value="route">only the earlier race layout's blocks</option><option value="all">ALL geometry of the OBJ (new layout)</option></select> <label><input type="checkbox" id="xconfirm"> I want to replace all geometry</label> <button id="xprev">Preview layout</button> <button id="xapply">Apply layout</button></div>
+    <div>checkpoint stations <input type="text" id="cpst" style="width:160px" placeholder="e.g. 50, 110, 170"> <button id="cpprev">Preview checkpoints</button> <button id="cpapply">Apply checkpoints</button></div>
+    <div class="note">A layout = road + walls (wall / wallback) + verges + the route (stations every ~2 m, 5 lanes, corner records), 17 units (the kit validator's count with pvs all), 6 grid slots behind the start line at station 0, checkpoints in lap order, optional authored traffic. Yellow = route centre line / grid / checkpoints. Refused when a structural check fails; the kit gates decide at Build -> Validate.</div>
+    <div><b>Terrain / scenery</b> <select id="skind"><option value="terrain">terrain patch (the include rect above)</option><option value="barrier">barrier along points</option><option value="prefab">prefab copy</option></select> <select id="sid"><option value="">new</option></select></div>
+    <div>terrain: height(s) <input type="text" id="sh" value="19.98" style="width:120px" title="one height or four corner heights"> cell <input type="number" id="scell" value="10" style="width:45px"> m material <select id="smat"></select></div>
+    <div>barrier: height <input type="number" id="sbh" value="1" step="0.5" style="width:45px"> thickness <input type="number" id="sbt" value="0.5" step="0.1" style="width:45px"> <label><input type="checkbox" id="sbclosed"> closed</label> <button id="spick">Click points</button></div>
+    <textarea id="spts" rows="3" style="width:95%" placeholder="barrier points: x y z per line"></textarea>
+    <div>prefab <select id="spf"></select> at x y z <input type="text" id="spos" style="width:160px"> turn <input type="number" id="sang" value="0" step="15" style="width:50px"> deg; save selection as <input type="text" id="spname" style="width:90px"> <button id="spsave">Save prefab</button></div>
+    <div><button id="sprev">Preview scenery</button> <button id="sapply">Apply scenery</button></div>
+    <div class="note">Terrain patches (flat or four corner heights; place them a little below a route floor), barriers (wall / wallback along points), prefabs (saved face groups, reusable in any project; materials must exist here) - all as tagged blocks, existing materials only, inside the unit regions (grow them with "include" first). Purple = new faces.</div>
+    <pre id="layout_out" style="display:none"></pre>
+  </div>
+  <div id="editmsg" class="note"></div>
+  <div id="editbtns"><button id="undo">Undo</button><button id="redo">Redo</button><button id="save">Save</button><button id="check">Check</button></div>
+  <div id="stagebox">
+  <h2>Build / Validate / Stage</h2>
+  <input type="text" id="dest" placeholder="staging folder (new or one the Workbench staged before)">
+  <button id="stage">Build -> Validate -> Stage</button>
+  <pre id="stageout" style="display:none"></pre>
+  </div>
+  <h2>Validation</h2>
+  <div id="vlist" class="note">none</div>
+  <h2>Materials</h2>
+  <div id="mats"></div>
+  <h2 id="flagsh">Preserved / unsupported data</h2>
+  <div id="flags"></div>
+</div>
+<script>
+'use strict';
+const Q = new URLSearchParams(location.search), TOKEN = Q.get('t'), SELFTEST = Q.get('selftest') === '1';
+const SECTIONS = Q.get('sections') ? new Set(Q.get('sections').split(',')) : null;   // self test: only these authored sections (base steps always)
+const $ = id => document.getElementById(id);
+const api = async (path, body) => {
+  const r = await fetch(path + (path.includes('?') ? '&' : '?') + 't=' + TOKEN, body === undefined ? {} :
+                        {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(body)});
+  return r.json();
+};
+// ---------------------------------------------------------------- tiny matrix helpers (column-major)
+const FOV = 0.9;
+const M = {
+  persp(f, a, n, fa) { const t = 1 / Math.tan(f / 2); return [t / a,0,0,0, 0,t,0,0, 0,0,(fa + n) / (n - fa),-1, 0,0,2 * fa * n / (n - fa),0]; },
+  look(e, c, u) { const z = norm(sub(e, c)), x = norm(cross(u, z)), y = cross(z, x);
+    return [x[0],y[0],z[0],0, x[1],y[1],z[1],0, x[2],y[2],z[2],0, -dot(x,e),-dot(y,e),-dot(z,e),1]; },
+  mul(a, b) { const o = new Array(16); for (let i = 0; i < 4; i++) for (let j = 0; j < 4; j++) { let s = 0; for (let k = 0; k < 4; k++) s += a[k * 4 + j] * b[i * 4 + k]; o[i * 4 + j] = s; } return o; }
+};
+function sub(a, b) { return [a[0]-b[0], a[1]-b[1], a[2]-b[2]]; } function dot(a, b) { return a[0]*b[0]+a[1]*b[1]+a[2]*b[2]; }
+function cross(a, b) { return [a[1]*b[2]-a[2]*b[1], a[2]*b[0]-a[0]*b[2], a[0]*b[1]-a[1]*b[0]]; }
+function norm(a) { const l = Math.hypot(a[0], a[1], a[2]) || 1; return [a[0]/l, a[1]/l, a[2]/l]; }
+// ---------------------------------------------------------------- GL setup
+const cv = $('c'), gl = cv.getContext('webgl', {antialias: true, preserveDrawingBuffer: true, alpha: false});
+const U32 = gl && gl.getExtension('OES_element_index_uint');
+const ST = {multi: [], nb: new Set(), preview: null, clip: null, scene: null, retail: false, origin: [0,0,0], cam: {yaw: 0.8, pitch: 0.6, dist: 600, tgt: [0,0,0]}, sel: null, hl: new Set(), hlKinds: new Set(),
+            bnd: null, bv: new Map(), wsel: null, wprev: null, wpick: null, wfaces: null, wgaps: [], bpick: null, bprev: null, bfaces: null, bpairs: [], lay: null, layprev: null, ppick: null,
+            tex: {}, texSrc: {}, forceOpaque: false, texLoaded: 0, texWanted: 0, meshes: {}, coll: [], lines: {}, pick: [], lastErr: null, bin: {}};
+function prog(vs, fs) {
+  const p = gl.createProgram();
+  for (const [t, s] of [[gl.VERTEX_SHADER, vs], [gl.FRAGMENT_SHADER, fs]]) { const sh = gl.createShader(t); gl.shaderSource(sh, s); gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) throw new Error(gl.getShaderInfoLog(sh)); gl.attachShader(p, sh); }
+  gl.linkProgram(p); return p;
+}
+const PT = gl && prog(
+  'attribute vec3 p; attribute vec2 uv; attribute vec3 c; uniform mat4 mvp; varying vec2 vuv; varying vec3 vc; void main(){ vuv=uv; vc=c; gl_Position=mvp*vec4(p,1.0); }',
+  'precision mediump float; varying vec2 vuv; varying vec3 vc; uniform sampler2D tx; uniform vec4 tint; uniform float lit; uniform float ls; uniform float mode; uniform float aref;' +
+  // mode (v0.16, from the retail material +0x24 flags): 0 opaque (alpha ignored), 1 cut-out (alpha test), 2 blended, 3 blended + alpha test
+  'void main(){ vec4 s=texture2D(tx,vuv); if(((mode>0.5&&mode<1.5)||mode>2.5)&&s.a<aref) discard;' +
+  ' vec3 t=s.rgb*mix(vec3(1.0),clamp(vc*ls,0.0,1.6),lit); gl_FragColor=vec4(mix(t,tint.rgb,tint.a),mode>1.5?s.a:1.0); }');
+const MODE = {opaque: 0, cutout: 1, blend: 2, 'blend+test': 3}, AREF = 0.5;   // AREF: display choice (the game's reference value is not decoded)
+const PL = gl && prog('attribute vec3 p; uniform mat4 mvp; void main(){ gl_Position=mvp*vec4(p,1.0); gl_PointSize=7.0; }',
+  'precision mediump float; uniform vec4 col; void main(){ gl_FragColor=col; }');
+function buf(arr) { const b = gl.createBuffer(); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.bufferData(gl.ARRAY_BUFFER, arr instanceof Float32Array ? arr : new Float32Array(arr), gl.STATIC_DRAW); return b; }
+function loadTex(key, url) {
+  const t = gl.createTexture(); gl.bindTexture(gl.TEXTURE_2D, t);
+  gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, 1, 1, 0, gl.RGBA, gl.UNSIGNED_BYTE, new Uint8Array([200, 0, 200, 255]));   // magenta until loaded / missing
+  if (url) {
+    ST.texWanted++;
+    const im = new Image();
+    im.onload = () => { gl.bindTexture(gl.TEXTURE_2D, t); gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, im);
+      const p2 = (im.width & (im.width - 1)) === 0 && (im.height & (im.height - 1)) === 0;
+      t.minFilter = p2 ? gl.LINEAR_MIPMAP_LINEAR : gl.LINEAR;
+      if (p2) { gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); }
+      else { gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); }
+      ST.texLoaded++; draw(); };
+    im.src = url + '&t=' + TOKEN;
+  }
+  return t;
+}
+// ---------------------------------------------------------------- scene -> buffers
+const O = p => [p[0] - ST.origin[0], p[1] - ST.origin[1], p[2] - ST.origin[2]];
+function nplus(s) { return [-s.t[1], 0, s.t[0]]; }                       // n+ = (-tz, tx) in the x-z plane
+function at(s, off, dy) { const n = nplus(s); return O([s.p[0] + n[0] * off, s.p[1] + (dy || 0), s.p[2] + n[2] * off]); }
+const seg = (arr, a, b) => arr.push(...a, ...b);
+const marker = (arr, p, s) => { seg(arr, [p[0]-s,p[1],p[2]], [p[0]+s,p[1],p[2]]); seg(arr, [p[0],p[1],p[2]-s], [p[0],p[1],p[2]+s]); seg(arr, [p[0],p[1],p[2]], [p[0],p[1]+s*2,p[2]]); };
+function freeMeshes() { for (const m of Object.values(ST.meshes)) for (const k of ['p','uv','c','ib']) if (m[k]) gl.deleteBuffer(m[k]); ST.meshes = {}; }
+function buildMeshesAuthored() {
+  freeMeshes();
+  for (const [name, m] of Object.entries(ST.scene.mesh.materials || {})) {
+    const arr = new Float32Array(m.pos.length); for (let i = 0; i < arr.length; i++) arr[i] = m.pos[i] - ST.origin[i % 3];
+    ST.meshes[name] = {n: m.pos.length / 3, arr, grp: m.grp, p: buf(arr), uv: buf(m.uv), c: buf(m.col), mat: name};
+    const mi = ST.scene.materials[name], v = mi ? mi.tex_v : '';                       // live preview: reload when the texture reference changed
+    if (ST.tex[name] && ST.texSrc[name] !== v) { gl.deleteTexture(ST.tex[name]); delete ST.tex[name]; }
+    if (!ST.tex[name]) { ST.texSrc[name] = v; ST.tex[name] = loadTex(name, mi && mi.texture_ok ? '/tex?m=' + encodeURIComponent(name) + '&v=' + v : null); }
+  }
+}
+function buildMeshesRetail() {
+  freeMeshes(); const B = ST.bin.mesh;
+  for (const e of ST.scene.mesh) {
+    const pos = new Float32Array(B, e.off_pos, e.vertices * 3).slice(); for (let i = 0; i < pos.length; i++) pos[i] -= ST.origin[i % 3];
+    const ib = gl.createBuffer(); gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, ib); gl.bufferData(gl.ELEMENT_ARRAY_BUFFER, new Uint32Array(B, e.off_idx, e.indices), gl.STATIC_DRAW);
+    const key = 'r' + e.material + (e.unit === null || e.unit === undefined ? '' : '_u' + e.unit);
+    ST.meshes[key] = {n: e.indices, p: buf(pos), uv: buf(new Float32Array(B, e.off_uv, e.vertices * 2)), c: buf(new Float32Array(B, e.off_col, e.vertices * 3)), ib, retail: e};
+    const tk = 't' + e.texture; if (e.texture !== null && !ST.tex[tk]) ST.tex[tk] = loadTex(tk, '/tex?i=' + e.texture);
+    ST.meshes[key].tex = e.texture === null ? (ST.tex.none || (ST.tex.none = loadTex('none', null))) : ST.tex[tk];
+  }
+  ST.coll = [];
+  for (const c of ST.scene.collision) {
+    const a = new Float32Array(ST.bin.coll, c.off, c.vertices * 3).slice(); for (let i = 0; i < a.length; i++) a[i] -= ST.origin[i % 3];
+    ST.coll.push({b: buf(a), n: c.vertices, surface: parseInt(c.surface, 16)});
+  }
+}
+function build() {
+  const S = ST.scene, L = {units: [], route: [], lanes: [], starts: [], hl: [], sel: [], nb: [], clip: [], cb: [], tf: [], pv: [], oe: [], wg: [], wf: [], wv: [], bf: [], bp: [], bc: [], lr: [], lu: [], lf: [], ln: [], ll: []};
+  ST.pick = [];
+  if (ST.retail) {
+    S.units.forEach(u => { if (u.empty) return; const c = u.corners.map(O);
+      for (let k = 0; k < 4; k++) seg(L.units, [c[k][0], c[k][1] + .5, c[k][2]], [c[(k + 1) % 4][0], c[(k + 1) % 4][1] + .5, c[(k + 1) % 4][2]]);
+      const m = [0,1,2].map(i => c.reduce((s, q) => s + q[i], 0) / 4); ST.pick.push({kind: 'unit', index: u.unit, p: m}); });
+    (S.route.lanes || []).forEach(l => { const pts = l.centre.map(O); for (let i = 0; i + 1 < pts.length; i++) seg(L.route, [pts[i][0], pts[i][1] + .4, pts[i][2]], [pts[i+1][0], pts[i+1][1] + .4, pts[i+1][2]]);
+      if (pts.length) { const q = pts[Math.floor(pts.length / 2)]; ST.pick.push({kind: 'lane', index: l.lane, p: [q[0], q[1] + .4, q[2]]}); } });
+    S.starts.forEach((s, i) => { const p = O(s.pos); marker(L.starts, p, 1.5); ST.pick.push({kind: 'start', index: i, p}); });
+  } else {
+    const st = S.stations, N = st.length;
+    for (let i = 0; i < N; i++) { const a = st[i], b = st[(i + 1) % N]; seg(L.route, at(a, 0, .3), at(b, 0, .3));
+      (a.offsets || []).forEach((o, k) => { if (b.offsets && b.offsets[k] !== undefined) seg(L.lanes, at(a, o, .25), at(b, b.offsets[k], .25)); }); }
+    (S.route.corners || []).forEach((c, i) => { const s = st[c.apex % N]; if (s) { seg(L.route, at(s, 0, 0), at(s, 0, 8)); ST.pick.push({kind: 'corner', index: i, p: at(s, 0, 4)}); } });
+    S.units.forEach((u, i) => {
+      const a = u.cut_from, b = u.cut_to, lat = u.lateral || [-10, 10];
+      for (let k = a; k < b; k++) { const s0 = st[k % N], s1 = st[(k + 1) % N]; seg(L.units, at(s0, lat[0], .5), at(s1, lat[0], .5)); seg(L.units, at(s0, lat[1], .5), at(s1, lat[1], .5)); }
+      const sa = st[a % N]; if (sa) { seg(L.units, at(sa, lat[0], .5), at(sa, lat[1], .5)); ST.pick.push({kind: 'unit', index: i, p: at(st[Math.floor((a + b) / 2) % N], 0, 1)}); }
+    });
+    const lineAcross = (arr, o) => { const n = o.normal || [1,0,0], w = (o.width || 10) / 2, p = O(o.pos), d = norm([-n[2], 0, n[0]]);
+      seg(arr, [p[0]-d[0]*w, p[1]+.4, p[2]-d[2]*w], [p[0]+d[0]*w, p[1]+.4, p[2]+d[2]*w]); };
+    S.grid.forEach((g, i) => { const p = O(g.pos), f = g.fwd || [1,0,0]; marker(L.starts, p, 1); seg(L.starts, p, [p[0]+f[0]*3, p[1]+f[1]*3, p[2]+f[2]*3]); ST.pick.push({kind: 'grid', index: i, p}); });
+    if (S.start_line && S.start_line.pos) { lineAcross(L.starts, S.start_line); ST.pick.push({kind: 'start_line', index: null, p: O(S.start_line.pos)}); }
+    S.checkpoints.forEach((c, i) => { if (c.pos) { lineAcross(L.starts, c); ST.pick.push({kind: 'checkpoint', index: i, p: O(c.pos)}); } });
+    const msel = new Set(ST.multi);                                       // outline the selected face groups' triangles (+ neighbours)
+    if (msel.size || ST.nb.size) for (const m of Object.values(ST.meshes)) for (let t = 0; t < m.grp.length; t++) {
+      const tgt = msel.has(m.grp[t]) ? L.sel : ST.nb.has(m.grp[t]) ? L.nb : null; if (!tgt) continue;
+      const v = k => [m.arr[9*t+3*k], m.arr[9*t+3*k+1] + .05, m.arr[9*t+3*k+2]]; seg(tgt, v(0), v(1)); seg(tgt, v(1), v(2)); seg(tgt, v(2), v(0)); }
+    const X = xformParams();                                               // v0.20: live transform preview + pivot marker
+    if (X) { const P = O(X.pivot); marker(L.pv, [P[0], P[1] + .1, P[2]], 2);
+      if (X.angle % 360 !== 0 || X.scale !== 1) for (const m of Object.values(ST.meshes)) for (let t = 0; t < m.grp.length; t++) { if (!msel.has(m.grp[t])) continue;
+        const v = k => { const q = xformPoint([m.arr[9*t+3*k] + ST.origin[0], m.arr[9*t+3*k+1] + ST.origin[1], m.arr[9*t+3*k+2] + ST.origin[2]], X); const o = O(q); return [o[0], o[1] + .1, o[2]]; };
+        seg(L.tf, v(0), v(1)); seg(L.tf, v(1), v(2)); seg(L.tf, v(2), v(0)); } }
+    for (const f of ST.clip || []) {                                        // v0.19: faces trackbuild would clip + the unit edges
+      const c = f.corners.map(q => { const o = O(q); return [o[0], o[1] + .08, o[2]]; }); c.forEach((q, i) => seg(L.clip, q, c[(i + 1) % c.length]));
+      for (const b of f.boundaries) if (b.segment) seg(L.cb, O(b.segment[0]).map((x, i) => i === 1 ? x + .6 : x), O(b.segment[1]).map((x, i) => i === 1 ? x + .6 : x)); }
+    const up = (q, d) => { const o = O(q); return [o[0], o[1] + d, o[2]]; };   // v0.21 boundary / weld overlays
+    if (ST.bnd && $('L_open').checked) for (const e of ST.bnd.open_edges) { const a = ST.bv.get(e[0]), b = ST.bv.get(e[1]); if (a && b) seg(L.oe, up(a, .04), up(b, .04)); }
+    for (const g of ST.wgaps || []) seg(L.wg, up(g[0], .06), up(g[1], .06));
+    for (const f of ST.wfaces || []) { const c = f.corners.map(q => up(q, .07)); c.forEach((q, i) => seg(L.wf, q, c[(i + 1) % c.length])); }
+    const wv = ST.wpick || (ST.wsel ? (ST.wsel.pairs || ST.wsel.chains).flat() : []);
+    wv.forEach(v => { const p = ST.bv.get(v); if (p) marker(L.wv, up(p, .05), .3); });
+    for (const f of ST.bfaces || []) { const c = f.corners.map(q => up(q, .03)); c.forEach((q, i) => seg(L.bf, q, c[(i + 1) % c.length])); seg(L.bf, c[0], c[2]); }   // v0.22 bridge preview
+    for (const g of ST.bpairs || []) seg(L.bp, up(g[0], .06), up(g[1], .06));
+    const LY = ST.lay || {};                                                // v0.23+ construct overlays
+    for (const r of LY.regions || []) { const c = r.corners.map(q => O(q)); c.forEach((q, i) => seg(r.changed ? L.lr : L.lu, q, c[(i + 1) % c.length])); }
+    for (const f of LY.lost || []) { const c = f.corners.map(q => up(q, .1)); c.forEach((q, i) => seg(L.lf, q, c[(i + 1) % c.length])); }
+    for (const f of LY.faces || []) { const c = f.map(q => up(q, .05)); c.forEach((q, i) => seg(L.ln, q, c[(i + 1) % c.length])); }
+    for (const g of LY.lines || []) seg(L.ll, up(g[0], .3), up(g[1], .3));
+    for (const q of LY.points || []) marker(L.ll, up(q, .3), .6);
+    for (const v of bridgeChains().flat()) { const p = ST.bv.get(v); if (p) marker(L.bc, up(p, .05), .25); }
+  }
+  ST.pick.forEach(o => { if (isHl(o.kind, o.index)) marker(L.hl, o.p, 2.5); });
+  if (ST.sel && ST.sel.p) marker(L.sel, ST.sel.p, 3);
+  for (const k in ST.lines) gl.deleteBuffer(ST.lines[k].b);
+  ST.lines = {}; for (const k in L) ST.lines[k] = {b: buf(L[k].length ? L[k] : [0,0,0]), n: L[k].length / 3};
+}
+function isHl(kind, index) { return ST.hl.has(kind + ':' + index) || ST.hlKinds.has(kind) || (ST.hlKinds.has('starts') && ['grid','checkpoint','start_line'].includes(kind)); }
+// ---------------------------------------------------------------- draw
+function eye() { const c = ST.cam; return [c.tgt[0] + c.dist * Math.cos(c.pitch) * Math.cos(c.yaw), c.tgt[1] + c.dist * Math.sin(c.pitch), c.tgt[2] + c.dist * Math.cos(c.pitch) * Math.sin(c.yaw)]; }
+function mvp() { return M.mul(M.persp(FOV, cv.width / cv.height, 0.5, 20000), M.look(eye(), ST.cam.tgt, [0,1,0])); }
+function collisionTint(m) {
+  if (!m || !m.collide) return [.5,.5,.5,.55];
+  const s = parseInt(m.surface, 16);
+  if (m.car_solid === false || (s & 0x1000)) return [1,.85,.1,.55];
+  if (s === 0x0018) return [.9,.15,.1,.55];
+  return [.1,.8,.25,.45];
+}
+function surfaceColour(s) { if (s & 0x1000) return [1,.85,.1,.5]; if (s === 0x0018) return [.9,.15,.1,.5];
+  if ([0x0001,0x0002,0x000F].includes(s)) return [.1,.8,.25,.45]; const h = (s * 2654435761) >>> 0; return [((h >> 16) & 255) / 255, ((h >> 8) & 255) / 255, (h & 255) / 255, .5]; }
+function draw() {
+  if (!gl || !ST.scene) return;
+  const w = cv.clientWidth * devicePixelRatio, h = cv.clientHeight * devicePixelRatio;
+  if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+  gl.viewport(0, 0, cv.width, cv.height); gl.clearColor(.53, .64, .74, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT); gl.enable(gl.DEPTH_TEST); gl.depthFunc(gl.LEQUAL);
+  const P = mvp();
+  const drawMesh = ($('L_mesh').checked || (!ST.retail && $('L_collision').checked));
+  if (drawMesh) {
+    gl.useProgram(PT); gl.uniformMatrix4fv(gl.getUniformLocation(PT, 'mvp'), false, P);
+    gl.uniform1f(gl.getUniformLocation(PT, 'ls'), ST.retail ? ST.scene.lit_scale : 2.5);
+    const aP = gl.getAttribLocation(PT, 'p'), aU = gl.getAttribLocation(PT, 'uv'), aC = gl.getAttribLocation(PT, 'c');
+    gl.uniform1f(gl.getUniformLocation(PT, 'aref'), AREF);
+    // retail: opaque + cut-out first (stored order), then blended sections far to near; authored materials are opaque (trackbuild 0.2)
+    let list = Object.entries(ST.meshes);
+    if (ST.retail) { const E = eye(), dist = m => { const c = m.retail.centre || [0,0,0]; return Math.hypot(c[0] - ST.origin[0] - E[0], c[1] - ST.origin[1] - E[1], c[2] - ST.origin[2] - E[2]); };
+      const bl = list.filter(([, m]) => MODE[m.retail.render] >= 2).sort((a, b) => dist(b[1]) - dist(a[1]));
+      list = list.filter(([, m]) => MODE[m.retail.render] < 2).concat(bl); }
+    for (const [name, m] of list) {
+      const md = ST.retail && !ST.forceOpaque ? MODE[m.retail.render] || 0 : 0;
+      gl.uniform1f(gl.getUniformLocation(PT, 'mode'), md);
+      if (md >= 2) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(!!m.retail.depth_write);
+        gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-1, -2); }
+      else { gl.disable(gl.BLEND); gl.depthMask(true); gl.disable(gl.POLYGON_OFFSET_FILL); }
+      let tint = [0,0,0,0];
+      if (!ST.retail) {
+        const mat = ST.scene.materials[name];
+        if ($('L_collision').checked) tint = collisionTint(mat);
+        if (!$('L_mesh').checked) tint = [tint[0], tint[1], tint[2], 1];
+        if (isHl('material', name) || ST.hlKinds.has('mesh') || (ST.hlKinds.has('collision') && mat && mat.collide)) tint = [.95,.1,.1,.6];
+        if (ST.sel && ST.sel.kind === 'material' && ST.sel.index === name) tint = [1,.9,0,.45];
+      }
+      gl.uniform4fv(gl.getUniformLocation(PT, 'tint'), tint); gl.uniform1f(gl.getUniformLocation(PT, 'lit'), 1);
+      gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, m.tex || ST.tex[name]); gl.uniform1i(gl.getUniformLocation(PT, 'tx'), 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.p); gl.enableVertexAttribArray(aP); gl.vertexAttribPointer(aP, 3, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.uv); gl.enableVertexAttribArray(aU); gl.vertexAttribPointer(aU, 2, gl.FLOAT, false, 0, 0);
+      gl.bindBuffer(gl.ARRAY_BUFFER, m.c); gl.enableVertexAttribArray(aC); gl.vertexAttribPointer(aC, 3, gl.FLOAT, false, 0, 0);
+      if (m.ib) { gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, m.ib); gl.drawElements(gl.TRIANGLES, m.n, gl.UNSIGNED_INT, 0); }
+      else gl.drawArrays(gl.TRIANGLES, 0, m.n);
+    }
+    gl.disable(gl.BLEND); gl.depthMask(true); gl.disable(gl.POLYGON_OFFSET_FILL); gl.uniform1f(gl.getUniformLocation(PT, 'mode'), 0);
+  }
+  gl.useProgram(PL); gl.uniformMatrix4fv(gl.getUniformLocation(PL, 'mvp'), false, P);
+  const aL = gl.getAttribLocation(PL, 'p');
+  gl.disableVertexAttribArray(1); gl.disableVertexAttribArray(2);
+  if (ST.retail && $('L_collision').checked) {
+    gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
+    for (const c of ST.coll) { gl.uniform4fv(gl.getUniformLocation(PL, 'col'), $('L_mesh').checked ? surfaceColour(c.surface) : surfaceColour(c.surface).slice(0, 3).concat([1]));
+      gl.bindBuffer(gl.ARRAY_BUFFER, c.b); gl.enableVertexAttribArray(aL); gl.vertexAttribPointer(aL, 3, gl.FLOAT, false, 0, 0); gl.drawArrays(gl.TRIANGLES, 0, c.n); }
+    gl.disable(gl.BLEND);
+  }
+  const lines = (k, col, depth) => { const l = ST.lines[k]; if (!l || !l.n) return; if (!depth) gl.disable(gl.DEPTH_TEST);
+    gl.uniform4fv(gl.getUniformLocation(PL, 'col'), col); gl.bindBuffer(gl.ARRAY_BUFFER, l.b); gl.enableVertexAttribArray(aL);
+    gl.vertexAttribPointer(aL, 3, gl.FLOAT, false, 0, 0); gl.drawArrays(gl.LINES, 0, l.n); gl.enable(gl.DEPTH_TEST); };
+  if ($('L_units').checked) lines('units', ST.hlKinds.has('units') ? [1,.1,.1,1] : [.1,.3,1,1], false);
+  if ($('L_route').checked) { lines('lanes', [1,1,1,.5], false); lines('route', ST.hlKinds.has('route') ? [1,.1,.1,1] : [1,.55,0,1], false); }
+  if ($('L_starts').checked) lines('starts', [.95,.95,.95,1], false);
+  lines('hl', [1,0,0,1], false); lines('nb', [1,.45,0,1], false); lines('sel', [1,.9,0,1], false); lines('cb', [1,0,1,1], false); lines('clip', [1,0,.2,1], false); lines('tf', [0,1,1,1], false); lines('pv', [1,1,1,1], false);
+  lines('oe', [1,.55,0,1], false); lines('wf', [.3,.6,1,1], false); lines('wg', [0,1,.4,1], false); lines('wv', [1,.4,.8,1], false);
+  lines('bf', [.65,.3,1,1], false); lines('bp', [0,1,.4,1], false); lines('bc', [1,.4,.8,1], false);
+  lines('lu', [.2,.6,.7,1], false); lines('lr', [0,1,1,1], false); lines('lf', [1,0,.2,1], false); lines('ln', [.65,.3,1,1], false); lines('ll', [1,1,.2,1], false);
+  $('hud').textContent = (ST.retail ? 'RETAIL VIEW (read only) - ' : '') + `${Object.keys(ST.meshes).length} material groups, ${ST.texLoaded} textures, ${ST.pick.length} selectable objects` + (ST.scene.state.dirty ? ' - UNSAVED EDITS' : '');
+}
+// ---------------------------------------------------------------- navigation + picking
+let drag = null;
+cv.addEventListener('mousedown', e => { drag = {x: e.clientX, y: e.clientY, b: e.button, s: e.shiftKey, moved: false}; });
+addEventListener('mouseup', e => { if (drag && !drag.moved && drag.b === 0) pickAt(e.offsetX, e.offsetY, e.ctrlKey); drag = null; });
+cv.addEventListener('contextmenu', e => e.preventDefault());
+addEventListener('mousemove', e => { if (!drag) return; const dx = e.clientX - drag.x, dy = e.clientY - drag.y; if (Math.abs(dx) + Math.abs(dy) > 2) drag.moved = true;
+  drag.x = e.clientX; drag.y = e.clientY; const c = ST.cam;
+  if (drag.b === 2 || drag.s) { const k = c.dist / 600; c.tgt[0] += (-dx * Math.sin(c.yaw) - dy * Math.cos(c.yaw)) * k; c.tgt[2] += (dx * Math.cos(c.yaw) - dy * Math.sin(c.yaw)) * k; }
+  else { c.yaw += dx * 0.005; c.pitch = Math.max(-1.45, Math.min(1.45, c.pitch + dy * 0.005)); } draw(); });
+cv.addEventListener('wheel', e => { e.preventDefault(); ST.cam.dist = Math.max(5, Math.min(8000, ST.cam.dist * Math.exp(e.deltaY * 0.001))); draw(); }, {passive: false});
+addEventListener('keydown', e => { if (['INPUT','SELECT'].includes(e.target.tagName)) return; const c = ST.cam, s = c.dist * 0.05, f = [-Math.cos(c.yaw), -Math.sin(c.yaw)];
+  const mv = {w: [f[0], 0, f[1]], s: [-f[0], 0, -f[1]], a: [f[1], 0, -f[0]], d: [-f[1], 0, f[0]], q: [0, -1, 0], e: [0, 1, 0]}[e.key.toLowerCase()];
+  if (mv) { c.tgt = c.tgt.map((v, i) => v + mv[i] * s); draw(); }
+  if (e.ctrlKey && e.key === 'z') doUndo(); if (e.ctrlKey && e.key === 'y') doRedo(); });
+function project(p, P) { const x = P[0]*p[0]+P[4]*p[1]+P[8]*p[2]+P[12], y = P[1]*p[0]+P[5]*p[1]+P[9]*p[2]+P[13], w = P[3]*p[0]+P[7]*p[1]+P[11]*p[2]+P[15];
+  if (w <= 0) return null; return [(x / w * .5 + .5) * cv.clientWidth, (1 - (y / w * .5 + .5)) * cv.clientHeight]; }
+function rayPick(x, y) {                                                  // authored mode: nearest face group under the cursor
+  const e = eye(), z = norm(sub(e, ST.cam.tgt)), xa = norm(cross([0,1,0], z)), ya = cross(z, xa), t = Math.tan(FOV / 2), a = cv.clientWidth / cv.clientHeight;
+  const nx = x / cv.clientWidth * 2 - 1, ny = 1 - y / cv.clientHeight * 2;
+  const d = norm([0,1,2].map(i => -z[i] + xa[i] * nx * t * a + ya[i] * ny * t));
+  let best = null, bt = Infinity;
+  for (const m of Object.values(ST.meshes)) { if (!m.arr) continue; const A = m.arr;
+    for (let k = 0; k < m.grp.length; k++) { const o = 9 * k;
+      const e1 = [A[o+3]-A[o], A[o+4]-A[o+1], A[o+5]-A[o+2]], e2 = [A[o+6]-A[o], A[o+7]-A[o+1], A[o+8]-A[o+2]];
+      const p = cross(d, e2), det = dot(e1, p); if (Math.abs(det) < 1e-9) continue; const inv = 1 / det;
+      const s = [e[0]-A[o], e[1]-A[o+1], e[2]-A[o+2]], u = dot(s, p) * inv; if (u < 0 || u > 1) continue;
+      const q = cross(s, e1), v = dot(d, q) * inv; if (v < 0 || u + v > 1) continue;
+      const tt = dot(e2, q) * inv; if (tt > 0.01 && tt < bt) { bt = tt; best = {group: m.grp[k], mat: m.mat}; } } }
+  if (best) best.p = [0,1,2].map(i => e[i] + d[i] * bt + ST.origin[i]);   // v0.24: the hit point (world metres) for click-placed points
+  return best;
+}
+function weldPickAt(x, y) { const P = mvp(); let best = null, bd = 14;             // v0.21: nearest open-edge vertex on screen
+  for (const [vi, p] of ST.bv) { const s = project(O(p), P); if (!s) continue; const d = Math.hypot(s[0] - x, s[1] - y); if (d < bd) { bd = d; best = vi; } }
+  if (best === null) { $('wpicked').textContent = 'no open-edge vertex within 14 px: click closer (zoom in)'; return; }
+  ST.wpick.push(best); if (ST.wpick.length === 2) { ST.wsel = {pairs: [ST.wpick.slice()]}; ST.wpick = null; ST.wprev = null; ST.wfaces = null; ST.wgaps = []; }
+  weldInfo(); build(); draw(); }
+function bridgePickAt(x, y) { const P = mvp(); let best = null, bd = 14;           // v0.22: append the nearest open-edge vertex to the chain being picked
+  for (const [vi, p] of ST.bv) { const s = project(O(p), P); if (!s) continue; const d = Math.hypot(s[0] - x, s[1] - y); if (d < bd) { bd = d; best = vi; } }
+  if (best === null) { $('bpicked').textContent = 'no open-edge vertex within 14 px: click closer (zoom in)'; return; }
+  const id = ST.bpick === 'a' ? 'bca' : 'bcb', cur = $(id).value.trim(); $(id).value = cur ? cur + ',' + best : String(best);
+  bridgeReset(); bridgeInfo(); build(); draw(); }
+function pointPickAt(x, y) { const g = rayPick(x, y); const id = ST.ppick;      // v0.24: append the clicked mesh point (+ lift) to a points list
+  if (!g) { $('layout_out').style.display = 'block'; $('layout_out').textContent = 'no mesh under the cursor: click on the ground'; return; }
+  const lift = +($('rlift').value || 0), q = [g.p[0], g.p[1] + lift, g.p[2]].map(v => (Math.round(v * 100) / 100).toFixed(2));
+  $(id).value = ($(id).value.trim() ? $(id).value.trim() + '\n' : '') + q.join(' '); roadMarkers(); }
+function pickAt(x, y, add) { if (ST.ppick && !ST.retail) return pointPickAt(x, y); if (ST.bpick && !ST.retail) return bridgePickAt(x, y); if (ST.wpick && !ST.retail) return weldPickAt(x, y);
+  const P = mvp(); let best = null, bd = 16;
+  if (!(add && !ST.retail)) for (const o of ST.pick) { if (!layerOn(o.kind)) continue; const s = project(o.p, P); if (!s) continue; const d = Math.hypot(s[0] - x, s[1] - y); if (d < bd) { bd = d; best = o; } }
+  if (best) return select(best.kind, best.index);
+  if (!ST.retail && $('L_mesh').checked) { const g = rayPick(x, y); if (g) return add ? toggleGroup(g.group) : select('group', g.group); }
+  if (!add) select(null, null); }
+function setMulti(groups) { ST.multi = groups; ST.nb = new Set(); ST.preview = null; ST.clip = null; if (typeof xformInfo === 'function') xformInfo(); }
+function toggleGroup(g) { const m = ST.multi.slice(), i = m.indexOf(g); if (i >= 0) m.splice(i, 1); else m.push(g);
+  if (!m.length) { setMulti([]); return select(null, null); }
+  setMulti(m); select('group', i >= 0 ? m[m.length - 1] : g, true); }
+function selInfo() { const G = ST.scene.mesh.groups || []; const f = ST.multi.reduce((n, g) => n + (G[g] ? G[g].faces : 0), 0);
+  return ST.multi.length ? `selection: ${ST.multi.length} face group(s), ${f} face(s) - groups ${ST.multi.slice().sort((a, b) => a - b).join(', ')}` : 'selection: nothing'; }
+const LAYER = {grid: 'L_starts', checkpoint: 'L_starts', start_line: 'L_starts', start: 'L_starts', unit: 'L_units', corner: 'L_route', lane: 'L_route'};
+function layerOn(kind) { return LAYER[kind] ? $(LAYER[kind]).checked : true; }
+function sourceOf(kind, index) { const S = ST.scene;
+  if (ST.retail) { const l = kind === 'lane' && S.route.lanes[index];
+    const rm = () => { const x = S.materials_retail[index], e = S.mesh.find(q => q.material === index);
+      return x && Object.assign({}, x, {texture_alpha: e && e.texture !== null ? S.texture_alpha[String(e.texture)] : null, preview: 'inspection only (retail)'}); };
+    return {unit: () => S.units[index], start: () => S.starts[index], rmaterial: rm, lane: () => l && {lane: l.lane, flags: l.flags, segments: l.segments, rungs: l.centre.length, first: l.centre[0]}}[kind]?.(); }
+  if (kind === 'group') { const g = S.mesh.groups[index]; return g && {group: g.i, usemtl_line: g.line, material: g.mat, faces: g.faces, vertex_colours: g.colours, material_properties: S.materials[g.mat]}; }
+  return {grid: () => S.grid[index], checkpoint: () => S.checkpoints[index], start_line: () => S.start_line, unit: () => S.units[index],
+          corner: () => (S.route.corners || [])[index], material: () => S.materials[index]}[kind]?.(); }
+function select(kind, index, keepMulti) {
+  if (!keepMulti) setMulti(kind === 'group' ? [index] : []);
+  ST.sel = kind ? {kind, index, p: (ST.pick.find(o => o.kind === kind && o.index === index) || {}).p} : null;
+  $('selname').textContent = kind ? `${kind}${index === null ? '' : ' ' + index}` + (isHl(kind, index) ? '  (VALIDATION PROBLEM)' : '') : 'nothing selected';
+  $('insp').textContent = kind ? JSON.stringify(sourceOf(kind, index), null, 1) : '';
+  const editable = kind && !ST.retail && ST.scene.editable[kind];
+  $('editbox').style.display = editable && !['group', 'material'].includes(kind) ? 'block' : 'none';
+  $('matbox').style.display = editable && kind === 'group' ? 'block' : 'none';
+  $('propbox').style.display = editable && kind === 'material' ? 'block' : 'none';
+  if (editable && kind === 'material') fillProps(index);
+  if (kind !== 'group') $('geomout').style.display = 'none';
+  $('gsel').textContent = selInfo();
+  if (editable && kind === 'group') { const g = ST.scene.mesh.groups[index]; $('mmat').value = g.mat;
+    const c = Object.keys(g.colours)[0]; if (c) { const v = c.split(' '); $('cr').value = v[0]; $('cg').value = v[1]; $('cb').value = v[2]; } }
+  $('editmsg').textContent = !kind ? '' : ST.retail ? 'read only (retail view)' : editable ? ({group: 'editable: assign an existing material, set the vertex colour, move the group', material: 'editable: texture, surface, collide, car_solid (checked by the kit trackbuild rules)'}[kind] || 'editable: move (dx, dy, dz)') :
+    'read only: ' + (ST.scene.not_editable[{unit: 'units', corner: 'route', material: 'materials'}[kind]] || 'not editable in this slice');
+  $('editmsg').className = 'note';
+  build(); draw();
+}
+// ---------------------------------------------------------------- edits / save / check / stage
+async function refresh(keepSel) { ST.scene = await api('/api/scene'); if (ST.bnd && !ST.retail) await doBoundary(true); let s = ST.sel, m = ST.multi.slice(); const nb = ST.nb, pv = ST.preview; if (!ST.retail) buildMeshesAuthored(); build(); renderSide();
+  const ng = ST.retail ? 0 : ((ST.scene.mesh || {}).groups || []).length;           // v0.22: an undone duplicate / bridge removes groups
+  if (!ST.retail && s && s.kind === 'group' && !(s.index < ng)) { m = m.filter(g => g < ng); s = m.length ? {kind: 'group', index: m[m.length - 1]} : null; } else if (!ST.retail) m = m.filter(g => g < ng);
+  if (keepSel && s) { select(s.kind, s.index, true); if (s.kind === 'group') { ST.multi = m; ST.nb = nb; ST.preview = pv; $('gsel').textContent = selInfo(); build(); draw(); } } else { setMulti([]); if (keepSel) select(null, null); draw(); } }
+function shown(r, okText) { ST.lastErr = r.ok ? null : r.error; $('editmsg').textContent = r.ok ? okText : 'REFUSED: ' + r.error; $('editmsg').className = r.ok ? 'note ok' : 'note bad'; }
+async function doEdit(kind, index, delta) { const r = await api('/api/edit', {kind, index, delta}); shown(r, r.label); if (r.ok) await refresh(true); return r; }
+async function doMaterial(body) { const r = await api('/api/material', body); shown(r, r.label); if (r.ok) await refresh(true); return r; }
+// v0.17 geometry: translate the selected face group; the server dry-runs the kit's trackbuild regeneration first
+// v0.17 / v0.18 geometry: move the selected face groups; connected mode needs a preview of the affected neighbours first
+function geomOpts() { return {mode: $('gmode').value, snap: $('gsnap').checked ? +$('gstep').value : null}; }
+// v0.20 transforms: the selection's bounding-box centre (its corners), angle snapping as the server (half away from zero)
+function selBBoxCentre() { const lo = [Infinity, Infinity, Infinity], hi = [-Infinity, -Infinity, -Infinity], msel = new Set(ST.multi);
+  for (const m of Object.values(ST.meshes)) for (let t = 0; t < m.grp.length; t++) if (msel.has(m.grp[t])) for (let j = 0; j < 9; j++) {
+    const v = m.arr[9*t+j] + ST.origin[j % 3]; lo[j % 3] = Math.min(lo[j % 3], v); hi[j % 3] = Math.max(hi[j % 3], v); }
+  return lo[0] === Infinity ? null : lo.map((v, i) => (v + hi[i]) / 2); }
+function snapAngle(a, step) { if (!step) return a; const q = a / step; return Math.sign(q) * Math.round(Math.abs(q)) * step; }
+function xformParams() { if (!ST.multi.length || ST.retail) return null;
+  const pivot = $('tpm').value === 'bbox' ? selBBoxCentre() : [+$('tpx').value, +$('tpy').value, +$('tpz').value]; if (!pivot) return null;
+  return {angle: snapAngle(+$('ta').value, $('tsnap').checked ? +$('tstep').value : 0), scale: +$('tk').value, pivot, pivotMode: $('tpm').value}; }
+function xformPoint(p, X) { const a = X.angle * Math.PI / 180, c = Math.cos(a), s = Math.sin(a), x = p[0] - X.pivot[0], y = p[1] - X.pivot[1], z = p[2] - X.pivot[2];
+  return [X.pivot[0] + X.scale * (c * x + s * z), X.pivot[1] + X.scale * y, X.pivot[2] + X.scale * (c * z - s * x)]; }
+function xformInfo() { const X = xformParams(); $('tinfo').textContent = X ? `preview: turn ${X.angle} deg, scale ${X.scale}, pivot [${X.pivot.map(v => v.toFixed(3)).join(', ')}] (${X.pivotMode === 'bbox' ? 'bbox centre' : 'entered'})` : ''; }
+function xformLive() { xformInfo(); build(); draw(); }
+function xformBody() { const piv = $('tpm').value === 'bbox' ? 'bbox' : [+$('tpx').value, +$('tpy').value, +$('tpz').value];
+  return {op: 'transform', angle: +$('ta').value, scale: +$('tk').value, pivot: piv, angle_snap: $('tsnap').checked ? +$('tstep').value : null}; }
+async function doPreview(groups, mode) { const r = await api('/api/geometry', {op: 'preview', groups, mode}); const o = $('geomout'); o.style.display = 'block';
+  if (!r.ok) { shown(r, ''); o.textContent = 'REFUSED: ' + r.error; return r; }
+  ST.nb = new Set(r.neighbour_groups); ST.preview = {key: r.preview_key, groups: groups.slice().sort((a, b) => a - b).join(','), mode};
+  o.textContent = `PREVIEW (${mode}): ${r.faces} selected face(s), ${r.corners} corner(s), ${r.shared_inside_selection} shared inside the selection (kept shared), ${r.boundary_corners} on the boundary\n${r.effect}` +
+    (r.neighbour_groups.length ? `\naffected neighbour groups (orange): ${r.neighbour_groups.join(', ')}` : '');
+  o.className = r.neighbour_faces ? 'warn' : ''; $('editmsg').textContent = 'preview only: nothing changed'; $('editmsg').className = 'note';
+  build(); draw(); return r; }
+async function doGeom(groups, delta, opts) { opts = opts || {mode: 'isolate', snap: null}; return geomOp(groups, {op: 'translate', delta, snap: opts.snap}, opts); }
+async function doXform(groups, body, opts) { return geomOp(groups, body, opts || {mode: 'isolate'}); }
+async function geomOp(groups, body, opts) { groups = Array.isArray(groups) ? groups : [groups];
+  const key = ST.preview && ST.preview.mode === opts.mode && ST.preview.groups === groups.slice().sort((a, b) => a - b).join(',') ? ST.preview.key : null;
+  const r = await api('/api/geometry', Object.assign({groups, mode: opts.mode, preview_key: key}, body)); shown(r, r.label);
+  const o = $('geomout'), L = []; o.style.display = 'block';
+  if (!r.ok && /^NEEDS PREVIEW/.test(r.error || '')) { await doPreview(groups, opts.mode); shown(r, '');
+    o.textContent = `NOT APPLIED - review the highlighted neighbours, then press ${body.op === 'transform' ? 'Transform' : 'Move'} again:\n` + o.textContent; return r; }
+  const C = r.clipping; ST.clip = C && C.faces && C.faces.length ? C.faces : null;
+  if (!r.ok) { L.push('REFUSED (nothing changed): ' + r.error);
+    if (C && C.refused) { L.push(`CLIPPED (red: intended position; magenta: unit edges crossed) - ${C.faces.length} face(s), ${C.lost_m2} m2 would be lost:`);
+      for (const f of C.faces.slice(0, 12)) L.push(`  face line ${f.line} (group ${f.group}, ${f.role}, ${f.material}): ` + (f.kind === 'collision' ? `collision more than ${f.margin_m} m outside every unit region` :
+        f.units.length ? `loses ${f.lost_m2} of ${f.area_m2} m2 at ` + (f.boundaries.map(b => `unit ${b.unit} ${b.edge}`).join(', ') || 'a unit boundary') : `wholly outside every unit region`)); }
+    build(); draw(); }
+  else { const adj = r.needs_adjustment || [];
+    if (C) L.push(`clip check (kit trackbuild unit regions): ${C.checked_faces} faces, ${C.changed_faces} moved / stretched, ${C.split_across_units} split across units; ` + (C.pre_existing.length ? `${C.pre_existing.length} already clipped before (red, no more lost)` : 'no face clipped'));
+    if (r.op === 'transform') { const T = r.transform;
+      L.push(`transformed ${r.faces_moved} face(s) in ${r.groups.length} group(s): turn ${T.angle_deg} deg, scale ${T.scale} about [${T.pivot.join(', ')}] (${T.pivot_mode === 'bbox' ? 'bbox centre' : 'entered pivot'}, ${r.mode})` + (T.angle_snap ? `, angle snapped from ${T.angle_snap.requested} to a ${T.angle_snap.step_deg} deg step` : ''));
+      L.push(`precision: ${r.exact.face_corners_transformed} selected corners` + (r.exact.neighbour_corners_transformed ? ` + ${r.exact.neighbour_corners_transformed} neighbour corners` : '') + ` transformed, max error ${r.precision.max_position_error_m} m (bound: ${r.precision.bound_m}); ${r.exact.other_face_corners_unchanged} other corners unchanged; uv refs + colours unchanged; ${r.shared_inside_selection_kept} shared inside kept; ${r.moved_in_place} in place, ${r.duplicated_shared_vertices} duplicated`);
+      L.push(`normals: ${r.normals.selected_turned} selected corner normal(s) turned with the yaw, ${r.normals.stretched_recomputed} stretched-neighbour normal(s) recomputed, ${r.normals.vn_lines_added} vn line(s) added (max error ${r.exact.max_normal_error})`); }
+    else { L.push(`moved ${r.faces_moved} face(s) in ${r.groups.length} group(s) by [${r.offset.join(', ')}] m (${r.mode})` + (r.snap ? `, snapped from [${r.snap.requested.join(', ')}] to a ${r.snap.step_m} m step` : ''));
+    L.push(`exact: ${r.exact.face_corners_moved_exactly} selected corners` + (r.exact.neighbour_corners_moved_exactly ? ` + ${r.exact.neighbour_corners_moved_exactly} neighbour corners` : '') + ` moved; ${r.exact.other_face_corners_unchanged} other corners unchanged; ${r.shared_inside_selection_kept} corner(s) shared inside the selection kept shared; ${r.moved_in_place} rewritten in place, ${r.duplicated_shared_vertices} duplicated`); }
+    for (const w of r.warnings || []) L.push('WARNING: ' + w);
+    L.push(`regenerated by ${r.regenerated.by}: ${r.regenerated.what}`);
+    for (const u of r.regenerated.changed_units) L.push(`  unit ${u.unit}: bounds y ${u.before ? u.before.prism_y.join('..') : '?'} -> ${u.after.prism_y.join('..')}, render ${u.before ? u.before.render_polys : '?'} -> ${u.after.render_polys}, collision ${u.before ? u.before.collision_polys : '?'} -> ${u.after.collision_polys}`);
+    if (adj.length) { L.push('NEEDS SEPARATE ADJUSTMENT (not moved):'); for (const x of adj) L.push(`  ${x.kind}${x.index === null ? '' : ' ' + (Array.isArray(x.index) ? x.index.length + ' station(s)' : x.index)}: ${x.why}`); }
+    else L.push('no grid slot, start line, checkpoint or route station stands on the old or new footprint'); }
+  o.textContent = L.join('\n'); o.className = r.ok && ((r.needs_adjustment || []).length || (r.warnings || []).length) ? 'warn' : '';
+  if (r.ok) { ST.nb = new Set(); ST.preview = null; await refresh(true); } return r; }
+// v0.21 boundary inspection + weld (server: op boundary / weld_preview / weld)
+function weldInfo() { const W = ST.wsel;
+  $('wpicked').textContent = ST.wpick ? `picking: click open-edge vertex ${ST.wpick.length + 1} of 2` : !W ? '' : W.pairs ? `chosen: ${W.pairs.length} vertex pair(s) ${W.pairs.slice(0, 3).map(p => p.join('-')).join(', ')}` : `chosen: chains of ${W.chains[0].length} vertices`; }
+async function doBoundary(quiet) { const r = await api('/api/geometry', {op: 'boundary', tol: +$('wtol').value}); const o = $('weldout');
+  if (!r.ok) { if (!quiet) { o.style.display = 'block'; o.className = 'bad'; o.textContent = 'REFUSED: ' + r.error; } return r; }
+  ST.bnd = r; ST.bv = new Map(r.vertices.map(v => [v[0], v.slice(1)])); if (!ST.wsel) ST.wgaps = r.gaps.flatMap(g => g.pa.map((p, i) => [p, g.pb[i]]));
+  renderGaps();
+  if (!quiet) { const C = r.counts; o.style.display = 'block'; o.className = '';
+    o.textContent = `BOUNDARY (inspection only, nothing changed): ${C.open_edges} open edge(s) at ${C.open_vertices} vertices (orange); ${C.index_split_seams} uv / colour seam(s) closed by position; ${C.non_manifold_edges} non-manifold, ${C.misoriented_edges} misoriented edge(s)\n` +
+      `within ${r.tolerance_m} m: ${r.gaps.length} gap candidate(s) (green = gap distances; click one below), ${r.ambiguous.length} ambiguous vertex(es)`;
+    build(); draw(); }
+  return r; }
+function renderGaps() { const d = $('wgaps'); d.innerHTML = '';
+  (ST.bnd ? ST.bnd.gaps : []).slice(0, 30).forEach((g, i) => { const e = document.createElement('div'); e.className = 'vitem';
+    e.textContent = `gap ${i}: ${g.pairs} pair(s)${g.closed ? ' (closed loop)' : ''}, ${g.min_gap_m}..${g.max_gap_m} m${g.branching ? ' - branches: welded as pairs' : ''}`; e.onclick = () => chooseGap(i); d.appendChild(e); });
+  (ST.bnd ? ST.bnd.ambiguous : []).slice(0, 8).forEach(a => { const e = document.createElement('div'); e.className = 'note bad';
+    e.textContent = `ambiguous: vertex ${a.vertex} - ${a.why} (${a.candidates.length} within the tolerance)`; d.appendChild(e); }); }
+function chooseGap(i) { const g = ST.bnd.gaps[i];
+  ST.wsel = g.branching || g.pairs === 1 ? {pairs: g.chain_a.map((v, k) => [v, g.chain_b[k]])} : {chains: [g.chain_a, g.chain_b]};
+  ST.wpick = null; ST.wprev = null; ST.wfaces = null; ST.wgaps = g.pa.map((p, k) => [p, g.pb[k]]); weldInfo(); build(); draw(); }
+function weldBody() { return Object.assign({}, ST.wsel, {tol: +$('wtol').value, keep: $('wkeep').value}); }
+async function doWeldPreview() { const o = $('weldout'); o.style.display = 'block';
+  if (!ST.wsel) { o.className = 'bad'; o.textContent = 'choose a gap candidate or pick two boundary vertices first'; return {ok: false, error: 'nothing chosen'}; }
+  const body = weldBody(), r = await api('/api/geometry', Object.assign({op: 'weld_preview'}, body));
+  if (!r.ok) { ST.wprev = null; ST.wfaces = null; o.className = 'bad'; o.textContent = 'REFUSED (nothing changed): ' + r.error; build(); draw(); return r; }
+  ST.wprev = {key: r.preview_key, sig: JSON.stringify(body)}; ST.wfaces = r.faces; ST.wgaps = r.pairs.map(p => [p.pa, p.pb]);
+  o.className = 'warn'; o.textContent = `WELD PREVIEW (nothing changed): ${r.pair_count} pair(s), gaps ${r.min_gap_m}..${r.max_gap_m} m (tolerance ${r.tolerance_m} m), keep ${r.keep}\n` +
+    `affected faces (blue): ${r.affected_faces} in group(s) ${r.affected_groups.slice(0, 12).join(', ')}; open edges ${r.open_edges[0]} -> ${r.open_edges[1]} (closes ${r.closes_open_edges})\n` +
+    r.pairs.slice(0, 8).map(p => `  vertex ${p.a} - ${p.b}: gap ${p.gap_m} m -> [${p.to.join(', ')}]`).join('\n') + `\nchecked: ${r.checked}`;
+  build(); draw(); return r; }
+async function doWeld() { const o = $('weldout'); if (!ST.wsel) return doWeldPreview();
+  const body = weldBody(), key = ST.wprev && ST.wprev.sig === JSON.stringify(body) ? ST.wprev.key : null;
+  const r = await api('/api/geometry', Object.assign({op: 'weld', preview_key: key}, body)); shown(r, r.label); o.style.display = 'block';
+  if (!r.ok && /^NEEDS PREVIEW/.test(r.error || '')) { await doWeldPreview(); shown(r, ''); o.textContent = 'NOT APPLIED - review the preview (blue faces, green gaps), then press Weld again:\n' + o.textContent; return r; }
+  if (!r.ok) { const C = r.clipping; ST.clip = C && C.faces && C.faces.length ? C.faces : null; o.className = 'bad'; o.textContent = 'REFUSED (nothing changed): ' + r.error; build(); draw(); return r; }
+  const L = [`welded ${r.pair_count} pair(s): gaps ${r.min_gap_m}..${r.max_gap_m} m closed; ${r.closes_open_edges} open edge(s) closed (${r.open_edges[0]} -> ${r.open_edges[1]}); ${r.affected_faces} face(s) stretched`,
+    `exact: ${r.exact.vertex_lines_rewritten} v line(s) rewritten (coordinates only), ${r.exact.lines_unchanged} lines unchanged: uv / normal references and colours kept (seams preserved), no line added or removed`,
+    `clip check (kit trackbuild unit regions): ${r.clipping.checked_faces} faces, none clipped` + (r.clipping.pre_existing.length ? ` (${r.clipping.pre_existing.length} already clipped before)` : ''),
+    `regenerated by ${r.regenerated.by}`];
+  for (const w of r.warnings || []) L.push('WARNING: ' + w);
+  for (const x of r.needs_adjustment || []) L.push(`NEEDS SEPARATE ADJUSTMENT (not moved): ${x.kind}: ${x.why}`);
+  ST.wsel = null; ST.wprev = null; ST.wfaces = null; ST.wgaps = []; await refresh(true); weldInfo();
+  o.style.display = 'block'; o.className = 'warn'; o.textContent = L.join('\n'); return r; }
+$('wshow').onclick = () => doBoundary(false);
+$('wpickb').onclick = async () => { if (!ST.bnd) await doBoundary(false); ST.wpick = []; ST.wsel = null; ST.wprev = null; ST.wfaces = null; ST.wgaps = []; weldInfo(); build(); draw(); };
+$('wprev').onclick = () => doWeldPreview();
+$('wapply').onclick = () => doWeld();
+$('L_open').onchange = () => { build(); draw(); };
+// v0.22 duplicate (server op duplicate): the copies become the selection, then move / turn / scale position them
+async function doDuplicate(groups, offset) { const r = await api('/api/geometry', {op: 'duplicate', groups, offset}); shown(r, r.label); const o = $('geomout'); o.style.display = 'block';
+  if (!r.ok) { const C = r.clipping; ST.clip = C && C.faces && C.faces.length ? C.faces : null; o.className = 'bad'; o.textContent = 'REFUSED (nothing changed): ' + r.error; build(); draw(); return r; }
+  await refresh(false); setMulti(r.groups.slice()); select('group', r.groups[0], true);
+  const C = r.clipping, L = [`duplicated ${r.source_groups.length} group(s) ${r.source_groups.join(', ')} at offset [${r.offset.join(', ')}] -> new group(s) ${r.groups.join(', ')} (now selected, yellow): ${r.faces} face(s), ${r.vertex_lines_added} v line(s) added`,
+    `placement: ${r.placement}`, `exact: ${r.exact.corners_copied} corners copied (position, colour, uv and normal references equal), ${r.exact.original_lines_unchanged} original lines unchanged, ${r.exact.shared_inside_selection} corner(s) shared inside kept shared`,
+    `clip check (kit trackbuild unit regions): ${C.added_faces} copied face(s), ` + (C.pre_existing.length ? `${C.pre_existing.length} clipped as much as their originals` : 'none clipped'), `regenerated by ${r.regenerated.by}`];
+  for (const w of r.warnings || []) L.push('WARNING: ' + w);
+  for (const x of r.needs_adjustment || []) L.push(`NEEDS SEPARATE ADJUSTMENT (not moved): ${x.kind}: ${x.why}`);
+  $('gsel').textContent = selInfo(); o.textContent = L.join('\n'); o.className = 'warn'; build(); draw(); return r; }
+$('gdup').onclick = () => ST.multi.length && doDuplicate(ST.multi.slice(), [+$('gx').value, +$('gy').value, +$('gz').value]);
+// v0.22 bridge (server ops bridge_preview / bridge): explicit chains of open-edge vertices, preview first
+function parseChain(t) { return t.split(/[\s,;]+/).filter(x => x).map(Number); }
+function bridgeChains() { return [parseChain($('bca').value), parseChain($('bcb').value)]; }
+function bridgeBody() { return {chains: bridgeChains(), material: $('bmat').value, closed: $('bclosed').checked}; }
+function bridgeReset() { ST.bprev = null; ST.bfaces = null; ST.bpairs = []; }
+function bridgeInfo() { const [a, b] = bridgeChains(); $('bpicked').textContent = (ST.bpick ? `picking chain ${ST.bpick.toUpperCase()}: click open-edge vertices in order (press Pick ${ST.bpick.toUpperCase()} again to stop); ` : '') + `A ${a.length}, B ${b.length} vertices`; }
+async function startBridgePick(w) { if (ST.bpick === w) { ST.bpick = null; bridgeInfo(); return; } if (!ST.bnd) await doBoundary(false);
+  ST.wpick = null; ST.bpick = w; $(w === 'a' ? 'bca' : 'bcb').value = ''; bridgeReset(); bridgeInfo(); build(); draw(); }
+async function doBridgePreview() { const o = $('bridgeout'); o.style.display = 'block'; ST.bpick = null;
+  const body = bridgeBody(), r = await api('/api/geometry', Object.assign({op: 'bridge_preview'}, body));
+  if (!r.ok) { bridgeReset(); o.className = 'bad'; o.textContent = 'REFUSED (nothing changed): ' + r.error; bridgeInfo(); build(); draw(); return r; }
+  ST.bprev = {key: r.preview_key, sig: JSON.stringify(body)}; ST.bfaces = r.faces; ST.bpairs = r.pairs.map(p => [p.pa, p.pb]);
+  o.className = 'warn'; o.textContent = `BRIDGE PREVIEW (nothing changed): ${r.pair_count} pair(s) (${r.closed ? 'closed loops' : 'open chains'}), ${r.new_faces} new face(s) (purple), material ${r.material}\n` +
+    `correspondence: ${r.correspondence}\nwinding: ${r.winding}\nuv: ${r.uv_mapping}\nnormals: ${r.normals}\n` +
+    `open edges ${r.open_edges[0]} -> ${r.open_edges[1]} (closes ${r.closes_open_edges}, new ${r.new_open_edges}); ${r.vt_lines_added} vt + ${r.vn_lines_added} vn line(s) added, no v line\n` +
+    r.pairs.slice(0, 8).map(p => `  vertex ${p.a} - ${p.b}: ${p.gap_m} m`).join('\n') + `\nchecked: ${r.checked}`;
+  bridgeInfo(); build(); draw(); return r; }
+async function doBridge() { const o = $('bridgeout'); ST.bpick = null;
+  const body = bridgeBody(), key = ST.bprev && ST.bprev.sig === JSON.stringify(body) ? ST.bprev.key : null;
+  const r = await api('/api/geometry', Object.assign({op: 'bridge', preview_key: key}, body)); shown(r, r.label); o.style.display = 'block';
+  if (!r.ok && /^NEEDS PREVIEW/.test(r.error || '')) { await doBridgePreview(); shown(r, ''); o.textContent = 'NOT APPLIED - review the preview (purple faces, green pairs), then press Bridge again:\n' + o.textContent; return r; }
+  if (!r.ok) { const C = r.clipping; ST.clip = C && C.faces && C.faces.length ? C.faces : null; o.className = 'bad'; o.textContent = 'REFUSED (nothing changed): ' + r.error; build(); draw(); return r; }
+  const L = [`bridged ${r.pair_count} pair(s): ${r.new_faces} new face(s) in new group ${r.groups[0]} (selected, yellow); open edges ${r.open_edges[0]} -> ${r.open_edges[1]} (${r.closes_open_edges} closed, ${r.new_open_edges} new)`,
+    `exact: ${r.exact.original_lines_unchanged} original lines unchanged; ${r.exact.vt_lines_added} vt + ${r.exact.vn_lines_added} vn line(s) added, no v line; ${r.exact.chain_edges_closed_opposite_winding} chain edges closed with opposite winding`,
+    `clip check (kit trackbuild unit regions): ${r.clipping.added_faces} new face(s), none clipped`, `regenerated by ${r.regenerated.by}`];
+  for (const w of r.warnings || []) L.push('WARNING: ' + w);
+  for (const x of r.needs_adjustment || []) L.push(`NEEDS SEPARATE ADJUSTMENT (not moved): ${x.kind}: ${x.why}`);
+  bridgeReset(); $('bca').value = ''; $('bcb').value = ''; await refresh(false); setMulti(r.groups.slice()); select('group', r.groups[0], true); bridgeInfo();
+  o.style.display = 'block'; o.className = 'warn'; o.textContent = L.join('\n'); return r; }
+$('bpa').onclick = () => startBridgePick('a');
+$('bpb').onclick = () => startBridgePick('b');
+$('bgap').onclick = () => { const W = ST.wsel; if (!W || !W.chains) { $('bpicked').textContent = 'choose a gap candidate (chains) first'; return; }
+  $('bca').value = W.chains[0].join(','); $('bcb').value = W.chains[1].join(','); const g = ST.bnd && ST.bnd.gaps.find(x => x.chain_a.join() === W.chains[0].join()); $('bclosed').checked = !!(g && g.closed);
+  ST.bpick = null; bridgeReset(); bridgeInfo(); build(); draw(); };
+for (const id of ['bca', 'bcb']) $(id).oninput = () => { bridgeReset(); bridgeInfo(); build(); draw(); };
+$('bprev').onclick = () => doBridgePreview();
+$('bapply').onclick = () => doBridge();
+// ---------------------------------------------------------------- v0.23+ construct: one dispatcher (server /api/layout {op, ...})
+const LAYOUT_PREVIEW = {units: 'units_preview', road: 'road_preview', race_layout: 'race_layout_preview', race_points: 'race_points_preview', scenery: 'scenery_preview'};
+function layoutSig(body) { const b = Object.assign({}, body); delete b.preview_key; return JSON.stringify(b); }
+function layoutShow(r, lines, cls) { const o = $('layout_out'); o.style.display = 'block'; o.className = cls; o.textContent = lines.join('\n'); }
+function layoutOverlay(r) { const d = (r && (r.detail || r)) || {}; ST.lay = {regions: d.regions || null, lost: d.lost_faces || null, faces: d.new_faces || null, lines: d.route_lines || null, points: d.markers || null};
+  build(); draw(); }
+function fmtLayout(r) { const L = [];
+  if (r.units_after !== undefined) { L.push(`units: ${r.units_before} -> ${r.units_after} (changed ${r.changed_units.join(', ') || 'none'})`);
+    const C = r.coverage; L.push(`coverage: ${C.faces} faces, none losing area, ${C.faces_gaining_area} gaining; kept ${C.kept_m2[0]} -> ${C.kept_m2[1]} m2; ${C.drivable_samples_in_one_unit} drivable samples and ${C.grid_slots_in_one_unit} grid slots each in exactly one unit`);
+    L.push(`capacity: worst ${r.capacity_worst_pct} % of a slot / vertex / record limit; per changed unit: ` + r.changed_units.slice(0, 6).map(k => { const c = r.capacity[k]; return c ? `u${k} mesh ${c.mesh_slot_pct} %, LOD ${c.lod_slot_pct} %, ${c.vertices} verts` : ''; }).join('; '));
+    for (const k of r.changed_units.slice(0, 6)) { const u = r.units[k]; if (u) L.push(`  unit ${k}: stations ${u.cut_from} -> ${u.cut_to}, lateral [${u.lateral.join(', ')}]`); } }
+  if (r.summary_lines) L.push(...r.summary_lines);
+  if (r.structural) for (const c of r.structural) L.push(`  ${c.ok ? 'ok    ' : 'FAILED'} ${c.check}: ${JSON.stringify(c.detail).slice(0, 220)}`);
+  if (r.road) { L.push(`road ${r.road}${r.replaces ? ' (re-generated)' : ''}: ${r.faces} faces, ${r.length_m} m, ${r.width_m} m wide, ${r.material}${r.closed ? ', closed loop' : ''}; elevation ${r.elevation_m.join('..')} m, max slope ${r.max_slope_pct} %, min radius ${r.min_radius_m} m`);
+    L.push(`lines: ${r.v_added} v + ${r.vt_added} vt + ${r.vn_added} vn added${r.removed_faces ? `, ${r.removed_faces} old face(s) of this road removed` : ''}; uv: ${r.uv_mapping}; normals: ${r.normals}`);
+    if (r.exact) L.push(`exact: ${r.exact.original_lines_kept} original lines kept, ${r.exact.faces_added} faces read back by the kit reader (rounding ${r.exact.max_position_rounding_m} m)`);
+    if (r.clipping) L.push(`clip check: ${r.clipping.added_faces} new face(s), none clipped`);
+    for (const x of r.needs_adjustment || []) L.push(`NEEDS SEPARATE ADJUSTMENT (not moved): ${x.kind}${x.index === null ? '' : ' ' + (Array.isArray(x.index) ? x.index.length + ' station(s)' : x.index)}: ${x.why}`); }
+  for (const w of r.warnings || []) L.push('WARNING: ' + w);
+  if (r.checked) L.push('checked: ' + r.checked);
+  return L; }
+async function layoutPreview(body) { const pop = LAYOUT_PREVIEW[body.op] || body.op; const pb = Object.assign({}, body, {op: pop}); delete pb.preview_key;
+  const r = await api('/api/layout', pb);
+  if (!r.ok) { ST.layprev = null; layoutOverlay(r); layoutShow(r, ['REFUSED (nothing changed): ' + r.error], 'bad'); return r; }
+  ST.layprev = {sig: layoutSig(body), key: r.preview_key}; layoutOverlay(r);
+  layoutShow(r, ['PREVIEW (nothing changed):'].concat(fmtLayout(r)), 'warn'); $('editmsg').textContent = 'preview only: nothing changed'; $('editmsg').className = 'note'; return r; }
+async function layoutApply(body) { const key = ST.layprev && ST.layprev.sig === layoutSig(body) ? ST.layprev.key : null;
+  const r = await api('/api/layout', Object.assign({}, body, {preview_key: key})); shown(r, r.label);
+  if (!r.ok && /^NEEDS PREVIEW/.test(r.error || '')) { await layoutPreview(body); shown(r, ''); $('layout_out').textContent = 'NOT APPLIED - review the preview, then press Apply again:\n' + $('layout_out').textContent; return r; }
+  if (!r.ok) { layoutOverlay(r); layoutShow(r, ['REFUSED (nothing changed): ' + r.error], 'bad'); return r; }
+  ST.layprev = null; ST.lay = null; await refresh(false); if (r.groups && r.groups.length) { setMulti(r.groups.slice()); select('group', r.groups[0], true); }
+  layoutShow(r, [r.label].concat(fmtLayout(r)), 'warn'); unitsInfo(); roadsList(); return r; }
+function unitsReq() { const op = $('uop').value, req = {op: 'units', unit_op: op, unit: +$('uk').value};
+  if (op === 'lateral') req.lateral = [+$('ulo').value, +$('uhi').value];
+  if (op === 'split' || op === 'cut') req.station = +$('ust').value;
+  if (op === 'include') req.rect = $('urect').value.split(/[\s,;]+/).filter(x => x).map(Number);
+  return req; }
+function unitsInfo() { const U = (ST.scene && ST.scene.units) || [], k = +$('uk').value, u = U[k];
+  $('uinfo').textContent = u ? `${U.length} units; unit ${k}: stations ${u.cut_from} -> ${u.cut_to}, lateral [${u.lateral.join(', ')}]` : `${U.length} units`;
+  if (u && document.activeElement !== $('ulo') && document.activeElement !== $('uhi')) { $('ulo').value = u.lateral[0]; $('uhi').value = u.lateral[1]; } }
+$('uk').oninput = unitsInfo;
+$('uprev').onclick = () => layoutPreview(unitsReq());
+function parsePts(t) { return t.split('\n').map(l => l.trim()).filter(l => l).map(l => l.split(/[\s,;]+/).map(Number)); }
+function roadMarkers() { ST.lay = Object.assign({}, ST.lay || {}, {points: parsePts($('rpts').value).filter(q => q.length === 3)}); build(); draw(); }
+function roadReq() { const r = {op: 'road', points: parsePts($('rpts').value), closed: $('rclosed').checked, width: +$('rw').value, material: $('rmat').value,
+  uv_len: +$('ruv').value, step: +$('rstep').value}; if ($('rid').value) r.road = $('rid').value; return r; }
+function roadsList() { const sel = $('rid'), cur = sel.value; sel.innerHTML = '<option value="">new road</option>';
+  for (const [k, v] of Object.entries((ST.scene && ST.scene.constructs) || {})) if (v.meta.kind === 'road') { const o = document.createElement('option'); o.value = o.textContent = k; sel.appendChild(o); }
+  sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+  const xm = $('xmat'), xc = xm.value || 'asphalt'; xm.innerHTML = ''; ((ST.scene && ST.scene.assignable) || []).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; xm.appendChild(o); }); xm.value = xc;
+  const rm = $('rmat'), rc = rm.value; rm.innerHTML = ''; ((ST.scene && ST.scene.assignable) || []).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; rm.appendChild(o); }); if (rc) rm.value = rc; }
+$('rid').onchange = () => { const c = ((ST.scene && ST.scene.constructs) || {})[$('rid').value]; if (!c) return; const m = c.meta;
+  $('rpts').value = m.points.map(q => q.join(' ')).join('\n'); $('rw').value = m.width; $('rmat').value = m.material; $('rclosed').checked = m.closed; $('ruv').value = m.uv_len; $('rstep').value = m.step; roadMarkers(); };
+$('rpick').onclick = () => { ST.ppick = ST.ppick ? null : 'rpts'; ST.wpick = null; ST.bpick = null; $('rpick').textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
+$('rpts').oninput = roadMarkers;
+// v0.25 race layout
+function raceReq() { const r = {op: 'race_layout', points: parsePts($('xpts').value), width: +$('xw').value, material: $('xmat').value, wall_height: +$('xwh').value,
+  verge_out: +$('xvo').value, verge_in: +$('xvi').value, checkpoints: +$('xcp').value, traffic: $('xtraffic').checked, replace: $('xrep').value}; return r; }
+function raceGuard() { if ($('xrep').value === 'all' && !$('xconfirm').checked) { layoutShow({}, ['NOT STARTED: replacing ALL geometry needs the confirmation box ticked'], 'bad'); return false; } return true; }
+$('xcheck').onclick = async () => { const r = await api('/api/layout', {op: 'race_check'}); layoutOverlay(r);
+  layoutShow(r, r.ok ? ['RACE CHECK (read only):'].concat(fmtLayout(r)) : ['REFUSED: ' + r.error], r.ok && r.structural_ok ? '' : 'warn'); return r; };
+$('xpick').onclick = () => { ST.ppick = ST.ppick ? null : 'xpts'; ST.wpick = null; ST.bpick = null; $('xpick').textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
+$('xprev').onclick = () => { ST.ppick = null; return raceGuard() ? layoutPreview(raceReq()) : null; };
+$('xapply').onclick = () => { ST.ppick = null; return raceGuard() ? layoutApply(raceReq()) : null; };
+// v0.26 terrain / scenery
+function sceneryReq() { const k = $('skind').value, r = {op: 'scenery', kind: k};
+  if ($('sid').value) r.id = $('sid').value;
+  if (k === 'terrain') { const h = $('sh').value.split(/[\s,;]+/).filter(x => x).map(Number); Object.assign(r, {rect: $('urect').value.split(/[\s,;]+/).filter(x => x).map(Number), heights: h.length === 1 ? h[0] : h, cell: +$('scell').value, material: $('smat').value}); }
+  if (k === 'barrier') Object.assign(r, {points: parsePts($('spts').value), height: +$('sbh').value, thick: +$('sbt').value, closed: $('sbclosed').checked});
+  if (k === 'prefab') Object.assign(r, {name: $('spf').value, position: $('spos').value.split(/[\s,;]+/).filter(x => x).map(Number), angle: +$('sang').value});
+  return r; }
+async function prefabList() { const r = await api('/api/layout', {op: 'prefabs'}); const sel = $('spf'), cur = sel.value; sel.innerHTML = '';
+  for (const n of (r.prefabs || [])) { const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o); } if (cur) sel.value = cur; return r; }
+function sceneryList() { const sel = $('sid'), cur = sel.value, k = $('skind').value; sel.innerHTML = '<option value="">new</option>';
+  for (const [id, v] of Object.entries((ST.scene && ST.scene.constructs) || {})) if (v.meta.kind === k) { const o = document.createElement('option'); o.value = o.textContent = id; sel.appendChild(o); }
+  sel.value = [...sel.options].some(o => o.value === cur) ? cur : '';
+  const sm = $('smat'), sc = sm.value || 'grass'; sm.innerHTML = ''; ((ST.scene && ST.scene.assignable) || []).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; sm.appendChild(o); }); sm.value = sc; }
+$('skind').onchange = sceneryList;
+$('spick').onclick = () => { ST.ppick = ST.ppick ? null : 'spts'; ST.wpick = null; ST.bpick = null; $('spick').textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
+$('sprev').onclick = () => { ST.ppick = null; return layoutPreview(sceneryReq()); };
+$('sapply').onclick = () => { ST.ppick = null; return layoutApply(sceneryReq()); };
+$('spsave').onclick = async () => { const r = await api('/api/layout', {op: 'prefab_save', groups: ST.multi.slice(), name: $('spname').value, overwrite: true});
+  layoutShow(r, r.ok ? [`prefab ${r.prefab} saved: ${r.faces} faces (${r.materials.join(', ')}); ${r.note}`] : ['REFUSED: ' + r.error], r.ok ? '' : 'bad'); await prefabList(); if (r.ok) $('spf').value = r.prefab; return r; };
+$('cpprev').onclick = () => layoutPreview({op: 'race_points', checkpoints: $('cpst').value.split(/[\s,;]+/).filter(x => x).map(Number)});
+$('cpapply').onclick = () => layoutApply({op: 'race_points', checkpoints: $('cpst').value.split(/[\s,;]+/).filter(x => x).map(Number)});
+$('rprev').onclick = () => { ST.ppick = null; $('rpick').textContent = 'Click points'; return layoutPreview(roadReq()); };
+$('rapply').onclick = () => { ST.ppick = null; $('rpick').textContent = 'Click points'; return layoutApply(roadReq()); };
+$('uapply').onclick = () => layoutApply(unitsReq());
+async function doUndo() { const r = await api('/api/undo', {}); shown(r, 'undone: ' + r.undone); if (r.ok) await refresh(true); return r; }
+async function doRedo() { const r = await api('/api/redo', {}); shown(r, 'redone: ' + r.redone); if (r.ok) await refresh(true); return r; }
+$('apply').onclick = () => ST.sel && doEdit(ST.sel.kind, ST.sel.index, [+$('dx').value, +$('dy').value, +$('dz').value]);
+$('massign').onclick = () => ST.sel && doMaterial({op: 'assign', group: ST.sel.index, material: $('mmat').value, scope: $('mscope').value});
+$('mcolour').onclick = () => ST.sel && doMaterial({op: 'colour', group: ST.sel.index, rgb: [+$('cr').value, +$('cg').value, +$('cb').value], scope: $('mscope').value});
+// v0.16 material properties: a material shared by several face groups needs the confirmation box ticked
+function fillProps(name) { const S = ST.scene, x = S.materials[name]; if (!x) return;
+  const sel = $('ptex'); sel.innerHTML = ''; (S.textures_available || []).forEach(t => { const o = document.createElement('option'); o.value = t.path;
+    o.textContent = t.path + (t.ok ? '' : ' (refused: ' + t.why + ')'); o.disabled = !t.ok; sel.appendChild(o); }); sel.value = String(x.texture).replace(/\\/g, '/');
+  $('surfwords').innerHTML = (S.surface_words || []).map(w => `<option value="${w.word}">${w.meaning}</option>`).join('');
+  $('psurf').value = x.surface; $('psurfm').textContent = 'surface ' + x.surface + ': ' + x.surface_meaning;
+  $('pcol').checked = !!x.collide; $('pcs').checked = x.car_solid !== false; $('pcsnote').textContent = S.car_solid_note;
+  $('propinfo').textContent = `${name}: used by ${x.groups} face group(s)` + (x.in_rows ? '' : ' - no render row (not editable)');
+  $('pconfl').style.display = x.groups > 1 ? 'block' : 'none'; $('pconf').checked = false;
+  $('pconft').textContent = `I understand: ${x.groups} face groups share ${name}; a change applies to all of them`; }
+const doProp = (prop, value) => ST.sel && ST.sel.kind === 'material' && doMaterial({op: 'property', material: ST.sel.index, prop, value, confirm: $('pconf').checked});
+$('ptexb').onclick = () => doProp('texture', $('ptex').value);
+$('psurfb').onclick = () => doProp('surface', $('psurf').value);
+$('pcol').onchange = () => doProp('collide', $('pcol').checked);
+$('pcs').onchange = () => doProp('car_solid', $('pcs').checked);
+$('gmove').onclick = () => ST.multi.length && doGeom(ST.multi.slice(), [+$('gx').value, +$('gy').value, +$('gz').value], geomOpts());
+$('gprev').onclick = () => ST.multi.length && doPreview(ST.multi.slice(), $('gmode').value);
+$('tapply').onclick = () => ST.multi.length && doXform(ST.multi.slice(), xformBody(), {mode: $('gmode').value});
+for (const id of ['ta', 'tk', 'tpx', 'tpy', 'tpz']) $(id).oninput = xformLive;
+for (const id of ['tsnap', 'tstep', 'tpm']) $(id).onchange = xformLive;
+$('tpfill').onclick = () => { const c = selBBoxCentre(); if (c) { $('tpx').value = c[0].toFixed(4); $('tpy').value = c[1].toFixed(4); $('tpz').value = c[2].toFixed(4); $('tpm').value = 'xyz'; } xformLive(); };
+$('gclear').onclick = () => { setMulti([]); select(null, null); };
+$('gmode').onchange = () => { ST.nb = new Set(); ST.preview = null; build(); draw(); };
+$('mprops').onclick = () => ST.sel && ST.sel.kind === 'group' && select('material', ST.scene.mesh.groups[ST.sel.index].mat);
+$('undo').onclick = doUndo; $('redo').onclick = doRedo;
+$('save').onclick = async () => { const r = await api('/api/save', {}); shown(r, r.written ? 'saved ' + (r.files || []).join(', ') + ' (only the edited lines / values changed)' : r.note); await refresh(true); };
+$('check').onclick = async () => { await api('/api/check', {}); await refresh(true); };
+$('stage').onclick = async () => { $('stageout').style.display = 'block'; $('stageout').textContent = 'running Build -> Validate -> Stage (the Workbench job)...';
+  const r = await api('/api/stage', {dest: $('dest').value}); $('stageout').textContent = r.summary || ('NOT STARTED: ' + r.error); await refresh(true); };
+['L_mesh','L_collision','L_units','L_route','L_starts'].forEach(id => $(id).onchange = draw);
+function renderSide() {
+  const S = ST.scene, s = S.state;
+  ST.hl = new Set(); ST.hlKinds = new Set(); const v = $('vlist'); v.innerHTML = '';
+  (S.validation || []).forEach(x => { x.targets.forEach(t => t[1] === null ? ST.hlKinds.add(t[0]) : ST.hl.add(t[0] + ':' + t[1]));
+    const d = document.createElement('div'); d.className = 'vitem'; d.textContent = x.source + ': ' + x.text;
+    d.onclick = () => { const t = x.targets[0]; if (t) select(t[0], t[1]); }; v.appendChild(d); });
+  const f = $('flags'); f.innerHTML = '';
+  (S.flags || []).forEach(x => { const d = document.createElement('div'); d.className = 'flag'; d.textContent = x.key + ': ' + x.flag; f.appendChild(d); });
+  const m = $('mats'); m.innerHTML = '';
+  if (ST.retail) {
+    $('statebox').innerHTML = `${s.project}<br>cache ${s.cache} (decoded previews, local only, never packaged)`;
+    if (!(S.validation || []).length) v.textContent = 'no problems reported by the kit readers (collision tree check, Gamedata / route check)';
+    const c = S.counts; $('pvslod').textContent = `${c.units} sections (streamed units), ${c.mesh_triangles} render triangles, ${c.textures_previewed} / ${c.textures} textures previewed, ${c.collision_quads} collision quads, ${c.route_lanes} route lanes, ${c.start_slots} start slots`;
+    const rc = S.render_classes || {};
+    m.innerHTML = `<div class="note">${S.materials_retail.length} retail materials (static.dat), inspection only. Drawn: ${rc.opaque} opaque, ${rc.cutout} cut-out, ${rc.blend} blended, ${rc['blend+test']} blended + alpha test (class from material +0x24; click to inspect)</div>`;
+    S.materials_retail.filter(x => x.passes.length && x.render !== 'opaque').forEach(x => { const d = document.createElement('div');
+      d.textContent = `${x.material} ${x.textures[0] || '-'} - ${x.render}${x.depth_write ? '' : ', no depth write'} (+0x24 ${x.flags_24}, pass ${x.passes.join('/')})`;
+      d.onclick = () => select('rmaterial', x.material); m.appendChild(d); });
+    return;
+  }
+  $('statebox').innerHTML = `${s.project}<br>${s.desc}${s.obj ? ' + ' + s.obj : ''} - ${s.dirty ? '<b class="warn">unsaved edits</b>' : 'saved'}; undo ${s.undo.length}, redo ${s.redo.length}`;
+  $('undo').disabled = !s.undo.length; $('redo').disabled = !s.redo.length; $('save').disabled = !s.dirty; $('stage').disabled = s.dirty;
+  $('pvslod').textContent = `visibility: pvs ${S.pvs.mode}; LOD: ${S.lod.mode}${S.lod.e_max ? ' e_max ' + S.lod.e_max : ''} (computed by trackbuild at Build; not drawn)`;
+  if (typeof roadsList === 'function') roadsList();
+  if (typeof sceneryList === 'function') sceneryList();
+  if (!(S.validation || []).length) v.textContent = 'no problems (Workbench input check; last Build: ' + (S.state && ST.lastBuild || 'not run in this window') + ')';
+  const sel = $('mmat'), cur = sel.value; sel.innerHTML = ''; (S.assignable || []).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; sel.appendChild(o); }); if (cur) sel.value = cur;
+  const bm = $('bmat'), bcur = bm.value; bm.innerHTML = ''; (S.assignable || []).forEach(n => { const o = document.createElement('option'); o.value = o.textContent = n; bm.appendChild(o); }); if (bcur) bm.value = bcur;
+  for (const [n, x] of Object.entries(S.materials)) { const d = document.createElement('div');
+    d.innerHTML = `${n} - ${x.texture} - surface ${x.surface}${x.collide ? ', collide' : ''}${x.car_solid === false ? ', not car-solid' : ''}` +
+      (x.texture_ok ? '' : ' <span class="bad">(texture problem)</span>') + (x.extra_keys.length ? ` <span class="warn">(unsupported keys ${x.extra_keys.join(', ')})</span>` : '');
+    d.onclick = () => select('material', n); m.appendChild(d); }
+}
+function setupRetailUi() {
+  const S = ST.scene;
+  $('title').textContent = 'Retail track view - ' + S.title; document.title = 'Retail track view (read only)';
+  $('intro').textContent = 'READ-ONLY view of a retail track folder, decoded by the mod kit\'s verified readers into a separate cache. Drag: orbit, right-drag / shift-drag: pan, wheel: zoom, W A S D Q E: fly, click: select a section, route lane or start slot.';
+  $('robanner').style.display = 'block'; $('robanner').textContent = S.read_only;
+  for (const id of ['editbox','matbox','propbox','editbtns','stagebox','weldbox','layoutbox']) $(id).style.display = 'none';
+  $('flagsh').textContent = 'Not decoded / unsupported data';
+}
+// ---------------------------------------------------------------- start + scripted self tests (?selftest=1)
+async function waitTex() { for (let i = 0; i < 150 && ST.texLoaded < ST.texWanted; i++) await new Promise(r => setTimeout(r, 100)); }
+function pixelsVary() { draw(); const px = new Uint8Array(4 * 64 * 64); gl.readPixels(Math.floor(cv.width / 2) - 32, Math.floor(cv.height / 2) - 32, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const colours = new Set(); for (let i = 0; i < px.length; i += 4) colours.add(px[i] << 16 | px[i + 1] << 8 | px[i + 2]); return colours.size; }
+// v0.18: Ctrl-click multi-selection, count / highlight, snapping, isolate vs keep-connected (preview first), clear
+async function selftestMulti(ok, grp, C0) {
+  select('group', grp); const pv = await api('/api/geometry', {op: 'preview', groups: [grp], mode: 'isolate'});
+  const tris = g => Object.values(ST.meshes).reduce((n, m) => n + m.grp.filter(x => x === g).length, 0);
+  let other = null;
+  for (const g2 of pv.neighbour_groups) { const m = Object.values(ST.meshes).find(q => q.grp.includes(g2)); const k = m.grp.indexOf(g2);
+    const c = [0,1,2].map(i => (m.arr[9*k+i] + m.arr[9*k+3+i] + m.arr[9*k+6+i]) / 3); ST.cam.tgt = c; ST.cam.pitch = 1.45; ST.cam.dist = 25; draw();
+    const ps = project(c, mvp()); pickAt(ps[0], ps[1], true); if (ST.multi.length === 2 && ST.multi.includes(g2)) { other = g2; break; } if (ST.multi.length !== 1) { setMulti([grp]); select('group', grp); } }
+  ok('Ctrl-click adds a face group', other !== null && ST.multi.includes(grp), JSON.stringify(ST.multi));
+  ok('selection count shown', /selection: 2 face group\(s\)/.test($('gsel').textContent), $('gsel').textContent);
+  ok('every selected group highlighted', ST.lines.sel.n === 6 * (tris(grp) + tris(other)), `${ST.lines.sel.n} / ${6 * (tris(grp) + tris(other))}`);
+  const c = [0,1,2].map(i => ST.cam.tgt[i]), ps = project(c, mvp()); pickAt(ps[0], ps[1], true);
+  ok('Ctrl-click again removes it', ST.multi.length === 1 && ST.multi[0] === grp && /selection: 1 face group/.test($('gsel').textContent), JSON.stringify(ST.multi));
+  pickAt(ps[0], ps[1], true); const sel2 = ST.multi.slice();
+  const ysOf = gs => { const out = []; for (const M of Object.values(ST.scene.mesh.materials)) for (let t = 0; t < M.grp.length; t++) if (gs.includes(M.grp[t])) for (let j = 0; j < 3; j++) out.push(M.pos[9 * t + 3 * j + 1]); return out; };
+  const y0 = ysOf(sel2); $('gx').value = 0; $('gy').value = 0.7; $('gz').value = 0; $('gsnap').checked = true; $('gstep').value = '1'; $('gmode').value = 'isolate';
+  const m1 = await $('gmove').onclick(); const y1 = ysOf(sel2);
+  ok('isolate move of 2 groups, snapped 0.7 -> 1 m, live preview', m1.ok && m1.offset[1] === '1' && y1.length === y0.length && y1.every((y, i) => Math.abs(y - y0[i] - 1) < 1e-6) && /snapped/.test($('geomout').textContent), (m1.label || m1.error) + ' | ' + $('geomout').textContent.split('\n')[0]);
+  ok('isolate: shared corners inside kept, gap warning', m1.ok && m1.shared_inside_selection_kept > 0 && m1.duplicated_shared_vertices > 0 && /gaps \/ steps/.test($('geomout').textContent), `kept ${m1.shared_inside_selection_kept}, duplicated ${m1.duplicated_shared_vertices}`);
+  await doUndo(); ok('undo (isolate) restores the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  $('gmode').value = 'connected'; $('gmode').onchange(); $('gsnap').checked = false; $('gy').value = 0.5;
+  const m2 = await $('gmove').onclick();
+  ok('connected: refused until previewed, neighbours highlighted', !m2.ok && /NEEDS PREVIEW/.test(m2.error) && ST.nb.size > 0 && ST.lines.nb.n > 0 && ST.scene.state.content_sha256 === C0 && /review the highlighted neighbours/.test($('geomout').textContent), `${ST.nb.size} neighbour groups, ${ST.lines.nb.n / 6} outlined triangles`);
+  const nbg = [...ST.nb], yn0 = ysOf(nbg); const m3 = await $('gmove').onclick(); const yn1 = ysOf(nbg);
+  ok('connected move after preview: neighbours stretch (some corners +0.5, others fixed)', m3.ok && m3.duplicated_shared_vertices === 0 && yn1.some((y, i) => Math.abs(y - yn0[i] - 0.5) < 1e-6) && yn1.some((y, i) => y === yn0[i]) && /stretched/.test($('geomout').textContent), (m3.label || m3.error));
+  await doUndo(); ok('undo (connected) restores the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  $('gclear').onclick(); ok('clear empties the selection', ST.multi.length === 0 && ST.sel === null && ST.lines.sel.n <= 1, '');
+  $('gmode').value = 'isolate'; select('group', grp); }
+// v0.19: a move that trackbuild would clip at the unit regions is refused, nothing changes, the faces / unit edges are highlighted
+async function selftestClip(ok, grp, C0) {
+  select('group', grp); $('gmode').value = 'isolate'; $('gsnap').checked = false; $('gx').value = 0; $('gy').value = 1; $('gz').value = 0;
+  const v = await $('gmove').onclick();
+  ok('valid move reports the clip check (no face clipped)', v.ok && v.clipping && !v.clipping.refused && v.clipping.lost_m2 === 0 && /clip check \(kit trackbuild unit regions\)/.test($('geomout').textContent), (v.label || v.error) + ' | ' + ($('geomout').textContent.split('\n').find(l => /clip check/.test(l)) || ''));
+  await doUndo();
+  let hit = null, tried = [];
+  for (const d of [[50, 0, 0], [-50, 0, 0], [0, 0, 50], [0, 0, -50]]) { $('gx').value = d[0]; $('gy').value = d[1]; $('gz').value = d[2];
+    const r = await $('gmove').onclick(); tried.push(d.join(',') + ':' + (r.ok ? 'ok' : r.clipping ? 'clip' : 'other'));
+    if (r.ok) { await doUndo(); select('group', grp); continue; }
+    if (r.clipping && r.clipping.refused) { hit = r; break; } }
+  ok('out-of-region move refused, nothing changed', !!hit && ST.scene.state.content_sha256 === C0 && /trackbuild would clip/.test(hit.error) && /REFUSED \(nothing changed\)/.test($('geomout').textContent), tried.join(' ') + ' | ' + (hit ? hit.error.slice(0, 120) : ''));
+  ok('clipped faces + unit edges highlighted and listed', !!hit && ST.lines.clip.n >= 6 && ST.lines.cb.n >= 2 && /CLIPPED/.test($('geomout').textContent) && /face line \d+ \(group \d+, selected/.test($('geomout').textContent), hit ? `${ST.lines.clip.n / 2} face edges, ${ST.lines.cb.n / 2} unit edges` : '');
+  select('group', grp); ok('new selection clears the clip highlight', ST.clip === null && ST.lines.clip.n <= 1, '');
+  $('gx').value = 0; $('gy').value = 0; $('gz').value = 0; }
+// v0.20: turn / scale with live preview, pivot marker, angle snapping, entered pivot, one undo entry, refusal, connected preview
+async function selftestXform(ok, C0) {
+  const G = ST.scene.mesh.groups, walls = G.map((g, i) => g.mat === 'wall' ? i : -1).filter(i => i >= 0);
+  const reset = () => { $('ta').value = 0; $('tk').value = 1; $('tsnap').checked = false; $('tpm').value = 'bbox'; $('gmode').value = 'isolate'; };
+  let w = null, r1 = null; reset();
+  for (const g of walls.slice(Math.floor(walls.length / 3), Math.floor(walls.length / 3) + 6)) { select('group', g);
+    $('ta').value = 22; $('tsnap').checked = true; $('tstep').value = '15'; xformLive();
+    if (w === null) { const X = xformParams(), c = selBBoxCentre();
+      ok('transform live preview + pivot marker, nothing changed', ST.lines.tf.n > 0 && ST.lines.pv.n === 6 && X.angle === 15 && Math.abs(X.pivot[0] - c[0]) < 1e-9 && ST.scene.state.content_sha256 === C0 && /preview: turn 15 deg/.test($('tinfo').textContent), `${ST.lines.tf.n / 2} preview edges, pivot [${X.pivot.map(v => v.toFixed(3))}]`); }
+    w = g; const n0 = ST.scene.state.undo.length; r1 = await $('tapply').onclick();
+    if (r1.ok) { ok('turn 22 -> snapped 15 deg applied, one undo entry, normals turned', r1.transform.angle_deg === '15' && ST.scene.state.undo.length === n0 + 1 && r1.normals.selected_turned > 0 && /normals: \d+ selected corner normal/.test($('geomout').textContent) && /precision: /.test($('geomout').textContent), r1.label);
+      break; }
+    await doUndo(); }
+  if (!r1 || !r1.ok) { ok('turn 22 -> snapped 15 deg applied, one undo entry, normals turned', false, r1 ? r1.error : 'no wall group'); return; }
+  const piv = r1.transform.pivot.map(Number); await doUndo();
+  ok('transform undone exactly (opened bytes)', ST.scene.state.content_sha256 === C0, ''); select('group', w);
+  const c = selBBoxCentre(); ok('server pivot = previewed bbox centre', piv.every((v, i) => Math.abs(v - c[i]) < 1e-3), `[${piv}] vs [${c.map(v => v.toFixed(4))}]`);
+  $('tpfill').onclick(); $('tpx').value = (+$('tpx').value + 0.5).toFixed(4); $('ta').value = 0; $('tsnap').checked = false; $('tk').value = 1.1; xformLive();
+  const pm = ST.lines.pv.n === 6 && $('tpm').value === 'xyz'; const r2 = await $('tapply').onclick();
+  ok('entered pivot + scale 1.1 applied, marked pivot used', pm && r2.ok && r2.transform.pivot_mode === 'xyz' && Math.abs(+r2.transform.pivot[0] - +$('tpx').value) < 1e-9 && r2.transform.scale === '1.1', r2.label || r2.error);
+  await doUndo(); select('group', w); $('tk').value = -1; const r3 = await $('tapply').onclick();
+  ok('negative scale refused, nothing changed', !r3.ok && /positive uniform scaling only/.test(r3.error) && ST.scene.state.content_sha256 === C0, r3.error);
+  $('tk').value = 1; $('tpm').value = 'bbox'; $('ta').value = 3; $('gmode').value = 'connected'; $('gmode').onchange(); const r4 = await $('tapply').onclick();
+  const nb = ST.nb.size; const r5 = r4.ok ? r4 : await $('tapply').onclick();
+  ok('connected transform: neighbours previewed first, then stretched with normals recomputed', (r4.ok || (/NEEDS PREVIEW/.test(r4.error) && nb > 0)) && r5.ok && r5.normals.stretched_recomputed > 0 && /stretched/.test($('geomout').textContent), (r5.label || r5.error));
+  if (r5.ok) await doUndo();
+  ok('undo (transforms) back to the opened bytes', ST.scene.state.content_sha256 === C0, ''); reset(); select('group', w); xformLive(); }
+async function selftestWeld(ok, C0) {
+  $('wtol').value = 0.05; $('wkeep').value = 'a'; $('gmode').value = 'isolate'; const b0 = await doBoundary(false);
+  ok('open edges highlighted (inspection only, nothing changed)', b0.ok && b0.counts.open_edges > 0 && ST.lines.oe.n === 2 * b0.counts.open_edges && ST.scene.state.content_sha256 === C0 && /BOUNDARY/.test($('weldout').textContent),
+     `${b0.counts.open_edges} open edges, ${b0.counts.index_split_seams} seams closed by position, ${b0.counts.non_manifold_edges} non-manifold`);
+  // a gap: +3 cm isolate move of an asphalt face group whose every corner is shared (all duplicated)
+  const G = ST.scene.mesh.groups, asph = G.map((g, i) => g.mat === 'asphalt' ? i : -1).filter(i => i >= 0);
+  let mv = null, gap = null, gi = -1;
+  for (const g of asph.slice(Math.floor(asph.length / 3), Math.floor(asph.length / 3) + 16)) { select('group', g); $('gx').value = 0; $('gy').value = 0.03; $('gz').value = 0;
+    const r = await $('gmove').onclick(); if (!r.ok) continue;
+    if (r.moved_in_place === 0) { const b = await doBoundary(false); gi = b.gaps.findIndex(x => x.pairs >= 3 && Math.abs(x.max_gap_m - 0.03) < 1e-6); if (gi >= 0) { mv = r; gap = b.gaps[gi]; break; } }
+    await doUndo(); }
+  ok('isolate move opens a gap, listed as a candidate (green)', !!gap && ST.lines.wg.n > 0 && ST.bnd.counts.open_edges > b0.counts.open_edges, gap ? `${gap.pairs} pairs, ${gap.min_gap_m}..${gap.max_gap_m} m, closed ${gap.closed}` : 'no gap found');
+  if (!gap) return;
+  const Cm = ST.scene.state.content_sha256;
+  await $('wpickb').onclick(); ST.cam.tgt = O(gap.pa[0]); ST.cam.pitch = 0.02; ST.cam.dist = 1.5; draw();
+  for (const p of [gap.pa[0], gap.pb[0]]) { const s = project(O(p), mvp()); pickAt(s[0], s[1]); }
+  ok('two boundary vertices picked by click -> one pair (pink)', ST.wsel && ST.wsel.pairs && ST.wsel.pairs[0][0] === gap.chain_a[0] && ST.wsel.pairs[0][1] === gap.chain_b[0] && ST.lines.wv.n === 12, JSON.stringify(ST.wsel));
+  const n0 = ST.scene.state.undo.length, r1 = await $('wapply').onclick();
+  ok('weld without a preview -> NEEDS PREVIEW, previewed (affected faces + gap distances), nothing changed', !r1.ok && /NEEDS PREVIEW/.test(r1.error) && ST.lines.wf.n > 0 && /WELD PREVIEW/.test($('weldout').textContent) && /gap 0\.03 m/.test($('weldout').textContent) && ST.scene.state.content_sha256 === Cm, $('weldout').textContent.slice(0, 200));
+  const r2 = await $('wapply').onclick();
+  ok('vertex-pair weld applied (one undo entry, the pair coincides)', r2.ok && r2.exact.pairs_coincident === 1 && ST.scene.state.undo.length === n0 + 1 && /welded 1 pair/.test($('weldout').textContent), r2.label || r2.error);
+  await doUndo(); ok('pair weld undone exactly', ST.scene.state.content_sha256 === Cm, '');
+  await doBoundary(false); gi = ST.bnd.gaps.findIndex(x => x.chain_a.join() === gap.chain_a.join()); chooseGap(gi);
+  $('wtol').value = 0.01; const r3 = await $('wprev').onclick();
+  ok('gap wider than the tolerance refused, nothing changed', !r3.ok && /GAP TOO WIDE|NO MATCH/.test(r3.error) && ST.scene.state.content_sha256 === Cm, r3.error);
+  $('wtol').value = 0.05; $('wkeep').value = gap.pa[0][1] < gap.pb[0][1] ? 'a' : 'b';
+  const r4 = await $('wprev').onclick(), r5 = await $('wapply').onclick();
+  ok('chain weld previewed then applied: gap closed, open edges back to before the move', r4.ok && r4.pair_count === gap.pairs && r5.ok && ST.bnd.counts.open_edges === b0.counts.open_edges && /seams preserved/.test($('weldout').textContent), (r5.label || r5.error) + ` open ${ST.bnd.counts.open_edges} / ${b0.counts.open_edges}`);
+  ok('regenerated data = before the gap (corners back at their source positions)', r5.ok && r5.regenerated.streamed_sha256[1] === mv.regenerated.streamed_sha256[0], r5.ok ? r5.regenerated.streamed_sha256[1].slice(0, 12) : '');
+  await doUndo(); await doUndo();
+  ok('undo (weld + move) back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  ST.bnd = null; ST.wsel = null; ST.wgaps = []; ST.wfaces = null; $('wkeep').value = 'a'; renderGaps(); weldInfo(); build(); draw(); }
+// v0.22: duplicate (copies selected, positioned by a move, original unchanged), bridge (chains picked by click, preview first,
+// gap closed by new faces), a refused bridge changes nothing, undo back to the opened bytes
+async function selftestConstruct(ok, C0) {
+  const G0 = ST.scene.mesh.groups, n0 = G0.length, grass = G0.map((g, i) => g.mat === 'grass' ? i : -1).filter(i => i >= 0);
+  const ysOf = gs => { const out = []; for (const M of Object.values(ST.scene.mesh.materials)) for (let t = 0; t < M.grp.length; t++) if (gs.includes(M.grp[t])) for (let j = 0; j < 3; j++) out.push(M.pos[9 * t + 3 * j + 1]); return out; };
+  const g = grass[Math.floor(grass.length / 3)], src = JSON.stringify({f: G0[g].faces, c: G0[g].colours, m: G0[g].mat}); select('group', g);
+  $('gx').value = 0; $('gy').value = 2; $('gz').value = 0; $('gsnap').checked = false; $('gmode').value = 'isolate';
+  const u0 = ST.scene.state.undo.length, yo = ysOf([g]), d = await $('gdup').onclick(), G1 = ST.scene.mesh.groups;
+  ok('duplicate: one undo entry, the copy appended as a new face group and selected (yellow)', d.ok && ST.scene.state.undo.length === u0 + 1 && G1.length === n0 + 1 && d.groups[0] === n0 && ST.multi.length === 1 && ST.multi[0] === n0 && ST.lines.sel.n > 0 && /duplicated 1 group/.test($('geomout').textContent) && /placement: copies appended at the end/.test($('geomout').textContent), (d.label || d.error));
+  const yd = ysOf([n0]);
+  ok('copy = the original (faces, material, vertex colours), placed at the offset (+2 m)', d.ok && JSON.stringify({f: G1[n0].faces, c: G1[n0].colours, m: G1[n0].mat}) === src && yd.length === yo.length && yd.every((y, i) => Math.abs(y - yo[i] - 2) < 1e-6) && /at offset \[0, 2, 0\]/.test($('geomout').textContent), src);
+  $('gy').value = 1; const m = await $('gmove').onclick(), yc = ysOf([n0]);
+  ok('the selected copy moved +1 m more (own undo step), the original unchanged', m.ok && m.groups.join() === String(n0) && m.duplicated_shared_vertices === 0 && JSON.stringify(ysOf([g])) === JSON.stringify(yo) && yc.length === yo.length && yc.every((y, i) => Math.abs(y - yo[i] - 3) < 1e-6) && ST.scene.state.undo.length === u0 + 2, (m.label || m.error));
+  await doUndo(); await doUndo(); ok('undo (move + duplicate) back to the opened bytes', ST.scene.state.content_sha256 === C0 && ST.scene.mesh.groups.length === n0, '');
+  // a closed gap: an asphalt face group (every corner shared) sunk 0.25 m in isolate mode
+  $('wtol').value = 0.3; const b0 = await doBoundary(false), asph = ST.scene.mesh.groups.map((x, i) => x.mat === 'asphalt' ? i : -1).filter(i => i >= 0);
+  let gap = null, gi = -1;
+  for (const a of asph.slice(Math.floor(asph.length / 3), Math.floor(asph.length / 3) + 16)) { select('group', a); $('gx').value = 0; $('gy').value = -0.25; $('gz').value = 0;
+    const r = await $('gmove').onclick(); if (!r.ok) continue;
+    if (r.moved_in_place === 0) { const b = await doBoundary(false); gi = b.gaps.findIndex(x => x.closed && x.pairs >= 3 && Math.abs(x.max_gap_m - 0.25) < 1e-6); if (gi >= 0) { gap = b.gaps[gi]; break; } }
+    await doUndo(); }
+  ok('a sunk face group opens a closed gap', !!gap, gap ? `${gap.pairs} pairs, closed ${gap.closed}` : 'no gap found');
+  if (!gap) return;
+  const Cm = ST.scene.state.content_sha256, openM = ST.bnd.counts.open_edges;
+  await $('bpa').onclick(); for (const v of gap.chain_a.slice(0, 2)) { ST.cam.tgt = O(ST.bv.get(v)); ST.cam.pitch = 0.3; ST.cam.dist = 1.5; draw(); const s = project(O(ST.bv.get(v)), mvp()); pickAt(s[0], s[1]); }
+  await $('bpb').onclick(); for (const v of gap.chain_b.slice(0, 2)) { ST.cam.tgt = O(ST.bv.get(v)); ST.cam.pitch = 0.3; ST.cam.dist = 1.5; draw(); const s = project(O(ST.bv.get(v)), mvp()); pickAt(s[0], s[1]); }
+  ok('chains picked by click (pink markers)', $('bca').value === gap.chain_a.slice(0, 2).join(',') && $('bcb').value === gap.chain_b.slice(0, 2).join(',') && ST.lines.bc.n === 24, `A ${$('bca').value} B ${$('bcb').value}`);
+  await $('bpb').onclick(); chooseGap(gi); $('bgap').onclick(); $('bmat').value = 'asphalt';
+  ok('the chosen gap fills the chains (closed loops)', $('bca').value === gap.chain_a.join(',') && $('bclosed').checked, $('bca').value + ' | ' + $('bcb').value);
+  const u1 = ST.scene.state.undo.length, r1 = await $('bapply').onclick();
+  ok('bridge without a preview -> NEEDS PREVIEW, previewed (new faces purple, pairs green), nothing changed', !r1.ok && /NEEDS PREVIEW/.test(r1.error) && ST.lines.bf.n === 2 * 5 * gap.pairs && ST.lines.bp.n === 2 * gap.pairs && /BRIDGE PREVIEW/.test($('bridgeout').textContent) && /winding: consistent with both neighbours/.test($('bridgeout').textContent) && ST.scene.state.content_sha256 === Cm, $('bridgeout').textContent.slice(0, 220));
+  const r2 = await $('bapply').onclick();
+  ok('bridge applied: one undo entry, new face group selected, the gap closed (open edges back to before the move)', r2.ok && ST.scene.state.undo.length === u1 + 1 && ST.scene.mesh.groups.length === n0 + 1 && ST.multi[0] === n0 && r2.new_open_edges === 0 && ST.bnd.counts.open_edges === b0.counts.open_edges && ST.bnd.counts.non_manifold_edges === 0 && ST.bnd.counts.misoriented_edges === 0 && /bridged \d+ pair/.test($('bridgeout').textContent), (r2.label || r2.error) + ` open ${openM} -> ${ST.bnd.counts.open_edges} (before the move ${b0.counts.open_edges})`);
+  await doUndo(); ok('bridge undone exactly', ST.scene.state.content_sha256 === Cm, '');
+  $('bca').value = gap.chain_a.join(','); $('bcb').value = gap.chain_b.slice(0, -1).join(','); $('bclosed').checked = false; const r3 = await $('bprev').onclick();
+  ok('unequal chains refused, nothing changed', !r3.ok && /not compatible/.test(r3.error) && ST.scene.state.content_sha256 === Cm && /REFUSED/.test($('bridgeout').textContent), r3.error);
+  await doUndo(); ok('undo (bridge test) back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  $('bca').value = ''; $('bcb').value = ''; $('bclosed').checked = false; bridgeReset(); ST.bnd = null; ST.wsel = null; ST.wgaps = []; ST.wfaces = null; $('wtol').value = 0.05;
+  $('gx').value = 0; $('gy').value = 0; $('gz').value = 0; renderGaps(); weldInfo(); build(); draw(); }
+// v0.23: unit regions - fit preview (regions drawn, nothing changed), a narrowing that would drop geometry refused (red faces),
+// merge needs a preview then applies (16 units), split adds a region back (17), undo to the opened bytes
+async function selftestUnits(ok, C0) {
+  const U0 = ST.scene.units.length; $('uk').value = 3; unitsInfo(); $('uop').value = 'fit';
+  const p1 = await $('uprev').onclick();
+  ok('unit fit previewed: regions drawn (changed cyan), coverage + capacity listed, nothing changed', p1.ok && ST.lines.lr.n === 8 && ST.lines.lu.n === 8 * (U0 - 1) && /capacity: worst/.test($('layout_out').textContent) && /drivable samples/.test($('layout_out').textContent) && ST.scene.state.content_sha256 === C0, $('layout_out').textContent.split('\n').slice(1, 3).join(' | '));
+  const u = ST.scene.units[3]; $('uop').value = 'lateral'; $('ulo').value = u.lateral[0] + 5; $('uhi').value = u.lateral[1];
+  const p2 = await $('uprev').onclick();
+  ok('a narrowing that would drop geometry refused, faces red, nothing changed', !p2.ok && /unintended geometry loss/.test(p2.error) && ST.lines.lf.n > 0 && ST.scene.state.content_sha256 === C0, (p2.error || '').slice(0, 140));
+  $('uop').value = 'merge'; const u0 = ST.scene.state.undo.length, a1 = await $('uapply').onclick();
+  ok('merge without a preview -> NEEDS PREVIEW, previewed, nothing changed', !a1.ok && /NEEDS PREVIEW/.test(a1.error) && /PREVIEW \(nothing changed\)/.test($('layout_out').textContent) && ST.scene.state.content_sha256 === C0, '');
+  const a2 = await $('uapply').onclick();
+  ok('merge applied: one undo entry, one unit fewer (unit layer redrawn)', a2.ok && ST.scene.units.length === U0 - 1 && ST.scene.state.undo.length === u0 + 1 && ST.lines.units.n > 0, a2.label || a2.error);
+  const m = ST.scene.units[3]; $('uop').value = 'split'; $('ust').value = m.cut_from + Math.floor(((m.cut_to - m.cut_from + 357) % 357) / 2);
+  await $('uprev').onclick(); const a3 = await $('uapply').onclick();
+  ok('split applied (a region added back)', a3.ok && ST.scene.units.length === U0 && ST.scene.state.undo.length === u0 + 2, a3.label || a3.error);
+  await doUndo(); await doUndo(); ok('undo (split + merge) back to the opened bytes', ST.scene.state.content_sha256 === C0 && ST.scene.units.length === U0, '');
+  ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
+// v0.24: road strip - points clicked on the mesh, preview (purple faces, markers, nothing changed), apply needs the preview,
+// re-generate the road from its stored points (one more point), a too-tight curve refused, undo to the opened bytes
+async function selftestRoad(ok, C0) {
+  ST.cam.tgt = O([-6000, 20, -6012]); ST.cam.pitch = 1.45; ST.cam.dist = 180; draw();
+  $('rpts').value = ''; $('rid').value = ''; $('rmat').value = 'asphalt'; $('rw').value = 8; $('rclosed').checked = false; $('rlift').value = 0.05;
+  $('rpick').onclick(); for (const q of [[-6060, 20, -6025], [-6000, 20, -6012], [-5940, 20, -6025]]) { const sp = project(O(q), mvp()); pickAt(sp[0], sp[1]); } $('rpick').onclick();
+  const P = parsePts($('rpts').value);
+  ok('three control points clicked on the mesh (lifted 0.05 m, markers)', P.length === 3 && P.every(q => Math.abs(q[1] - 20.05) < 0.02) && Math.abs(P[1][0] + 6000) < 1 && Math.abs(P[1][2] + 6012) < 1 && ST.lines.ll.n === 18, $('rpts').value.replace(/\n/g, ' | '));
+  const u0 = ST.scene.state.undo.length, a1 = await $('rapply').onclick();
+  ok('road without a preview -> NEEDS PREVIEW, previewed (purple faces), nothing changed', !a1.ok && /NEEDS PREVIEW/.test(a1.error) && ST.lines.ln.n > 0 && /road road1: \d+ faces/.test($('layout_out').textContent) && ST.scene.state.content_sha256 === C0, $('layout_out').textContent.split('\n').slice(1, 2).join(''));
+  const a2 = await $('rapply').onclick(), G = ST.scene.mesh.groups;
+  ok('road applied: one undo entry, new face group selected, listed as road1', a2.ok && ST.scene.state.undo.length === u0 + 1 && G[G.length - 1].mat === 'asphalt' && ST.multi[0] === G.length - 1 && !!ST.scene.constructs.road1 && [...$('rid').options].some(o => o.value === 'road1'), a2.label || a2.error);
+  $('rid').value = 'road1'; $('rid').onchange(); $('rpts').value += '\n-5900 20.05 -6030'; roadMarkers();
+  await $('rprev').onclick(); const a3 = await $('rapply').onclick();
+  ok('road1 re-generated from its stored points + one more (old block replaced)', a3.ok && a3.removed_faces === a2.faces && a3.faces > a2.faces && Object.keys(ST.scene.constructs).length === 1, a3.label || a3.error);
+  $('rid').value = ''; $('rpts').value = '-6000 20.05 -6030\n-5996 20.05 -6030\n-5998 20.05 -6027'; $('rclosed').checked = true; const a4 = await $('rprev').onclick();
+  ok('a curve too tight for the width refused, nothing changed', !a4.ok && /turns too tightly/.test(a4.error) && ST.scene.state.undo.length === u0 + 2, a4.error);
+  await doUndo(); await doUndo(); ok('undo (re-generate + road) back to the opened bytes', ST.scene.state.content_sha256 === C0 && !ST.scene.constructs.road1, '');
+  $('rpts').value = ''; $('rclosed').checked = false; ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
+// v0.25: race layout - structural check of the demo (all ok, runtime note), checkpoints out of lap order refused, checkpoints
+// applied, a new original layout replacing all geometry (confirmation needed, preview, apply: 17 units, structural PASS), undo
+async function selftestRace(ok, C0) {
+  const c1 = await $('xcheck').onclick();
+  ok('race check of the demo: every structural check ok, runtime unproven stated, route drawn', c1.ok && c1.structural_ok && c1.structural.length === 6 && /NOT proven: AI drivers/.test($('layout_out').textContent) && ST.lines.ll.n > 0 && ST.scene.state.content_sha256 === C0, c1.summary_lines ? c1.summary_lines[0] : c1.error);
+  $('cpst').value = '200, 100, 300'; const p1 = await $('cpprev').onclick();
+  ok('checkpoints out of lap order refused, nothing changed', !p1.ok && /not in lap order/.test(p1.error) && ST.scene.state.content_sha256 === C0, (p1.error || '').slice(0, 100));
+  $('cpst').value = '50, 120, 190, 260, 320'; await $('cpprev').onclick(); const u0 = ST.scene.state.undo.length, a1 = await $('cpapply').onclick();
+  ok('checkpoints applied (5, lap order ok, one undo entry)', a1.ok && ST.scene.checkpoints.length === 5 && ST.scene.state.undo.length === u0 + 1, a1.label || a1.error);
+  await doUndo();
+  $('xpts').value = '-6120 20 -6060\n-6000 20 -6075\n-5880 20 -6050\n-5850 20 -5980\n-5900 20 -5930\n-6000 20 -5950\n-6100 20 -5925\n-6150 20 -5990';
+  $('xmat').value = 'asphalt'; $('xrep').value = 'all'; $('xconfirm').checked = false; const n0 = await $('xprev').onclick();
+  ok('replace ALL without the confirmation box: not started', n0 === null && /confirmation box/.test($('layout_out').textContent), '');
+  $('xconfirm').checked = true; const p2 = await $('xprev').onclick();
+  ok('new layout previewed: structural PASS, 17 units, route + regions drawn, nothing changed', p2.ok && p2.units === 17 && p2.structural.every(c => c.ok) && ST.lines.lr.n === 8 * 17 && ST.lines.ll.n > 0 && ST.scene.state.content_sha256 === C0, (p2.summary_lines || [p2.error])[0]);
+  const a2 = await $('xapply').onclick();
+  ok('new layout applied: one undo entry, route / units / grid / checkpoints replaced, blocks listed', a2.ok && ST.scene.units.length === 17 && ST.scene.stations.length === p2.stations && ST.scene.checkpoints.length === 6 && !!ST.scene.constructs.route_road && ST.scene.state.undo.length === u0 + 1, a2.label || a2.error);
+  const c2 = await $('xcheck').onclick();
+  ok('race check of the new layout: structural PASS', c2.ok && c2.structural_ok, c2.summary_lines ? c2.summary_lines[0] : '');
+  await doUndo(); ok('undo (layout) back to the opened bytes', ST.scene.state.content_sha256 === C0 && ST.scene.units.length === 17 && !ST.scene.constructs.route_road, '');
+  $('xpts').value = ''; $('xconfirm').checked = false; $('xrep').value = 'route'; ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
+// v0.26: scenery on an editor-built layout - include the infield (units grow), terrain patch, barrier from clicked points,
+// prefab saved from the barrier and inserted turned, a terrain outside every unit refused, structural check, undo to the opened bytes
+async function selftestScenery(ok, C0) {
+  $('xpts').value = '-6120 20 -6060\n-6000 20 -6075\n-5880 20 -6050\n-5850 20 -5980\n-5900 20 -5930\n-6000 20 -5950\n-6100 20 -5925\n-6150 20 -5990';
+  $('xmat').value = 'asphalt'; $('xrep').value = 'all'; $('xconfirm').checked = true; await $('xprev').onclick(); const L = await $('xapply').onclick();
+  const u0 = ST.scene.state.undo.length; ok('editor-built layout for the scenery test', L.ok, L.label || L.error);
+  $('urect').value = '-6080 -6030 -5940 -5975'; $('skind').value = 'terrain'; sceneryList(); $('sh').value = '19.98'; $('smat').value = 'grass';
+  await $('sprev').onclick(); const t1b = await $('sapply').onclick();
+  ok('infield terrain outside the units refused (clip rule)', !t1b.ok && /would clip/.test(t1b.error) && ST.scene.state.undo.length === u0, (t1b.error || '').slice(0, 100));
+  $('uop').value = 'include'; await $('uprev').onclick(); const i1 = await $('uapply').onclick();
+  ok('include the infield rectangle: units grow (one undo entry)', i1.ok && i1.changed_units.length > 0 && ST.scene.state.undo.length === u0 + 1, i1.label || i1.error);
+  $('skind').value = 'terrain'; sceneryList(); await $('sprev').onclick(); const t2 = await $('sapply').onclick();
+  ok('terrain patch applied (grass, tagged block terrain1)', t2.ok && !!ST.scene.constructs.terrain1 && t2.faces > 0, t2.label || t2.error);
+  $('skind').value = 'barrier'; sceneryList(); $('spts').value = ''; ST.cam.tgt = O([-6000, 20, -6000]); ST.cam.pitch = 1.45; ST.cam.dist = 160; draw();
+  $('spick').onclick(); for (const q of [[-6040, 20, -6010], [-5990, 20, -6000], [-5960, 20, -5990]]) { const sp = project(O(q), mvp()); pickAt(sp[0], sp[1]); } $('spick').onclick();
+  await $('sprev').onclick(); const b1 = await $('sapply').onclick();
+  ok('barrier from 3 clicked points applied (barrier1)', b1.ok && parsePts($('spts').value).length === 3 && !!ST.scene.constructs.barrier1, b1.label || b1.error);
+  setMulti(ST.scene.constructs.barrier1.groups.slice()); $('spname').value = 'selftest_barrier'; const ps = await $('spsave').onclick();
+  ok('prefab saved from the barrier (Workbench state, project unchanged by it)', ps.ok && [...$('spf').options].some(o => o.value === 'selftest_barrier'), ps.ok ? `${ps.faces} faces` : ps.error);
+  $('skind').value = 'prefab'; sceneryList(); $('spf').value = 'selftest_barrier'; $('spos').value = '-6010 19.98 -5992'; $('sang').value = 30;
+  await $('sprev').onclick(); const pf = await $('sapply').onclick();
+  ok('prefab copy inserted turned 30 deg (prefab1)', pf.ok && !!ST.scene.constructs.prefab1 && pf.faces === ps.faces, pf.label || pf.error);
+  const c = await $('xcheck').onclick(); ok('structural check still PASS', c.ok && c.structural_ok, c.summary_lines ? c.summary_lines[0] : '');
+  for (let k = 0; k < 5; k++) await doUndo(); ok('undo (5 edits) back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  $('xpts').value = ''; $('xconfirm').checked = false; $('xrep').value = 'route'; $('spts').value = ''; $('urect').value = ''; $('uop').value = 'fit';
+  ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
+async function selftestAuthored(ok) {
+  const S0 = ST.scene.state.sha256, C0 = ST.scene.state.content_sha256;
+  ok('webgl context', !!gl, gl && gl.getParameter(gl.VERSION));
+  const want = Object.values(ST.scene.materials).filter(m => m.texture_ok).length;
+  await waitTex(); ok('textures loaded', ST.texLoaded === want && want > 0, `${ST.texLoaded} / ${want}`);
+  ok('meshes', Object.keys(ST.meshes).length === Object.keys(ST.scene.mesh.materials).length, Object.keys(ST.meshes).length);
+  const nc = pixelsVary(); ok('rendered pixels vary (not a blank canvas)', nc > 8, nc);
+  for (const id of ['L_mesh','L_collision','L_units','L_route','L_starts']) { $(id).click(); draw(); $(id).click(); draw(); }
+  ok('layer toggles', true, 'each layer toggled off / on');
+  ST.cam.pitch = 1.4; ST.cam.dist = 900; ST.cam.tgt = [0,0,0]; draw();
+  const g = ST.pick.find(o => o.kind === 'grid' && o.index === 0); const sp = project(g.p, mvp()); pickAt(sp[0], sp[1]);
+  ok('click selection (grid 0)', ST.sel && ST.sel.kind === 'grid', ST.sel && (ST.sel.kind + ' ' + ST.sel.index));
+  ok('inspector shows the source object', $('insp').textContent.includes('"pos"'), $('insp').textContent.slice(0, 60));
+  const r1 = await doEdit(ST.sel.kind, ST.sel.index, [1, 0, 0]);
+  ok('edit (move grid slot +1 m x)', r1.ok && ST.scene.state.dirty, r1.label || r1.error);
+  const r2 = await doUndo(); ok('undo restores the bytes', r2.ok && ST.scene.state.sha256 === S0, ST.scene.state.sha256.slice(0, 12));
+  const r3 = await doRedo(); ok('redo re-applies', r3.ok && ST.scene.state.sha256 === r1.state.sha256, ST.scene.state.sha256.slice(0, 12));
+  await doUndo(); ok('undo again (back to the opened bytes)', ST.scene.state.sha256 === S0 && !ST.scene.state.dirty, '');
+  const r4 = await doEdit('station', 3, [1, 0, 0]); ok('unsupported edit refused (station)', !r4.ok && /refused/.test(r4.error), r4.error);
+  select('unit', 0); ok('unit read only in the inspector', $('editbox').style.display === 'none', $('editmsg').textContent.slice(0, 60));
+  // v0.15 material edits: pick a grass face group by a click on the mesh, assign, colour, undo / redo, refusals
+  const gm = ST.meshes.grass; let tri = -1; for (let k = 0; k < gm.grp.length; k += 7) { const c = [0,1,2].map(i => (gm.arr[9*k+i] + gm.arr[9*k+3+i] + gm.arr[9*k+6+i]) / 3);
+    ST.cam.tgt = c; ST.cam.pitch = 1.45; ST.cam.dist = 25; draw(); const ps = project(c, mvp());
+    if (!ST.pick.some(o => { const q = project(o.p, mvp()); return q && Math.hypot(q[0] - ps[0], q[1] - ps[1]) < 20; })) { tri = k; pickAt(ps[0], ps[1]); break; } }
+  ok('click on the mesh selects its face group', ST.sel && ST.sel.kind === 'group' && ST.scene.mesh.groups[ST.sel.index].mat === 'grass', ST.sel && JSON.stringify(sourceOf('group', ST.sel.index)).slice(0, 80));
+  ok('material edit box shown', $('matbox').style.display === 'block', '');
+  const grp = ST.sel.index;
+  const inSec = s => !SECTIONS || SECTIONS.has(s);      // a suite may run only its own sections; e07 runs them all
+  ok('self-test sections', true, SECTIONS ? [...SECTIONS].join(',') : 'all');
+  if (inSec('mat')) {
+  $('mmat').value = 'pad'; $('mscope').value = 'group'; await $('massign').onclick();
+  const a1 = ST.scene.state.content_sha256;
+  ok('assign existing material (grass -> pad), live preview', ST.lastErr === null && a1 !== C0 && ST.scene.mesh.groups[grp].mat === 'pad' && !!ST.meshes.pad, $('editmsg').textContent);
+  $('cr').value = 0.9; $('cg').value = 0.1; $('cb').value = 0.1; await $('mcolour').onclick();
+  ok('vertex colour set, live preview', ST.lastErr === null && Object.keys(ST.scene.mesh.groups[grp].colours)[0] === '0.900 0.100 0.100', JSON.stringify(ST.scene.mesh.groups[grp].colours));
+  await doUndo(); await doUndo(); ok('undo x2 restores the opened bytes', ST.scene.state.content_sha256 === C0 && !ST.scene.state.dirty, ST.scene.state.content_sha256.slice(0, 12));
+  await doRedo(); ok('redo re-applies the assignment', ST.scene.state.content_sha256 === a1, ST.scene.state.content_sha256.slice(0, 12));
+  await doUndo(); ok('undo again (back to the opened bytes)', ST.scene.state.content_sha256 === C0, '');
+  const r6 = await doMaterial({op: 'colour', group: grp, rgb: [1.5, 0, 0]}); ok('colour outside 0..1 refused', !r6.ok, r6.error);
+  }
+  if (inSec('geom')) {
+  // v0.17 geometry: move the selected group, live preview, adjustment report, undo / redo, refusal
+  select('group', grp); const ys = m => { const M = ST.scene.mesh.materials[m], out = []; for (let t = 0; t < M.grp.length; t++) if (M.grp[t] === grp) for (let j = 0; j < 3; j++) out.push(M.pos[9 * t + 3 * j + 1]); return out; };
+  const y0 = ys('grass'), nOther = Object.values(ST.scene.mesh.materials).reduce((n, M) => n + M.pos.length, 0) - 3 * y0.length;
+  $('gx').value = 0; $('gy').value = 1.5; $('gz').value = 0; const g1 = await $('gmove').onclick(); const y1 = ys('grass');
+  ok('move face group (+1.5 m y), live preview', g1.ok && y1.length === y0.length && y1.every((y, i) => Math.abs(y - y0[i] - 1.5) < 1e-6) && ST.scene.state.content_sha256 !== C0, (g1.label || g1.error) + ' dup ' + g1.duplicated_shared_vertices);
+  ok('regeneration + adjustment report shown', $('geomout').style.display === 'block' && /regenerated by kit trackbuild/.test($('geomout').textContent), $('geomout').textContent.slice(0, 160));
+  const g2 = await doGeom(grp, [0.00001, 0, 0]); ok('offset finer than the source refused, nothing changed', !g2.ok && /finer than the source precision/.test(g2.error) && ST.scene.state.content_sha256 === g1.state.content_sha256, g2.error);
+  await doUndo(); ok('undo restores the opened bytes', ST.scene.state.content_sha256 === C0 && ys('grass').every((y, i) => y === y0[i]), '');
+  await doRedo(); ok('redo re-applies the move', ST.scene.state.content_sha256 === g1.state.content_sha256, ''); await doUndo();
+  }
+  if (inSec('multi')) await selftestMulti(ok, grp, C0);
+  if (inSec('clip')) await selftestClip(ok, grp, C0);
+  if (inSec('xform')) { await selftestXform(ok, C0); select('group', grp); }
+  if (inSec('weld')) { await selftestWeld(ok, C0); select('group', grp); }
+  if (inSec('construct')) { await selftestConstruct(ok, C0); select('group', grp); }
+  if (inSec('units')) { await selftestUnits(ok, C0); select('group', grp); }
+  if (inSec('road')) { await selftestRoad(ok, C0); select('group', grp); }
+  if (inSec('race')) { await selftestRace(ok, C0); select('group', grp); }
+  if (inSec('scenery')) { await prefabList(); await selftestScenery(ok, C0); select('group', grp); }
+  if (inSec('props')) {
+  // v0.16 material property edits
+  $('mprops').onclick(); ok('group -> its material\'s property box', ST.sel && ST.sel.kind === 'material' && ST.sel.index === 'grass' && $('propbox').style.display === 'block', $('propinfo').textContent);
+  const ng = ST.scene.materials.grass.groups;
+  $('psurf').value = '0x0002'; $('pconf').checked = false; let p1 = await $('psurfb').onclick();
+  if (ng > 1) { ok('shared material needs confirmation', !p1.ok && /NEEDS CONFIRMATION/.test(p1.error) && ST.scene.state.content_sha256 === C0, p1.error);
+    $('pconf').checked = true; p1 = await $('psurfb').onclick(); }
+  ok('surface word set (grass 0x000F -> 0x0002), meaning shown', p1.ok && ST.scene.materials.grass.surface === '0x0002' && /concrete/.test(ST.scene.materials.grass.surface_meaning), p1.label || p1.error);
+  const tl = ST.texLoaded, pad = (ST.scene.textures_available || []).find(t => /bm_pad\.png$/.test(t.path));
+  select('material', 'grass'); $('ptex').value = pad.path; $('pconf').checked = true; const p2 = await $('ptexb').onclick(); await waitTex();
+  ok('texture reference swapped, preview reloads it', p2.ok && ST.scene.materials.grass.texture === pad.path && ST.texLoaded > tl, (p2.label || p2.error) + ` textures loaded ${tl} -> ${ST.texLoaded}`);
+  const p3 = await doMaterial({op: 'property', material: 'grass', prop: 'alpha', value: 1, confirm: true}); ok('unsupported property refused (alpha)', !p3.ok && /trackbuild/.test(p3.error), p3.error);
+  const p4 = await doMaterial({op: 'property', material: 'grass', prop: 'surface', value: '0x10000', confirm: true}); ok('surface outside 16 bits refused', !p4.ok, p4.error);
+  await doUndo(); await doUndo(); ok('undo x2 restores the opened bytes', ST.scene.state.content_sha256 === C0 && ST.scene.materials.grass.surface === '0x000F', ST.scene.state.content_sha256.slice(0, 12));
+  }
+  ok('source unchanged after the test', ST.scene.state.content_sha256 === C0 && !ST.scene.state.dirty, '');
+}
+// v0.16 transparency probe: draw one retail texture 1:1 over white with the real shader in a given mode and compare every pixel
+// with the value expected from the decoded PNG's RGBA (read back through a 2-D canvas): opaque = rgb, cut-out = white where
+// alpha < AREF else rgb, blended = rgb * a + white * (1 - a).
+async function pngRGBA(url) { const im = new Image(); await new Promise((res, rej) => { im.onload = res; im.onerror = rej; im.src = url + '&t=' + TOKEN; });
+  const c = document.createElement('canvas'); c.width = im.width; c.height = im.height; const x = c.getContext('2d'); x.drawImage(im, 0, 0);
+  return {w: im.width, h: im.height, d: x.getImageData(0, 0, im.width, im.height).data}; }
+async function alphaProbe(ti, mode) {
+  const ref = await pngRGBA('/tex?i=' + ti), w = ref.w, h = ref.h, T = ST.tex['t' + ti];
+  if (!T || w > cv.width || h > cv.height) return {skipped: `texture ${w}x${h} vs canvas ${cv.width}x${cv.height}`};
+  gl.viewport(0, 0, w, h); gl.enable(gl.SCISSOR_TEST); gl.scissor(0, 0, w, h); gl.clearColor(1, 1, 1, 1); gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.disable(gl.DEPTH_TEST); gl.useProgram(PT);
+  gl.uniformMatrix4fv(gl.getUniformLocation(PT, 'mvp'), false, [1,0,0,0, 0,1,0,0, 0,0,1,0, 0,0,0,1]);
+  gl.uniform4fv(gl.getUniformLocation(PT, 'tint'), [0,0,0,0]); gl.uniform1f(gl.getUniformLocation(PT, 'lit'), 0); gl.uniform1f(gl.getUniformLocation(PT, 'ls'), 1);
+  gl.uniform1f(gl.getUniformLocation(PT, 'mode'), MODE[mode]); gl.uniform1f(gl.getUniformLocation(PT, 'aref'), AREF);
+  gl.activeTexture(gl.TEXTURE0); gl.bindTexture(gl.TEXTURE_2D, T); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+  gl.uniform1i(gl.getUniformLocation(PT, 'tx'), 0);
+  const bp = buf([-1,-1,0, 1,-1,0, 1,1,0, -1,-1,0, 1,1,0, -1,1,0]), bu = buf([0,1, 1,1, 1,0, 0,1, 1,0, 0,0]), bc = buf(new Array(18).fill(0));
+  for (const [b, a, n] of [[bp, 'p', 3], [bu, 'uv', 2], [bc, 'c', 3]]) { const l = gl.getAttribLocation(PT, a); gl.bindBuffer(gl.ARRAY_BUFFER, b); gl.enableVertexAttribArray(l); gl.vertexAttribPointer(l, n, gl.FLOAT, false, 0, 0); }
+  if (MODE[mode] >= 2) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); }
+  gl.drawArrays(gl.TRIANGLES, 0, 6); gl.disable(gl.BLEND);
+  const px = new Uint8Array(4 * w * h); gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, T.minFilter || gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.disable(gl.SCISSOR_TEST); gl.enable(gl.DEPTH_TEST); [bp, bu, bc].forEach(b => gl.deleteBuffer(b));
+  let bad = 0, maxd = 0, white = 0, a0 = 0;
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) { const i = (y * w + x) * 4, j = ((h - 1 - y) * w + x) * 4, a = ref.d[i + 3] / 255;
+    if (ref.d[i + 3] === 0) a0++;
+    let d = 0; for (let k = 0; k < 3; k++) { const c = ref.d[i + k];
+      const e = MODE[mode] === 0 ? c : MODE[mode] === 1 ? (a < AREF ? 255 : c) : c * a + 255 * (1 - a); d = Math.max(d, Math.abs(px[j + k] - e)); }
+    if (d > 4) bad++; maxd = Math.max(maxd, d); if (px[j] === 255 && px[j + 1] === 255 && px[j + 2] === 255) white++; }
+  draw(); return {w, h, texels: w * h, mismatched: bad, max_diff: maxd, white_pixels: white, alpha0_texels: a0};
+}
+async function selftestRetail(ok) {
+  ok('webgl context + 32-bit indices', !!gl && !!U32, gl && gl.getParameter(gl.VERSION));
+  ok('mesh groups uploaded', Object.keys(ST.meshes).length === ST.scene.mesh.length && ST.scene.mesh.length > 0, Object.keys(ST.meshes).length);
+  await waitTex(); ok('textures loaded', ST.texLoaded === ST.texWanted && ST.texWanted > 0, `${ST.texLoaded} / ${ST.texWanted}`);
+  const nc = pixelsVary(); ok('rendered pixels vary (not a blank canvas)', nc > 8, nc);
+  // v0.16 transparency: representative materials (picked by texture name for the TEST only; the class comes from +0x24)
+  const rep = n => ST.scene.mesh.find(e => e.texture_name === n);
+  const cases = [['Tree_shadow1', 'blend', false], ['GL_bridgeshadow', 'blend', false], ['GL_treeflat', 'cutout', true]];
+  for (const [n, want, zw] of cases) { const e = rep(n);
+    ok(`render class ${n} = ${want} from +0x24`, e && e.render === want && e.depth_write === zw, e && `${e.render} +0x24 ${e.flags_24} depth_write ${e.depth_write}`);
+    const r = e && await alphaProbe(e.texture, e.render);
+    ok(`rendered ${n} matches its decoded RGBA (${want})`, r && !r.skipped && r.mismatched === 0, JSON.stringify(r)); }
+  const tf = rep('GL_treeflat'), ro = await alphaProbe(tf.texture, 'opaque'), rc = await alphaProbe(tf.texture, 'cutout');
+  ok('cut-out discards exactly the alpha-0 texels (opaque mode shows them)', rc.white_pixels === rc.alpha0_texels && rc.alpha0_texels > 0 && ro.white_pixels < rc.white_pixels, `cutout white ${rc.white_pixels} / alpha0 ${rc.alpha0_texels}; opaque white ${ro.white_pixels}`);
+  const blendDrawn = Object.values(ST.meshes).filter(m => MODE[m.retail.render] >= 2).length;
+  ST.forceOpaque = true; const n0 = pixelsVary(); ST.forceOpaque = false; const n1 = pixelsVary();
+  ok('scene draws blended sections after the opaque pass', blendDrawn > 0 && n0 > 8 && n1 > 8, `${blendDrawn} blended section groups`);
+  for (const id of ['L_mesh','L_collision','L_units','L_route','L_starts']) { $(id).click(); draw(); $(id).click(); draw(); }
+  $('L_collision').click(); const ncc = pixelsVary(); $('L_collision').click(); ok('collision layer draws', ST.coll.length > 0 && ncc > 8, `${ST.coll.length} surface words`);
+  ok('layer toggles', true, 'each layer toggled off / on');
+  const s0 = ST.pick.find(o => o.kind === 'start'); ST.cam.tgt = s0.p.slice(); ST.cam.pitch = 1.4; ST.cam.dist = 60; draw();
+  const sp = project(s0.p, mvp()); pickAt(sp[0], sp[1]);
+  ok('click selection (start slot)', ST.sel && ST.sel.kind === 'start', ST.sel && (ST.sel.kind + ' ' + ST.sel.index));
+  ok('inspector shows the decoded object', $('insp').textContent.includes('"pos"'), $('insp').textContent.slice(0, 60));
+  const u = ST.pick.find(o => o.kind === 'unit'); select('unit', u.index); ok('section inspector', $('insp').textContent.includes('"corners"'), '');
+  ok('edit controls hidden', ['editbox','matbox','editbtns','stagebox'].every(id => $(id).style.display === 'none') && $('robanner').style.display === 'block', $('robanner').textContent.slice(0, 60));
+  const tries = [['/api/edit', {kind: 'grid', index: 0, delta: [1,0,0]}], ['/api/material', {op: 'assign', group: 0, material: 'x'}], ['/api/material', {op: 'colour', group: 0, rgb: [1,1,1]}],
+                 ['/api/geometry', {op: 'translate', group: 0, delta: [1,0,0]}], ['/api/geometry', {op: 'preview', groups: [0, 1], mode: 'connected'}], ['/api/geometry', {op: 'transform', groups: [0], angle: 15}],
+                 ['/api/geometry', {op: 'boundary', tol: 0.05}], ['/api/geometry', {op: 'weld_preview', pairs: [[1, 2]], tol: 0.05}], ['/api/geometry', {op: 'weld', pairs: [[1, 2]], tol: 0.05}], ['/api/undo', {}], ['/api/save', {}], ['/api/stage', {dest: 'x'}]];
+  const refused = []; for (const [p, b] of tries) { const r = await api(p, b); refused.push(!r.ok && /READ ONLY/.test(r.error || '')); }
+  ok('every write path refused (edit, assign, colour, move group, preview, undo, save, stage)', refused.every(Boolean), JSON.stringify(refused));
+}
+async function selftest() {
+  const steps = [], ok = (n, c, d) => steps.push({step: n, ok: !!c, detail: d});
+  const C0 = ST.scene.state.content_sha256;
+  if (ST.retail) await selftestRetail(ok); else await selftestAuthored(ok);
+  const fin = await api('/api/state'); ok('final state = opened state', fin.content_sha256 === C0 && !fin.dirty, '');
+  await api('/api/selftest', {ok: steps.every(s => s.ok), mode: ST.retail ? 'retail' : 'authored', steps, ua: navigator.userAgent});
+  document.title = 'SELFTEST ' + (steps.every(s => s.ok) ? 'PASS' : 'FAIL');
+}
+(async () => {
+  try {
+    if (!gl) throw new Error('WebGL is not available in this browser');
+    ST.scene = await api('/api/scene'); ST.retail = ST.scene.mode === 'retail';
+    if (ST.retail) {
+      if (!U32) throw new Error('this browser lacks 32-bit WebGL indices (OES_element_index_uint): the retail view needs them');
+      const fetchBin = async f => (await fetch('/bin?f=' + f + '&t=' + TOKEN)).arrayBuffer();
+      ST.bin.mesh = await fetchBin('mesh'); ST.bin.coll = await fetchBin('coll');
+      const cs = ST.scene.units.filter(u => !u.empty).flatMap(u => u.corners); ST.origin = [0,1,2].map(i => cs.reduce((s, c) => s + c[i], 0) / cs.length);
+      setupRetailUi(); buildMeshesRetail(); build(); renderSide();
+    } else {
+      const st = ST.scene.stations, N = st.length;
+      if (N) { const c = [0,0,0]; st.forEach(s => { c[0] += s.p[0]; c[1] += s.p[1]; c[2] += s.p[2]; }); ST.origin = c.map(v => v / N); }
+      await refresh(false);
+    }
+    const xs = ST.pick.map(o => o.p[0]), zs = ST.pick.map(o => o.p[2]);
+    ST.cam.dist = Math.max(200, (Math.max(...xs) - Math.min(...xs) + Math.max(...zs) - Math.min(...zs)) * 0.8);
+    // v0.27: optional view for documentation screenshots (read only): view=pitch,yaw,dist (radians, m), layers=collision,units,...
+    if (Q.get('view')) { const [vp, vy, vd] = Q.get('view').split(',').map(Number); if (isFinite(vp)) ST.cam.pitch = Math.max(-1.45, Math.min(1.45, vp)); if (isFinite(vy)) ST.cam.yaw = vy; if (isFinite(vd)) ST.cam.dist = Math.max(5, Math.min(8000, vd)); }
+    for (const l of (Q.get('layers') || '').split(',')) { const b = ['mesh','collision','units','route','starts'].includes(l) && $('L_' + l); if (b) b.checked = true; }
+    draw(); addEventListener('resize', draw);
+    if (SELFTEST) await selftest();
+  } catch (e) { $('hud').textContent = 'ERROR: ' + e.message; if (SELFTEST) api('/api/selftest', {ok: false, error: String(e && e.stack || e)}); }
+})();
+</script>
+</body>
+</html>

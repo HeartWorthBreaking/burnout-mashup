@@ -1,0 +1,8 @@
+# bmpack 1.3 spec - GP-DEPS1 runtime fixture (gp_deps1_set): a data mod without content (retail tracks only), NEGATIVE: requires the capability bmashup.autopilot >= 2 (this host offers 1) - refused by the platform gate.
+[mod]
+id = "gp.deps-cap"
+version = "1.0.0"
+name = "DEPS CAP"
+description = "GP-DEPS1 fixture: needs autopilot service version 2."
+folder = "deps-cap"
+requires = ["bmashup.autopilot >= 2"]

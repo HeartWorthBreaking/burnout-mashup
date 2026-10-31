@@ -1,0 +1,14 @@
+# bmashup-sdk example (j), source = the p4.1 host tree's autopilot demo 0.2.0 (docs/services/AUTOPILOT.md). Approve its code on the MODS page.
+id = "bmashup-sdk.autopilot-demo"
+name = "SDK Autopilot Demo"
+version = "0.2.0"
+description = "Private, experimental: the game AI takes over player 1 about 5 s into every race (bmashup.autopilot 2)."
+
+[bmashup]
+platform = ">=0.1.4"
+requires = ["bmashup.autopilot>=2"]
+
+[plugin]
+api = 1
+windows = "bm_autopilot_demo.asi"
+# Only Windows x64 is built and tested.

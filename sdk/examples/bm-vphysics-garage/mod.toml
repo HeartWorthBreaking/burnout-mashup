@@ -1,0 +1,16 @@
+# SDK 0.5.0 example: bmashup.vphysics version 2 vehicle query. Read only: lists every vehicle's handling values from the
+# game's ValueDB at the first front-end update (no race needed).
+id = "bmashup.vphysics-garage-example"
+name = "VPhysics Garage Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: every vehicle's mass / drag / top-speed limit / accel multiplier outside a race."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.vphysics>=2"]
+
+[plugin]
+api = 1
+windows = "bm_vphysics_garage.asi"
+linux = "libbm_vphysics_garage.so"
+macos = "libbm_vphysics_garage.dylib"

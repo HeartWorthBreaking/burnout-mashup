@@ -1,0 +1,16 @@
+# bmashup-sdk 0.2.0 example (g): a verified patch of a published site (bmashup.patch 1; Burnout Mashup platform hosts only;
+# private, experimental). Changes the game: the read-only data value "game.byte_fade_rate" (shipped 510) becomes 255 when
+# the plugins' start ends. Put this folder in a mods folder with the built module beside this file and approve its bytes.
+id = "bmashup-sdk.patch-demo"
+name = "SDK example: published-site patch"
+version = "0.2.0"
+description = "Sets the published site game.byte_fade_rate to 255 (bounds 127.5 .. 2040); logs its state at the first load."
+
+[bmashup]
+platform = ">=0.1"
+requires = ["bmashup.patch>=1", "bmashup.hooks>=1"]
+
+[plugin]
+api = 1
+windows = "bm_sdk_patch_demo.asi"
+# Only Windows x64 is built and tested by this SDK.

@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.6.0 example: "bmashup.menu" v1 popup (docs/services/MENU.md).
+# Put this folder in a mod folder (TAKEDAWN_MODS) with the built module beside this file, and approve its
+# code on the MODS page.
+id = "bmashup.menu-popup"
+name = "Menu Popup (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: a YES / NO question after car select through bmashup.menu."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.menu>=1", "bmashup.settings>=2"]
+
+[plugin]
+api = 1
+windows = "bm_menu_popup.asi"
+linux = "libbm_menu_popup.so"
+macos = "libbm_menu_popup.dylib"

@@ -1,0 +1,15 @@
+# bmpack 1.2 spec - host p3 gameplay-label fixture: a data mod (no plugin, no content) that changes two tuning values and
+# declares an AI route lane capacity. The host logs "[MODS] ... changes gameplay: ..." and the Mods page shows
+# "CHANGES GAMEPLAY: BOOST, SCORING, CAPACITY"; no approval prompt.
+[mod]
+id = "bmashup.bmp-p3-tune"
+version = "1.0.0"
+name = "BMP p3 tune (test fixture)"
+description = "Host p3 fixture: tune + capacity values (gameplay label)."
+folder = "p3-tune"
+
+[tune]
+set = ["Score/Boost/Aggressive | Trading Paint Boost value (Boost units) = 6", "Score/Burnout Points | Takedown BP = 2000"]
+
+[capacity]
+lanes = 80

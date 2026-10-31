@@ -1,0 +1,5 @@
+{
+ "note": "every binary file of this tool folder (paths relative to it): AUTHORED (original), with how it is made; the pre-push scan allows exactly these path + sha256 pairs",
+ "tool": "vehtool",
+ "files": []
+}

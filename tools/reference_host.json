@@ -1,0 +1,16 @@
+{
+ "exe": "burnout3_gp_main21.exe",
+ "final": true,
+ "identity": "bmp-0.1.9+2c8142e65f20",
+ "mainline": true,
+ "name": "main21",
+ "platform": "0.1.9",
+ "previous": {
+  "identity": "bmp-0.1.9+0620fe316156",
+  "name": "main19_final",
+  "sha256": "8675e61d4c149eb1b1fd1f5d360f2e5464e1580f9a9da520114bfc4576bc1b45"
+ },
+ "sha256": "f0b9c8a9bf3baa7ed41703569a23236efd2b7e503fdbf6a73cf8c0d3d5f27656",
+ "status": "MAINLINE host main21 = main20 (MODS menu) + main21 patches 66-130 (platform 0.1.9); technically verified; not distribution-cleared",
+ "user_build_name": "burnout3_bmashup.exe"
+}

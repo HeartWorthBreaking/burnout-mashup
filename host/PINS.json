@@ -1,0 +1,48 @@
+{
+ "format": "pf-pins 1",
+ "identity": {
+  "application": "Burnout Mashup",
+  "cmake_option": "BMASHUP_IDENTITY (ON)",
+  "folder": "BurnoutMashup",
+  "release_exe": "BurnoutMashup.exe"
+ },
+ "marks": {
+  "anchors_sha256": "7794adf4784b00be75ce665e397a43afe29192be73fee92860298c06fe38af18",
+  "count": 512,
+  "form": "macro",
+  "format": "bm-anchors 1",
+  "header_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985"
+ },
+ "pristine_gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
+ "reference_build_private": {
+  "exe_sha256_identity_on": "1971a2985c7c529dab98bd4cb7b68e7d845f801d634a14b7c436a21fda799068",
+  "note": "private reference of the layers (pfid1 + marks in the original form); the macro form differs in the source digest and the linker build id only"
+ },
+ "takedawn": {
+  "archive": "git archive, core.autocrlf=false",
+  "archive_digest": "97014dbb3f7a7c80ef7898c66f702b3eca314af7f837bdc39452d43601d10448",
+  "autocrlf": "false",
+  "commit": "4f074e211822eaf43d4a3902c744d5ed0e9c9adf",
+  "files": 419,
+  "repo": "https://github.com/xenophobentx/takedawn",
+  "tree_id": "26cdbea6f8c4a0f6092900c5715ac18393aeb41f"
+ },
+ "toolchain": {
+  "cmake": "4.4.4",
+  "glslang": "16.6.0",
+  "llvm-mingw": "20260922 (ucrt)",
+  "ninja": "1.13.2",
+  "sdl2": "2.32.10",
+  "vulkan-headers": "1.4.363.0"
+ },
+ "xbe_signature": "9f497acd82ad (hash only; the executable is the user's own)",
+ "xboxrecomp": {
+  "archive": "git archive, core.autocrlf=true",
+  "archive_digest": "dfe1d391fd09a6992fa16f006a7db3c00482ebf9fa5f98dc6694d14cfada9f79",
+  "autocrlf": "true",
+  "commit": "e3756d1b2fefdae6888038384c748cbdd37a41ba",
+  "files": 913,
+  "repo": "https://github.com/xenophobentx/xboxrecomp",
+  "tree_id": "480d8993bb58fa61ae48ec275d2059536ffe494f"
+ }
+}

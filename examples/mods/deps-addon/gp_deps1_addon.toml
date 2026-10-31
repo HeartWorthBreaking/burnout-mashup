@@ -1,0 +1,13 @@
+# bmpack 1.3 spec - GP-DEPS1 runtime fixture (gp_deps1_set): a data mod without content (retail tracks only), requires gp.deps-base >= 1.0.2 and the events capability >= 5. Accepted, placed after the base.
+[mod]
+id = "gp.deps-addon"
+version = "1.0.0"
+name = "DEPS ADDON"
+description = "GP-DEPS1 fixture: needs DEPS BASE 1.0.2 or newer."
+folder = "deps-addon"
+platform = ">=0.1.2"
+requires = ["bmashup.events >= 5"]
+requires_mods = ["gp.deps-base >= 1.0.2"]
+
+[tune]
+set = ["Score/Boost/Aggressive | Trading Paint Boost value (Boost units) = 6"]

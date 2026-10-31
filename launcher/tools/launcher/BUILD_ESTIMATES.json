@@ -1,0 +1,19 @@
+{
+ "format": "bm-build-estimates 1",
+ "measured": "2026-10-31, maintainers' PC (Windows 11, 8 compile jobs, SSD): a clean release build of a copied source checkout (path with spaces and non-ASCII characters) from local clones with the pinned toolchain, then a warm (no-op) rebuild; seconds and the folder size of each step afterwards (MB). regen peaks at about 220 MB while the recompiler's analysis folder exists (it is removed when the step ends).",
+ "note": "A fetch from GitHub (--source github) also downloads both upstream repositories (network time not included). Your PC may be slower or faster; the free-space check uses these sizes + 500 MB.",
+ "clean": {
+  "fetch": {"s": 6, "mb": 50},
+  "layers": {"s": 8, "mb": 35},
+  "regen": {"s": 115, "mb": 220},
+  "marks": {"s": 4, "mb": 88},
+  "build": {"s": 38, "mb": 101},
+  "verify": {"s": 1, "mb": 1},
+  "host_info": {"s": 1, "mb": 1},
+  "install": {"s": 1, "mb": 31}
+ },
+ "clean_total_s": 174,
+ "clean_total_mb": 527,
+ "clean_build_folder_mb": 327,
+ "warm_total_s": 6
+}

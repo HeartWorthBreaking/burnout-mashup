@@ -1,0 +1,1 @@
+{"suites": [{"name": "bmpack", "command": ["{py}", "-B", "{tool}/tests/test_bmpack.py", "{out}", "--game-data", "{game}", "--cc", "{cc}"], "needs": ["game_data", "cc"], "slow": true}]}

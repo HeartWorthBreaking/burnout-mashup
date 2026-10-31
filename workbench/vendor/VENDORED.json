@@ -1,0 +1,12 @@
+{
+ "about": "Files copied unchanged into the Workbench (authored Burnout Mashup code only; no game data, no generated code).",
+ "files": {
+  "bmcompat.py": {
+   "sha256": "4ea815252f04286acd54f9a22b8e89a42faea499c063f86dfe5a0638aa840e3d",
+   "origin": "release_readiness candidate tester\\tools\\launcher\\bmcompat.py (the tester launcher's compatibility gate, standard library only)",
+   "copied": "2026-10-31",
+   "used_by": "wbn_rules.py, wbn_flow.py (the same OK / WARN / BLOCKED verdict the launcher gives)",
+   "changes": "none (byte copy)"
+  }
+ }
+}

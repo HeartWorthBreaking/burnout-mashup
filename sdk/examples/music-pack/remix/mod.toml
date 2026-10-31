@@ -1,0 +1,14 @@
+# gp slice music1 example (private, experimental): a music pack that replaces a track of another pack.
+id = "gp.music.tones-remix"
+name = "BM TEST TONES REMIX"
+version = "1.0.0"
+author = "Burnout Mashup gp s7"
+description = "Replaces Tone 2 of BM TEST TONES with a 523 Hz tone by BM Remix."
+
+[bmashup]
+requires = ["bmashup.music>=1"]
+requires_mods = ["gp.music.tones >= 1.0.0"]
+
+[bmashup.music]
+version = 1
+replace = ["gp.music.tones/b1000 = music/tone_523.wav | Tone 3 - 523 Hz | BM Remix | Synthetic Tones"]

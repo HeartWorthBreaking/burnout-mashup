@@ -1,0 +1,1 @@
+{"suites": [{"name": "errors", "command": ["{py}", "-B", "{tool}/tests/test_errors.py", "{out}", "--game-data", "{game}"], "needs": []}]}

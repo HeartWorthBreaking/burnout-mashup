@@ -1,0 +1,14 @@
+# GP-FETEX1 example: a front-end texture pack (AUTHORED art: gp\slices\fetex1\demo\gen_art.py). Data only.
+id = "bmashup.fetex-photo"
+name = "Front-end textures: Compact Mashup garage photo"
+version = "1.0.0"
+description = "Registers bmashup.fetex-photo/compbm01_photo (P8 128x64, 8 paint palettes). Registration only: a car mod binds it."
+
+[bmashup]
+platform = ">=0.1.5"
+requires = ["bmashup.textures>=1"]
+
+[bmashup.textures]
+version = 1
+txd = "art/photo.txd"
+class = "frontend"

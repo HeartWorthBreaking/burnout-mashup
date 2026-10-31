@@ -1,0 +1,28 @@
+# AUTHORED example (gp veh1): a second new series with progression (unlock rules read from the game's own open-car state).
+id = "bmashup.veh-dust"
+name = "Dust Runners Series (veh1 example)"
+version = "1.0.0"
+description = "A new car series Dust Runners: four cars, two opened by progress; Muscle cars race against it."
+
+[bmashup]
+platform = ">=0.1.5"
+
+[bmashup.series]
+version = 1
+add = ["dust = BMDU"]
+names = ["dust = Dust Runners"]
+unlock = ["dust = open"]
+ai_class = ["dust = MSCL"]
+
+[bmashup.cars]
+version = 2
+add = ["BMDUC01 = MSCLCAR3", "BMDUC02 = HEVYCAR2", "BMDUC03 = MSCLCAR7", "BMDUC04 = SUPRCAR6"]
+names = ["BMDUC01 = Dust Rover", "BMDUC02 = Dust Hauler", "BMDUC03 = Dust Storm", "BMDUC04 = Dust Comet"]
+model = ["BMDUC01 = donor", "BMDUC02 = donor", "BMDUC03 = donor", "BMDUC04 = donor"]
+unlock = ["BMDUC03 = cars:30", "BMDUC04 = car:SUPRCAR1"]
+
+[bmashup.paints]
+version = 1
+add = ["rover-sand = BMDUC01 | ramp E0C080 403010", "hauler-rust = BMDUC02 | ramp D06020 301000",
+       "storm-slate = BMDUC03 | ramp A0B0C0 202830", "comet-ochre = BMDUC04 | ramp FFC040 403000"]
+default = ["BMDUC01 = rover-sand", "BMDUC02 = hauler-rust", "BMDUC03 = storm-slate", "BMDUC04 = comet-ochre"]

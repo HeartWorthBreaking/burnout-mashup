@@ -1,0 +1,15 @@
+# SDK 0.6.0 example: bmashup.traffic version 3 (wreck). CHANGES GAMEPLAY.
+id = "bmashup.kamikaze-example"
+name = "Kamikaze Traffic Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: the nearest oncoming traffic vehicle ahead crashes by the game's own induced crash (bmashup.traffic 3 wreck)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.traffic>=3"]
+
+[plugin]
+api = 1
+windows = "bm_kamikaze.asi"
+linux = "libbm_kamikaze.so"
+macos = "libbm_kamikaze.dylib"

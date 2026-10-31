@@ -1,0 +1,21 @@
+# bmpack spec - the deliberately CONFLICTING variant for the runtime conflict test: valid on its own, but it adds the track
+# ID US_C8_V1 that mod 1 (bmashup.bmp-content-pack) adds too. Installed with mod 1 the host refuses the start (bm_tracks.c:
+# an ID another mod already has; exit 92). PLACEHOLDER content: retail US_C1_V1 data under a new ID.
+[mod]
+id = "bmashup.bmp-conflict-pack"
+version = "1.0.0"
+name = "BMP conflict pack (test fixture)"
+description = "Platform fixture: declares US_C8_V1, the track ID of bmashup.bmp-content-pack (conflict test)."
+folder = "conflict-pack"
+
+[[track]]
+id = "US_C8_V1"
+donor = "US_C1_V1"
+name = "Harbour Clash"
+location = "CLASH"
+
+[[event]]
+id = "harbour-sprint"
+track = "US_C8_V1"
+location = "US_P1"
+stage = "020006USC1V1"

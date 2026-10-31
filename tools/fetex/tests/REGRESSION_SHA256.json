@@ -1,0 +1,55 @@
+{
+ "art": {
+  "marker/oceania_marker.png": "9cac690c149a77856f1b54576943b3121d5e5f50d36fb196595a632e7a02d409",
+  "marker/oceania_marker_hollow.png": "9a312dc086df2edb64f4804cb2b7496a7ff335afab23c7e050fcc217cc641307",
+  "marker/oceania_marker_pulse.png": "476e5371fcb5c491a21dd30f750a56699a0ee6eb40898fda7283638b0937c17a",
+  "oceania/oceania_area.png": "d8e2550ec875e8f0e39a13f453f4a0d449e731961d9996cfada5a6a5b7078522",
+  "oceania/oceania_city_l1.png": "76fe896b6b7b7c46c99f05e1a2c50ad3f48b13b7479d8b3e1924d18648245706",
+  "oceania/oceania_city_l2.png": "83ef891b7f7f6d500009150154d1b68d07cd250f3f5e9b61493fb2629ed156ab",
+  "oceania/oceania_city_l3.png": "a01302cc57923ebed1b3f5defd34ab8e9b3a15dc9b4b010bf3dd2c73148e7e77",
+  "oceania/oceania_city_l4.png": "c9c5be9dd82c2956e7f04a44cb5f8acc889caa8cdf6c85ceca3b52fa96818059",
+  "oceania/oceania_overview.png": "732aa983e28539dd15da1f41edb657d53a473dc0bec5313320c966feb00c1dad",
+  "oceania/oceania_tile_1_1.png": "0c48866f995ff3f95ebc35593c2b3319191d517f27cb88178a20761e63bae888",
+  "oceania/oceania_tile_1_2.png": "c61517ef021463546ad4d5facf2cf6895cc79161d4f77f9b0e1dbbf46e9228b1",
+  "oceania/oceania_tile_2_1.png": "50bf4daf48aa75064ffc0b1e45df894c136774695070b2f12bd58be3aa7b2cd4",
+  "oceania/oceania_tile_2_2.png": "90849a812b6c4f4fcc6f4369585a1b50fa797e173e7702035d9d2e1078ba21d0",
+  "oceania/oceania_tile_3_1.png": "d5a7cf8b2782a52a4c8a1090c26b660dabd1c4f096189f2396c7c7d6c1b67bdc",
+  "oceania/oceania_tile_3_2.png": "defc8854db5dfd04d6d80d8db5b4bbd985dd6dccb256bc32df7b4a786e4970cc",
+  "photo/compbm01_paint0.png": "1aad85a24548788e2f46018e37254b3de6ae406ce5a5a893fb667dbde3df8a6b",
+  "photo/compbm01_paint1.png": "1169ef1ca4b96f73fadf63f40fd004d0f1031a5ea1fe63af2dfe0131bef992ca",
+  "photo/compbm01_paint2.png": "bc458cd1a8bd230a88dc42f00f0afb74d52093c0885dac4996bf19d400c28844",
+  "photo/compbm01_paint3.png": "c15194f928611e65b7f88dddaac0a1ea9ee8f51fae10e33ce594fcd3b940b267",
+  "photo/compbm01_paint4.png": "bd6d9de5f3099af715cf30529f81f784a63ca27eec70f7eb694c3290e68095fb",
+  "photo/compbm01_paint5.png": "c10fed3c4de4264089fa126e3f979937f7e27593d06fe393ea9cab167ac8b818",
+  "photo/compbm01_paint6.png": "b564cae32a068d2f3384440b2a182e9244b1c59d0d14bbdbfda513968aa52332",
+  "photo/compbm01_paint7.png": "79b0ec49d8667cd64b2092bae3b592980566af21a19281b21c481fedbedaceee"
+ },
+ "note": "content-phase fetex outputs: gen_art PNGs (fetex1 demo art = kit 0.4.0 staging S3c), the packed TXDs, the packs fetex-photo / fetex-oceania-art (runtime_data modsets gp_fetex_examples), the p4.3 coupe photo TXD, the DERIVED fetex-car-photo pack (cars2 files) for the optional --cars2-files mode",
+ "packs": {
+  "fetex-car-photo": {
+   "LABELS.txt": "43bbd0c64bc7b109404d5bfca1befd46d193b0e7bcf3547f2e50c13cfb8e06e1",
+   "SHA256SUMS.txt": "ca97a987e40e189539dd85e925967c9e2b6005da7549e0a4e52f77a1d0c1dfc8",
+   "files/pveh/COMP/BM01.bgv": "cdbd2bd7c3774970f7bdddc5fc89dd7f876166a030eac8be43b577ea0e61a1ec",
+   "files/pveh/COMP/BM01.hwd": "c030385cc92ba11fb1f4a1f5477d6307f2670c809a0c9590429b63f6321fdd8b",
+   "files/pveh/COMP/BM01.lwd": "b6ff319ada0c73fbcb34571f00c3d7621942abc0a43e9cd2e9b22fb87c85cfb2",
+   "mod.toml": "6599e703cb6a4ddecdd0bfb63899ffac9b027a570b6f091bea0130510438c4e7"
+  },
+  "fetex-oceania-art": {
+   "LABELS.txt": "ba02cb3526b0f681ba0f0c27661a866b51663ba6e1825fddeb9ddf56d71ab061",
+   "SHA256SUMS.txt": "8c18c1b926deb6b800411c36f7291bd795e024aa6072df02e05953aefe7340d2",
+   "art/oceania.txd": "501eab4553c9233ca2f1e18d2cdcb8da00bb7b4a43b9b521bae9f074fdec5df0",
+   "mod.toml": "f043d0164aaaec0b733104b9da25f0058d588fb7c12541e7527186fe21d6e47f"
+  },
+  "fetex-photo": {
+   "LABELS.txt": "3a9e233f1100ba71301db11fedf1e2d466034a008dedd36b38438488c7a65a8e",
+   "SHA256SUMS.txt": "3dc245c41cd0edc44bf6dec75797ecefe78841adecfff14251d26f683ef3bd13",
+   "art/photo.txd": "2f523e518332916e81507acd2fcecf880b113a7f699bde8d514f11e149651d67",
+   "mod.toml": "a34f5cb49db3ae3a6922ede46eab346dac47cc6749934bc5cc0d368619afdfbb"
+  }
+ },
+ "txd": {
+  "oceania.txd": "501eab4553c9233ca2f1e18d2cdcb8da00bb7b4a43b9b521bae9f074fdec5df0",
+  "p43_photo.txd": "a91527d9bed12040684c05cef7fdfe5f10e382028a3eedb2e3ed87c4dd9b6f55",
+  "photo.txd": "2f523e518332916e81507acd2fcecf880b113a7f699bde8d514f11e149651d67"
+ }
+}

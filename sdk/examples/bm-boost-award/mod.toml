@@ -1,0 +1,17 @@
+# SDK 0.5.0 example: bmashup.boost version 2 award(). Put this folder in a mod folder with the built module beside this
+# file and approve its code on the MODS page. Each takedown by player 1 adds a quarter of the boost bar through the game's
+# own add-boost routine. CHANGES GAMEPLAY.
+id = "bmashup.boost-award-example"
+name = "Boost Award Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: a quarter boost bar for each takedown (bmashup.boost 2 award)."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.boost>=2", "bmashup.racers>=1"]
+
+[plugin]
+api = 1
+windows = "bm_boost_award.asi"
+linux = "libbm_boost_award.so"
+macos = "libbm_boost_award.dylib"

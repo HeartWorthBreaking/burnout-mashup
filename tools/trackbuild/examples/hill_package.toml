@@ -1,0 +1,23 @@
+# Package decisions for the ORIGINAL sloped-route test area "BM Hill Loop" (trackbuild 0.3.0, `gen-testloop --variant hill`).
+# Geometry / textures / route are AUTHORED; the Gamedata header, event records, traffic sets, lane network, enviro.dat and audio
+# are DONOR copies of EU/M1_V1 (local only).
+[package]
+set = "gp_trkimp_hill_set"
+folder = "bm-hill-loop"
+track_id = "EU_T8_V1"
+track_name = "BM Hill Loop"
+track_location = "HILL LOOP"
+mod_id = "bmashup.trackbuild.hill-loop"
+mod_name = "BM Hill Loop (authored)"
+version = "0.3.0"
+author = "bmashup trackbuild"
+description = "Original procedural test area built with trackbuild 0.3.0: the 714 m walled BM Test Loop with an 8 m hill on the back of the lap (max grade 5.9 %), 17 streamed units, authored collision, route and start grid on the flat start straight. Gamedata header / traffic sets, enviro and audio are borrowed from EU_M1_V1 (donor, local only)."
+platform = ">=0.1"
+
+[package.comments]
+header = "# BM Hill Loop - ORIGINAL track geometry authored with trackbuild 0.3.0 (procedural source: tb.py gen-testloop --variant\n# hill). Donor parts (Gamedata header / traffic, enviro, audio) come from EU_M1_V1: LOCAL ONLY.\n"
+tracks = "# Added to the retail Europe region (no region declaration needed). A circuit: no point_to_point entry.\n"
+
+[package.provenance]
+packaged_by = "trackbuild 0.3.0 (trackconv package, bmpack rename_gamedata)"
+donor_note = "EU_M1_V1 = Gamedata host (header, event records, S2 traffic sets, S3 lane network) and enviro / audio donor; static.dat, streamed.dat, the S1 page and the S4 route are authored"

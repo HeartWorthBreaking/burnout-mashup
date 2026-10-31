@@ -1,0 +1,37 @@
+// Made from tools/release/windows/bmashup.rc.in by src/game/CMakeLists.txt (pfid1, BMASHUP_IDENTITY ON): the
+// executable's icon (assets/icon/bmashup.ico, an original icon drawn in code: assets/icon/BMASHUP_ICON.md), its manifest and
+// what Explorer's Details tab shows. Used by every Windows build with the option ON (a development build too).
+#include <winver.h>
+
+@BM_RC_ICON_LINE@
+
+// The manifest (takedawn.exe.manifest: the UTF-8 code page, unchanged). 1 is the resource id Windows reads a program's
+// manifest from, 24 is RT_MANIFEST.
+1 24 "@BO3_RC_MANIFEST@"
+
+VS_VERSION_INFO VERSIONINFO
+FILEVERSION     @BM_PLATFORM_COMMAS@,0
+PRODUCTVERSION  @BM_PLATFORM_COMMAS@,0
+FILEOS          VOS_NT_WINDOWS32
+FILETYPE        VFT_APP
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904B0"
+        BEGIN
+            VALUE "ProductName",      "Burnout Mashup (unofficial)"
+            VALUE "FileDescription",  "Burnout Mashup (unofficial; based on Takedawn @BO3_VERSION@)"
+            VALUE "FileVersion",      "@BM_PLATFORM_VERSION@"
+            VALUE "ProductVersion",   "@BM_PLATFORM_VERSION@ (based on Takedawn @BO3_VERSION@)"
+            VALUE "OriginalFilename", "BurnoutMashup.exe"
+            VALUE "InternalName",     "bmashup"
+            VALUE "CompanyName",      "Burnout Mashup contributors"
+            VALUE "LegalCopyright",   "Burnout Mashup contributors; MIT licence and third-party notices in the licenses folder"
+            VALUE "Comments",         "Unofficial fan project based on Takedawn. Not affiliated with or endorsed by the Takedawn project, Criterion Games or Electronic Arts. Requires your own copy of the game."
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x0409, 1200
+    END
+END

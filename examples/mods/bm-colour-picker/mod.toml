@@ -1,0 +1,27 @@
+# Burnout Mashup example (main21 patch 91, open-list item 14): a colour picker as a data-only paint mod.
+# Every retail race car gets the same 12 extra paints in the car-select paint cycle ("*" = every retail race car).
+# Ramp = "bright dark" (hex RGB): the car's paint entries are recoloured by their luminance between the two.
+id = "bmashup.colour-picker"
+name = "Colour Picker (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: 12 extra paints for every car (data only, no code)."
+
+[bmashup]
+platform = ">=0.1.9"
+
+[bmashup.paints]
+version = 1
+add = [
+  "pick-01-red = * | ramp FF2020 400000",
+  "pick-02-orange = * | ramp FF8C1A 4A2000",
+  "pick-03-yellow = * | ramp FFE030 4A3C00",
+  "pick-04-lime = * | ramp A8FF30 2A4A00",
+  "pick-05-green = * | ramp 30E060 003A14",
+  "pick-06-teal = * | ramp 30E0D0 003A36",
+  "pick-07-sky = * | ramp 40B0FF 002A4A",
+  "pick-08-blue = * | ramp 3050FF 000C4A",
+  "pick-09-purple = * | ramp A040FF 1E004A",
+  "pick-10-pink = * | ramp FF50C0 4A0030",
+  "pick-11-white = * | ramp FFFFFF 505050",
+  "pick-12-black = * | ramp 505050 080808",
+]

@@ -1,0 +1,14 @@
+# Burnout Mashup's private per-car physics demo (docs/bmashup-vphysics.md). Put this folder in a mod folder
+# (TAKEDAWN_MODS) with the built module beside this file, and approve its code on the MODS page: until then it is never
+# loaded. In the 1st (3rd, ...) race of a session player 1's car runs with half its own Drag Coef (a higher top speed);
+# in the 2nd (4th, ...) race it is back to its own value. It logs player 1's speed twice a second.
+id = "bmashup.vphysics-demo"
+name = "Vehicle Physics Demo (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: player 1's drag halved in odd races, its own value in even races."
+
+[plugin]
+api = 1
+windows = "bm_vphysics_demo.asi"
+linux = "libbm_vphysics_demo.so"
+macos = "libbm_vphysics_demo.dylib"

@@ -1,0 +1,13 @@
+# SDK 0.6.0 example: bmashup.hooks version 3 TRAFFIC_CONTACT (NO_CRASH) + WRECK_CAUSE. CHANGES GAMEPLAY.
+id = "bmashup.contact-no-crash-example"
+name = "Contact No-Crash Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: same-direction traffic touched below 15 m/s is pushed, not crashed; logs takedown causes (bmashup.hooks 3)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.hooks>=3"]
+
+[plugin]
+api = 1
+windows = "bm_contact_no_crash.asi"

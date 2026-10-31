@@ -1,0 +1,15 @@
+# AUTHORED (p4.3 combined acceptance): a procedural garage photo of the carimport coupe; its 6 palettes = the coupe's 6
+# in-file paints (carimport.json: teal, orange, violet, white, black, lime). Data only. Source: src\, photo_spec.json.
+id = "bmashup.p43-coupe-photo"
+name = "BM Coupe garage photo (p4.3)"
+version = "1.0.0"
+description = "Registers bmashup.p43-coupe-photo/bmcocic1_photo (P8 128x64, 6 paint palettes)."
+
+[bmashup]
+platform = ">=0.1.6"
+requires = ["bmashup.textures>=1"]
+
+[bmashup.textures]
+version = 1
+txd = "art/photo.txd"
+class = "frontend"

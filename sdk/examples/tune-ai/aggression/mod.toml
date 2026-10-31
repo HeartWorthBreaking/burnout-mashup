@@ -1,0 +1,18 @@
+# gp slice aitune1 example (private, experimental): aggression / avoidance tuning as a pure data mod (bmashup.tune v3).
+id = "gp.aitune.aggression"
+name = "AI AGGRESSIVE"
+version = "1.0.0"
+author = "Burnout Mashup gp s7"
+description = "Rivals attack sooner and from further away, keep less distance; boost lead pulled in (a negative value)."
+
+[bmashup]
+requires = ["bmashup.tune>=3"]
+
+[bmashup.tune]
+version = 2
+set = ["AI/Aggressive Driving | How long to wait at the start of the race before doing aggressive driving (seconds) = 0.5",
+       "AI/Aggressive Driving | Max. distance apart to begin attacking when ahead of target (meters) = 80",
+       "AI/Aggressive Driving | Max. distance apart to begin attacking when behind of target (meters) = 250",
+       "AI/Aggressive Driving | Min. target speed to consider attacking (mph) = 40",
+       "AI/Aggressive Driving | Extra distance in front to boost relative to aggression (meters) = -40",
+       "AI/Avoidance | Speed when car is <10m away = 15"]

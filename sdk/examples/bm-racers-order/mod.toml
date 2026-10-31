@@ -1,0 +1,15 @@
+# SDK 0.5.0 example: bmashup.racers version 2 (place order, session). Read only: logs the running order once a second.
+id = "bmashup.racers-order-example"
+name = "Racers Order Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: logs the running order once a second (bmashup.racers 2); changes nothing."
+
+[bmashup]
+platform = ">=0.1.8"
+requires = ["bmashup.racers>=2"]
+
+[plugin]
+api = 1
+windows = "bm_racers_order.asi"
+linux = "libbm_racers_order.so"
+macos = "libbm_racers_order.dylib"

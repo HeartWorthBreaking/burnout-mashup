@@ -1,0 +1,101 @@
+{
+ "note": "every non-text file of examples\\authored: AUTHORED (original), with the workspace original it equals",
+ "files": [
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint0.png",
+   "sha256": "810f9db5c19c9a6b282a1b8bc603f6650855a44bedb1b22b49e2192ff4c5b59d",
+   "bytes": 522,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint0.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint1.png",
+   "sha256": "b3987958ac946ef10b6ddfc509069621a2c638cf504cd8455bb54982f4e39e1a",
+   "bytes": 516,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint1.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint2.png",
+   "sha256": "3126419dc1087c86b0145fa6bbe1117bdf6810a166bd61fb807270a59c9dea0e",
+   "bytes": 514,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint2.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint3.png",
+   "sha256": "fe818df810d266d6510f5ceadb71fe5ec5a25e10308a830a4742710dee8482b8",
+   "bytes": 501,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint3.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint4.png",
+   "sha256": "fe1f89858ebaaaf7fdf9d99cd5ba61ab22ac5324140b9301cdb61e59ec36d84c",
+   "bytes": 498,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint4.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/bm-coupes/p43-coupe-photo/src/paint5.png",
+   "sha256": "774bce454426fca908d183717325b43721a2b3bd73e1fd9399fc45f1d747e76d",
+   "bytes": 521,
+   "label": "AUTHORED",
+   "source": "runtime_data/modsets/gp_p43_examples/p43-coupe-photo/src/paint5.png",
+   "made_by": "gp\\integration\\p4_3 make_p43_packs.py (procedural coupe photo)"
+  },
+  {
+   "path": "examples/authored/carimport/coupe/coupe.bin",
+   "sha256": "7c3dff5333389d8bdf07e2801394b4c48a39a6f8e9de941f0a1624896eb61c28",
+   "bytes": 99144,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/coupe/coupe.bin",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  },
+  {
+   "path": "examples/authored/carimport/coupe/paint_mask.png",
+   "sha256": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "bytes": 1527,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/coupe/paint_mask.png",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  },
+  {
+   "path": "examples/authored/carimport/coupe/texture.png",
+   "sha256": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d",
+   "bytes": 7158,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/coupe/texture.png",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  },
+  {
+   "path": "examples/authored/carimport/wedge/paint_mask.png",
+   "sha256": "15da9a3d18610080cab656151dae5b5ac3aef44895f0251389d380b73cd203f6",
+   "bytes": 1527,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/wedge/paint_mask.png",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  },
+  {
+   "path": "examples/authored/carimport/wedge/texture.png",
+   "sha256": "9d0c8a387769936010fcdccdae0f61fb1648ebecd2f7c235342275cb8799d29d",
+   "bytes": 7158,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/wedge/texture.png",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  },
+  {
+   "path": "examples/authored/carimport/wedge/wedge.bin",
+   "sha256": "63bba3149a16248bb40d011c335bce5a3ebcb6ad9089c3a64856dfa321a56395",
+   "bytes": 2856,
+   "label": "AUTHORED",
+   "source": "research/native_gameplay_api/platform/gp/tools/carimport/examples/wedge/wedge.bin",
+   "made_by": "gp\\tools\\carimport\\carimp\\demo.py (procedural, `carimport.py demo`)"
+  }
+ ]
+}

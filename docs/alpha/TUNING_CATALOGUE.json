@@ -1,0 +1,1224 @@
+{
+ "format": 1,
+ "limit_rule": "0 .. 16 x max(game value, 1)",
+ "values": [
+  {
+   "key": "Boost Bar | Minimum Boost Time (seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Boost Bar | Minimum Boost Recovery Time (seconds)",
+   "type": "decimal",
+   "game": 0.5,
+   "host_addition": false
+  },
+  {
+   "key": "Boost Bar | Boost Bar sizes (Boost Units)",
+   "type": "decimal",
+   "game": 240.0,
+   "host_addition": false
+  },
+  {
+   "key": "Boost Bar | Boost Earning Multiplier",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Boost Bar | Boost Rate (Boost Units per Second)",
+   "type": "decimal",
+   "game": 36.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Air | Minimum Air Distance (Metres)",
+   "type": "decimal",
+   "game": 5.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Air | Boost value per Air metre (Boost units)",
+   "type": "decimal",
+   "game": 2.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Oncoming | Minimum Oncoming Speed (MPH)",
+   "type": "decimal",
+   "game": 30.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Oncoming | Minimum Oncoming Distance (Metres)",
+   "type": "decimal",
+   "game": 10.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Oncoming | Boost value per Oncoming metre (Boost units)",
+   "type": "decimal",
+   "game": 0.30000001192092896,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Drift | Minimum Drift Speed (MPH)",
+   "type": "decimal",
+   "game": 30.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Drift | Minimum Drift Distance (Metres)",
+   "type": "decimal",
+   "game": 10.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Drift | Boost value per Drift metre (Boost units)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Near Miss | Near Miss Distance (Metres)",
+   "type": "decimal",
+   "game": 2.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Near Miss | Minimum Near Miss Speed (MPH)",
+   "type": "decimal",
+   "game": 30.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Near Miss | Minimum Near Miss Chain Speed (MPH)",
+   "type": "decimal",
+   "game": 30.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Near Miss | Boost value per Near Miss (Boost units)",
+   "type": "decimal",
+   "game": 60.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Near Miss | Near Miss Chain Time (Seconds)",
+   "type": "decimal",
+   "game": 5.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Crash Escape Radius",
+   "type": "decimal",
+   "game": 8.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Time Between Crashing Near Misses (Seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Minimum Time Clear After Crash Escape",
+   "type": "decimal",
+   "game": 3.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Minimum Crash Escape Speed (MPH)",
+   "type": "decimal",
+   "game": 70.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Boost value per Crash Escape (Boost units)",
+   "type": "decimal",
+   "game": 120.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Aggressive | Boost value lost or gained per Slam (Boost units)",
+   "type": "decimal",
+   "game": 360.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Aggressive | Min Contact Time For Rubbing (Seconds)",
+   "type": "decimal",
+   "game": 0.30000001192092896,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Aggressive | Boost value for rubbing (Boost units)",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Boost Start | Boost Start Boost value (Boost units)",
+   "type": "decimal",
+   "game": 50.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Takedown Boost value (Boost units)",
+   "type": "decimal",
+   "game": 720.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Race Car Clear Wait Time (Seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Maximum Crash Wait Time (Seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Maximum Crash Wait Time - No Slam (Seconds)",
+   "type": "decimal",
+   "game": 0.5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Minimum Collide Time to enable Takedown - No Slam (Seconds)",
+   "type": "decimal",
+   "game": 0.5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a double takedown(Seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a takedown spree (Seconds)",
+   "type": "decimal",
+   "game": 30.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a double revenge takedown (Seconds)",
+   "type": "decimal",
+   "game": 60.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Props | Prop Hit Chain time (Seconds)",
+   "type": "decimal",
+   "game": 2.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Props | Prop Hit Boost value (Boost units)",
+   "type": "decimal",
+   "game": 3.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Lap | Perfect Lap Boost value (Boost units)",
+   "type": "decimal",
+   "game": 120.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Lap | Burnout Lap Boost value (Boost units)",
+   "type": "decimal",
+   "game": 240.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Boost/Aggressive | Trading Paint Boost value (Boost units)",
+   "type": "decimal",
+   "game": 3.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Prop Hit BP",
+   "type": "whole number",
+   "game": 10,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Rubbing BP",
+   "type": "whole number",
+   "game": 5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Tradin' Paint BP",
+   "type": "whole number",
+   "game": 25,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Boost Start BP",
+   "type": "whole number",
+   "game": 50,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Crash Escape BP",
+   "type": "whole number",
+   "game": 100,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Burning Slam Extra BP",
+   "type": "whole number",
+   "game": 15,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Slam Type BP",
+   "type": "whole number",
+   "game": 20,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Super Slam Type BP",
+   "type": "whole number",
+   "game": 30,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Perfect Lap BP",
+   "type": "whole number",
+   "game": 500,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Takedown BP",
+   "type": "whole number",
+   "game": 1000,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Revenge Takedown Bonus BP",
+   "type": "whole number",
+   "game": 350,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Psyche Out BP",
+   "type": "whole number",
+   "game": 150,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Aftertouch Takedown BP",
+   "type": "whole number",
+   "game": 250,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Burnout Lap BP",
+   "type": "whole number",
+   "game": 1000,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Near Miss BP",
+   "type": "whole number",
+   "game": 20,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Leading Race At End Of Lap BP",
+   "type": "whole number",
+   "game": 250,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Denied (You Were Lucky) BP",
+   "type": "whole number",
+   "game": 15,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Denied (Takedown Denied) BP",
+   "type": "whole number",
+   "game": 10,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Air Category BP",
+   "type": "whole number",
+   "game": 100,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Oncoming Category BP",
+   "type": "whole number",
+   "game": 100,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Drift Category BP",
+   "type": "whole number",
+   "game": 100,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Tailgate Category BP",
+   "type": "whole number",
+   "game": 5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Rubbing Category BP",
+   "type": "whole number",
+   "game": 5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Grinding Category BP",
+   "type": "whole number",
+   "game": 5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Near Miss Category BP",
+   "type": "whole number",
+   "game": 5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Take Race Position BP",
+   "type": "whole number",
+   "game": 500,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Double Takedown BP",
+   "type": "whole number",
+   "game": 300,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Takedown Spree BP",
+   "type": "whole number",
+   "game": 300,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Double Revenge BP",
+   "type": "whole number",
+   "game": 300,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Burnout Points | Road Rage Takedown BP",
+   "type": "whole number",
+   "game": 100,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Air Category Minima (Metres)",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Oncoming Category Minima (Metres)",
+   "type": "decimal",
+   "game": 50.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Drift Category Minima (Metres)",
+   "type": "decimal",
+   "game": 45.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Tailgate Category Minima (Seconds)",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Rubbing Category Minima (Seconds)",
+   "type": "decimal",
+   "game": 0.10000000149011612,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Grinding Category Minima (Seconds)",
+   "type": "decimal",
+   "game": 0.10000000149011612,
+   "host_addition": false
+  },
+  {
+   "key": "Score/BP Categories | Near Miss Category Minima (Counts)",
+   "type": "decimal",
+   "game": 999.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Tailgating | Max distance behind for tailgating (Metres)",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Tailgating | Min distance behind for psyche-out when tailgating (Metres)",
+   "type": "decimal",
+   "game": 7.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Tailgating | Cone angle behind for tailgating (Degrees)",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Tailgating | Extra boost per second",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Tailgating | Minimum tailgating time to count as tailgating (Seconds)",
+   "type": "decimal",
+   "game": 0.5,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Grinding | Minimum time to grind before scoring (Seconds)",
+   "type": "decimal",
+   "game": 3.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Grinding | Extra boost per second",
+   "type": "decimal",
+   "game": 15.0,
+   "host_addition": false
+  },
+  {
+   "key": "Score/Distance Travelled | Distance Travelled Medals (Miles)",
+   "type": "decimal",
+   "game": 4.0,
+   "host_addition": false
+  },
+  {
+   "key": "AI/Car | Out of range speed decrease rate",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Max desDir angle change OOR",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Angle you want min spd at",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Top speed mps",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Min speed mps",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | How much carAt affects steering",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Angle at which drift is started",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Max lock at 180 x degrees",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Car | Drift Max lock at 180 x degrees",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Total risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Current risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Corner Risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Total corner risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Arbitrator | Current corner risk threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | AVOID: LookAhead dist racecars",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | AVOID: Soft No Go offset time",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | AVOID: Soft No Go offset distance",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Extra softNoGo offset dist for future",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Extra softNoGo offset time for future",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Hard No Go offset time",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Hard No Go offset distance",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Distance to discard fatally colliding racecar",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Vert dist to discard traffic and racecars",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | dt between start and end vehicle",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <10m away",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <20m away",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <30m away",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Speed when risk is >0.95",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Speed when risk is >0.9",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Steering factor big=>extreme",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Aggression time variation factor",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Aggression dist variation factor",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Aggression time variation offset",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Avoidance | Aggression dist variation offset",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Dist to brake speed factor big=>fast",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Drift speed threshold",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Dist to update target pos",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Perp dist to update target pos",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Corner radius to give max offset pos",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Time until we hit the apex at which to start drifting (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Number of segments to extend the start of any corner",
+   "type": "whole number",
+   "game": 0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Max. number of extra segments to extend the corner based on your speed",
+   "type": "whole number",
+   "game": 0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Number of segments to extend the start of any corner (when drifting)",
+   "type": "whole number",
+   "game": 0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | Max. number of extra segments to extend the corner based on your speed (when drifting)",
+   "type": "whole number",
+   "game": 0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Target | How far away from the true apex to move the apex point of a corner when drifting (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Driver | How close the target car must be to start proper speed matching (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Driver | Maximum distance from player to start doing sticky speed matching (metres)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Driver | Maximum diffence in speeds for sticky speed matching (MPH)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. aggression before we start attacking",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. time to wait between attacks (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. time to wait between attacks (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. distance apart to begin attacking when ahead of target (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. distance apart to begin attacking when behind of target (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. target speed to consider attacking (mph)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | How much slower than the player to drive while speed matching to attack position",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | How far in front to boost when speed matching the player",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | Extra distance in front to boost relative to aggression (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | How long to wait at the start of the race before doing aggressive driving (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving | How long after hitting something to disable immunity (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Min time to try and block you for (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max time to try and block you for (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max distance ahead to start blocking you (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Preferred car separation when getting into slam position (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. time to try and get into slamming position (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. distance between cars, when ahead (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. difference in speeds (MPH)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Steer out distance (meters)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Steer out time (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Slam time (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. cos angle off lane to stop attack",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | How soon after starting to slam is the AI car committed and can't stop",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "AI/Aggressive Driving/Reactions | How long a rubbed AI car goes blind for (seconds)",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Front Corner",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Back Corner",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Side",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Front",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Back",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram World",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "CAD Properties | Air Ram Low Speed Multiplier",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "Crash/HandyCam | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "Crash/HandyCam | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Spring Coeff",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Damping",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Force",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Sparks | Size",
+   "type": "decimal",
+   "game": 0.0,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Shadow | Alpha Test",
+   "type": "whole number",
+   "game": 1,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Shadow | Opacity",
+   "type": "decimal",
+   "game": 0.699999988079071,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Shadow | Width",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Shadow | Length",
+   "type": "decimal",
+   "game": 1.0,
+   "host_addition": true
+  },
+  {
+   "key": "Effects/Shadow | Soft Edge",
+   "type": "decimal",
+   "game": 0.1875,
+   "host_addition": true
+  }
+ ]
+}

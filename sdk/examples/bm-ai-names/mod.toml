@@ -1,0 +1,17 @@
+# main21 (next SDK) example: bmashup.racers version 4 - name labels over the AI racers (hook request "zackypoo" 01, route b).
+# The plugin draws the labels itself (bmashup.hud 2 TEXT, the host's dot font); the game is not changed. Release step: set
+# platform to the combined release's platform version (racers 4 is new there).
+id = "bmashup.ai-names-example"
+name = "AI Names Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example: a name label over every AI racer (bmashup.racers 4 get_pose, bmashup.hud 2 TEXT)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.racers>=4", "bmashup.hud>=2", "bmashup.hooks>=3", "bmashup.camera>=1"]
+
+[plugin]
+api = 1
+windows = "bm_ai_names.asi"
+linux = "libbm_ai_names.so"
+macos = "libbm_ai_names.dylib"

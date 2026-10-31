@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.6.0 example: "bmashup.menu" v1 mode row + "bmashup.rules" v1 (docs/services/MENU.md, RULES.md).
+# Put this folder in a mod folder (TAKEDAWN_MODS) with the built module beside this file, and approve its
+# code on the MODS page.
+id = "bmashup.eliminator-mode"
+name = "Timed Eliminator (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: a TIMED ELIM mode row and its rules through bmashup.menu / bmashup.rules. CHANGES GAMEPLAY."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.menu>=1", "bmashup.rules>=1", "bmashup.settings>=2"]
+
+[plugin]
+api = 1
+windows = "bm_eliminator_mode.asi"
+linux = "libbm_eliminator_mode.so"
+macos = "libbm_eliminator_mode.dylib"

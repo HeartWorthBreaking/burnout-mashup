@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.6.0 example: "bmashup.paints" v1 (docs/services/PAINTS.md). Put this folder in a mod folder
+# (TAKEDAWN_MODS) with the built module beside this file, and approve its code on the MODS page. In a race, player 1's car
+# cycles through four body colours, one every two seconds (the dynamic paint; the garage and the save keep your paint).
+id = "bmashup.car-colour"
+name = "Car Colour (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: cycles player 1's body colour through bmashup.paints."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.paints>=1"]
+
+[plugin]
+api = 1
+windows = "bm_car_colour.asi"
+linux = "libbm_car_colour.so"
+macos = "libbm_car_colour.dylib"

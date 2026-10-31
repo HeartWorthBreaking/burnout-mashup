@@ -1,0 +1,14 @@
+# Burnout Mashup's private coordinated-hooks demo, the owner (include/bmashup_hooks.h). The module is ../bm_hooks_demo.c
+# built without BM_HOOKS_DEMO_RIVAL; put it beside this file and approve its code on the MODS page: until then it is never
+# loaded. It holds RACE_EXIT exclusively (a race summary line), counts player 1's takedowns and makes player 1's
+# perfect-lap boost award 1.25 x.
+id = "bmashup.hooks-demo"
+name = "Hooks Demo (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: bmashup.hooks owner example (exclusive RACE_EXIT, TAKEDOWN observer, boost modifier)."
+
+[plugin]
+api = 1
+windows = "bm_hooks_demo.asi"
+linux = "libbm_hooks_demo.so"
+macos = "libbm_hooks_demo.dylib"

@@ -1,0 +1,164 @@
+{
+ "format": "pf-host-layers 1",
+ "note": "result_sha256 values are those of the private reference tree (pfid1 RESULT); 3 added test fixtures are not part of this tree",
+ "toolkit": {
+  "lgpl_file": "src/apu/apu_core.c",
+  "modified": {
+   "docs/runtime/overlay.md": {
+    "base_sha256": "547e4da52ea5994c6758159247612acfa3cc37ec003e058b478bec0c804fdc52",
+    "hunks": 1,
+    "result_sha256": "8bcc73450dda890365d076dae358c3aa61ef27fa6ede9a0c28e2fc304d091215"
+   },
+   "src/apu/apu_core.c": {
+    "base_sha256": "ded1da83b903d0938b66bc957f592d1a78d8b26aa6efcbe0d61832c7f60a5a42",
+    "hunks": 4,
+    "result_sha256": "55c0614aa55c9073aa94245a89b3c2fad570353a99424db31d0277f836f1185f"
+   },
+   "src/d3d/nv2a_pb_d3d11.c": {
+    "base_sha256": "7e560d0322ccc406f621d5849136bda0c8d1a9cbbd154b20ed14315919cc0188",
+    "hunks": 1,
+    "result_sha256": "46ec8b650a2433a3fafd59100fc7023cf14d3466d6062f9b4c0738d438c11c18"
+   },
+   "src/d3d/nv2a_pb_metal.m": {
+    "base_sha256": "8458a337514f979c7d8afca595f925bf754e38ed1b3557b02d4ff602c12d30e6",
+    "hunks": 5,
+    "result_sha256": "1bb85b7ee2a9937bb4972aad868742bfe5a74ab89a73487d41908e34a3b81d2c"
+   },
+   "src/d3d/nv2a_pb_vulkan.c": {
+    "base_sha256": "e298ec98646a926e11b95d23d1ea65f637138f8b2cff941cbbbf8afec33a9479",
+    "hunks": 5,
+    "result_sha256": "24cc59eb492c321306f4a850aabc607456d0f8e15251f59d76a8ffeb04a96c97"
+   },
+   "src/kernel/kernel.h": {
+    "base_sha256": "5e27f2239d8cb184663dd9d6895a1dff8b5901d63056f520259cd8bf16d9323e",
+    "hunks": 1,
+    "result_sha256": "e5f6797ad3b1f6d5dd5e79cec47b829209aff9efeb21116a137ef7106a9be638"
+   },
+   "src/kernel/kernel_bridge.c": {
+    "base_sha256": "e3a8740164e8b1dc04d80a90e289689d4722cf00c7b46f9f39f86be4ee016159",
+    "hunks": 5,
+    "result_sha256": "aeaeb5cd4a6f085ff349f96190704bc16a0ed817edd515f9f69b7d900c4304c7"
+   },
+   "src/kernel/nv2a_backend_common.h": {
+    "base_sha256": "e8efb640fcce311282dbf00df61f02011b635f4ebe91080b209e80d9299e8ad4",
+    "hunks": 2,
+    "result_sha256": "926b7328c672b7fce5852c0d5fb0d2c807a0d6a1b5dbfb3d557b8787b292e2af"
+   },
+   "src/kernel/xbox_memory_layout.c": {
+    "base_sha256": "46587c03bb48c201764edb501013596b22ca484099e46d9aa33c589d2a334476",
+    "hunks": 8,
+    "result_sha256": "f6a8fc758f2e90892aca86bc724a2254fec5e876546f992aed63885a980565b2"
+   },
+   "src/kernel/xbox_memory_layout.h": {
+    "base_sha256": "6d7372ff0962cd0ebc1a9428a2f7b02d3cba13c46a68febc0071115165730a75",
+    "hunks": 1,
+    "result_sha256": "b698396b31d7a37cbd2253d2228fdee1926a6e1525c192b9f1629a6d8c7441e4"
+   },
+   "src/overlay/overlay_ui.cpp": {
+    "base_sha256": "913358977d40c5aeac08eac939e89067e00cb62d275a3d508a610ca1a17d89e5",
+    "hunks": 24,
+    "result_sha256": "0ed702da5353d4ec21809428883a1224fd353ed7b283c04282deaa29cf5466c2"
+   },
+   "src/overlay/xbox_settings.h": {
+    "base_sha256": "153ddb485e21e84c81cba0e544e36d1db8058527370152a8b867a19dd504d81e",
+    "hunks": 1,
+    "result_sha256": "d90434ff3bdeeddd9512f45e050950f0b7df1482c7b736d5ccb76ec0a870116a"
+   },
+   "src/usb/ohci.c": {
+    "base_sha256": "23b2bdfe803ddb926a852901ebf87455fd26c71fe7178e8f499acb33c2cd4bdf",
+    "hunks": 2,
+    "result_sha256": "cffaa49dd930340d066908359469d4aa2697acd000072fb1873e3b5afad22da1"
+   }
+  }
+ },
+ "tree": {
+  "added": 266,
+  "excluded_added": [
+   "tests/bm_chevron/gen_capfix1.c",
+   "tests/bm_chevron/gen_clean1.c",
+   "tests/bm_vphysics/gen_copy.c"
+  ],
+  "modified": {
+   "CMakeLists.txt": {
+    "base_sha256": "5ffeab2ab1c24c45cc07842e361c60bdb2d2b73bf53cadd63c9d54fa7540b522",
+    "hunks": 3,
+    "result_sha256": "32284e73896aeb5bc23e0985dbda481fcbeb1f13ce96ec636b974af94d584f4d"
+   },
+   "config/patches.json": {
+    "base_sha256": "e32c3975ab95c91d00e849d264d325d9b3b01049caa4a1872edc99d7d6736c07",
+    "hunks": 1,
+    "result_sha256": "43017022a6e113430cc8f1c2b26b0aa1757837e870606d0f1b83f8af0673f822"
+   },
+   "docs/mod-folders.md": {
+    "base_sha256": "2e022c63456e08ef1f293a331eaf219fc93006baa3261818c11581ca15c18ac8",
+    "hunks": 4,
+    "result_sha256": "36e59c486d6c2cf3cf7367a898fa2f5c1e0dc787e9a0ca44a5fa84a4e59827fa"
+   },
+   "src/game/CMakeLists.txt": {
+    "base_sha256": "db60228baba02e531fc8623796ec8463764feca3590d3a3c06dcdf18e870bb58",
+    "hunks": 6,
+    "result_sha256": "a3901e3d14879af6c073947798a4db2dcfca26b6098b755794f965623cc74404"
+   },
+   "src/game/autopilot.c": {
+    "base_sha256": "d7dedf24dba17aa8d7aef79957552a79b83c43d3a943ce9b7c2ef41f12019f29",
+    "hunks": 4,
+    "result_sha256": "5190ce06b1b0d4bb0b11a0dd67089a6a9d0dba4d7c9d164a218ccad440aa9b9b"
+   },
+   "src/game/controls.c": {
+    "base_sha256": "e004d697735981dd3b4e52f1a161b0474301b69bbda6386fc646778bc1406a7b",
+    "hunks": 3,
+    "result_sha256": "ef347e7dd5d2708fa058e1b08101b2a7fece01a228c32b3a9c4fd898f4f6d98a"
+   },
+   "src/game/fatal.c": {
+    "base_sha256": "3b73512b707de2f38455a258302fd4cabe9b95077310d66e9253f8e2c1e6767f",
+    "hunks": 2,
+    "result_sha256": "bac76b43a572eb461e45e9767a402bb081b8279974edbb254323ccd5843704a9"
+   },
+   "src/game/hirefresh.c": {
+    "base_sha256": "063cc9abbd0d6d5fdd85debfced0029dc8b81259173339b1f02311eb89eb0d55",
+    "hunks": 5,
+    "result_sha256": "5f1c995a4e3496fc4efc6691f28cae67df794f63073c7f9f243bb27f95fb3af1"
+   },
+   "src/game/install.c": {
+    "base_sha256": "928c5f6d2f3dd24a89f558154cd0ca80a4b792a5caf7da11d7fcc9e471a84e7e",
+    "hunks": 11,
+    "result_sha256": "29572cc64d89316474aea2a89982691634376ce60e2b762007e3227eba8123b7"
+   },
+   "src/game/install.h": {
+    "base_sha256": "996b1ee880152523fa4ac9b0a6aeac0a43beefd7fdf7843d510d5a2bcd424759",
+    "hunks": 1,
+    "result_sha256": "482a931f5ab7f583beba7421e09a214a1cb2dcf2fe1113bed17f76d63a53c2ae"
+   },
+   "src/game/main.c": {
+    "base_sha256": "6fcc397a1c45c52066f9238e5a447fa6fb81cd79a337a89794e13c0f9b452ab4",
+    "hunks": 17,
+    "result_sha256": "47576b69020b0074b03a00c0979da53ddf39f7eba9a3a078b09a13c758fccc86"
+   },
+   "src/game/menuentry.c": {
+    "base_sha256": "8d5c27faae570e2c5818335a8ec58995243b792b8346b13574a085a31a6866e1",
+    "hunks": 5,
+    "result_sha256": "c9490c3f51c8bb80e031dac63f0469dc283666ffff7e6cf003901fdf5559ba34"
+   },
+   "src/game/modfs.c": {
+    "base_sha256": "608ef2615c6128963cb7b69946241aa89afd12edb3272ff0692ab382c34c83f4",
+    "hunks": 8,
+    "result_sha256": "0774149e1afd89c5716c3b8ca47cdd47e1160ded63cda4515912119c49702a6e"
+   },
+   "src/game/soundtrack.c": {
+    "base_sha256": "edc9913ae212905f752617ba03751825b9cd1049d78cf4a5c59fac73109e3564",
+    "hunks": 4,
+    "result_sha256": "212f52bf116e6d7f5204975dda17cd9ffb895b76d436494ed975b5be1c967d59"
+   },
+   "tests/modfs/CMakeLists.txt": {
+    "base_sha256": "7fc4d742fb626a7ffc6b19784d65b78874dd422640f034a83bee59f4bbc098f5",
+    "hunks": 1,
+    "result_sha256": "8e0138a4883e76608acdf6f38866ffd0db4e9e08486d5f960c42c2bc5561993d"
+   },
+   "tests/modfs/test_main.c": {
+    "base_sha256": "1e13a3cfa3d2ca0ba1ccedc612b35266b7a2f4993ef5f4175d7af4b62e410887",
+    "hunks": 8,
+    "result_sha256": "e8992474aa751cfb0d8b9a19ba981ab2f4a14737c6aa0cac27a2efd362f798a4"
+   }
+  }
+ }
+}

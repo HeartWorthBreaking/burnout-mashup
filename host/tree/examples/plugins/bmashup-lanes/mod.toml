@@ -1,0 +1,15 @@
+# Burnout Mashup's private lane-capacity request (include/bmashup_engine.h).
+# The module is bm_lanes_demo.c; put it beside this file and approve its code on
+# the MODS page: until then it is never loaded. While the game starts it asks
+# for 80 total AI route lanes (16 beyond the game's 64) for track mods that need
+# them; a track with 64 or fewer lanes is unaffected.
+id = "bmashup.lanes-80"
+name = "Lane Capacity 80 (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: requests 80 total AI route lanes through bmashup.engine."
+
+[plugin]
+api = 1
+windows = "bm_lanes_demo.asi"
+linux = "libbm_lanes_demo.so"
+macos = "libbm_lanes_demo.dylib"

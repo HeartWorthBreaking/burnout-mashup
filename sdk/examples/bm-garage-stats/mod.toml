@@ -1,0 +1,17 @@
+# Burnout Mashup SDK 0.6.0 example: "bmashup.menu" v1 bars (docs/services/MENU.md).
+# Put this folder in a mod folder (TAKEDAWN_MODS) with the built module beside this file, and approve its
+# code on the MODS page.
+id = "bmashup.garage-stats"
+name = "Garage Stats (Burnout Mashup)"
+version = "0.1.0"
+description = "Private, experimental: a TOP SPEED bar on car select through bmashup.menu."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.menu>=1", "bmashup.vphysics>=2"]
+
+[plugin]
+api = 1
+windows = "bm_garage_stats.asi"
+linux = "libbm_garage_stats.so"
+macos = "libbm_garage_stats.dylib"

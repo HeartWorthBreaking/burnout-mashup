@@ -1,0 +1,5971 @@
+{
+ "schema": "bm-workbench-next-tune-catalogue/1",
+ "rows": [
+  {
+   "key": "Boost Bar | Minimum Boost Time (seconds)",
+   "group": "Boost Bar",
+   "name": "Minimum Boost Time (seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Boost Bar | Minimum Boost Recovery Time (seconds)",
+   "group": "Boost Bar",
+   "name": "Minimum Boost Recovery Time (seconds)",
+   "type": "decimal",
+   "kit_game": 0.5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "0.5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Boost Bar | Boost Bar sizes (Boost Units)",
+   "group": "Boost Bar",
+   "name": "Boost Bar sizes (Boost Units)",
+   "type": "decimal",
+   "kit_game": 240.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 3840.0,
+    "rule": "0 .. 16 x max(|program value 240|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 240.0,
+    "text": "240",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost Units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Boost Bar | Boost Earning Multiplier",
+   "group": "Boost Bar",
+   "name": "Boost Earning Multiplier",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Boost Bar | Boost Rate (Boost Units per Second)",
+   "group": "Boost Bar",
+   "name": "Boost Rate (Boost Units per Second)",
+   "type": "decimal",
+   "kit_game": 36.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 576.0,
+    "rule": "0 .. 16 x max(|program value 36|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 36.0,
+    "text": "36",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost Units per Second",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Air | Minimum Air Distance (Metres)",
+   "group": "Score/Boost/Air",
+   "name": "Minimum Air Distance (Metres)",
+   "type": "decimal",
+   "kit_game": 5.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Air | Boost value per Air metre (Boost units)",
+   "group": "Score/Boost/Air",
+   "name": "Boost value per Air metre (Boost units)",
+   "type": "decimal",
+   "kit_game": 2.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 32.0,
+    "rule": "0 .. 16 x max(|program value 2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 2.0,
+    "text": "2",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Oncoming | Minimum Oncoming Speed (MPH)",
+   "group": "Score/Boost/Oncoming",
+   "name": "Minimum Oncoming Speed (MPH)",
+   "type": "decimal",
+   "kit_game": 30.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Oncoming | Minimum Oncoming Distance (Metres)",
+   "group": "Score/Boost/Oncoming",
+   "name": "Minimum Oncoming Distance (Metres)",
+   "type": "decimal",
+   "kit_game": 10.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "10",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Oncoming | Boost value per Oncoming metre (Boost units)",
+   "group": "Score/Boost/Oncoming",
+   "name": "Boost value per Oncoming metre (Boost units)",
+   "type": "decimal",
+   "kit_game": 0.30000001192092896,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.30000001192092896,
+    "text": "0.3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Drift | Minimum Drift Speed (MPH)",
+   "group": "Score/Boost/Drift",
+   "name": "Minimum Drift Speed (MPH)",
+   "type": "decimal",
+   "kit_game": 30.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Drift | Minimum Drift Distance (Metres)",
+   "group": "Score/Boost/Drift",
+   "name": "Minimum Drift Distance (Metres)",
+   "type": "decimal",
+   "kit_game": 10.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "10",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Drift | Boost value per Drift metre (Boost units)",
+   "group": "Score/Boost/Drift",
+   "name": "Boost value per Drift metre (Boost units)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Near Miss | Near Miss Distance (Metres)",
+   "group": "Score/Boost/Near Miss",
+   "name": "Near Miss Distance (Metres)",
+   "type": "decimal",
+   "kit_game": 2.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 32.0,
+    "rule": "0 .. 16 x max(|program value 2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 2.0,
+    "text": "2",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Near Miss | Minimum Near Miss Speed (MPH)",
+   "group": "Score/Boost/Near Miss",
+   "name": "Minimum Near Miss Speed (MPH)",
+   "type": "decimal",
+   "kit_game": 30.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Near Miss | Minimum Near Miss Chain Speed (MPH)",
+   "group": "Score/Boost/Near Miss",
+   "name": "Minimum Near Miss Chain Speed (MPH)",
+   "type": "decimal",
+   "kit_game": 30.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Near Miss | Boost value per Near Miss (Boost units)",
+   "group": "Score/Boost/Near Miss",
+   "name": "Boost value per Near Miss (Boost units)",
+   "type": "decimal",
+   "kit_game": 60.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 960.0,
+    "rule": "0 .. 16 x max(|program value 60|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 60.0,
+    "text": "60",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Near Miss | Near Miss Chain Time (Seconds)",
+   "group": "Score/Boost/Near Miss",
+   "name": "Near Miss Chain Time (Seconds)",
+   "type": "decimal",
+   "kit_game": 5.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Crash Escape Radius",
+   "group": "Score/Boost/Crash Escape",
+   "name": "Crash Escape Radius",
+   "type": "decimal",
+   "kit_game": 8.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 128.0,
+    "rule": "0 .. 16 x max(|program value 8|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 8.0,
+    "text": "8",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Time Between Crashing Near Misses (Seconds)",
+   "group": "Score/Boost/Crash Escape",
+   "name": "Time Between Crashing Near Misses (Seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Minimum Time Clear After Crash Escape",
+   "group": "Score/Boost/Crash Escape",
+   "name": "Minimum Time Clear After Crash Escape",
+   "type": "decimal",
+   "kit_game": 3.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Minimum Crash Escape Speed (MPH)",
+   "group": "Score/Boost/Crash Escape",
+   "name": "Minimum Crash Escape Speed (MPH)",
+   "type": "decimal",
+   "kit_game": 70.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1120.0,
+    "rule": "0 .. 16 x max(|program value 70|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 70.0,
+    "text": "70",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Crash Escape | Boost value per Crash Escape (Boost units)",
+   "group": "Score/Boost/Crash Escape",
+   "name": "Boost value per Crash Escape (Boost units)",
+   "type": "decimal",
+   "kit_game": 120.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1920.0,
+    "rule": "0 .. 16 x max(|program value 120|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 120.0,
+    "text": "120",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Aggressive | Boost value lost or gained per Slam (Boost units)",
+   "group": "Score/Boost/Aggressive",
+   "name": "Boost value lost or gained per Slam (Boost units)",
+   "type": "decimal",
+   "kit_game": 360.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 5760.0,
+    "rule": "0 .. 16 x max(|program value 360|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 360.0,
+    "text": "360",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Aggressive | Min Contact Time For Rubbing (Seconds)",
+   "group": "Score/Boost/Aggressive",
+   "name": "Min Contact Time For Rubbing (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.30000001192092896,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.30000001192092896,
+    "text": "0.3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Aggressive | Boost value for rubbing (Boost units)",
+   "group": "Score/Boost/Aggressive",
+   "name": "Boost value for rubbing (Boost units)",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Boost Start | Boost Start Boost value (Boost units)",
+   "group": "Score/Boost/Boost Start",
+   "name": "Boost Start Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 50.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 800.0,
+    "rule": "0 .. 16 x max(|program value 50|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 50.0,
+    "text": "50",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Takedown Boost value (Boost units)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Takedown Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 720.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 11520.0,
+    "rule": "0 .. 16 x max(|program value 720|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 720.0,
+    "text": "720",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Race Car Clear Wait Time (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Race Car Clear Wait Time (Seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Maximum Crash Wait Time (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Maximum Crash Wait Time (Seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Maximum Crash Wait Time - No Slam (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Maximum Crash Wait Time - No Slam (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "0.5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Minimum Collide Time to enable Takedown - No Slam (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Minimum Collide Time to enable Takedown - No Slam (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "0.5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a double takedown(Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Time window for getting a double takedown(Seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a takedown spree (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Time window for getting a takedown spree (Seconds)",
+   "type": "decimal",
+   "kit_game": 30.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Takedowns | Time window for getting a double revenge takedown (Seconds)",
+   "group": "Score/Boost/Takedowns",
+   "name": "Time window for getting a double revenge takedown (Seconds)",
+   "type": "decimal",
+   "kit_game": 60.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 960.0,
+    "rule": "0 .. 16 x max(|program value 60|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 60.0,
+    "text": "60",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Props | Prop Hit Chain time (Seconds)",
+   "group": "Score/Boost/Props",
+   "name": "Prop Hit Chain time (Seconds)",
+   "type": "decimal",
+   "kit_game": 2.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 32.0,
+    "rule": "0 .. 16 x max(|program value 2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 2.0,
+    "text": "2",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Props | Prop Hit Boost value (Boost units)",
+   "group": "Score/Boost/Props",
+   "name": "Prop Hit Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 3.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Lap | Perfect Lap Boost value (Boost units)",
+   "group": "Score/Boost/Lap",
+   "name": "Perfect Lap Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 120.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1920.0,
+    "rule": "0 .. 16 x max(|program value 120|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 120.0,
+    "text": "120",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Lap | Burnout Lap Boost value (Boost units)",
+   "group": "Score/Boost/Lap",
+   "name": "Burnout Lap Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 240.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 3840.0,
+    "rule": "0 .. 16 x max(|program value 240|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 240.0,
+    "text": "240",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Boost/Aggressive | Trading Paint Boost value (Boost units)",
+   "group": "Score/Boost/Aggressive",
+   "name": "Trading Paint Boost value (Boost units)",
+   "type": "decimal",
+   "kit_game": 3.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Boost units",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Prop Hit BP",
+   "group": "Score/Burnout Points",
+   "name": "Prop Hit BP",
+   "type": "whole number",
+   "kit_game": 10,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "10",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Rubbing BP",
+   "group": "Score/Burnout Points",
+   "name": "Rubbing BP",
+   "type": "whole number",
+   "kit_game": 5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Tradin' Paint BP",
+   "group": "Score/Burnout Points",
+   "name": "Tradin' Paint BP",
+   "type": "whole number",
+   "kit_game": 25,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 400.0,
+    "rule": "0 .. 16 x max(|program value 25|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 25.0,
+    "text": "25",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Boost Start BP",
+   "group": "Score/Burnout Points",
+   "name": "Boost Start BP",
+   "type": "whole number",
+   "kit_game": 50,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 800.0,
+    "rule": "0 .. 16 x max(|program value 50|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 50.0,
+    "text": "50",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Crash Escape BP",
+   "group": "Score/Burnout Points",
+   "name": "Crash Escape BP",
+   "type": "whole number",
+   "kit_game": 100,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1600.0,
+    "rule": "0 .. 16 x max(|program value 100|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "100",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Burning Slam Extra BP",
+   "group": "Score/Burnout Points",
+   "name": "Burning Slam Extra BP",
+   "type": "whole number",
+   "kit_game": 15,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Slam Type BP",
+   "group": "Score/Burnout Points",
+   "name": "Slam Type BP",
+   "type": "whole number",
+   "kit_game": 20,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 320.0,
+    "rule": "0 .. 16 x max(|program value 20|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 20.0,
+    "text": "20",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Super Slam Type BP",
+   "group": "Score/Burnout Points",
+   "name": "Super Slam Type BP",
+   "type": "whole number",
+   "kit_game": 30,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "30",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Perfect Lap BP",
+   "group": "Score/Burnout Points",
+   "name": "Perfect Lap BP",
+   "type": "whole number",
+   "kit_game": 500,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 8000.0,
+    "rule": "0 .. 16 x max(|program value 500|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 500.0,
+    "text": "500",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Takedown BP",
+   "group": "Score/Burnout Points",
+   "name": "Takedown BP",
+   "type": "whole number",
+   "kit_game": 1000,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16000.0,
+    "rule": "0 .. 16 x max(|program value 1000|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1000.0,
+    "text": "1000",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Revenge Takedown Bonus BP",
+   "group": "Score/Burnout Points",
+   "name": "Revenge Takedown Bonus BP",
+   "type": "whole number",
+   "kit_game": 350,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 5600.0,
+    "rule": "0 .. 16 x max(|program value 350|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 350.0,
+    "text": "350",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Psyche Out BP",
+   "group": "Score/Burnout Points",
+   "name": "Psyche Out BP",
+   "type": "whole number",
+   "kit_game": 150,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 2400.0,
+    "rule": "0 .. 16 x max(|program value 150|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 150.0,
+    "text": "150",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Aftertouch Takedown BP",
+   "group": "Score/Burnout Points",
+   "name": "Aftertouch Takedown BP",
+   "type": "whole number",
+   "kit_game": 250,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4000.0,
+    "rule": "0 .. 16 x max(|program value 250|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 250.0,
+    "text": "250",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Burnout Lap BP",
+   "group": "Score/Burnout Points",
+   "name": "Burnout Lap BP",
+   "type": "whole number",
+   "kit_game": 1000,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16000.0,
+    "rule": "0 .. 16 x max(|program value 1000|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1000.0,
+    "text": "1000",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Near Miss BP",
+   "group": "Score/Burnout Points",
+   "name": "Near Miss BP",
+   "type": "whole number",
+   "kit_game": 20,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 320.0,
+    "rule": "0 .. 16 x max(|program value 20|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 20.0,
+    "text": "20",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Leading Race At End Of Lap BP",
+   "group": "Score/Burnout Points",
+   "name": "Leading Race At End Of Lap BP",
+   "type": "whole number",
+   "kit_game": 250,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4000.0,
+    "rule": "0 .. 16 x max(|program value 250|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 250.0,
+    "text": "250",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Denied (You Were Lucky) BP",
+   "group": "Score/Burnout Points",
+   "name": "Denied (You Were Lucky) BP",
+   "type": "whole number",
+   "kit_game": 15,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Denied (Takedown Denied) BP",
+   "group": "Score/Burnout Points",
+   "name": "Denied (Takedown Denied) BP",
+   "type": "whole number",
+   "kit_game": 10,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "10",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Air Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Air Category BP",
+   "type": "whole number",
+   "kit_game": 100,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1600.0,
+    "rule": "0 .. 16 x max(|program value 100|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "100",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Oncoming Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Oncoming Category BP",
+   "type": "whole number",
+   "kit_game": 100,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1600.0,
+    "rule": "0 .. 16 x max(|program value 100|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "100",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Drift Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Drift Category BP",
+   "type": "whole number",
+   "kit_game": 100,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1600.0,
+    "rule": "0 .. 16 x max(|program value 100|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "100",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Tailgate Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Tailgate Category BP",
+   "type": "whole number",
+   "kit_game": 5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Rubbing Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Rubbing Category BP",
+   "type": "whole number",
+   "kit_game": 5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Grinding Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Grinding Category BP",
+   "type": "whole number",
+   "kit_game": 5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Near Miss Category BP",
+   "group": "Score/Burnout Points",
+   "name": "Near Miss Category BP",
+   "type": "whole number",
+   "kit_game": 5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Take Race Position BP",
+   "group": "Score/Burnout Points",
+   "name": "Take Race Position BP",
+   "type": "whole number",
+   "kit_game": 500,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 8000.0,
+    "rule": "0 .. 16 x max(|program value 500|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 500.0,
+    "text": "500",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Double Takedown BP",
+   "group": "Score/Burnout Points",
+   "name": "Double Takedown BP",
+   "type": "whole number",
+   "kit_game": 300,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4800.0,
+    "rule": "0 .. 16 x max(|program value 300|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 300.0,
+    "text": "300",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Takedown Spree BP",
+   "group": "Score/Burnout Points",
+   "name": "Takedown Spree BP",
+   "type": "whole number",
+   "kit_game": 300,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4800.0,
+    "rule": "0 .. 16 x max(|program value 300|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 300.0,
+    "text": "300",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Double Revenge BP",
+   "group": "Score/Burnout Points",
+   "name": "Double Revenge BP",
+   "type": "whole number",
+   "kit_game": 300,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4800.0,
+    "rule": "0 .. 16 x max(|program value 300|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 300.0,
+    "text": "300",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Burnout Points | Road Rage Takedown BP",
+   "group": "Score/Burnout Points",
+   "name": "Road Rage Takedown BP",
+   "type": "whole number",
+   "kit_game": 100,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1600.0,
+    "rule": "0 .. 16 x max(|program value 100|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "100",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Air Category Minima (Metres)",
+   "group": "Score/BP Categories",
+   "name": "Air Category Minima (Metres)",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Oncoming Category Minima (Metres)",
+   "group": "Score/BP Categories",
+   "name": "Oncoming Category Minima (Metres)",
+   "type": "decimal",
+   "kit_game": 50.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 800.0,
+    "rule": "0 .. 16 x max(|program value 50|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 50.0,
+    "text": "50",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Drift Category Minima (Metres)",
+   "group": "Score/BP Categories",
+   "name": "Drift Category Minima (Metres)",
+   "type": "decimal",
+   "kit_game": 45.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 720.0,
+    "rule": "0 .. 16 x max(|program value 45|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 45.0,
+    "text": "45",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Tailgate Category Minima (Seconds)",
+   "group": "Score/BP Categories",
+   "name": "Tailgate Category Minima (Seconds)",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Rubbing Category Minima (Seconds)",
+   "group": "Score/BP Categories",
+   "name": "Rubbing Category Minima (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.10000000149011612,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.10000000149011612,
+    "text": "0.1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Grinding Category Minima (Seconds)",
+   "group": "Score/BP Categories",
+   "name": "Grinding Category Minima (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.10000000149011612,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.10000000149011612,
+    "text": "0.1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/BP Categories | Near Miss Category Minima (Counts)",
+   "group": "Score/BP Categories",
+   "name": "Near Miss Category Minima (Counts)",
+   "type": "decimal",
+   "kit_game": 999.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 15984.0,
+    "rule": "0 .. 16 x max(|program value 999|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 999.0,
+    "text": "999",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Counts",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Tailgating | Max distance behind for tailgating (Metres)",
+   "group": "Score/Tailgating",
+   "name": "Max distance behind for tailgating (Metres)",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Tailgating | Min distance behind for psyche-out when tailgating (Metres)",
+   "group": "Score/Tailgating",
+   "name": "Min distance behind for psyche-out when tailgating (Metres)",
+   "type": "decimal",
+   "kit_game": 7.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 112.0,
+    "rule": "0 .. 16 x max(|program value 7|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 7.0,
+    "text": "7",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Tailgating | Cone angle behind for tailgating (Degrees)",
+   "group": "Score/Tailgating",
+   "name": "Cone angle behind for tailgating (Degrees)",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Degrees",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Tailgating | Extra boost per second",
+   "group": "Score/Tailgating",
+   "name": "Extra boost per second",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Tailgating | Minimum tailgating time to count as tailgating (Seconds)",
+   "group": "Score/Tailgating",
+   "name": "Minimum tailgating time to count as tailgating (Seconds)",
+   "type": "decimal",
+   "kit_game": 0.5,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "0.5",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Grinding | Minimum time to grind before scoring (Seconds)",
+   "group": "Score/Grinding",
+   "name": "Minimum time to grind before scoring (Seconds)",
+   "type": "decimal",
+   "kit_game": 3.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "3",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Grinding | Extra boost per second",
+   "group": "Score/Grinding",
+   "name": "Extra boost per second",
+   "type": "decimal",
+   "kit_game": 15.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "15",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Score/Distance Travelled | Distance Travelled Medals (Miles)",
+   "group": "Score/Distance Travelled",
+   "name": "Distance Travelled Medals (Miles)",
+   "type": "decimal",
+   "kit_game": 4.0,
+   "host_addition": false,
+   "family": "valuedb",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 4.0,
+    "text": "4",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": {
+    "text": "Miles",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "AI/Car | Out of range speed decrease rate",
+   "group": "AI/Car",
+   "name": "Out of range speed decrease rate",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 960.0,
+    "rule": "0 .. 16 x max(|program value 60|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 960.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 960 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 60)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Max desDir angle change OOR",
+   "group": "AI/Car",
+   "name": "Max desDir angle change OOR",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Angle you want min spd at",
+   "group": "AI/Car",
+   "name": "Angle you want min spd at",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 614.4000244140625,
+    "rule": "0 .. 16 x max(|program value 38.4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 1440.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 1440 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 90.0,
+    "text": "ValueDB 90 (code default 38.4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Top speed mps",
+   "group": "AI/Car",
+   "name": "Top speed mps",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1280.0,
+    "rule": "0 .. 16 x max(|program value 80|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 1408.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 1408 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 88.0,
+    "text": "ValueDB 88 (code default 80)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Min speed mps",
+   "group": "AI/Car",
+   "name": "Min speed mps",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 320.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 320 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 20.0,
+    "text": "ValueDB 20 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | How much carAt affects steering",
+   "group": "AI/Car",
+   "name": "How much carAt affects steering",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.8999999761581421,
+    "text": "ValueDB 0.9 (code default 0.2)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Angle at which drift is started",
+   "group": "AI/Car",
+   "name": "Angle at which drift is started",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 320.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 320 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 20.0,
+    "text": "ValueDB 20 (code default 15)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Max lock at 180 x degrees",
+   "group": "AI/Car",
+   "name": "Max lock at 180 x degrees",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 96.0,
+    "rule": "0 .. 16 x max(|program value 6|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 160.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 160 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 6)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Car | Drift Max lock at 180 x degrees",
+   "group": "AI/Car",
+   "name": "Drift Max lock at 180 x degrees",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 800.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 800 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 50.0,
+    "text": "ValueDB 50 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Total risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Total risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 2.0,
+    "text": "ValueDB 2 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Current risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Current risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 80.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 80 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "ValueDB 5 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Corner Risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Corner Risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "ValueDB 0.5 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Total corner risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Total corner risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Arbitrator | Current corner risk threshold",
+   "group": "AI/Arbitrator",
+   "name": "Current corner risk threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 4.0,
+    "text": "ValueDB 4 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | AVOID: LookAhead dist racecars",
+   "group": "AI/Avoidance",
+   "name": "AVOID: LookAhead dist racecars",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 320.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 320 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 20.0,
+    "text": "ValueDB 20 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | AVOID: Soft No Go offset time",
+   "group": "AI/Avoidance",
+   "name": "AVOID: Soft No Go offset time",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 24.0,
+    "rule": "0 .. 16 x max(|program value 1.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 40.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 40 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 2.5,
+    "text": "ValueDB 2.5 (code default 1.5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | AVOID: Soft No Go offset distance",
+   "group": "AI/Avoidance",
+   "name": "AVOID: Soft No Go offset distance",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1200.0,
+    "rule": "0 .. 16 x max(|program value 75|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 1616.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 1616 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 101.0,
+    "text": "ValueDB 101 (code default 75)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Extra softNoGo offset dist for future",
+   "group": "AI/Avoidance",
+   "name": "Extra softNoGo offset dist for future",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 320.0,
+    "rule": "0 .. 16 x max(|program value 20|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 320.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 320 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "ValueDB 5 (code default 20)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Extra softNoGo offset time for future",
+   "group": "AI/Avoidance",
+   "name": "Extra softNoGo offset time for future",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.07999999821186066,
+    "text": "ValueDB 0.08 (code default 0.5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Hard No Go offset time",
+   "group": "AI/Avoidance",
+   "name": "Hard No Go offset time",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0,
+    "text": "ValueDB 0 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Hard No Go offset distance",
+   "group": "AI/Avoidance",
+   "name": "Hard No Go offset distance",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 3200.0,
+    "rule": "0 .. 16 x max(|program value 200|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 3200.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 3200 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 200.0,
+    "text": "ValueDB 200 (code default 200)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Distance to discard fatally colliding racecar",
+   "group": "AI/Avoidance",
+   "name": "Distance to discard fatally colliding racecar",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 640.0,
+    "rule": "0 .. 16 x max(|program value 40|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 1600.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 1600 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 100.0,
+    "text": "ValueDB 100 (code default 40)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Vert dist to discard traffic and racecars",
+   "group": "AI/Avoidance",
+   "name": "Vert dist to discard traffic and racecars",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 80.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 80 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "ValueDB 5 (code default 5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | dt between start and end vehicle",
+   "group": "AI/Avoidance",
+   "name": "dt between start and end vehicle",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.20000000298023224,
+    "text": "ValueDB 0.2 (code default 0.5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <10m away",
+   "group": "AI/Avoidance",
+   "name": "Speed when car is <10m away",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 419.20001220703125,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 419.2 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 26.200000762939453,
+    "text": "ValueDB 26.2 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <20m away",
+   "group": "AI/Avoidance",
+   "name": "Speed when car is <20m away",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 400.0,
+    "rule": "0 .. 16 x max(|program value 25|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 640.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 640 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 40.0,
+    "text": "ValueDB 40 (code default 25)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Speed when car is <30m away",
+   "group": "AI/Avoidance",
+   "name": "Speed when car is <30m away",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 640.0,
+    "rule": "0 .. 16 x max(|program value 40|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 960.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 960 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 60.0,
+    "text": "ValueDB 60 (code default 40)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Speed when risk is >0.95",
+   "group": "AI/Avoidance",
+   "name": "Speed when risk is >0.95",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 256.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 256 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 16.0,
+    "text": "ValueDB 16 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Speed when risk is >0.9",
+   "group": "AI/Avoidance",
+   "name": "Speed when risk is >0.9",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 480.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 480 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "ValueDB 30 (code default 30)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Steering factor big=>extreme",
+   "group": "AI/Avoidance",
+   "name": "Steering factor big=>extreme",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 81.5999984741211,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 81.6 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.099999904632568,
+    "text": "ValueDB 5.1 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Aggression time variation factor",
+   "group": "AI/Avoidance",
+   "name": "Aggression time variation factor",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 49.279998779296875,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 49.28 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0799999237060547,
+    "text": "ValueDB 3.08 (code default 1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Aggression dist variation factor",
+   "group": "AI/Avoidance",
+   "name": "Aggression dist variation factor",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 160.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 160 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Aggression time variation offset",
+   "group": "AI/Avoidance",
+   "name": "Aggression time variation offset",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 32.0,
+    "rule": "0 .. 16 x max(|program value 2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 32.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 32 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0,
+    "text": "ValueDB 0 (code default 2)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Avoidance | Aggression dist variation offset",
+   "group": "AI/Avoidance",
+   "name": "Aggression dist variation offset",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 160.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 160 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Dist to brake speed factor big=>fast",
+   "group": "AI/Target",
+   "name": "Dist to brake speed factor big=>fast",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.44|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.6000000238418579,
+    "text": "ValueDB 0.6 (code default 0.44)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Drift speed threshold",
+   "group": "AI/Target",
+   "name": "Drift speed threshold",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 656.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 656 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 41.0,
+    "text": "ValueDB 41 (code default 30)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Dist to update target pos",
+   "group": "AI/Target",
+   "name": "Dist to update target pos",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.4000000059604645,
+    "text": "ValueDB 0.4 (code default 0.4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Perp dist to update target pos",
+   "group": "AI/Target",
+   "name": "Perp dist to update target pos",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.10000000149011612,
+    "text": "ValueDB 0.1 (code default 0.1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Corner radius to give max offset pos",
+   "group": "AI/Target",
+   "name": "Corner radius to give max offset pos",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 4800.0,
+    "rule": "0 .. 16 x max(|program value 300|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 4800.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 4800 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 300.0,
+    "text": "ValueDB 300 (code default 300)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Time until we hit the apex at which to start drifting (seconds)",
+   "group": "AI/Target",
+   "name": "Time until we hit the apex at which to start drifting (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Number of segments to extend the start of any corner",
+   "group": "AI/Target",
+   "name": "Number of segments to extend the start of any corner",
+   "type": "whole number",
+   "kit_game": 0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0,
+    "text": "ValueDB 0 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Max. number of extra segments to extend the corner based on your speed",
+   "group": "AI/Target",
+   "name": "Max. number of extra segments to extend the corner based on your speed",
+   "type": "whole number",
+   "kit_game": 0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": -16.0,
+    "hi": 16.0,
+    "rule": "-16 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0,
+    "text": "ValueDB 0 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": true,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Number of segments to extend the start of any corner (when drifting)",
+   "group": "AI/Target",
+   "name": "Number of segments to extend the start of any corner (when drifting)",
+   "type": "whole number",
+   "kit_game": 0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 80.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 80 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "ValueDB 5 (code default 5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | Max. number of extra segments to extend the corner based on your speed (when drifting)",
+   "group": "AI/Target",
+   "name": "Max. number of extra segments to extend the corner based on your speed (when drifting)",
+   "type": "whole number",
+   "kit_game": 0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": -16.0,
+    "hi": 16.0,
+    "rule": "-16 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 48.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 48 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": -3.0,
+    "text": "ValueDB -3 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": true,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Target | How far away from the true apex to move the apex point of a corner when drifting (meters)",
+   "group": "AI/Target",
+   "name": "How far away from the true apex to move the apex point of a corner when drifting (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Driver | How close the target car must be to start proper speed matching (meters)",
+   "group": "AI/Driver",
+   "name": "How close the target car must be to start proper speed matching (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 160.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 160 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Driver | Maximum distance from player to start doing sticky speed matching (metres)",
+   "group": "AI/Driver",
+   "name": "Maximum distance from player to start doing sticky speed matching (metres)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 160.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 160 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 10.0,
+    "text": "ValueDB 10 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "metres",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Driver | Maximum diffence in speeds for sticky speed matching (MPH)",
+   "group": "AI/Driver",
+   "name": "Maximum diffence in speeds for sticky speed matching (MPH)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 640.0,
+    "rule": "0 .. 16 x max(|program value 40|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 640.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 640 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 40.0,
+    "text": "ValueDB 40 (code default 40)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. aggression before we start attacking",
+   "group": "AI/Aggressive Driving",
+   "name": "Min. aggression before we start attacking",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0020000000949949026,
+    "text": "ValueDB 0.002 (code default 0)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. time to wait between attacks (seconds)",
+   "group": "AI/Aggressive Driving",
+   "name": "Min. time to wait between attacks (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.0,
+    "text": "ValueDB 0 (code default 0.5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": true,
+   "applies": "never (never read by this game build: the host refuses it)",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. time to wait between attacks (seconds)",
+   "group": "AI/Aggressive Driving",
+   "name": "Max. time to wait between attacks (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 32.0,
+    "rule": "0 .. 16 x max(|program value 2|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 48.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 48 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "ValueDB 3 (code default 2)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. distance apart to begin attacking when ahead of target (meters)",
+   "group": "AI/Aggressive Driving",
+   "name": "Max. distance apart to begin attacking when ahead of target (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 400.0,
+    "rule": "0 .. 16 x max(|program value 25|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 640.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 640 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 40.0,
+    "text": "ValueDB 40 (code default 25)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Max. distance apart to begin attacking when behind of target (meters)",
+   "group": "AI/Aggressive Driving",
+   "name": "Max. distance apart to begin attacking when behind of target (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 800.0,
+    "rule": "0 .. 16 x max(|program value 50|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 2400.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 2400 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 150.0,
+    "text": "ValueDB 150 (code default 50)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Min. target speed to consider attacking (mph)",
+   "group": "AI/Aggressive Driving",
+   "name": "Min. target speed to consider attacking (mph)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 960.0,
+    "rule": "0 .. 16 x max(|program value 60|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 1200.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 1200 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 75.0,
+    "text": "ValueDB 75 (code default 60)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "mph",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | How much slower than the player to drive while speed matching to attack position",
+   "group": "AI/Aggressive Driving",
+   "name": "How much slower than the player to drive while speed matching to attack position",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.95|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.8999999761581421,
+    "text": "ValueDB 0.9 (code default 0.95)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | How far in front to boost when speed matching the player",
+   "group": "AI/Aggressive Driving",
+   "name": "How far in front to boost when speed matching the player",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 480.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 480 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "ValueDB 15 (code default 30)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | Extra distance in front to boost relative to aggression (meters)",
+   "group": "AI/Aggressive Driving",
+   "name": "Extra distance in front to boost relative to aggression (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": -360.0,
+    "hi": 360.0,
+    "rule": "-16 .. 16 x max(|program value -22.5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 360.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 360 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": -22.5,
+    "text": "ValueDB -22.5 (code default -22.5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": true,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | How long to wait at the start of the race before doing aggressive driving (seconds)",
+   "group": "AI/Aggressive Driving",
+   "name": "How long to wait at the start of the race before doing aggressive driving (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 112.0,
+    "rule": "0 .. 16 x max(|program value 7|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 112.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 112 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "ValueDB 3 (code default 7)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving | How long after hitting something to disable immunity (seconds)",
+   "group": "AI/Aggressive Driving",
+   "name": "How long after hitting something to disable immunity (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 48.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 48 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "ValueDB 3 (code default 3)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Min time to try and block you for (seconds)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Min time to try and block you for (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 48.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 48 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "ValueDB 3 (code default 3)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max time to try and block you for (seconds)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max time to try and block you for (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 240.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 240 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "ValueDB 15 (code default 15)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max distance ahead to start blocking you (meters)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max distance ahead to start blocking you (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 240.0,
+    "rule": "0 .. 16 x max(|program value 15|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 240.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 240 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 15.0,
+    "text": "ValueDB 15 (code default 15)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Preferred car separation when getting into slam position (meters)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Preferred car separation when getting into slam position (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 64.0,
+    "rule": "0 .. 16 x max(|program value 4|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 64.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 64 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.0,
+    "text": "ValueDB 3 (code default 4)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": true,
+   "applies": "never (never read by this game build: the host refuses it)",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. time to try and get into slamming position (seconds)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max. time to try and get into slamming position (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 480.0,
+    "rule": "0 .. 16 x max(|program value 30|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 480.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 480 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 30.0,
+    "text": "ValueDB 30 (code default 30)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. distance between cars, when ahead (meters)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max. distance between cars, when ahead (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 80.0,
+    "rule": "0 .. 16 x max(|program value 5|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 80.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 80 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 3.5,
+    "text": "ValueDB 3.5 (code default 5)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. difference in speeds (MPH)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max. difference in speeds (MPH)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 160.0,
+    "rule": "0 .. 16 x max(|program value 10|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 800.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 800 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 50.0,
+    "text": "ValueDB 50 (code default 10)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "MPH",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Steer out distance (meters)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Steer out distance (meters)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 80.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 80 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 5.0,
+    "text": "ValueDB 5 (code default 1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "meters",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Steer out time (seconds)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Steer out time (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.25|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.5,
+    "text": "ValueDB 0.5 (code default 0.25)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Slam time (seconds)",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Slam time (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 48.0,
+    "rule": "0 .. 16 x max(|program value 3|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 48.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 48 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.75,
+    "text": "ValueDB 0.75 (code default 3)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | Max. cos angle off lane to stop attack",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "Max. cos angle off lane to stop attack",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.8|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.800000011920929,
+    "text": "ValueDB 0.8 (code default 0.8)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Slam | How soon after starting to slam is the AI car committed and can't stop",
+   "group": "AI/Aggressive Driving/Slam",
+   "name": "How soon after starting to slam is the AI car committed and can't stop",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0.1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 0.07500000298023224,
+    "text": "ValueDB 0.075 (code default 0.1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": true,
+   "applies": "never (never read by this game build: the host refuses it)",
+   "needs_version": 2
+  },
+  {
+   "key": "AI/Aggressive Driving/Reactions | How long a rubbed AI car goes blind for (seconds)",
+   "group": "AI/Aggressive Driving/Reactions",
+   "name": "How long a rubbed AI car goes blind for (seconds)",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "ai",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 1|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)",
+    "hi_with_game_value": 16.0,
+    "note": "the host widens the limit to 16 x max(|code default|, |ValueDB value|, 1) = 16 once the game's value is read at boot (bm_tune.c bound())"
+   },
+   "verified_range": null,
+   "default": {
+    "value": 1.0,
+    "text": "ValueDB 1 (code default 1)",
+    "source": "host bm_tune_ai.h (vdb, vdefault); the kit catalogue lists 0 (the block is empty before boot)"
+   },
+   "unit": {
+    "text": "seconds",
+    "source": "the row's own name"
+   },
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 2
+  },
+  {
+   "key": "CAD Properties | Air Ram Front Corner",
+   "group": "CAD Properties",
+   "name": "Air Ram Front Corner",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram Back Corner",
+   "group": "CAD Properties",
+   "name": "Air Ram Back Corner",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram Side",
+   "group": "CAD Properties",
+   "name": "Air Ram Side",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram Front",
+   "group": "CAD Properties",
+   "name": "Air Ram Front",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram Back",
+   "group": "CAD Properties",
+   "name": "Air Ram Back",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram World",
+   "group": "CAD Properties",
+   "name": "Air Ram World",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "CAD Properties | Air Ram Low Speed Multiplier",
+   "group": "CAD Properties",
+   "name": "Air Ram Low Speed Multiplier",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "cad",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cad.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Crash/HandyCam | Spring Coeff",
+   "group": "Crash/HandyCam",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "Crash/HandyCam | Damping",
+   "group": "Crash/HandyCam",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Spring Coeff",
+   "group": "InGame/Effect/Burnout/Position",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Damping",
+   "group": "InGame/Effect/Burnout/Position",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Position | Force",
+   "group": "InGame/Effect/Burnout/Position",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Spring Coeff",
+   "group": "InGame/Effect/Burnout/Angular",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Damping",
+   "group": "InGame/Effect/Burnout/Angular",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Burnout/Angular | Force",
+   "group": "InGame/Effect/Burnout/Angular",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Spring Coeff",
+   "group": "InGame/Effect/Shunt/Position",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Damping",
+   "group": "InGame/Effect/Shunt/Position",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Position | Force",
+   "group": "InGame/Effect/Shunt/Position",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Spring Coeff",
+   "group": "InGame/Effect/Shunt/Angular",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Damping",
+   "group": "InGame/Effect/Shunt/Angular",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunt/Angular | Force",
+   "group": "InGame/Effect/Shunt/Angular",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Spring Coeff",
+   "group": "InGame/Effect/Shunted/Position",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Damping",
+   "group": "InGame/Effect/Shunted/Position",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Position | Force",
+   "group": "InGame/Effect/Shunted/Position",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Spring Coeff",
+   "group": "InGame/Effect/Shunted/Angular",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Damping",
+   "group": "InGame/Effect/Shunted/Angular",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shunted/Angular | Force",
+   "group": "InGame/Effect/Shunted/Angular",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Spring Coeff",
+   "group": "InGame/Effect/Slam/Position",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Damping",
+   "group": "InGame/Effect/Slam/Position",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Position | Force",
+   "group": "InGame/Effect/Slam/Position",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Spring Coeff",
+   "group": "InGame/Effect/Slam/Angular",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Damping",
+   "group": "InGame/Effect/Slam/Angular",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Slam/Angular | Force",
+   "group": "InGame/Effect/Slam/Angular",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Spring Coeff",
+   "group": "InGame/Effect/Shake/Position",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Damping",
+   "group": "InGame/Effect/Shake/Position",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Position | Force",
+   "group": "InGame/Effect/Shake/Position",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Spring Coeff",
+   "group": "InGame/Effect/Shake/Angular",
+   "name": "Spring Coeff",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Damping",
+   "group": "InGame/Effect/Shake/Angular",
+   "name": "Damping",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "InGame/Effect/Shake/Angular | Force",
+   "group": "InGame/Effect/Shake/Angular",
+   "name": "Force",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "camera",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_cam.inc comment"
+   },
+   "unit": null,
+   "description": null,
+   "signed": false,
+   "unread": false,
+   "applies": "from the next race",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Sparks | Size",
+   "group": "Effects/Sparks",
+   "name": "Size",
+   "type": "decimal",
+   "kit_game": 0.0,
+   "host_addition": true,
+   "family": "fx",
+   "limit": {
+    "lo": 0.0,
+    "hi": 16.0,
+    "rule": "0 .. 16 x max(|program value 0|, 1)",
+    "source": "host bm_tune.c row_bounds (admission limit, not a tested range)"
+   },
+   "verified_range": null,
+   "default": {
+    "value": null,
+    "text": "not known offline: the host takes the game's value while it runs",
+    "source": "host bm_tune_catalog_fx.inc comment"
+   },
+   "unit": null,
+   "description": {
+    "text": "the spark effect's size (Xbox 0.012, PS2 0.017)",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Shadow | Alpha Test",
+   "group": "Effects/Shadow",
+   "name": "Alpha Test",
+   "type": "whole number",
+   "kit_game": 1,
+   "host_addition": true,
+   "family": "shadow",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1.0,
+    "rule": "the row's own bounds",
+    "source": "host bm_tune.c k_sh_bounds"
+   },
+   "verified_range": {
+    "lo": 0.0,
+    "hi": 1.0,
+    "source": "host bm_tune.c k_sh_bounds (the row's own range)"
+   },
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": {
+    "text": "OFF = draw the whole soft shadow (PS2), ON = the Xbox cut",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Shadow | Opacity",
+   "group": "Effects/Shadow",
+   "name": "Opacity",
+   "type": "decimal",
+   "kit_game": 0.699999988079071,
+   "host_addition": true,
+   "family": "shadow",
+   "limit": {
+    "lo": 0.0,
+    "hi": 1.0,
+    "rule": "the row's own bounds",
+    "source": "host bm_tune.c k_sh_bounds"
+   },
+   "verified_range": {
+    "lo": 0.0,
+    "hi": 1.0,
+    "source": "host bm_tune.c k_sh_bounds (the row's own range)"
+   },
+   "default": {
+    "value": 0.699999988079071,
+    "text": "0.7",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": {
+    "text": "opacity (Xbox 0.7, PS2 0.703)",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Shadow | Width",
+   "group": "Effects/Shadow",
+   "name": "Width",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": true,
+   "family": "shadow",
+   "limit": {
+    "lo": 0.5,
+    "hi": 2.0,
+    "rule": "the row's own bounds",
+    "source": "host bm_tune.c k_sh_bounds"
+   },
+   "verified_range": {
+    "lo": 0.5,
+    "hi": 2.0,
+    "source": "host bm_tune.c k_sh_bounds (the row's own range)"
+   },
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": {
+    "text": "x the car's shadow width (game 1)",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Shadow | Length",
+   "group": "Effects/Shadow",
+   "name": "Length",
+   "type": "decimal",
+   "kit_game": 1.0,
+   "host_addition": true,
+   "family": "shadow",
+   "limit": {
+    "lo": 0.5,
+    "hi": 2.0,
+    "rule": "the row's own bounds",
+    "source": "host bm_tune.c k_sh_bounds"
+   },
+   "verified_range": {
+    "lo": 0.5,
+    "hi": 2.0,
+    "source": "host bm_tune.c k_sh_bounds (the row's own range)"
+   },
+   "default": {
+    "value": 1.0,
+    "text": "1",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": {
+    "text": "x the car's shadow length (game 1)",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  },
+  {
+   "key": "Effects/Shadow | Soft Edge",
+   "group": "Effects/Shadow",
+   "name": "Soft Edge",
+   "type": "decimal",
+   "kit_game": 0.1875,
+   "host_addition": true,
+   "family": "shadow",
+   "limit": {
+    "lo": 0.05,
+    "hi": 0.45,
+    "rule": "the row's own bounds",
+    "source": "host bm_tune.c k_sh_bounds"
+   },
+   "verified_range": {
+    "lo": 0.05,
+    "hi": 0.45,
+    "source": "host bm_tune.c k_sh_bounds (the row's own range)"
+   },
+   "default": {
+    "value": 0.1875,
+    "text": "0.1875",
+    "source": "kit TUNING_CATALOGUE.json game value"
+   },
+   "unit": null,
+   "description": {
+    "text": "share of the shadow's length that fades out (game 0.1875)",
+    "source": "kit tools\\ps2look\\ps2look.py (SHADOW SETTINGS comment)"
+   },
+   "signed": false,
+   "unread": false,
+   "applies": "at the next use",
+   "needs_version": 1
+  }
+ ],
+ "count": 203,
+ "sources": {
+  "kit_catalogue": {
+   "path": "docs/TUNING_CATALOGUE.json",
+   "from": "kit",
+   "sha256": "727fe2a53aca88a01f4751703ec68d460d36253ba17fe25d8a4f05992c20d1d9"
+  },
+  "bm_tune_ai.h": {
+   "path": "src/game/bm_tune_ai.h",
+   "from": "host tree",
+   "sha256": "3708d0c8d40929a69572561b7b7c2f21ca481ed64e19526bbe29ab81a0d9aa11"
+  },
+  "bm_tune_catalog_ai.inc": {
+   "path": "src/game/bm_tune_catalog_ai.inc",
+   "from": "host tree",
+   "sha256": "bb41ed7619f04a350f74dcb7824bfd44cebf457a8ac6a9acbdaf22fd2f48dc0f"
+  },
+  "ps2look.py": {
+   "path": "tools/ps2look/ps2look.py",
+   "from": "kit",
+   "sha256": "91d20d18d854fe740cc0179dd08a8500c47474b85c16e42670cb5abb2dedffd8"
+  },
+  "bm_tune.c": {
+   "path": "src/game/bm_tune.c",
+   "from": "host tree",
+   "sha256": "3ba35bf19b621b7d436d96bd1455baee6696f1fb265c3741081d97182d9a5ff2"
+  },
+  "bm_tune_catalog_shadow.inc": {
+   "path": "src/game/bm_tune_catalog_shadow.inc",
+   "from": "host tree",
+   "sha256": "544744b050d877a51a2cbe6dee689ab810d94bd70e3d89094179f827f862c02d"
+  },
+  "bm_tune_catalog_fx.inc": {
+   "path": "src/game/bm_tune_catalog_fx.inc",
+   "from": "host tree",
+   "sha256": "ad796c472d539d413480600bc4c393c05a6a51a2b3eaad548fba7993387a1425"
+  },
+  "bm_tune_catalog_cam.inc": {
+   "path": "src/game/bm_tune_catalog_cam.inc",
+   "from": "host tree",
+   "sha256": "39d5025b455c65aa3825f81560ef5d951b7133b2db6d0845b4b538873fd77ce9"
+  },
+  "bm_tune_catalog_cad.inc": {
+   "path": "src/game/bm_tune_catalog_cad.inc",
+   "from": "host tree",
+   "sha256": "804b19a21721aebe5b7770776279c251d11ff4317c3efe8dff5411c61820ae94"
+  }
+ },
+ "shadow_bounds": {
+  "values": [
+   [
+    0.0,
+    1.0
+   ],
+   [
+    0.0,
+    1.0
+   ],
+   [
+    0.5,
+    2.0
+   ],
+   [
+    0.5,
+    2.0
+   ],
+   [
+    0.05,
+    0.45
+   ]
+  ],
+  "source": "host bm_tune.c k_sh_bounds (read from the host tree)"
+ },
+ "kit_catalogue_sha256": "727fe2a53aca88a01f4751703ec68d460d36253ba17fe25d8a4f05992c20d1d9",
+ "notes": [
+  "no row carries a description or tested range in the kit catalogue; nothing is invented",
+  "the host checks every row against the running game at start (\"verified on this game build\"); offline checks cannot know that result",
+  "set values: negative values and AI rows need [bmashup.tune] version 2; sliders need version 3"
+ ]
+}

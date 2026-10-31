@@ -1,0 +1,13 @@
+# SDK 0.6.0 example: bmashup.camera version 2 chase-camera adjust (roll). Visual only.
+id = "bmashup.camera-roll-example"
+name = "Camera Roll Example (Burnout Mashup)"
+version = "0.1.0"
+description = "Example, experimental: a small chase-camera roll and lift while racing (bmashup.camera 2 set_adjust)."
+
+[bmashup]
+platform = ">=0.1.9"
+requires = ["bmashup.camera>=2"]
+
+[plugin]
+api = 1
+windows = "bm_camera_roll.asi"

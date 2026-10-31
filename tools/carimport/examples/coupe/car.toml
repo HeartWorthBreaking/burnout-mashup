@@ -1,0 +1,36 @@
+# carimport car definition (ORIGINAL procedural demo "coupe"; AUTHORED geometry and texture)
+[car]
+id = "COMPCIC1"
+donor = "COMPCAR1"
+name = "Compact Coupe BM"
+model = "coupe.gltf"
+paint_mask = "paint_mask.png"
+texture_name = "cicoupe"
+deform = "transfer"
+mod_id = "bmashup.carimp-coupe"
+mod_name = "carimport demo: Compact Coupe BM"
+mod_version = "1.0.0"
+
+[[paint]]
+name = "teal"
+color = "#1FA8A0"
+
+[[paint]]
+name = "orange"
+color = "#F07818"
+
+[[paint]]
+name = "violet"
+color = "#7A3CC8"
+
+[[paint]]
+name = "white"
+color = "#F0F0F0"
+
+[[paint]]
+name = "black"
+color = "#303030"
+
+[[paint]]
+name = "lime"
+color = "#90D020"

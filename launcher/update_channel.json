@@ -1,0 +1,16 @@
+{
+ "format": "bm-update-channel 1",
+ "note": "The launcher's update channel (docs/UPDATES.md). EMPTY in this release: no channel and no trusted key, so 'Check for updates' only says that no update channel is configured and nothing is contacted. The maintainer fills channel (id + github_repo OWNER/NAME or url https://...) and trusted_keys (the 'ssh-ed25519 AAAA...' line of the release signing key) for published releases (docs/OWNER_UPDATE_CHANNEL.md). Checks run only when you ask; an upstream Takedawn repository is never accepted as a channel.",
+ "channel": {
+  "id": "",
+  "github_repo": "",
+  "url": ""
+ },
+ "trusted_keys": [],
+ "minimum": {
+  "launcher": "1.0.0",
+  "kit": "0.7.0",
+  "platform": "0.1.9"
+ },
+ "namespace": "bmashup-update"
+}

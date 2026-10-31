@@ -1,0 +1,16 @@
+# bmashup-sdk 0.2.0 example (d), plugin side: engine-capacity requests (bmashup.engine / bmashup.streaming; Burnout
+# Mashup builds only; private, experimental). Prefer the declaration-only form (../declaration-only/mod.toml) when the
+# mod needs nothing but capacity: it runs no code and needs no approval.
+id = "bmashup-sdk.capacity"
+name = "SDK example: capacity requests"
+version = "0.2.0"
+description = "Requests 80 AI lanes, 0x1A000 low-detail slots and a 0xD01000 STATIC pool; logs what the race got."
+
+[bmashup]
+platform = ">=0.1"          # Burnout Mashup platform 0.1 or later; older platform hosts and plain Takedawn ignore [bmashup]
+requires = ["bmashup.engine>=1", "bmashup.streaming>=2"]   # a platform host refuses THIS mod alone (the game starts without it) when one is not offered
+
+[plugin]
+api = 1
+windows = "bm_sdk_capacity.asi"
+# Only Windows x64 is built and tested by this SDK.

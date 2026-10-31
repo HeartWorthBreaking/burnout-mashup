@@ -1,0 +1,17 @@
+# bmashup-sdk 0.2.0 example (c): names an ADDED track from plugin-owned game memory (bmashup.memory + bmashup.names;
+# Burnout Mashup builds only; private, experimental). It names nothing by itself: a track mod must add the track
+# (default US_C6_V1) WITHOUT naming it - a mod's own names / locations win over any plugin.
+# Put this folder in a mods folder with the built module beside this file and approve the module's bytes.
+id = "bmashup-sdk.track-names"
+name = "SDK example: track names from a plugin"
+version = "0.2.0"
+description = "Names the added track US_C6_V1 Harbour Bay, location HARBOUR, through validated, frozen memory blocks."
+
+[bmashup]
+platform = ">=0.1"          # Burnout Mashup platform 0.1 or later; older platform hosts and plain Takedawn ignore [bmashup]
+requires = ["bmashup.memory>=1", "bmashup.names>=1"]   # a platform host refuses THIS mod alone (the game starts without it) when one is not offered
+
+[plugin]
+api = 1
+windows = "bm_sdk_track_names.asi"
+# Only Windows x64 is built and tested by this SDK.
