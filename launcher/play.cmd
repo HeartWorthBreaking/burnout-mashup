@@ -11,6 +11,18 @@ rem   not set                  host-local\ if it holds a host (your own build wi
 rem Example:  set BMASHUP_HOST=prebuilt  and then  play.cmd
 setlocal EnableExtensions DisableDelayedExpansion
 set "ROOT=%~dp0"
+rem 0.2.0 layout 2 (the Windows package): the game copy and your mods live in <install>\gamedata beside app\ (bmpaths.py)
+set "GD=%ROOT%gamedata"
+set "MODG=%ROOT%mods\generated"
+set "MODU=%ROOT%mods\user"
+for %%I in ("%ROOT%..") do set "TREENAME=%%~nxI"
+for %%I in ("%ROOT%..\..") do set "INST=%%~fI"
+if not "%INST:~-1%"=="\" set "INST=%INST%\"
+if /i "%TREENAME%"=="app" if exist "%INST%Burnout Mashup.exe" (
+  set "GD=%INST%gamedata"
+  set "MODG=%INST%gamedata\mods\generated"
+  set "MODU=%INST%gamedata\mods\user"
+)
 set "SEL=%BMASHUP_HOST%"
 set "HOSTDIR="
 set "KIND="
@@ -39,9 +51,9 @@ if exist "%HOSTDIR%\BurnoutMashup.exe" set "EXE=%HOSTDIR%\BurnoutMashup.exe"
 if exist "%HOSTDIR%\BurnoutMashup.exe" if not exist "%HOSTDIR%\HOST_INFO.json" goto :unverified
 if exist "%HOSTDIR%\BurnoutMashup.exe" if not exist "%HOSTDIR%\BUILD_RESULT.json" goto :unverified
 if not exist "%EXE%" goto :nohost
-if not exist "%ROOT%gamedata\.complete" goto :nodata
-for %%D in ("profile\Roaming" "profile\Local" "mods\generated" "mods\user") do (
-  if not exist "%ROOT%%%~D" mkdir "%ROOT%%%~D"
+if not exist "%GD%\.complete" goto :nodata
+for %%D in ("%ROOT%profile\Roaming" "%ROOT%profile\Local" "%MODG%" "%MODU%") do (
+  if not exist "%%~D" mkdir "%%~D"
 )
 rem developer / research overrides from the calling shell never reach the game
 for /f "delims==" %%V in ('set RECOMP_ 2^>nul') do set "%%V="
@@ -52,12 +64,12 @@ set "XDG_DATA_HOME="
 set "HOME="
 set "APPDATA=%ROOT%profile\Roaming"
 set "LOCALAPPDATA=%ROOT%profile\Local"
-set "BMASHUP_DATA=%ROOT%gamedata"
-set "BMASHUP_MODS=%ROOT%mods\demo;%ROOT%mods\generated;%ROOT%mods\user"
+set "BMASHUP_DATA=%GD%"
+set "BMASHUP_MODS=%ROOT%mods\demo;%MODG%;%MODU%"
 if /i "%~1"=="--print-env" goto :printenv
 echo play.cmd: host = %KIND%
 cd /d "%HOSTDIR%"
-"%EXE%" --data "%ROOT%gamedata" %*
+"%EXE%" --data "%GD%" %*
 set "RC=%ERRORLEVEL%"
 echo play.cmd: the game ended with exit status %RC%. Log: "%APPDATA%\BurnoutMashup\logs\run.log"
 if not "%RC%"=="0" echo   For a bug report run:  diag.cmd   ^(docs\BUGS_AND_CONTRIBUTING.md^)
@@ -85,7 +97,7 @@ echo   Run Build Mashup again ^(build-mashup.cmd build --input ^<your game^>^); 
 exit /b 2
 
 :nodata
-echo play.cmd: no game data in "%ROOT%gamedata" yet.
+echo play.cmd: no game data in "%GD%" yet.
 echo   Run:  prepare.cmd data --copy-from ^<your installed game data folder^>
 echo   or:   prepare.cmd data --install-from ^<your disc image or extracted disc folder^>
 echo   Then: preflight.cmd     ^(docs\INSTALL.md^)

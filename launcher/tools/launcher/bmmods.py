@@ -27,6 +27,7 @@ sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import bmcompat  # noqa: E402
+import bmpaths  # noqa: E402  (0.2.0 layout 2: mods\\user / mods\\generated in <install>\\gamedata\\mods)
 
 MOD_DIRS = ("demo", "generated", "user")
 ZIP_MAX_FILES = 20000
@@ -88,7 +89,7 @@ class Bundle:
     def mods(self):
         found = []
         for d in MOD_DIRS:
-            base = os.path.join(self.root, "mods", d)
+            base = bmpaths.mods_dir(self.root, d)
             if not os.path.isdir(base):
                 continue
             for name in sorted(os.listdir(base)):
@@ -153,7 +154,7 @@ class Bundle:
             mid = str(man.get("id", ""))
             if not _ID.match(mid):
                 raise ModError("mod.toml id %r is not a valid mod id ([a-z0-9] then [a-z0-9._-], at most 64)" % mid)
-            user = os.path.join(self.root, "mods", "user")
+            user = bmpaths.mods_dir(self.root, "user")
             os.makedirs(user, exist_ok=True)
             for r in self.mods():
                 if r["id"] == mid and r["source"] != "user":
@@ -167,7 +168,7 @@ class Bundle:
                 shutil.rmtree(tmp)
             shutil.copytree(folder, tmp)
             if os.path.exists(dest):
-                bk = os.path.join(self.root, "mods", ".backup", "%s-%s" % (mid, _stamp()))
+                bk = os.path.join(os.path.dirname(user), ".backup", "%s-%s" % (mid, _stamp()))
                 os.makedirs(os.path.dirname(bk), exist_ok=True)
                 os.replace(dest, bk)
             os.replace(tmp, dest)

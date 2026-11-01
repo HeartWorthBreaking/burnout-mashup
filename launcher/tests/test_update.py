@@ -212,10 +212,20 @@ def sshsig_interop():
         shutil.rmtree(d, ignore_errors=True)
 
 
+RELEASE_FP = "SHA256:tQRHolv3k/JYwlk5b3rS8fkZ3LbHWdOfyl+5eXUHnGg"
+
+
+def empty_channel(launcher):
+    """an update_channel.json without channel and key (what 0.1.0 shipped): 'no update channel configured'"""
+    c = json.load(open(os.path.join(SRC, "update_channel.json"), encoding="utf-8"))
+    c["channel"] = {"id": "", "github_repo": "", "url": ""}
+    c["trusted_keys"] = []
+    open(os.path.join(launcher, "update_channel.json"), "w", encoding="utf-8").write(json.dumps(c, indent=1))
+
 @case
 def no_channel():
     i = Inst("no channel", config=False)
-    shutil.copy2(os.path.join(SRC, "update_channel.json"), os.path.join(i.L, "update_channel.json"))
+    empty_channel(i.L)
     hits = len(CH.hits)
     rc, v, out = cli("status", launcher=i.L, env={"LOCALAPPDATA": i.base})
     assert rc == 0 and "No update channel configured" in out and v["configured"] is False and v["automatic_checks"] is False, out[-600:]
@@ -723,7 +733,7 @@ def gui_window():
     root.withdraw()
     try:
         i = Inst("gui none", config=False)
-        shutil.copy2(os.path.join(SRC, "update_channel.json"), os.path.join(i.L, "update_channel.json"))
+        empty_channel(i.L)
         w = G.UpdateWindow(root, launcher=i.L)
         w.update()
         assert w.channel_lbl["text"].startswith("No update channel configured"), w.channel_lbl["text"]
@@ -753,10 +763,13 @@ def gui_window():
 
 
 @case
-def shipped_config_trusts_nothing():
+def shipped_config_trusts_release_key():
+    """0.2.0: the shipped configuration names exactly the release channel and the release key (owner decision 2026-11-01)"""
     c = json.load(open(os.path.join(SRC, "update_channel.json"), encoding="utf-8"))
-    assert c["trusted_keys"] == [] and not any(c["channel"].values()), c
-    assert U.load_config(SRC)["configured"] is False
+    assert c["channel"] == {"id": "burnoutmashup-stable", "github_repo": "HeartWorthBreaking/burnout-mashup", "url": ""}, c["channel"]
+    assert len(c["trusted_keys"]) == 1, c["trusted_keys"]       # checked by fingerprint (no key literal under launcher\tests: the release gate)
+    cfg = U.load_config(SRC)
+    assert cfg["configured"] is True and cfg["fingerprints"] == [RELEASE_FP] and cfg["namespace"] == "bmashup-update", cfg
     found = []
     for dp, dn, fn in os.walk(SRC):
         if os.path.normcase(os.path.abspath(dp)).startswith(os.path.normcase(HERE)):
@@ -767,7 +780,7 @@ def shipped_config_trusts_nothing():
                 if k.line.split()[1].encode() in t or K.MARK.encode() in t:
                     found.append(os.path.join(dp, f))
     assert not found, found
-    return "PASS shipped update_channel.json: no channel, no key; no TEST-ONLY key / marker outside launcher\\tests"
+    return "PASS shipped update_channel.json: the release channel and key only (%s); no TEST-ONLY key / marker outside launcher\\tests" % RELEASE_FP
 
 
 def main():

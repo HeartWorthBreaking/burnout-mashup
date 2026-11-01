@@ -1,12 +1,17 @@
 {
  "format": "bm-update-channel 1",
- "note": "The launcher's update channel (docs/UPDATES.md). EMPTY in this release: no channel and no trusted key, so 'Check for updates' only says that no update channel is configured and nothing is contacted. The maintainer fills channel (id + github_repo OWNER/NAME or url https://...) and trusted_keys (the 'ssh-ed25519 AAAA...' line of the release signing key) for published releases (docs/OWNER_UPDATE_CHANNEL.md). Checks run only when you ask; an upstream Takedawn repository is never accepted as a channel.",
+ "note": "The launcher's update channel (docs/UPDATES.md): the official Burnout Mashup releases on GitHub (HeartWorthBreaking/burnout-mashup), signed with the release key below (namespace bmashup-update). Checks run only when you ask (Help -> Check for updates); a manifest signed by any other key is refused; an upstream Takedawn repository is never accepted as a channel.",
  "channel": {
-  "id": "",
-  "github_repo": "",
+  "id": "burnoutmashup-stable",
+  "github_repo": "HeartWorthBreaking/burnout-mashup",
   "url": ""
  },
- "trusted_keys": [],
+ "trusted_keys": [
+  {
+   "key": "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAINJLFbt4Kt843QDZPk0/nnpjoMLuGng0lcL/5VqciIpk Burnout Mashup release signing",
+   "label": "release key 1 (SHA256:tQRHolv3k/JYwlk5b3rS8fkZ3LbHWdOfyl+5eXUHnGg)"
+  }
+ ],
  "minimum": {
   "launcher": "1.0.0",
   "kit": "0.7.0",

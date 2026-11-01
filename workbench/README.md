@@ -1113,6 +1113,17 @@ build_units dry run and one undo entry; giving an existing `id` re-generates tha
 - Tests: suites `wbn` (developer workflow, one process per case), `wbexe` (the exe) and `datamod` d07 (AI rows) in
   `tests\test_deps.json`.
 
+## v0.31 (2026-11-01, gp\workbench_te): track-editor authoring tools
+The track editor gains an **Authoring tools** panel: profiled roads (width / bank / grade, cross-sections) and sloped /
+variable-width race routes with outer-wall gaps; T / Y / cross junction pieces and road-end joins (geometric only - the AI route
+cannot branch); height-grid terrain with brushes and road-edge blending; vertex / edge / face mesh editing (move / turn / scale,
+triangulate, subdivide, extrude, explicit hole fill); original-texture import with provenance, new / duplicate materials, UV
+transforms, vertex-colour painting; a prefab library with previews, snapped placement, repeats along a path and linked-copy
+refresh; a streaming / LOD / visibility report with the limits classified (format / host / tool / editor); wireframe / normals
+overlays and clickable diagnostics; backups on Save, source export / import, a version record and "prepare test" (no launch).
+Tutorial, capability matrix, known limitations and blocked items: **TRACK_EDITOR_AUTHORING.md**. Offline only: every feature is
+runtime-unverified. Tests: suites te31 .. te41.
+
 ## Safety and limits
 - One operation at a time (buttons disabled + `state\OPERATION.lock` across windows; the pipeline's own cache lock too).
 - Every command is an argument list with an explicit working directory; paths with spaces are kept whole.

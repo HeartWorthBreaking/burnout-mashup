@@ -1,6 +1,7 @@
 """bmupdate_gui.py - the launcher's "Updates" window (tkinter; Help tab -> "Check for updates..."). Every button runs ONE step of
 tools/launcher/bmupdate.py (the same CLI as update.cmd) as a child process: Check for updates, Download, Prepare, Build and install,
-Switch back, Install an older version, Discard, Cancel. Opening the window contacts nothing (it reads update_channel.json and the
+Switch back, Install an older version, Discard, Cancel; in the Windows package (layout 2) also Install (the prepared package
+replaces the program in one undoable step; the launcher then starts again). Opening the window contacts nothing (it reads update_channel.json and the
 local update state only); there is no automatic, background or scheduled check. Without a configured channel the window says so and
 explains how the maintainer sets one. Original code (MIT)."""
 import json
@@ -13,6 +14,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import bmhost  # noqa: E402
 import bmops  # noqa: E402
+import bmpaths  # noqa: E402
 import bmupdate  # noqa: E402
 
 bmops.STEPS.setdefault("update", (os.path.join("launcher", "bmupdate.py"), []))
@@ -65,6 +67,7 @@ class UpdateWindow(tk.Toplevel):
         self.btn = {}
         for key, text, cmd in (("check", "Check for updates", lambda: self.run("check")), ("download", "Download", lambda: self.run("download")),
                                ("prepare", "Prepare (unpack + verify)", lambda: self.run("prepare")),
+                               ("install", "Install (restarts)", self.install),
                                ("build", "Build and install", self.build)):
             b = ttk.Button(bb, text=text, command=cmd, style="Accent.TButton" if key == "check" else "TButton")
             b.pack(side="left", padx=(0, 6))
@@ -106,13 +109,14 @@ class UpdateWindow(tk.Toplevel):
             self.channel_lbl.configure(text="Update channel: %s (%s). Trusted signing key(s): %s" % (s["channel"], s["where"], ", ".join(s["trusted_keys"])))
         else:
             self.channel_lbl.configure(text=s.get("why") or bmupdate.NO_CHANNEL)
-        self.version_lbl.configure(text="Version in use: %s (source %s)   |   previous: %s   |   pending: %s" % (
-            s.get("version", "?"), s.get("source") or "-", s.get("previous") or "-",
+        self.version_lbl.configure(text="Version in use: %s (%s)   |   previous: %s   |   pending: %s" % (
+            s.get("version", "?"), ("Windows package" if s.get("layout") == 2 else "source %s" % (s.get("source") or "-")),
+            s.get("kept_previous") or s.get("previous") or "-",
             ("%s, next step: %s" % ((s.get("pending") or {}).get("version"), s.get("next_step"))) if s.get("pending") else "-"))
         busy = bool(self.job and self.job.running())
         nxt = s.get("next_step")
         on = {"check": s.get("configured"), "download": nxt == "download", "prepare": nxt == "prepare", "build": nxt == "build",
-              "switch": bool(s.get("previous")), "older": s.get("configured"), "discard": bool(s.get("pending"))}
+              "install": nxt == "install", "switch": bool(s.get("previous") or s.get("kept_previous")), "older": s.get("configured"), "discard": bool(s.get("pending"))}
         for k, b in self.btn.items():
             b["state"] = "normal" if on.get(k) and not busy else "disabled"
         self.cancel_btn["state"] = "normal" if busy else "disabled"
@@ -123,13 +127,22 @@ class UpdateWindow(tk.Toplevel):
             return False
         args = [cmd, "--launcher", self.launcher, "--events"] + list(extra)
         self._log("> update " + " ".join(('"%s"' % x if " " in x else x) for x in args))
-        self.job = self.Step("update", args, root=bmhost.LAUNCHER)     # the program of this launcher; --launcher names the installation
+        inst = bmpaths.install_root(self.launcher)
+        kw = {"cwd": inst} if inst and cmd in ("install", "switch-back") else {}
+        self.job = self.Step("update", args, root=bmhost.LAUNCHER, **kw)     # the program of this launcher; --launcher names the installation
         self.job_kind, self.last_result = cmd, None
         self.progress.configure(value=0)
         self.result.configure(text="Running %s... (Cancel stops it)" % cmd, foreground="#58a6ff")
         self.refresh()
         self.after(100, self._poll)
         return True
+
+    def install(self):
+        if not self.ask(TITLE, "Install the prepared update now?\nThe program folder and the two exes are replaced in one step (undone "
+                               "on any error); your game data, mods, saves, settings and builds are carried over. The launcher then "
+                               "starts again. Close the game and the Workbench first.", parent=self):
+            return False
+        return self.run("install")
 
     def build(self):
         if not self.v_input.get():
@@ -199,8 +212,21 @@ class UpdateWindow(tk.Toplevel):
         if rc == 0:
             self.progress.configure(value=100)
         self.job = None
+        if rc == 0 and r.get("restart"):
+            self.restart(msg)
+            return
         self.refresh()
         self.on_change()
+
+    def restart(self, msg):
+        r"""after an install / switch back: the program in app\ is the new one - this window's code is the old one; start again"""
+        inst = bmpaths.install_root(self.launcher)
+        _try(lambda: messagebox.showinfo(TITLE, msg + "\n\nThe launcher starts again now.", parent=self))
+        exe = os.path.join(inst, bmpaths.EXE) if inst else None
+        if exe and os.path.isfile(exe) and not os.environ.get("BMASHUP_NO_RESTART"):
+            import subprocess
+            _try(lambda: subprocess.Popen([exe], cwd=inst, close_fds=True))
+        _try(lambda: self.master.destroy())
 
     def _log(self, text):
         self.log.configure(state="normal")

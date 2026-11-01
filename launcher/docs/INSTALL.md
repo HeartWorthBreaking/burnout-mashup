@@ -1,5 +1,10 @@
 # Install, build, prepare, run, remove - tester package 0.4.0
 
+> **Burnout Mashup 0.2.0 and later (the Windows package):** start with `QUICKSTART.md`. In the package the game copy and your mods
+> are in `gamedata\` and `gamedata\mods\user` beside `app\` (not in this folder); saves, settings and builds stay in
+> `app\launcher\profile` / `host-local`. The commands below work the same (they find those places themselves). The rest of this page
+> describes the older tester package.
+
 Order: unpack -> game data -> (Option B only: toolchain + build the host) -> preflight -> demos -> play.
 Two choices for the host: **A = the prebuilt `host\` (use it as is)**, **B = build your own from source into `host-local\`**.
 Read the risk note in START_HERE.md section 0 first: the prebuilt host holds code recompiled from the game (Q1 open, not cleared). Background: [START_HERE.md](START_HERE.md).

@@ -90,6 +90,8 @@ import wb_stage as stg
 import wb_retail
 import wb_track
 import wb_construct as wc
+import wb_te_geom as tg
+import wb_te_author as ta
 
 HTML = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'trackedit.html')
 EDITABLE = {'grid': ('grid', 'pos'), 'checkpoint': ('checkpoints', 'pos'), 'start_line': ('start_line', 'pos')}
@@ -475,7 +477,7 @@ def fmt_num(x):
 
 
 # ---------------------------------------------------------------- the source model
-class TrackSource:
+class TrackSource(ta.AuthorMixin):
     """one opened track project; edits are byte splices of the description, kept in undo / redo stacks"""
 
     def __init__(self, cfg, project):
@@ -506,6 +508,7 @@ class TrackSource:
         self.obj_cur = self.obj_saved
         self.others0 = self._others()
         self.last_build = None
+        self.pending, self.pending_meta = {}, {}                     # TE stage 5: imported files written at Save (rel -> bytes)
 
     # ---------------- state
     def _others(self):
@@ -515,10 +518,14 @@ class TrackSource:
         return json.loads(self.cur.decode('utf-8'))
 
     def dirty(self):
-        return self.cur != self.saved or self.obj_cur != self.obj_saved
+        return self.cur != self.saved or self.obj_cur != self.obj_saved or bool(self.pending)
 
     def content_sha(self):
-        return hashlib.sha256(hashlib.sha256(self.cur).digest() + hashlib.sha256(self.obj_cur or b'').digest()).hexdigest()
+        h = hashlib.sha256(hashlib.sha256(self.cur).digest() + hashlib.sha256(self.obj_cur or b'').digest())
+        for rel in sorted(getattr(self, 'pending', {})):              # TE: pending imported files are content too
+            h.update(rel.encode('utf-8') + hashlib.sha256(self.pending[rel]).digest())
+        return h.hexdigest() if getattr(self, 'pending', None) else \
+            hashlib.sha256(hashlib.sha256(self.cur).digest() + hashlib.sha256(self.obj_cur or b'').digest()).hexdigest()
 
     def state(self):
         return {'mode': 'authored', 'project': self.project, 'desc': self.desc_rel, 'obj': self.obj_rel, 'dirty': self.dirty(),
@@ -528,11 +535,19 @@ class TrackSource:
                 'content_sha256': self.content_sha()}
 
     def _buf(self, f):
+        if f.startswith('file:'):                           # TE stage 5: a pending imported file (None = absent)
+            return self.pending.get(f[5:])
         if f == 'both':                                     # v0.23: one undo entry for a description + OBJ edit
             return (self.cur, self.obj_cur)
         return self.cur if f == 'desc' else self.obj_cur
 
     def _setbuf(self, f, b):
+        if f.startswith('file:'):
+            if b is None:
+                self.pending.pop(f[5:], None)
+            else:
+                self.pending[f[5:]] = b
+            return
         if f == 'both':
             self.cur, self.obj_cur = b
         elif f == 'desc':
@@ -2796,7 +2811,7 @@ class TrackSource:
         # v0.26: scenery faces (terrain cells, barrier steps, prefab copies) may cross a unit cut; the kit clipper loses the same
         # 4-decimal rounding slivers there as on race layouts (reported as cut_rounding_slivers_m2). Roads keep the strict rule.
         clip = self._clip_added(self.obj_cur, after, len(kept), [None] * n_planned, gof1, kind, kept=kept,
-                                round_tol=kind in ('terrain', 'barrier', 'prefab'))
+                                round_tol=kind in ('terrain', 'barrier', 'prefab') + ta.ROUND_TOL_KINDS)
         try:
             base = self.regenerate(self.obj_cur)
         except EditError:
@@ -2923,13 +2938,29 @@ class TrackSource:
                                   'RUNTIME: ' + self.RUNTIME_NOTE]}
 
     def _race_req(self, points, width, material, wall_height, wall_thick, wall_mat, back_mat, verge_out, verge_in, verge_mat,
-                  n_units, checkpoints, traffic, replace):
+                  n_units, checkpoints, traffic, replace, profile=None):
         num = lambda v, lo, hi: isinstance(v, (int, float)) and not isinstance(v, bool) and math.isfinite(v) and lo <= v <= hi  # noqa: E731
         try:
             P = wc.check_points(points, True)
         except wc.ConstructError as e:
             raise EditError('race layout refused: %s' % e)
-        if len({p[1] for p in P}) != 1:
+        prof = None
+        if profile is not None:                             # TE stage 1: sloped / variable-width / (V2-limited) banked route
+            if not isinstance(profile, dict) or set(profile) - {'sloped', 'widths', 'banks', 'outer_gaps'}:
+                raise EditError('profile: {sloped: true|false, widths: [one per control point], banks: [degrees, one per control '
+                                'point], outer_gaps: [[first station, last station], ...]} (other keys refused)')
+            try:
+                prof = {'sloped': profile.get('sloped', False) is True,
+                        'widths': tg.check_profile(profile['widths'], len(P), 'widths', 6, 40) if profile.get('widths') is not None else None,
+                        'banks': tg.check_profile(profile['banks'], len(P), 'banks', -15, 15) if profile.get('banks') is not None else None,
+                        'outer_gaps': profile.get('outer_gaps') or []}
+            except wc.ConstructError as e:
+                raise EditError('race layout refused: %s' % e)
+            g = prof['outer_gaps']
+            if not (isinstance(g, list) and len(g) <= 8 and all(isinstance(x, list) and len(x) == 2 and all(
+                    isinstance(v, int) and not isinstance(v, bool) and v >= 0 for v in x) and x[0] < x[1] for x in g)):
+                raise EditError('outer_gaps: up to 8 [first station, last station] pairs (integers, first < last; the wall opens from station first to last)')
+        if len({p[1] for p in P}) != 1 and not (prof and prof['sloped']):
             raise EditError('race layout refused: every control point needs the same y - this generator builds a route at one height '
                             '(walls / verges / stations level; trackbuild 0.3.0 accepts sloped routes, sloped generation is not in the '
                             'editor yet)')
@@ -2964,10 +2995,13 @@ class TrackSource:
                             '0x0018) - V2_walls_hold probes only those' % wall_mat)
         if replace == 'route' and not any(c['meta'].get('route') for c in self.constructs().values()):
             raise EditError('replace "route" refused: there is no earlier race layout block to replace (use "all" for a new layout)')
-        return {'points': P, 'width': float(width), 'material': material, 'wall_height': float(wall_height),
-                'wall_thick': float(wall_thick), 'wall_mat': wall_mat, 'back_mat': back_mat, 'verge_out': float(verge_out),
-                'verge_in': float(verge_in), 'verge_mat': verge_mat, 'n_units': n_units, 'checkpoints': checkpoints,
-                'traffic': traffic, 'replace': replace}
+        r = {'points': P, 'width': float(width), 'material': material, 'wall_height': float(wall_height),
+             'wall_thick': float(wall_thick), 'wall_mat': wall_mat, 'back_mat': back_mat, 'verge_out': float(verge_out),
+             'verge_in': float(verge_in), 'verge_mat': verge_mat, 'n_units': n_units, 'checkpoints': checkpoints,
+             'traffic': traffic, 'replace': replace}
+        if prof is not None:                                # absent = the v0.25 request exactly (same preview keys, same bytes)
+            r['profile'] = prof
+        return r
 
     def _race_plan(self, req):
         if self.obj_cur is None:
@@ -2976,49 +3010,52 @@ class TrackSource:
         y0 = P[0][1]
         sps = 3
         try:
-            _S, L = wc.sample(P, True, step=2.0)
-            spu = sps * max(1, int(round(L / (req['n_units'] * 2.0 * sps))))
-            n = req['n_units'] * spu
-            S, L = wc.sample(P, True, count=n)
-            S = [[p[0], y0, p[2]] for p in S]
-            T = wc.tangents(S, True)
-            road, _len = wc.road_strip(S, T, True, req['width'], req['material'], 14.0)
-            reach = [(-(hw + t + req['verge_out'])), hw + t + req['verge_in']]
-            for o in reach:                                 # an offset edge running backwards = a folded strip
-                for i in range(n):
-                    a, b = wc.offset_pt(S[i], T[i], o), wc.offset_pt(S[(i + 1) % n], T[(i + 1) % n], o)
-                    if (b[0] - a[0]) * T[i][0] + (b[2] - a[2]) * T[i][1] <= 0:
-                        raise wc.ConstructError('the strip edge at lateral %.1f m folds over at station %d (the curve radius there is '
-                                                'smaller than that offset): use smaller verges / width or a wider curve' % (o, i))
-                x = wc.self_intersections([list(wc.offset_pt(S[i], T[i], o)) for i in range(n)], True)
-                if x:
-                    raise wc.ConstructError('the strip edge at lateral %.1f m crosses itself (segments %s): the verges of opposite sides '
-                                            'would overlap - use smaller verges or move the control points apart' % (o, x[:2]))
-            walls = (wc.wall_strip(S, T, True, -hw, -1, req['wall_height'], t, req['wall_mat'], req['back_mat'], y=y0) +
-                     wc.wall_strip(S, T, True, hw, 1, req['wall_height'], t, req['wall_mat'], req['back_mat'], y=y0))
-            verges = []
-            if req['verge_out'] > 0:
-                verges += wc.verge_strip(S, T, True, -(hw + t + req['verge_out']), -(hw + t), req['verge_mat'], y=y0)
-            if req['verge_in'] > 0:
-                verges += wc.verge_strip(S, T, True, hw + t, hw + t + req['verge_in'], req['verge_mat'], y=y0)
-            stations = wc.stations_from(S, T, hw, t, req['verge_out'], req['verge_in'], y0)
-            corners = wc.heading_corners(S, T, sps, n // sps)
-            start, grid, cps = wc.start_objects(S, L, y0, req['checkpoints'])
-            per = collections.defaultdict(list)             # plan points of the generated faces per station step (unit fitting)
-            for i, (_m, cs) in enumerate(road):
-                per[i] += [(c[0][0], c[0][2]) for c in cs]
-            half = len(walls) // 2
-            for j, (_m, cs) in enumerate(walls):
-                per[(j % half) // 3] += [(c[0][0], c[0][2]) for c in cs]
-            nv = len(verges)
-            for j, (_m, cs) in enumerate(verges):
-                per[j % n if nv else 0] += [(c[0][0], c[0][2]) for c in cs]
-            units = []
-            for k in range(req['n_units']):
-                a, b = k * spu, ((k + 1) * spu) % n
-                pts = [q for i in range(a, a + spu) for q in per[i]]
-                lat, m = wc.fit_lateral(stations, a, b, pts)
-                units.append({'cut_from': a, 'cut_to': b, 'lateral': lat, 'chord_normal': m})
+            if req.get('profile'):                          # TE stage 1 (wb_te_author)
+                S, T, road, walls, verges, stations, corners, start, grid, cps, units, L, n, spu = self._race_geom_profile(req)
+            else:
+                _S, L = wc.sample(P, True, step=2.0)
+                spu = sps * max(1, int(round(L / (req['n_units'] * 2.0 * sps))))
+                n = req['n_units'] * spu
+                S, L = wc.sample(P, True, count=n)
+                S = [[p[0], y0, p[2]] for p in S]
+                T = wc.tangents(S, True)
+                road, _len = wc.road_strip(S, T, True, req['width'], req['material'], 14.0)
+                reach = [(-(hw + t + req['verge_out'])), hw + t + req['verge_in']]
+                for o in reach:                                 # an offset edge running backwards = a folded strip
+                    for i in range(n):
+                        a, b = wc.offset_pt(S[i], T[i], o), wc.offset_pt(S[(i + 1) % n], T[(i + 1) % n], o)
+                        if (b[0] - a[0]) * T[i][0] + (b[2] - a[2]) * T[i][1] <= 0:
+                            raise wc.ConstructError('the strip edge at lateral %.1f m folds over at station %d (the curve radius there is '
+                                                    'smaller than that offset): use smaller verges / width or a wider curve' % (o, i))
+                    x = wc.self_intersections([list(wc.offset_pt(S[i], T[i], o)) for i in range(n)], True)
+                    if x:
+                        raise wc.ConstructError('the strip edge at lateral %.1f m crosses itself (segments %s): the verges of opposite sides '
+                                                'would overlap - use smaller verges or move the control points apart' % (o, x[:2]))
+                walls = (wc.wall_strip(S, T, True, -hw, -1, req['wall_height'], t, req['wall_mat'], req['back_mat'], y=y0) +
+                         wc.wall_strip(S, T, True, hw, 1, req['wall_height'], t, req['wall_mat'], req['back_mat'], y=y0))
+                verges = []
+                if req['verge_out'] > 0:
+                    verges += wc.verge_strip(S, T, True, -(hw + t + req['verge_out']), -(hw + t), req['verge_mat'], y=y0)
+                if req['verge_in'] > 0:
+                    verges += wc.verge_strip(S, T, True, hw + t, hw + t + req['verge_in'], req['verge_mat'], y=y0)
+                stations = wc.stations_from(S, T, hw, t, req['verge_out'], req['verge_in'], y0)
+                corners = wc.heading_corners(S, T, sps, n // sps)
+                start, grid, cps = wc.start_objects(S, L, y0, req['checkpoints'])
+                per = collections.defaultdict(list)             # plan points of the generated faces per station step (unit fitting)
+                for i, (_m, cs) in enumerate(road):
+                    per[i] += [(c[0][0], c[0][2]) for c in cs]
+                half = len(walls) // 2
+                for j, (_m, cs) in enumerate(walls):
+                    per[(j % half) // 3] += [(c[0][0], c[0][2]) for c in cs]
+                nv = len(verges)
+                for j, (_m, cs) in enumerate(verges):
+                    per[j % n if nv else 0] += [(c[0][0], c[0][2]) for c in cs]
+                units = []
+                for k in range(req['n_units']):
+                    a, b = k * spu, ((k + 1) * spu) % n
+                    pts = [q for i in range(a, a + spu) for q in per[i]]
+                    lat, m = wc.fit_lateral(stations, a, b, pts)
+                    units.append({'cut_from': a, 'cut_to': b, 'lateral': lat, 'chord_normal': m})
         except wc.ConstructError as e:
             raise EditError('race layout refused: %s. Nothing changed' % e)
         d = self.desc()
@@ -3026,6 +3063,9 @@ class TrackSource:
                   'grid': grid, 'start_line': start, 'checkpoints': cps,
                   'traffic': wc.traffic_for(n, hw) if req['traffic'] else None, 'loop_length': round(L, 4), 'closed': True,
                   'wall_gaps': [], 'pvs': {'mode': 'all'}}
+        if req.get('profile'):
+            values = self._race_values_profile(req, values, stations)
+
         newdesc = desc_splice(self.cur, values)
         C = self.constructs()
         _l, groups, _v = obj_index(self.obj_cur)
@@ -3078,27 +3118,29 @@ class TrackSource:
                                      '%d / verge %d faces; replaces %d face group(s), keeps %d face(s)' % (
                                          L, n, req['n_units'], spu, len(corners), len(road), len(walls), len(verges), len(replace),
                                          len(kept))] + rc['summary_lines']}
+        if req.get('profile'):
+            summary.update(self._race_profile_summary(req))
         return {'after': after, 'blk': blk, 'planned': planned, 'newdesc': newdesc, 'keys': set(values), 'kept': kept,
                 'summary': summary}
 
     def race_layout_preview(self, points=None, width=14.0, material='asphalt', wall_height=1.5, wall_thick=0.6, wall_mat='wall',
                             back_mat='wallback', verge_out=10.0, verge_in=8.0, verge_mat='grass', n_units=17, checkpoints=6,
-                            traffic=True, replace='route'):
+                            traffic=True, replace='route', profile=None):
         """v0.25: a race layout from closed control points (one height): road + walls on both sides + verges, and the route
         (stations, corners, 5 lanes), units, grid, start line, checkpoints, traffic - WITHOUT changing anything"""
         req = self._race_req(points, width, material, wall_height, wall_thick, wall_mat, back_mat, verge_out, verge_in, verge_mat,
-                             n_units, checkpoints, traffic, replace)
+                             n_units, checkpoints, traffic, replace, profile)
         plan = self._race_plan(req)
         return dict(plan['summary'], ok=True, preview_key=self._cons_key('race', req), note='preview only: nothing changed')
 
     def race_layout(self, points=None, width=14.0, material='asphalt', wall_height=1.5, wall_thick=0.6, wall_mat='wall',
                     back_mat='wallback', verge_out=10.0, verge_in=8.0, verge_mat='grass', n_units=17, checkpoints=6, traffic=True,
-                    replace='route', preview_key=None):
+                    replace='route', preview_key=None, profile=None):
         """v0.25: apply a previewed race layout: the OBJ blocks (replace "all": every face group; "route": the earlier layout's
         blocks) and the description's route values change in ONE undo entry (description + OBJ); exact re-reads of both, the
         clip rule for the new faces, the kit's build_units dry run on the new pair"""
         req = self._race_req(points, width, material, wall_height, wall_thick, wall_mat, back_mat, verge_out, verge_in, verge_mat,
-                             n_units, checkpoints, traffic, replace)
+                             n_units, checkpoints, traffic, replace, profile)
         if preview_key != self._cons_key('race', req):
             raise EditError('NEEDS PREVIEW: preview this race layout first (route, units, structural checks) and apply it with its '
                             'preview_key')
@@ -3360,10 +3402,11 @@ class TrackSource:
               'scenery_preview': 'scenery_preview', 'scenery': 'scenery', 'prefab_save': 'prefab_save', 'prefabs': 'prefabs'}
 
     def layout(self, body):
-        if not isinstance(body, dict) or body.get('op') not in self.LAYOUT:
+        ops = dict(self.LAYOUT, **self.TE_LAYOUT)               # TE queue ops (wb_te_author)
+        if not isinstance(body, dict) or body.get('op') not in ops:
             raise EditError('layout op %r refused: %s' % ((body or {}).get('op') if isinstance(body, dict) else body,
-                                                           ' / '.join(sorted(self.LAYOUT))))
-        fn = getattr(self, self.LAYOUT[body['op']])
+                                                           ' / '.join(sorted(ops))))
+        fn = getattr(self, ops[body['op']])
         import inspect
         sig = inspect.signature(fn).parameters
         names = set(sig)
@@ -3700,7 +3743,7 @@ class TrackSource:
                 raise EditError('texture %r refused: %s' % (value, why))
             if not new.lower().endswith('.png'):
                 raise EditError('texture %r refused: trackbuild reads PNG only' % value)
-            if new not in stg.tree_hashes(self.project):
+            if new not in stg.tree_hashes(self.project) and new not in self.pending:
                 raise EditError('texture %r refused: not an existing file of this project (only existing PNGs can be referenced; '
                                 'adding textures is not supported here)' % value)
             p = os.path.join(self.project, *new.split('/'))
@@ -3791,6 +3834,8 @@ class TrackSource:
             raise EditError('other project files changed on disk since the editor opened them: not saved (reopen the project)')
         if not self.dirty():
             return {'ok': True, 'written': False, 'note': 'no changes: nothing written'}
+        backup = ta.backup_before_save(self)                # TE stage 9: the previous saved bytes, in Workbench state
+        new_files = ta.write_pending(self)                  # TE stage 5: imported textures + provenance (rolled back below on failure)
         # v0.16: all-or-nothing. Every temp file is written first; a failed replace restores the files already replaced to
         # their saved bytes, so a failed save leaves the project as it was on disk and the edits unsaved in the editor.
         plan = [(path, cur, old, rel) for path, cur, old, rel in ((self.obj_path, self.obj_cur, self.obj_saved, self.obj_rel),
@@ -3806,6 +3851,7 @@ class TrackSource:
             for t in tmps:
                 if os.path.exists(t):
                     os.remove(t)
+            ta.rollback_pending(self, new_files)
             raise EditError('save failed while writing a temporary file (%s): nothing replaced, the project is unchanged; '
                             'the edits are kept (unsaved)' % e)
         written = []
@@ -3823,15 +3869,18 @@ class TrackSource:
             for t in tmps:
                 if os.path.exists(t):
                     os.remove(t)
+            ta.rollback_pending(self, new_files)
             raise EditError('save failed (%s): %s; the project files are as before the save%s; the edits are kept (unsaved)' % (
                 e, 'nothing was replaced' if not restored else 'restored %s' % ', '.join(restored),
                 '' if not restored else ' (written back from the saved bytes)'))
-        written = [rel for path, old, rel in written]
+        written = [rel for path, old, rel in written] + [rel for rel, _p, _old in new_files]
+        self.pending, self.pending_meta = {}, {}
+        self.others0 = self._others()                       # the imported files are now part of the project
         changed = [i for i in range(min(len(self.saved), len(self.cur))) if self.saved[i] != self.cur[i]]
         self.saved = self.cur
         self.obj_saved = self.obj_cur
         self.check = wb_track.input_check(self.cfg, self.project, self.rid)
-        return {'ok': True, 'written': True, 'files': written, 'bytes': len(self.cur),
+        return {'ok': True, 'written': True, 'files': written, 'bytes': len(self.cur), 'backup': backup,
                 'first_changed_offset': changed[0] if changed else None}
 
     # ---------------- scene (read only view data)
@@ -3843,7 +3892,7 @@ class TrackSource:
             mesh = read_obj_view(self.obj_cur)                     # the CURRENT buffer: live preview of unsaved edits
         for name, m in (d.get('materials') or {}).items():
             tex = m.get('texture')
-            ok = isinstance(tex, str) and tex.replace('\\', '/') in (self.check.get('inputs') or {}) or (
+            ok = isinstance(tex, str) and tex.replace('\\', '/') in self.pending or isinstance(tex, str) and tex.replace('\\', '/') in (self.check.get('inputs') or {}) or (
                 isinstance(tex, str) and not any(('material %s ' % name) in p for p in self.check['problems']))
             try:
                 sm = surface_meaning(int(m.get('surface'), 16))
@@ -3882,13 +3931,14 @@ class TrackSource:
         """the project's PNG files a material may reference, each with the kit reader's verdict (opaque, size)"""
         cache = self.__dict__.setdefault('_texinfo', {})
         out = []
-        for rel, h in sorted(stg.tree_hashes(self.project).items()):
+        for rel, h in sorted(list(stg.tree_hashes(self.project).items()) + [(r, hashlib.sha256(b).hexdigest()) for r, b in self.pending.items()]):
             if not rel.lower().endswith('.png'):
                 continue
             if (rel, h) not in cache:
                 try:
                     K = kit_trackbuild(self.cfg)
-                    w, hh, _rows, amin = K['io'].read_png_alpha(os.path.join(self.project, *rel.split('/')))
+                    w, hh, _rows, amin = (ta.png_alpha_bytes(self, self.pending[rel]) if rel in self.pending else
+                                          K['io'].read_png_alpha(os.path.join(self.project, *rel.split('/'))))
                     p2 = lambda x: 4 <= x <= 1024 and x & (x - 1) == 0  # noqa: E731
                     why = None if amin == 255 and p2(w) and p2(hh) else (
                         'transparent pixels (trackbuild 0.2 writes opaque DXT1)' if amin != 255 else '%dx%d is not a power of two 4..1024' % (w, hh))
@@ -3928,6 +3978,8 @@ class TrackSource:
             raise EditError('material %s texture is not a checked project file' % material)
         files = stg.tree_hashes(self.project)
         rel = tex.replace('\\', '/')
+        if rel in self.pending:                             # TE stage 5: an imported texture not saved yet
+            return self.pending[rel]
         if rel not in files:
             raise EditError('material %s texture %s missing' % (material, tex))
         p = os.path.join(self.project, *rel.split('/'))
@@ -4093,19 +4145,21 @@ def read_obj_view(src):
             elif k == 'vt':
                 VT.append((float(a[0]), float(a[1])))
             elif k == 'vn':
-                VN.append(a)
+                VN.append([float(x) for x in a[:3]])
             elif k == 'usemtl':
                 mat = a[0]
                 grp = len(groups)
                 groups.append({'i': grp, 'line': ln, 'mat': mat, 'faces': 0, 'colours': {}})
             elif k == 'f':
                 idx = [[int(q) for q in x.split('/')] for x in a]
-                m = out.setdefault(mat, {'pos': [], 'uv': [], 'col': [], 'grp': [], 'faces': 0})
+                m = out.setdefault(mat, {'pos': [], 'uv': [], 'col': [], 'grp': [], 'faces': 0, 'nrm': []})
                 m['faces'] += 1
                 if grp >= 0:
                     groups[grp]['faces'] += 1
                 for tri in ((0, 1, 2), (0, 2, 3)) if len(idx) == 4 else ((0, 1, 2),):
                     m['grp'].append(grp)
+                    nv = VN[idx[0][2] - 1] if len(idx[0]) > 2 and 0 < idx[0][2] <= len(VN) else [0.0, 0.0, 0.0]
+                    m['nrm'] += [round(nv[0], 4), round(nv[1], 4), round(nv[2], 4)]   # TE stage 8: stored normal per triangle
                     for j in tri:
                         vi, ti = idx[j][0], idx[j][1]
                         p, c = V[vi - 1]
@@ -4262,6 +4316,9 @@ class Server:
     def stop(self):
         self.httpd.shutdown()
         self.httpd.server_close()
+
+
+ta.bind(globals())
 
 
 def main(argv):

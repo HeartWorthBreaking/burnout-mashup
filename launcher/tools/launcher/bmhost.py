@@ -169,7 +169,8 @@ def play_state(launcher=LAUNCHER):
         out.update(host_kind="prebuilt (host)", state=st, problems=st["problems"], host_ok=st["ok"])
     else:
         out["problems"] = ["no host built yet: Build Mashup first"]
-    out["data_ok"] = os.path.isfile(os.path.join(launcher, "gamedata", ".complete"))
+    import bmpaths
+    out["data_ok"] = os.path.isfile(os.path.join(bmpaths.gamedata(launcher), ".complete"))
     out["play"] = out["host_ok"] and out["data_ok"]
     return out
 

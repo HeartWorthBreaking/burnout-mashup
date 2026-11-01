@@ -1,58 +1,84 @@
 # Updates - "Check for updates" in the launcher
 
-The launcher can update Burnout Mashup to a newer **published release** of its own update channel: it downloads the new **source**,
-verifies it, builds it on your PC with BUILD MASHUP (`docs\BUILD_MASHUP.md`, the same build as always, with your own game) and
-installs the result, keeping the version you used before. Help tab -> **Check for updates...** opens the Updates window; the same
-steps run from the command line as `launcher\update.cmd` (`update.cmd help`).
+The launcher updates Burnout Mashup to a newer **published release** of its update channel: the signed releases of the project's
+GitHub repository (`launcher\update_channel.json`). Help tab -> **Check for updates...** opens the Updates window; the same steps run
+from the command line as `app\launcher\update.cmd` (`update.cmd help`).
 
 ## What it does - and never does
 
 | it does (only when you press the button / give the command) | it never does |
 |---|---|
-| fetch the channel's signed release manifest (`check`) | check by itself: no check at start, in the background, on a schedule, or from the game (the host's own update row stays off) |
-| show what is new, the download size and every step that will follow | download, build or install anything silently |
-| download the source archive into `%LOCALAPPDATA%\BurnoutMashup\updates` (sha256 + size from the signed manifest; an interrupted download continues) | use any channel other than the one in `launcher\update_channel.json`; use an upstream Takedawn repository or release |
-| unpack it into a **new** folder beside your current source (`BurnoutMashup-<version>`), verify every file | unpack over your current source, or change it |
-| build it with BUILD MASHUP (its build folder, cache and pinned tools); the exe must be identical to the release's reference build | install a build that is not identical, or replace Mashup with another host |
-| install it into `launcher\host-local`; the build in use becomes `host-local.prev`; **Switch back to previous version** restores the previous build **and** source | touch your profile, saves, settings, mods, plugin approvals or game data (new plugin bytes still need your approval in the game) |
+| fetch the channel's signed release manifest (`check`) | check by itself: no check at start, in the background, on a schedule, or from the game |
+| show what is new, the download size and every step that will follow | download or install anything silently |
+| download the release's Windows package into `%LOCALAPPDATA%\BurnoutMashup\updates` (sha256 + size from the signed manifest; an interrupted download continues) | use any channel or key other than the ones in `update_channel.json`; use an upstream Takedawn repository or release |
+| unpack it into `app\.update\stage\<version>` and verify every file, both exes and the program folder | unpack over the version in use |
+| **Install**: replace `app\` and the two exes in ONE step that is undone on any error, carry your data over, keep the version you had, restart the launcher | delete your game copy, mods, saves, settings, plugin approvals or builds (new plugin bytes still need your approval in the game) |
+| Build Mashup afterwards only when the new release has another reference host than your build | install a host build that is not identical to the release's reference build |
 
-## No channel configured (this release)
+## The install folder (the Windows package, 0.2.0 and later)
 
-`launcher\update_channel.json` ships **empty**: no channel and no trusted signing key. The Updates window then says **"No update channel
-configured"**, every step is disabled and nothing is contacted. The maintainers fill the file for published releases
-(`docs\OWNER_UPDATE_CHANNEL.md`). Until then, get new versions by hand and use **Bring my data from an older Burnout Mashup folder**.
+    Burnout Mashup.exe, Burnout Mashup Workbench.exe     the starters (replaced by an update)
+    gamedata\                                            your game copy + mods\user (yours) + mods\generated (demos from your game): never touched by an update
+    app\                                                 the program (replaced by an update), with YOUR data inside it:
+      launcher\profile\                                  saves, settings, mod list, plugin approvals, progress
+      launcher\host-local\, host-local.prev\             your Build Mashup builds
+      HOST_INFO.json, workbench\workbench.json, ...      written by Build Mashup / the Workbench
+      .update\                                           the updater's work folder: stage, kept versions, journal, logs
+
+**What counts as your data:** every file or folder in `app\` that the version in use did not ship (its `app\SHIPPED_FILES.sha256`)
+moves to the same place in the new version - also anything you added. Shipped files you changed are not carried over (the new
+version brings its own); they stay with the kept version and the install result names them.
 
 ## The steps
 
 | button / command | what happens | if it fails |
 |---|---|---|
 | Check for updates / `update.cmd check` | downloads `bmashup-release.json` + `.sig` from the channel; the signature is verified **before any field is read**; then the rules below | nothing changed; the reason and what to do are shown |
-| Download / `download` | the archive -> `updates\downloads\<sha>-<name>.part`, then sha256 + size; a wrong file is deleted | run Download again: a kept part continues (HTTP Range) or starts again |
-| Prepare / `prepare` | checks the archive's paths (no `..`, drives, links, device names; one top folder), unpacks into `BurnoutMashup-<version>.partial`, compares the tree with the signed SHA256SUMS digest, checks that it is a Burnout Mashup source (`host\PINS.json`) whose `build\EXPECTED.json` is the manifest's, renames to `BurnoutMashup-<version>` | the partial folder is removed; your source is untouched |
-| Build and install / `build [BUILD OPTIONS]` | re-verifies the unpacked tree, runs `bmbuild.py build --repo <new source> --launcher <this launcher>` (release profile; your game and the upstream source as in the last build unless given), whose verify step compares the exe with the new source's `EXPECTED.json` (= the manifest's reference), installs atomically; the updater checks the installed exe against the manifest once more | the version in use is unchanged (BUILD MASHUP keeps the previous build); fix the shown reason and press Build again (completed steps are reused) |
-| Switch back to previous version / `switch-back` | the previous build and the previous source become the ones in use; pressed again = forward | refused when the builds in `host-local` / `host-local.prev` are not the recorded ones; then use **Previous build** in the Setup tab |
-| Install an older version... / `install-older VERSION --yes` | the same steps for an older signed release of the channel (`releases/<VERSION>/` or the GitHub release `v<VERSION>`), only on your explicit choice | as above |
-| Discard pending update / `discard --yes` | forgets the pending update, deletes its download and its unpacked folder (never the version in use or the previous one) | - |
-| Cancel / `cancel` | stops a download (the part is kept) or a build (BUILD MASHUP keeps the completed steps) | - |
+| Download / `download` | the package -> `updates\downloads\<sha>-<name>.part`, then sha256 + size; a wrong file is deleted | run Download again: a kept part continues (HTTP Range) or starts again |
+| Prepare / `prepare` | checks every path in the package (only the two exes and `app\...`; no `..`, drives, links, device names), unpacks into `app\.update\stage\<version>.partial`, compares it with the signed digest, both exes with their signed sha256, `app\` with the signed source tree (a Burnout Mashup source whose `build\EXPECTED.json` is the manifest's), renames to `stage\<version>` | the partial folder is removed; nothing in use is touched |
+| **Install (restarts)** / `install` | close the game and the Workbench first. Plans every step, writes it to `app\.update\JOURNAL.json`, then only RENAMES: your data into the new program folder, the old program into `app\.update\versions\<old version>-<time>`, the new one into `app\`, the exes likewise; then the launcher starts again | any error: every step done so far is undone in reverse order - the version in use is exactly as before (a file in use: close the program holding it and press Install again). A crash or power loss: the next start of either exe finishes or undoes the change from the journal |
+| Build and install / `build [BUILD OPTIONS]` | only when the new release has another reference host: BUILD MASHUP from the program in use, compared with the manifest's reference, installed (your previous build is kept as `host-local.prev`) | your build in use is unchanged; fix the reason shown and press Build again |
+| Switch back to previous version / `switch-back` | the kept version becomes the one in use (the same undoable step); pressed again = forward | as Install |
+| Install an older version... / `install-older VERSION --yes` | the same steps for an older signed release of the channel (`releases/download/v<VERSION>/`), only on your explicit choice | as above |
+| Discard pending update / `discard --yes` | forgets the pending update, deletes its download and its stage folder (never the version in use or a kept one) | - |
+| Cancel / `cancel` | stops a download (the part is kept) or a build | - |
 
-After an update, **Build Mashup** (Setup tab) builds the source in use (`update-state\STATE.json` in the launcher folder records it);
-**Previous build** keeps build and source together. The launcher program you started stays the one in this folder: the update replaces the
-host program it starts. A newer launcher program arrives with a fresh folder of the new release (move your data with **Bring my data from
-an older Burnout Mashup folder**).
+One kept version: an update removes the version kept before it (after the new one is in place); Switch back always has the
+version you came from.
+
+## Coming from 0.1.0-alpha.1
+
+0.1.0-alpha.1 was a source tree with everything under `launcher\` and no update channel, so it cannot update itself. Two ways:
+
+- **In place (recommended):** unpack `BurnoutMashup-0.2.0-alpha.1-windows.zip` INTO your 0.1.0-alpha.1 folder (all its names are
+  new: nothing is overwritten) and start `Burnout Mashup.exe`. It finds the old version around `app\` and moves it into the new
+  layout by itself, in one transaction like Install: `launcher\gamedata` -> `gamedata\`; `launcher\mods\user` and `mods\generated`
+  -> `gamedata\mods\...`; `launcher\profile`, `host-local`, `host-local.prev`, `update-state`, `build`, `work`, `diag`, `HOST_INFO.json`,
+  the Workbench's settings and data and anything else 0.1.0 did not ship -> the same place in `app\`; the 999 files 0.1.0 shipped
+  (and the ones you changed) -> `app\.update\versions\0.1.0-alpha.1-<time>\tree` with `MIGRATION_REPORT.json`. Paths to the old
+  folder in `workbench\workbench.json` are moved along; old source-folder entries in `update-state\STATE.json` are dropped. Your host
+  build stays valid (0.2.0 has the same reference host). A file in use (the old launcher, the game): everything is undone; close it
+  and start again.
+- **Fresh folder:** unpack the new zip into a new folder, start it, Help -> **Bring my data from an older Burnout Mashup folder**
+  and choose the old folder (or `remove.cmd upgrade --from <old folder>`): the same map, but COPIED (each file compared by sha256) -
+  the old folder is only read. Refused when the new folder already has a profile.
+
+A git clone or an unpacked source zip (no `Burnout Mashup.exe` beside it) keeps the 0.1.0 behaviour: everything under `launcher\`,
+and the source update (a new source folder beside it, built with Build Mashup).
 
 ## Refused, with nothing changed
 
 - a manifest signed by a key that is not in `update_channel.json`, a bad or missing signature, another namespace (`bmashup-update`)
 - another product or channel name, an upstream Takedawn repository / owner / URL in the channel or the manifest, a source that is not a
-  Burnout Mashup source
+  Burnout Mashup source, a package with other entries than the two exes and `app\...`
 - a version **older** than the one in use (unless you chose **Install an older version**); the same version = "up to date"
 - a manifest with a **lower serial** than one already seen here, or the same serial with other bytes (a replayed or stale file)
 - a release that needs a newer launcher (`requires.launcher`) or provides a lower launcher / kit / platform than `update_channel.json`'s
   `minimum`
-- plain `http://` (only `https://`; `http://127.0.0.1` for tests), a channel without a trusted key
+- plain `http://` (only `https://`; `http://127.0.0.1` for tests)
 
-Exit codes of `update.cmd`: 0 done (also "up to date"), 1 usage, 2 refused, 3 failed (the version in use unchanged), 5 cancelled, 6 no
-update channel configured, 7 the channel cannot be reached (offline).
+Exit codes of `update.cmd`: 0 done (also "up to date"), 1 usage, 2 refused, 3 failed (the version in use unchanged), 5 cancelled,
+6 no update channel configured, 7 the channel cannot be reached (offline).
 
 ## The release manifest (bm-release-manifest 1, MIT)
 
@@ -62,14 +88,15 @@ verified by `tools\launcher\bmed25519.py`, standard library only). Fields (all r
 | field | meaning |
 |---|---|
 | `format` | `bm-release-manifest 1` |
-| `product`, `channel` | `BurnoutMashup`; the channel id of `update_channel.json` |
-| `version`, `serial`, `created` | the release version (= `launcher\VERSION.json` `release` of its source); a whole number that grows with every manifest the channel publishes (replay protection); UTC time `2026-11-01T12:00:00Z` |
-| `source.tag`, `source.commit` | the git tag and the 40-hex commit the archive was made from |
-| `source.archive` | `name` (.zip), `urls` (one or more; relative to the manifest allowed), `sha256`, `size` |
-| `source.top_folder`, `source.files`, `source.tree_sha256` | the archive's single top folder, its file count, and sha256 of its SHA256SUMS text (`<sha256>  <path>` lines sorted by path) |
-| `expected` | `expected_json_sha256` (sha256 of the source's `build/EXPECTED.json`), `exe` (`BurnoutMashup.exe`), `exe_sha256`, `identity` (`bmp-...`), `profile` (`release`): the reference build the rebuilt exe must equal |
+| `product`, `channel` | `BurnoutMashup`; the channel id of `update_channel.json` (`burnoutmashup-stable`) |
+| `version`, `serial`, `created` | the release version (= `launcher\VERSION.json` `release`); a whole number that grows with every manifest the channel publishes (replay protection); UTC time `2026-11-01T12:00:00Z` |
+| `source.tag`, `source.commit` | the git tag and the 40-hex commit the release was made from |
+| `source.archive` | the source zip: `name`, `urls` (relative to the manifest allowed), `sha256`, `size` |
+| `source.top_folder`, `source.files`, `source.tree_sha256` | the source zip's single top folder, its file count, and sha256 of its SHA256SUMS text (`<sha256>  <path>` lines sorted by path) |
+| `package` (launcher 1.1.0) | the Windows package: `layout` `bm-layout 2`, `app_folder` `app`, `name`, `urls`, `sha256`, `size`, `files`, `tree_sha256` (over every file of the zip, the same text form), `exes` {`Burnout Mashup.exe`, `Burnout Mashup Workbench.exe`: sha256}; its `app/` is the source tree byte for byte |
+| `expected` | `expected_json_sha256` (sha256 of the source's `build/EXPECTED.json`), `exe` (`BurnoutMashup.exe`), `exe_sha256`, `identity` (`bmp-...`), `profile` (`release`): the reference host build |
 | `provides` | `release`, `launcher`, `kit`, `platform` versions of this release |
-| `requires` | `launcher`: the oldest launcher that may install it |
+| `requires` | `launcher`: the oldest launcher that may install it (`1.1.0` for a release with a package) |
 | `notes_url`, `notes` | (optional) the release notes |
 
 Versions compare by up to four numbers; `-pre` ranks below the same numbers; `+build` is ignored.
@@ -78,8 +105,8 @@ Versions compare by up to four numbers; `-pre` ranks below the same numbers; `+b
 
 | | |
 |---|---|
-| `launcher\update_channel.json` | the channel (`id` + `github_repo` OWNER/NAME **or** `url` https://...), `trusted_keys` (`ssh-ed25519 AAAA...` lines), `minimum`, `namespace` |
-| `launcher\VERSION.json` | this source's release version and the launcher version |
-| `launcher\update-state\STATE.json` | the source in use and the previous one, the pending update, the newest serial seen (local, not shared) |
+| `app\launcher\update_channel.json` | the channel (`id` + `github_repo` OWNER/NAME **or** `url` https://...), `trusted_keys` (`ssh-ed25519 AAAA...` lines), `minimum`, `namespace` |
+| `app\launcher\VERSION.json` | this release's version and the launcher version |
+| `app\launcher\update-state\STATE.json` | the pending update, the newest serial seen, the package installed (local, not shared; carried over) |
+| `app\.update\` | `stage\` (a prepared update), `versions\` (the kept version; the 0.1.0 files after a migration), `PREVIOUS.json`, `JOURNAL.json` (only while a change runs), `logs\` (each finished change), `bmapply.py` (the recovery helper the exes run) |
 | `%LOCALAPPDATA%\BurnoutMashup\updates` | checked manifests and downloads (`--updates DIR` chooses another folder) |
-| `..\BurnoutMashup-<version>` | the unpacked new source (`--sources-dir DIR` chooses another parent folder) |

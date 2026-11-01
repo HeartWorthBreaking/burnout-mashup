@@ -28,6 +28,15 @@ import time
 
 sys.dont_write_bytecode = True
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "launcher"))
+try:
+    import bmpaths  # noqa: E402  (0.2.0 layout 2: game copy + mods\\user / mods\\generated in <install>\\gamedata)
+except ImportError:      # this tool copied without tools\\launcher (the tester bundle layout): everything stays in this folder
+    import types
+    bmpaths = types.SimpleNamespace(
+        install_root=lambda l: None, gamedata=lambda l: os.path.join(os.path.abspath(l), "gamedata"),
+        mods_dir=lambda l, k: os.path.join(os.path.abspath(l), "mods", k), display=lambda l, p: os.path.relpath(p, l),
+        game_entries=lambda gd: sorted(n for n in (os.listdir(gd) if os.path.isdir(gd) else []) if n.lower() != "mods"))
 # tester package 0.4.0 / 0.3.0: + build\ (toolchain + host build work) and host-local\ (your own host build, Option B). The shipped
 # prebuilt host\ is part of the package (listed in SHA256SUMS.txt) and is never deleted by clean.
 # R1 (release readiness): the player's own data is never deleted by a plain clean.
@@ -35,6 +44,27 @@ DERIVED = ["gamedata", "gamedata.partial", "gamedata.installing", os.path.join("
            "host-local"]
 MY_DATA = ["profile", os.path.join("mods", "user")]
 CREATED = DERIVED + MY_DATA
+
+
+def where(rel):
+    r"""the real place of a DERIVED / MY_DATA name: layout 2 keeps the game copy in <install>\gamedata (its mods\ folder is NOT part
+    of it) and mods\user / mods\generated in <install>\gamedata\mods; everything else stays in this launcher folder"""
+    if rel == "gamedata":
+        return bmpaths.gamedata(ROOT)
+    if rel in (os.path.join("mods", "user"), os.path.join("mods", "generated")):
+        return bmpaths.mods_dir(ROOT, os.path.basename(rel))
+    return os.path.join(ROOT, rel)
+
+
+def _game_paths():
+    gd = bmpaths.gamedata(ROOT)
+    if not bmpaths.install_root(ROOT):              # layout 1 (0.1.0 behaviour): the folder holds only the game copy
+        return [gd] if os.path.exists(gd) else []
+    return [os.path.join(gd, n) for n in bmpaths.game_entries(gd)]
+
+
+def _base():
+    return bmpaths.install_root(ROOT) or ROOT
 # what backup copies (relative to profile\Roaming\BurnoutMashup): saves, BurnoutMashup progress sidecars, settings files
 BACKUP = ["UDATA", "TDATA", os.path.join("bmashup", "progress"), "settings.toml", "mod-list.toml", "plugin-approvals.toml",
           "plugin-settings.toml", "enhance.toml", "mixer.toml"]
@@ -57,7 +87,10 @@ def size_of(p):
 def cmd_list():
     print("bundle: %s" % ROOT)
     for rel in CREATED:
-        p = os.path.join(ROOT, rel)
+        p = where(rel)
+        if rel == "gamedata" and not _game_paths():
+            print("  %-16s (not created)" % rel)
+            continue
         if os.path.exists(p):
             b, n = size_of(p)
             print("  %-16s %8.1f MB  %6d files" % (rel, b / 1e6, n))
@@ -111,12 +144,12 @@ def _free_bytes(path):
 def cmd_backup(to):
     """-> (rc, backup folder or None). Saves + settings (profile) and mods\\user, checked file by file."""
     src = os.path.join(ROOT, "profile", "Roaming", "BurnoutMashup")
-    user = os.path.join(ROOT, "mods", "user")
+    user = where(os.path.join("mods", "user"))
     if not os.path.isdir(src) and not (os.path.isdir(user) and os.listdir(user)):
         print("nothing to back up: no profile and no imported mods in this bundle")
         return 0, None
     dest = os.path.join(os.path.abspath(to), "bmashup-backup-" + time.strftime("%Y%m%d-%H%M%S"))
-    if _inside(dest):
+    if _inside(dest) or _inside(dest, _base()):
         print("REFUSED: back up to a folder OUTSIDE the bundle (it is deleted on removal)")
         return 3, None
     need = (size_of(src)[0] if os.path.isdir(src) else 0) + (size_of(user)[0] if os.path.isdir(user) else 0)
@@ -146,8 +179,16 @@ def cmd_upgrade(old):
     if os.path.normcase(old) == os.path.normcase(ROOT):
         print("REFUSED: --from must be the OLD bundle folder, not this one")
         return 2
+    try:
+        import bmlayout
+    except ImportError:                              # copied without tools\launcher: bundles only
+        bmlayout = None
+    if bmlayout and not bmlayout.legacy_release(old) and os.path.basename(old).lower() == "launcher" and bmlayout.legacy_release(os.path.dirname(old)):
+        old = os.path.dirname(old)                  # the 0.1.0 launcher folder was chosen: its program folder is the parent
+    if bmlayout and bmlayout.legacy_release(old):   # 0.2.0: a Burnout Mashup 0.1.0-alpha.1 folder (source layout)
+        return bmlayout.import_main(old, ROOT)
     if not os.path.isfile(os.path.join(old, "BUNDLE.json")):
-        print("REFUSED: %s is not a Burnout Mashup bundle (no BUNDLE.json)" % old)
+        print("REFUSED: %s is not a Burnout Mashup bundle (no BUNDLE.json) or 0.1.0-alpha.1 folder" % old)
         return 3
     if os.path.exists(os.path.join(ROOT, "profile")) and os.listdir(os.path.join(ROOT, "profile")):
         print("REFUSED: this bundle already has a profile\\ (it is never overwritten); upgrade into a fresh bundle")
@@ -158,7 +199,7 @@ def cmd_upgrade(old):
             s = os.path.join(old, rel)
             if not os.path.isdir(s):
                 continue
-            d = os.path.join(ROOT, rel)
+            d = where(rel)
             if os.path.isdir(d) and os.listdir(d):
                 print("REFUSED: %s is not empty in this bundle" % rel)
                 return 3
@@ -241,7 +282,7 @@ def _force(func, path, _exc):
 def cmd_clean(yes, keep_gamedata, keep_host=False, remove_my_data=False, backup_to=None):
     targets = [r for r in DERIVED + (MY_DATA if remove_my_data else []) if not (keep_gamedata and r == "gamedata")
                and not (keep_host and (r == "build" or r == "host-local"))]
-    present = [r for r in targets if os.path.exists(os.path.join(ROOT, r))]
+    present = [r for r in targets if (_game_paths() if r == "gamedata" else os.path.exists(where(r)))]
     if not yes:
         print("would delete: %s" % (", ".join(present) or "nothing"))
         print("kept: your saves and settings (profile\\) and your imported mods (mods\\user\\)" if not remove_my_data else
@@ -256,13 +297,13 @@ def cmd_clean(yes, keep_gamedata, keep_host=False, remove_my_data=False, backup_
             print("REFUSED: nothing deleted because the backup did not succeed")
             return rc
     for r in present:
-        p = os.path.join(ROOT, r)
-        assert os.path.normcase(os.path.abspath(p)).startswith(os.path.normcase(ROOT) + os.sep), p
-        if os.path.isdir(p):
-            shutil.rmtree(p, onerror=_force)       # git checkouts under build\ hold read-only files
-        else:
-            _force(os.remove, p, None)
-        print("deleted %s" % r)
+        for p in (_game_paths() if r == "gamedata" else [where(r)]):     # gamedata: the game copy only, never its mods\ folder
+            assert os.path.normcase(os.path.abspath(p)).startswith(os.path.normcase(_base()) + os.sep), p
+            if os.path.isdir(p):
+                shutil.rmtree(p, onerror=_force)       # git checkouts under build\ hold read-only files
+            else:
+                _force(os.remove, p, None)
+        print("deleted %s" % (bmpaths.display(ROOT, where(r)) + (" (the game copy; its mods folder is kept)" if r == "gamedata" else "")))
     print("OK. The bundle's own files remain; to remove the bundle completely, delete the folder %s" % ROOT)
     return 0
 

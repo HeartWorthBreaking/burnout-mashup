@@ -41,8 +41,13 @@ label { display:block; }
   <label><input type="checkbox" id="L_units"> streaming bounds (units / sections)</label>
   <label><input type="checkbox" id="L_route" checked> routes</label>
   <label><input type="checkbox" id="L_starts" checked> starts</label>
+  <label><input type="checkbox" id="L_wire"> wireframe (every triangle edge)</label>
+  <label><input type="checkbox" id="L_normals"> stored normals (green; red = disagrees with the face plane)</label>
+  <div class="note" id="shadenote">Shading is APPROXIMATE: texture x baked vertex colour only. No sky, fog or track lighting (enviro.dat has no verified reader; the build copies the donor's unchanged).</div>
   <div class="note" id="pvslod"></div>
   <h2>Selection</h2>
+  <div>click selects <select id="pickfilter"><option value="">any face group</option></select> <button id="helpbtn" title="shortcuts and help (?)">? Help</button></div>
+  <pre id="helpbox" style="display:none"></pre>
   <div id="selname" class="note">nothing selected</div>
   <pre id="insp"></pre>
   <div id="editbox" style="display:none">move by (m): <input type="number" id="dx" value="0" step="0.5"> <input type="number" id="dy" value="0" step="0.5"> <input type="number" id="dz" value="0" step="0.5"> <button id="apply">Apply</button></div>
@@ -121,6 +126,12 @@ label { display:block; }
     <div><button id="sprev">Preview scenery</button> <button id="sapply">Apply scenery</button></div>
     <div class="note">Terrain patches (flat or four corner heights; place them a little below a route floor), barriers (wall / wallback along points), prefabs (saved face groups, reusable in any project; materials must exist here) - all as tagged blocks, existing materials only, inside the unit regions (grow them with "include" first). Purple = new faces.</div>
     <pre id="layout_out" style="display:none"></pre>
+    <div id="xsec" style="display:none"></div>
+  </div>
+  <div id="tebox">
+    <h2>Authoring tools (TE queue)</h2>
+    <div class="note">Each tool previews first (nothing changes), then applies with that preview (one undo step); refusals change nothing. Search: <input type="text" id="tesearch" style="width:150px" placeholder="filter tools"></div>
+    <div id="tetools"></div>
   </div>
   <div id="editmsg" class="note"></div>
   <div id="editbtns"><button id="undo">Undo</button><button id="redo">Redo</button><button id="save">Save</button><button id="check">Check</button></div>
@@ -207,7 +218,7 @@ function buildMeshesAuthored() {
   freeMeshes();
   for (const [name, m] of Object.entries(ST.scene.mesh.materials || {})) {
     const arr = new Float32Array(m.pos.length); for (let i = 0; i < arr.length; i++) arr[i] = m.pos[i] - ST.origin[i % 3];
-    ST.meshes[name] = {n: m.pos.length / 3, arr, grp: m.grp, p: buf(arr), uv: buf(m.uv), c: buf(m.col), mat: name};
+    ST.meshes[name] = {n: m.pos.length / 3, arr, grp: m.grp, nrm: m.nrm || null, p: buf(arr), uv: buf(m.uv), c: buf(m.col), mat: name};
     const mi = ST.scene.materials[name], v = mi ? mi.tex_v : '';                       // live preview: reload when the texture reference changed
     if (ST.tex[name] && ST.texSrc[name] !== v) { gl.deleteTexture(ST.tex[name]); delete ST.tex[name]; }
     if (!ST.tex[name]) { ST.texSrc[name] = v; ST.tex[name] = loadTex(name, mi && mi.texture_ok ? '/tex?m=' + encodeURIComponent(name) + '&v=' + v : null); }
@@ -230,7 +241,7 @@ function buildMeshesRetail() {
   }
 }
 function build() {
-  const S = ST.scene, L = {units: [], route: [], lanes: [], starts: [], hl: [], sel: [], nb: [], clip: [], cb: [], tf: [], pv: [], oe: [], wg: [], wf: [], wv: [], bf: [], bp: [], bc: [], lr: [], lu: [], lf: [], ln: [], ll: []};
+  const S = ST.scene, L = {units: [], route: [], lanes: [], starts: [], hl: [], sel: [], nb: [], clip: [], cb: [], tf: [], pv: [], oe: [], wg: [], wf: [], wv: [], bf: [], bp: [], bc: [], lr: [], lu: [], lf: [], ln: [], ll: [], wire: [], nok: [], nbad: []};
   ST.pick = [];
   if (ST.retail) {
     S.units.forEach(u => { if (u.empty) return; const c = u.corners.map(O);
@@ -281,6 +292,16 @@ function build() {
     for (const g of LY.lines || []) seg(L.ll, up(g[0], .3), up(g[1], .3));
     for (const q of LY.points || []) marker(L.ll, up(q, .3), .6);
     for (const v of bridgeChains().flat()) { const p = ST.bv.get(v); if (p) marker(L.bc, up(p, .05), .25); }
+    // TE stage 8: wireframe + stored normals (capped for responsiveness on large projects; the counts go to the HUD)
+    ST.ovl = {wire: 0, normals: 0, bad: 0, capped: false};
+    const wireOn = $('L_wire').checked, nOn = $('L_normals').checked, CAP = 60000;
+    if (wireOn || nOn) for (const m of Object.values(ST.meshes)) { const A = m.arr;
+      for (let t = 0; t < m.grp.length; t++) { const o = 9 * t, a = [A[o], A[o+1], A[o+2]], b = [A[o+3], A[o+4], A[o+5]], c = [A[o+6], A[o+7], A[o+8]];
+        if (wireOn && ST.ovl.wire < CAP) { seg(L.wire, a, b); seg(L.wire, b, c); seg(L.wire, c, a); ST.ovl.wire++; }
+        if (nOn && m.nrm && ST.ovl.normals < CAP && t % 2 === 0) { const n = [m.nrm[3*t], m.nrm[3*t+1], m.nrm[3*t+2]], g = norm(cross(sub(b, a), sub(c, a)));
+          const ce = [0,1,2].map(i => (a[i] + b[i] + c[i]) / 3), ok = dot(n, g) >= 0.9; if (!ok) ST.ovl.bad++;
+          seg(ok ? L.nok : L.nbad, ce, [ce[0] + n[0] * 1.5, ce[1] + n[1] * 1.5, ce[2] + n[2] * 1.5]); ST.ovl.normals++; } } }
+    ST.ovl.capped = ST.ovl.wire >= CAP || ST.ovl.normals >= CAP;
   }
   ST.pick.forEach(o => { if (isHl(o.kind, o.index)) marker(L.hl, o.p, 2.5); });
   if (ST.sel && ST.sel.p) marker(L.sel, ST.sel.p, 3);
@@ -359,8 +380,10 @@ function draw() {
   lines('hl', [1,0,0,1], false); lines('nb', [1,.45,0,1], false); lines('sel', [1,.9,0,1], false); lines('cb', [1,0,1,1], false); lines('clip', [1,0,.2,1], false); lines('tf', [0,1,1,1], false); lines('pv', [1,1,1,1], false);
   lines('oe', [1,.55,0,1], false); lines('wf', [.3,.6,1,1], false); lines('wg', [0,1,.4,1], false); lines('wv', [1,.4,.8,1], false);
   lines('bf', [.65,.3,1,1], false); lines('bp', [0,1,.4,1], false); lines('bc', [1,.4,.8,1], false);
+  lines('wire', [.1,.1,.12,.8], true); lines('nok', [.1,.9,.3,1], true); lines('nbad', [1,.1,.1,1], false);
   lines('lu', [.2,.6,.7,1], false); lines('lr', [0,1,1,1], false); lines('lf', [1,0,.2,1], false); lines('ln', [.65,.3,1,1], false); lines('ll', [1,1,.2,1], false);
-  $('hud').textContent = (ST.retail ? 'RETAIL VIEW (read only) - ' : '') + `${Object.keys(ST.meshes).length} material groups, ${ST.texLoaded} textures, ${ST.pick.length} selectable objects` + (ST.scene.state.dirty ? ' - UNSAVED EDITS' : '');
+  $('hud').textContent = (ST.retail ? 'RETAIL VIEW (read only) - ' : '') + `${Object.keys(ST.meshes).length} material groups, ${ST.texLoaded} textures, ${ST.pick.length} selectable objects` + (ST.scene.state.dirty ? ' - UNSAVED EDITS' : '') +
+    (ST.ovl && (ST.ovl.wire || ST.ovl.normals) ? ` - overlay: ${ST.ovl.wire} wire / ${ST.ovl.normals} normals (${ST.ovl.bad} disagree)${ST.ovl.capped ? ' CAPPED at 60000' : ''}` : '');
 }
 // ---------------------------------------------------------------- navigation + picking
 let drag = null;
@@ -375,7 +398,13 @@ cv.addEventListener('wheel', e => { e.preventDefault(); ST.cam.dist = Math.max(5
 addEventListener('keydown', e => { if (['INPUT','SELECT'].includes(e.target.tagName)) return; const c = ST.cam, s = c.dist * 0.05, f = [-Math.cos(c.yaw), -Math.sin(c.yaw)];
   const mv = {w: [f[0], 0, f[1]], s: [-f[0], 0, -f[1]], a: [f[1], 0, -f[0]], d: [-f[1], 0, f[0]], q: [0, -1, 0], e: [0, 1, 0]}[e.key.toLowerCase()];
   if (mv) { c.tgt = c.tgt.map((v, i) => v + mv[i] * s); draw(); }
-  if (e.ctrlKey && e.key === 'z') doUndo(); if (e.ctrlKey && e.key === 'y') doRedo(); });
+  if (e.ctrlKey && e.key === 'z') doUndo(); if (e.ctrlKey && e.key === 'y') doRedo();
+  if (e.ctrlKey && e.key === 's') { e.preventDefault(); $('save').click(); }
+  if (!e.ctrlKey && e.key === 'g') { $('L_wire').checked = !$('L_wire').checked; build(); draw(); }
+  if (!e.ctrlKey && e.key === 'n') { $('L_normals').checked = !$('L_normals').checked; build(); draw(); }
+  if (!e.ctrlKey && e.key === 'f' && ST.multi.length) { const c = selBBoxCentre(); if (c) { const o = O(c); ST.cam.tgt = [o[0], o[1], o[2]]; draw(); } }
+  if (e.key === 'Escape') { ST.ppick = null; ST.fpick = null; ST.wpick = null; ST.bpick = null; }
+  if (e.key === '?') $('helpbtn').click(); });
 function project(p, P) { const x = P[0]*p[0]+P[4]*p[1]+P[8]*p[2]+P[12], y = P[1]*p[0]+P[5]*p[1]+P[9]*p[2]+P[13], w = P[3]*p[0]+P[7]*p[1]+P[11]*p[2]+P[15];
   if (w <= 0) return null; return [(x / w * .5 + .5) * cv.clientWidth, (1 - (y / w * .5 + .5)) * cv.clientHeight]; }
 function rayPick(x, y) {                                                  // authored mode: nearest face group under the cursor
@@ -384,7 +413,8 @@ function rayPick(x, y) {                                                  // aut
   const d = norm([0,1,2].map(i => -z[i] + xa[i] * nx * t * a + ya[i] * ny * t));
   let best = null, bt = Infinity;
   for (const m of Object.values(ST.meshes)) { if (!m.arr) continue; const A = m.arr;
-    for (let k = 0; k < m.grp.length; k++) { const o = 9 * k;
+    if (ST.pickMat && m.mat !== ST.pickMat) continue;
+    for (let k = 0; k < m.grp.length; k++) { const o = 9 * k; if (ST.pickGroups && !ST.pickGroups.has(m.grp[k])) continue;
       const e1 = [A[o+3]-A[o], A[o+4]-A[o+1], A[o+5]-A[o+2]], e2 = [A[o+6]-A[o], A[o+7]-A[o+1], A[o+8]-A[o+2]];
       const p = cross(d, e2), det = dot(e1, p); if (Math.abs(det) < 1e-9) continue; const inv = 1 / det;
       const s = [e[0]-A[o], e[1]-A[o+1], e[2]-A[o+2]], u = dot(s, p) * inv; if (u < 0 || u > 1) continue;
@@ -407,7 +437,23 @@ function pointPickAt(x, y) { const g = rayPick(x, y); const id = ST.ppick;      
   if (!g) { $('layout_out').style.display = 'block'; $('layout_out').textContent = 'no mesh under the cursor: click on the ground'; return; }
   const lift = +($('rlift').value || 0), q = [g.p[0], g.p[1] + lift, g.p[2]].map(v => (Math.round(v * 100) / 100).toFixed(2));
   $(id).value = ($(id).value.trim() ? $(id).value.trim() + '\n' : '') + q.join(' '); roadMarkers(); }
-function pickAt(x, y, add) { if (ST.ppick && !ST.retail) return pointPickAt(x, y); if (ST.bpick && !ST.retail) return bridgePickAt(x, y); if (ST.wpick && !ST.retail) return weldPickAt(x, y);
+// TE stage 4: click a face / vertex of the mesh into a faces / verts field (face lines and v indices from mesh_info of that group)
+ST.fcache = {};
+async function facePickAt(x, y) { const g = rayPick(x, y), F = ST.fpick; if (!g) return;
+  const key = g.group + ':' + (ST.scene && ST.scene.state.content_sha256);
+  if (!ST.fcache[key]) { const r = await api('/api/layout', {op: 'mesh_info', groups: [g.group]}); if (!r.ok) return; ST.fcache = {[key]: r.faces}; }
+  let best = null, bd = Infinity;
+  for (const f of ST.fcache[key]) { const P = f.pts; for (let i = 1; i < P.length - 1; i++) { const a = P[0], b = P[i], c = P[i + 1];
+      const det = (b[2] - c[2]) * (a[0] - c[0]) + (c[0] - b[0]) * (a[2] - c[2]); if (Math.abs(det) < 1e-12) continue;
+      const l1 = ((b[2] - c[2]) * (g.p[0] - c[0]) + (c[0] - b[0]) * (g.p[2] - c[2])) / det, l2 = ((c[2] - a[2]) * (g.p[0] - c[0]) + (a[0] - c[0]) * (g.p[2] - c[2])) / det;
+      if (l1 < -1e-6 || l2 < -1e-6 || l1 + l2 > 1 + 1e-6) continue; const y = l1 * a[1] + l2 * b[1] + (1 - l1 - l2) * c[1], d = Math.abs(y - g.p[1]);
+      if (d < bd) { bd = d; best = f; } } }
+  if (!best) return; let val;
+  if (F.mode === 'verts') { let bv = null, bdv = Infinity; best.pts.forEach((p, k) => { const d = Math.hypot(p[0] - g.p[0], p[1] - g.p[1], p[2] - g.p[2]); if (d < bdv) { bdv = d; bv = best.corners[k][0]; } }); val = bv; }
+  else val = best.line;
+  const cur = $(F.id).value.split(/[\s,;]+/).filter(t => t).map(Number), i = cur.indexOf(val); if (i >= 0) cur.splice(i, 1); else cur.push(val);
+  $(F.id).value = cur.join(', '); ST.lay = Object.assign({}, ST.lay || {}, {faces: ST.fcache[key].filter(f => F.mode === 'verts' ? f.corners.some(c => cur.includes(c[0])) : cur.includes(f.line)).map(f => f.pts)}); build(); draw(); }
+function pickAt(x, y, add) { if (ST.fpick && !ST.retail) return facePickAt(x, y); if (ST.ppick && !ST.retail) return pointPickAt(x, y); if (ST.bpick && !ST.retail) return bridgePickAt(x, y); if (ST.wpick && !ST.retail) return weldPickAt(x, y);
   const P = mvp(); let best = null, bd = 16;
   if (!(add && !ST.retail)) for (const o of ST.pick) { if (!layerOn(o.kind)) continue; const s = project(o.p, P); if (!s) continue; const d = Math.hypot(s[0] - x, s[1] - y); if (d < bd) { bd = d; best = o; } }
   if (best) return select(best.kind, best.index);
@@ -449,7 +495,7 @@ function select(kind, index, keepMulti) {
   build(); draw();
 }
 // ---------------------------------------------------------------- edits / save / check / stage
-async function refresh(keepSel) { ST.scene = await api('/api/scene'); if (ST.bnd && !ST.retail) await doBoundary(true); let s = ST.sel, m = ST.multi.slice(); const nb = ST.nb, pv = ST.preview; if (!ST.retail) buildMeshesAuthored(); build(); renderSide();
+async function refresh(keepSel) { ST.scene = await api('/api/scene'); if (typeof teFill === 'function' && $('tetools').children.length) { teFill(); pickFilterFill(); } if (ST.bnd && !ST.retail) await doBoundary(true); let s = ST.sel, m = ST.multi.slice(); const nb = ST.nb, pv = ST.preview; if (!ST.retail) buildMeshesAuthored(); build(); renderSide();
   const ng = ST.retail ? 0 : ((ST.scene.mesh || {}).groups || []).length;           // v0.22: an undone duplicate / bridge removes groups
   if (!ST.retail && s && s.kind === 'group' && !(s.index < ng)) { m = m.filter(g => g < ng); s = m.length ? {kind: 'group', index: m[m.length - 1]} : null; } else if (!ST.retail) m = m.filter(g => g < ng);
   if (keepSel && s) { select(s.kind, s.index, true); if (s.kind === 'group') { ST.multi = m; ST.nb = nb; ST.preview = pv; $('gsel').textContent = selInfo(); build(); draw(); } } else { setMulti([]); if (keepSel) select(null, null); draw(); } }
@@ -694,6 +740,189 @@ $('cpapply').onclick = () => layoutApply({op: 'race_points', checkpoints: $('cps
 $('rprev').onclick = () => { ST.ppick = null; $('rpick').textContent = 'Click points'; return layoutPreview(roadReq()); };
 $('rapply').onclick = () => { ST.ppick = null; $('rpick').textContent = 'Click points'; return layoutApply(roadReq()); };
 $('uapply').onclick = () => layoutApply(unitsReq());
+// ---------------------------------------------------------------- TE queue: authoring tools (generic forms over /api/layout ops)
+// kinds: pts (x y z per line, Click points), num, nums (list), text, bool, mat (existing material), json, groups (the current
+// selection), cons:<kind> (an existing construction block of that kind), sel:a|b|c. Empty optional fields are left out.
+const TE_TOOLS = [];
+function teTool(t) { TE_TOOLS.push(t); if (t.preview !== false) LAYOUT_PREVIEW[t.op] = t.op + '_preview'; }
+teTool({id: 'proad', title: '1 Profiled road (width / bank / grade)', op: 'road_profile', xsec: true, fields: [
+  ['road', 'existing road (re-generate)', 'cons:road', ''], ['points', 'control points (x y z per line; y = elevation)', 'pts', ''],
+  ['widths', 'widths per point (m)', 'nums', '10, 10'], ['banks', 'banks per point (deg, + = n+ edge higher)', 'nums', '0, 0'],
+  ['material', 'material', 'mat', 'asphalt'], ['closed', 'closed loop', 'bool', false], ['step', 'step (m)', 'num', 4], ['uv_len', 'uv m per repeat', 'num', 14]],
+  note: 'Smooth (smoothstep) width / bank transitions between points; monotone elevation (no overshoot). u 0..1 across, v continuous along. Off-route roads may bank freely; the drivable route is limited by the kit V2 gate (Race profile below).'});
+teTool({id: 'rprof', title: '1 Race layout with profile (sloped / variable width / bank / outer gaps)', op: 'race_layout', xsec: true, fields: [
+  ['points', 'closed control points (x y z per line)', 'pts', ''], ['width', 'base width (m)', 'num', 14], ['material', 'road', 'mat', 'asphalt'],
+  ['checkpoints', 'checkpoints', 'num', 6], ['traffic', 'authored traffic', 'bool', true], ['replace', 'replace', 'sel:route|all', 'route'],
+  ['profile', 'profile JSON {sloped, widths, banks, outer_gaps}', 'json', '{"sloped": true, "widths": null, "banks": null, "outer_gaps": []}']],
+  confirm: b => b.replace !== 'all' || confirm('Replace ALL geometry of the OBJ with this layout?'),
+  note: 'Start stretch (45 m before .. 30 m after point 0) must be level and unbanked; route bank is limited by kit gate V2_drivable_coverage (shown in the preview); sloped routes need trackbuild >= 0.3.0. Outer gaps are declared wall_gaps (cars can leave there; runtime unproven).'});
+teTool({id: 'xs', title: '1 Cross-sections (read only)', op: 'cross_sections', preview: false, xsec: true, fields: [['road', 'road (empty = route stations)', 'cons:road', '']]});
+teTool({id: 'ends', title: '2 Open road ends (read only)', op: 'road_ends', preview: false, fields: [],
+  note: 'Yellow markers = open ends (roads: start / end; junction arms). Use the refs (e.g. road1:end, junction1:arm0) in Join.'});
+teTool({id: 'junc', title: '2 Junction piece (T / Y / cross, level)', op: 'junction', fields: [
+  ['id', 'existing junction (re-generate)', 'cons:junction', ''], ['centre', 'centre x y z', 'nums', ''], ['heading', 'heading (deg; 0 = +x, 90 = +z)', 'num', 0],
+  ['arms', 'arms JSON [{angle, width, length}]', 'json', '[{"angle": 0, "width": 8, "length": 14}, {"angle": 90, "width": 8, "length": 14}, {"angle": 270, "width": 8, "length": 14}]'],
+  ['material', 'material', 'mat', 'asphalt']],
+  note: '3..6 arms at least 25 deg apart; hub planar-mapped (texture seam at the hub edges), arms u across / v along. Refused when it overlaps existing collision floor at a similar height. GEOMETRIC ONLY: the AI route / traffic network cannot branch (trackbuild: one closed route).'});
+teTool({id: 'join', title: '2 Join two road ends', op: 'join', fields: [
+  ['id', 'existing join (re-generate)', 'cons:join', ''], ['a', 'from end (e.g. road1:end)', 'text', ''], ['b', 'to end (e.g. junction1:arm0)', 'text', ''],
+  ['material', 'material', 'mat', 'asphalt'], ['step', 'step (m)', 'num', 4], ['uv_len', 'uv m per repeat', 'num', 14]],
+  note: 'Connector from end A along its direction into end B; its end corners coincide exactly with both ends. Widths within 50 %, banks within 10 deg, grade <= 25 %. UV seams (mirrored u, v offset) are reported, geometry stays continuous.'});
+teTool({id: 'routing', title: '2 Routing report (read only)', op: 'routing', preview: false, fields: [],
+  note: 'Route direction / lanes / starts / checkpoints / traffic, and which pieces are geometric only. Runtime behaviour needs an in-game run.'});
+teTool({id: 'hterr', title: '3 Height terrain (grid)', op: 'hterrain', fields: [
+  ['id', 'existing terrain (re-generate flat)', 'cons:hterrain', ''], ['rect', 'rect x0 z0 x1 z1 (m)', 'nums', ''], ['cell', 'cell (m)', 'num', 5],
+  ['height', 'height (m; or 4 corner heights)', 'json', '19.9'], ['material', 'material', 'mat', 'grass']],
+  note: 'At most 128 x 128 and 4096 cells per block; must lie inside the unit regions (Unit regions: include / lateral first). Place it a little below road floors.'});
+teTool({id: 'brush', title: '3 Terrain brush (one undo step per stroke)', op: 'terrain_brush', fields: [
+  ['id', 'terrain', 'cons:hterrain', ''], ['mode', 'mode', 'sel:raise|lower|flatten|smooth|set|blend', 'raise'],
+  ['centre', 'centre (click the mesh; last line used)', 'xz', ''], ['radius', 'radius (m)', 'num', 15], ['strength', 'strength (m for raise / lower, else 0..1)', 'num', 2],
+  ['target', 'flatten target height (m)', 'num', ''], ['points', 'set: [[i, k, height], ...]', 'json', ''], ['road', 'blend to block (road / junction / join / route_road)', 'cons:*', ''],
+  ['drop', 'blend: terrain this far below the road (m)', 'num', 0.05]],
+  note: 'Falloff smoothstep(1 - d / radius). Blend moves terrain only: vertices under the road go to road height - drop, neighbours ease towards the road edge, then every terrain cell still rising above the road is lowered (the road is never moved). Preview is light (no kit run); Apply runs the clip rule and the kit dry run.'});
+teTool({id: 'minfo', title: '4 Mesh: faces / open loops of the selection (read only)', op: 'mesh_info', preview: false, fields: [
+  ['groups', 'face groups', 'groups', ''], ['open_loops', 'list open-edge loops (for Fill)', 'bool', true]]});
+teTool({id: 'mxf', title: '4 Mesh: move / turn / scale vertices, edges or faces', op: 'mesh', mop: 'transform', fields: [
+  ['verts', 'vertices (v indices)', 'verts', ''], ['edges', 'edges JSON [[v, v], ...]', 'json', ''], ['faces', 'faces (OBJ lines)', 'faces', ''],
+  ['delta', 'move dx dy dz (m)', 'nums', '0, 0, 0'], ['axis', 'axis lock', 'sel:|x|y|z', ''], ['angle', 'turn (deg, about vertical)', 'num', 0], ['scale', 'scale', 'num', 1],
+  ['pivot', 'pivot x y z (empty = selection centre / lowest point)', 'nums', '']],
+  note: 'Every v line at a selected position moves (uv / colour seams stay welded); every affected face gets the normal of its new plane. Refused: collapsed / sliver faces, faces leaving the unit regions, a broken route check, new non-manifold edges.'});
+teTool({id: 'mdel', title: '4 Mesh: delete faces', op: 'mesh', mop: 'delete', fields: [['faces', 'faces (OBJ lines)', 'faces', '']],
+  note: 'Refused when the drivable route floor or walls would be broken (kit V2 sampling). Unused v lines stay.'});
+teTool({id: 'mtri', title: '4 Mesh: triangulate quads', op: 'mesh', mop: 'triangulate', fields: [['faces', 'faces (OBJ lines)', 'faces', ''], ['diagonal', 'diagonal', 'sel:short|02|13', 'short']]});
+teTool({id: 'msub', title: '4 Mesh: subdivide faces', op: 'mesh', mop: 'subdivide', fields: [['faces', 'faces (OBJ lines)', 'faces', '']],
+  note: 'Quads -> 4 quads, triangles -> 4 triangles. Refused when an edge is shared with an unselected face (it would crack).'});
+teTool({id: 'mext', title: '4 Mesh: extrude a face region', op: 'mesh', mop: 'extrude', fields: [['faces', 'faces (OBJ lines)', 'faces', ''],
+  ['distance', 'distance (m, negative = inwards)', 'num', 1], ['side_material', 'side material (empty = that of the region)', 'mat', '']]});
+teTool({id: 'mfill', title: '4 Mesh: fill ONE explicit hole', op: 'mesh', mop: 'fill', fields: [['loop', 'open-edge loop: v indices in order (from the read-only listing)', 'nums', ''],
+  ['material', 'material', 'mat', 'grass']], note: 'Only an explicit open-edge loop; winding against its neighbours; refused when not planar within 0.25 m or self-crossing. No automatic repair.'});
+teTool({id: 'timp', title: '5 Import an original texture (PNG)', op: 'texture_import', fields: [
+  ['source', 'source file (absolute path of YOUR OWN .png)', 'text', ''], ['name', 'name (textures/<name>.png)', 'text', ''],
+  ['author', 'author', 'text', ''], ['licence', 'licence', 'text', ''], ['note', 'note', 'text', '']],
+  note: 'Kit PNG rules: 8-bit RGB / opaque RGBA, non-interlaced, power of two 4..1024. The source is only read; the file is held in the editor (undoable) until Save writes it with a provenance record (editor_provenance.json). Game / kit data is never imported.'});
+teTool({id: 'mnew', title: '5 New / duplicate material', op: 'material_create', fields: [
+  ['name', 'name', 'text', ''], ['like', 'duplicate of (empty = new)', 'mat', ''], ['texture', 'texture (project or imported PNG)', 'text', ''],
+  ['surface', 'surface word (hex, e.g. 0x0001)', 'text', ''], ['collide', 'collide', 'sel:|true|false', ''], ['car_solid', 'car_solid', 'sel:|true|false', '']],
+  note: 'Keys: texture / surface / collide / car_solid only (trackbuild materials are opaque; no alpha / blend / shader / animation). Checked by the kit rules; one render row appended (max 83).'});
+teTool({id: 'uvx', title: '5 UV scale / offset / rotation', op: 'uv_transform', fields: [
+  ['groups', 'face groups', 'groups', ''], ['scale', 'scale su sv', 'nums', '1, 1'], ['offset', 'offset ou ov', 'nums', '0, 0'], ['rotate', 'rotate (deg)', 'num', 0]],
+  note: "u' = R(rotate)(su u, sv v) + offset; new vt lines (other faces' uv untouched)."});
+teTool({id: 'paint', title: '5 Paint vertex colour', op: 'paint', fields: [
+  ['groups', 'face groups to paint', 'groups', ''], ['centre', 'centre (click)', 'xz', ''], ['radius', 'radius (m)', 'num', 5],
+  ['colour', 'colour r g b (0..1; 0.2 = neutral)', 'nums', '0.3, 0.25, 0.2'], ['strength', 'strength 0..1', 'num', 1]],
+  note: 'Baked vertex light (trackbuild v colour). Vertices shared with unpainted faces are copied, so no other face changes colour.'});
+teTool({id: 'plib', title: '6 Prefab library (search, previews)', op: 'prefab_library', preview: false, fields: [['query', 'search (name or material)', 'text', '']],
+  note: 'Top (left) and side (right) previews generated from the prefab file. Placements are COPIES (trackbuild has no instances); each block remembers its prefab version for an explicit refresh.'});
+teTool({id: 'pplace', title: '6 Place a prefab copy (snapping)', op: 'prefab_place', fields: [
+  ['id', 'existing copy (re-generate)', 'cons:placed', ''], ['name', 'prefab', 'text', ''], ['position', 'position (click; last line)', 'pts', ''],
+  ['angle', 'turn (deg)', 'num', 0], ['snap', 'grid snap (m)', 'num', ''], ['angle_snap', 'angle snap (deg)', 'num', ''],
+  ['ground', 'drop onto the collision floor below', 'bool', true], ['collision', 'collision', 'sel:keep|none', 'keep']],
+  note: 'Collision "none" uses each material\u2019s <name>_nc twin (create it with New / duplicate material, collide false); never automatic.'});
+teTool({id: 'pscat', title: '6 Repeat a prefab along a path', op: 'prefab_scatter', fields: [
+  ['id', 'existing scatter (re-generate)', 'cons:scatter', ''], ['name', 'prefab', 'text', ''], ['points', 'path points', 'pts', ''],
+  ['closed', 'closed path', 'bool', false], ['spacing', 'spacing (m)', 'num', 10], ['offset', 'lateral offset (m, + = n+ side)', 'num', 0],
+  ['align', 'align to the path', 'bool', true], ['angle', 'extra turn (deg)', 'num', 0], ['start', 'first copy at (m)', 'num', 0],
+  ['ground', 'drop onto the floor', 'bool', false], ['collision', 'collision', 'sel:keep|none', 'keep'], ['max_count', 'max copies', 'num', 100]]});
+teTool({id: 'pref', title: '6 Refresh copies of a changed prefab', op: 'prefab_refresh', fields: [['name', 'prefab', 'text', '']],
+  note: 'Lists the blocks made from an older version (sha256) of the prefab; Apply re-generates them in place (one undo step).'});
+teTool({id: 'srep', title: '7 Streaming / LOD / visibility report (read only)', op: 'streaming_report', preview: false, fields: [],
+  note: 'Per section (streamed unit): stations, lateral bounds, region area, drivable samples, polygons, mesh / LOD bytes vs slots. Limits are labelled FORMAT / HOST / TOOL / EDITOR with their evidence; HOST ceilings need host work (separate checkpoint), never an editor change.'});
+teTool({id: 'lodp', title: '7 LOD preview of one section', op: 'lod_preview', preview: false, fields: [['unit', 'unit', 'num', 0]]});
+teTool({id: 'sset', title: '7 LOD / visibility settings', op: 'streaming_settings', fields: [
+  ['lod_mode', 'LOD', 'sel:identity|decimate', 'decimate'], ['e_max', 'decimation bound e_max (m, <= 0.3)', 'num', 0.3], ['pvs_mode', 'visibility', 'sel:all|computed', 'all']],
+  note: 'Checked by the kit build_units dry run; other lod / pvs keys are kept. The kit gates (V8_lod, V3 / V9) decide at Build -> Validate.'});
+teTool({id: 'diag', title: '8 Diagnostics: click an item to show its faces', op: 'diagnostics', preview: false, fields: [],
+  note: 'Open / non-manifold edges, stored normals against their face plane, faces outside the unit regions, overlapping collision floors, route structural checks, input problems. Red = the faces of the clicked item.'});
+teTool({id: 'bk', title: '9 Backups of this project (read only)', op: 'backups', preview: false, fields: [],
+  note: 'Save copies the previous description / OBJ into Workbench state first (never inside the project; never deleted by the editor).'});
+teTool({id: 'bkr', title: '9 Restore a backup into the editor', op: 'backup_restore', fields: [['name', 'backup (as listed)', 'text', '']],
+  note: 'Loads the backup into the editor buffers as one undo step; Save writes it.'});
+teTool({id: 'ver', title: '9 Versions / dependencies (read only)', op: 'versions', preview: false, fields: []});
+teTool({id: 'exp', title: '9 Export original sources (zip)', op: 'export_sources', preview: false, fields: [['dest', 'new .zip path (absolute)', 'text', '']],
+  note: 'Description, OBJ / MTL, textures, provenance, project files + MANIFEST.json (sha256, versions). Never build output, staged packages or game files. Needs a saved project.'});
+teTool({id: 'imp', title: '9 Import a source zip as a NEW project', op: 'import_sources', preview: false, fields: [['zip', 'source zip', 'text', ''], ['dest', 'new project folder (absolute)', 'text', '']],
+  note: 'Verified against its manifest; only its listed relative paths; the open project is not touched.'});
+teTool({id: 'prep', title: '9 Prepare test (after Build -> Validate -> Stage)', op: 'prepare_test', preview: false, fields: [['dest', 'new folder for the test plan (absolute)', 'text', '']],
+  note: 'Writes TEST_PLAN.md (checks for the content of this track) and PACKAGE_RECORD.json (sha256 of every staged file, versions). Nothing is launched; a run needs the owner present and the runner token.'});
+function teCons(kind) { return Object.entries((ST.scene && ST.scene.constructs) || {}).filter(([k, v]) => v.meta.kind === kind || (kind === '*')).map(([k]) => k); }
+function teInput(t, f) { const [key, label, kind, def] = f, id = `te_${t.id}_${key}`; let h;
+  if (kind === 'pts') h = `<div>${label} <button data-pick="${id}">Click points</button></div><textarea id="${id}" rows="3" style="width:95%">${def}</textarea>`;
+  else if (kind === 'faces' || kind === 'verts') h = `<div>${label} <button data-fpick="${id}" data-mode="${kind}">Pick on the mesh</button></div><textarea id="${id}" rows="1" style="width:95%">${def}</textarea>`;
+  else if (kind === 'xz') h = `<div>${label} <button data-pick="${id}">Click</button></div><textarea id="${id}" rows="1" style="width:95%">${def}</textarea>`;
+  else if (kind === 'bool') h = `<label><input type="checkbox" id="${id}" ${def ? 'checked' : ''}> ${label}</label>`;
+  else if (kind === 'json') h = `<div>${label}</div><textarea id="${id}" rows="2" style="width:95%">${def}</textarea>`;
+  else if (kind === 'mat' || kind.startsWith('cons:') || kind.startsWith('sel:')) h = `<div>${label} <select id="${id}" data-kind="${kind}" data-def="${def}"></select></div>`;
+  else if (kind === 'groups') h = `<div class="note">${label}: the current selection (Ctrl-click face groups)</div>`;
+  else h = `<div>${label} <input type="${kind === 'num' ? 'number' : 'text'}" id="${id}" value="${def}" style="width:${kind === 'num' ? 70 : 200}px"></div>`;
+  return h; }
+function teFill() { for (const s of document.querySelectorAll('#tetools select')) { const k = s.dataset.kind, cur = s.value || s.dataset.def; let opts;
+    if (k === 'mat') opts = (ST.scene && ST.scene.assignable) || [];
+    else if (k.startsWith('cons:')) opts = [''].concat(teCons(k.slice(5)));
+    else opts = k.slice(4).split('|');
+    s.innerHTML = opts.map(o => `<option value="${o}">${o || '(new)'}</option>`).join(''); if (opts.includes(cur)) s.value = cur; } }
+function teBody(t) { const b = {op: t.op}; if (t.mop) b.mesh_op = t.mop;
+  for (const [key, label, kind] of t.fields) { const el = $(`te_${t.id}_${key}`); if (kind === 'groups') { b[key] = ST.multi.slice(); continue; } if (!el) continue;
+    let v;
+    if (kind === 'pts') { v = parsePts(el.value); if (key === 'position' || key === 'centre') v = v.length ? v[v.length - 1] : undefined; }
+    else if (kind === 'faces' || kind === 'verts') { const q = el.value.split(/[\s,;]+/).filter(t => t).map(Number); v = q.length ? q : undefined; }
+    else if (kind === 'xz') { const q = parsePts(el.value).filter(p => p.length >= 2); v = q.length ? (q[q.length - 1].length === 3 ? [q[q.length - 1][0], q[q.length - 1][2]] : q[q.length - 1]) : undefined; }
+    else if (kind === 'bool') v = el.checked;
+    else if (kind === 'num') v = el.value === '' ? undefined : +el.value;
+    else if (kind === 'nums') v = el.value.trim() === '' ? undefined : el.value.split(/[\s,;]+/).filter(x => x).map(Number);
+    else if (kind === 'json') { try { v = el.value.trim() ? JSON.parse(el.value) : undefined; } catch (e) { throw new Error(label + ': not JSON'); } }
+    else { v = el.value === '' ? undefined : el.value; if (v === 'true') v = true; else if (v === 'false') v = false; }
+    if (v !== undefined && !(Array.isArray(v) && !v.length && kind === 'pts')) b[key] = v; }
+  return b; }
+function teXsec(r) { const box = $('xsec'), xs = r && r.cross_sections || r && r.sections; if (!xs || !xs.length || !xs[0].width) { box.style.display = 'none'; return; }
+  const W = 340, H = 90, s0 = xs[0].s, s1 = xs[xs.length - 1].s || 1;
+  const ser = [['elevation', x => x.centre[1], '#2a5db0'], ['width', x => x.width, '#2e8b57'], ['bank', x => x.bank_deg, '#b7791f']];
+  let svg = `<svg width="${W}" height="${H * 3 + 20}" style="background:var(--bg);border:1px solid var(--line)">`;
+  ser.forEach(([name, f, c], k) => { const v = xs.map(f), lo = Math.min(...v), hi = Math.max(...v), sp = hi - lo || 1;
+    const pts = xs.map((x, i) => `${(6 + (W - 12) * (x.s - s0) / (s1 - s0 || 1)).toFixed(1)},${(k * H + 14 + (H - 22) * (1 - (v[i] - lo) / sp)).toFixed(1)}`).join(' ');
+    svg += `<text x="6" y="${k * H + 11}" font-size="10" fill="currentColor">${name} ${lo.toFixed(2)} .. ${hi.toFixed(2)}</text><polyline fill="none" stroke="${c}" stroke-width="1.5" points="${pts}"/>`; });
+  box.innerHTML = svg + `</svg><div class="note">${xs.length} cross-sections along ${(s1 - s0).toFixed(1)} m</div>`; box.style.display = 'block'; }
+async function teRun(t, apply) { let b; try { b = teBody(t); } catch (e) { layoutShow({}, ['NOT STARTED: ' + e.message], 'bad'); return null; }
+  ST.ppick = null; ST.fpick = null; let r;
+  if (t.preview === false) { r = await api('/api/layout', b); layoutOverlay(r); layoutShow(r, r.ok ? [t.title + ' (read only):'].concat(fmtLayout(r), [JSON.stringify(teBrief(r), null, 1).slice(0, 4000)]) : ['REFUSED: ' + r.error], r.ok ? '' : 'bad'); }
+  else if (apply) { if (t.confirm && !t.confirm(b)) return null; r = await layoutApply(b); if (r && r.ok) teFill(); }
+  else r = await layoutPreview(b);
+  if (t.xsec) teXsec(r);
+  if (r && r.items) { const box = $('xsec'); box.style.display = 'block'; box.innerHTML = '';
+    r.items.forEach((it, i) => { const d = document.createElement('div'); d.className = it.ok ? 'flag' : 'vitem'; d.textContent = (it.ok ? 'ok  ' : 'CHECK  ') + it.check + ': ' + it.text;
+      d.onclick = () => { ST.lay = {lost: (it.faces || []).map(c => ({corners: c})), points: it.focus ? [it.focus] : null}; if (it.focus) { const o = O(it.focus); ST.cam.tgt = [o[0], o[1], o[2]]; } build(); draw(); };
+      box.appendChild(d); }); }
+  if (r && r.prefabs) { const box = $('xsec'); box.style.display = 'block'; box.innerHTML = r.prefabs.map(x => `<div style="display:inline-block;margin:3px;text-align:center;font-size:11px"><img alt="${x.name}" src="data:image/svg+xml;utf8,${encodeURIComponent(x.preview_svg || '')}"><br>${x.name} (${x.faces || 0})</div>`).join(''); }
+  return r; }
+function teBrief(r) { const o = {}; for (const [k, v] of Object.entries(r)) if (!['new_faces', 'state', 'cross_sections', 'sections', 'markers', 'route_lines', 'regions'].includes(k)) o[k] = v; return o; }
+function teRender() { const box = $('tetools'); box.innerHTML = '';
+  for (const t of TE_TOOLS) { const d = document.createElement('details'); d.id = 'tet_' + t.id; d.dataset.search = (t.title + ' ' + (t.note || '') + ' ' + t.op).toLowerCase();
+    d.innerHTML = `<summary><b>${t.title}</b></summary>` + t.fields.map(f => teInput(t, f)).join('') +
+      (t.preview === false ? `<div><button data-run="1">Run</button></div>` : `<div><button data-prev="1">Preview</button> <button data-apply="1">Apply</button></div>`) +
+      (t.note ? `<div class="note">${t.note}</div>` : '');
+    d.querySelector('[data-run]') && (d.querySelector('[data-run]').onclick = () => teRun(t, false));
+    d.querySelector('[data-prev]') && (d.querySelector('[data-prev]').onclick = () => teRun(t, false));
+    d.querySelector('[data-apply]') && (d.querySelector('[data-apply]').onclick = () => teRun(t, true));
+    for (const b of d.querySelectorAll('[data-fpick]')) b.onclick = () => { const on = !(ST.fpick && ST.fpick.id === b.dataset.fpick); ST.fpick = on ? {id: b.dataset.fpick, mode: b.dataset.mode} : null; ST.ppick = null; b.textContent = on ? 'Stop picking' : 'Pick on the mesh'; };
+    for (const b of d.querySelectorAll('[data-pick]')) b.onclick = () => { ST.ppick = ST.ppick === b.dataset.pick ? null : b.dataset.pick; ST.wpick = null; ST.bpick = null; b.textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
+    box.appendChild(d); }
+  teFill(); }
+for (const id of ['L_wire', 'L_normals']) $(id).onchange = () => { build(); draw(); };
+const HELP = ['Shortcuts (not while typing in a field):', '  drag: orbit   right-drag / shift-drag: pan   wheel: zoom   W A S D Q E: fly',
+  '  click: select   Ctrl-click: add / remove a face group   F: focus the selection   G: wireframe   N: stored normals',
+  '  Ctrl+Z / Ctrl+Y: undo / redo (one step per operation)   Ctrl+S: save   Esc: stop picking   ?: this help', '',
+  'Every tool: Preview (nothing changes) -> Apply (with that preview). Refusals change nothing. Save is all-or-nothing and keeps a',
+  'backup of the previous save (Workbench state). Build -> Validate -> Stage uses the kit gates; "Prepare test" writes a test plan',
+  'and package record only - nothing is launched. Snapping / axis locks: in the move, mesh and placement tools.',
+  'Click filter: restrict clicks to one material or one construction block kind (roads, terrain, ...).'];
+$('helpbtn').onclick = () => { const b = $('helpbox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; b.textContent = HELP.join('\n'); };
+function pickFilterFill() { const sel = $('pickfilter'), cur = sel.value; const S = ST.scene || {}; let h = '<option value="">any face group</option>';
+  for (const n of Object.keys(S.materials || {})) h += `<option value="mat:${n}">material ${n}</option>`;
+  const kinds = [...new Set(Object.values(S.constructs || {}).map(c => c.meta.kind))]; for (const k of kinds) h += `<option value="kind:${k}">${k} blocks</option>`;
+  sel.innerHTML = h; if ([...sel.options].some(o => o.value === cur)) sel.value = cur; pickFilterApply(); }
+function pickFilterApply() { const v = $('pickfilter').value; ST.pickMat = v.startsWith('mat:') ? v.slice(4) : null;
+  ST.pickGroups = v.startsWith('kind:') ? new Set(Object.values((ST.scene && ST.scene.constructs) || {}).filter(c => c.meta.kind === v.slice(5)).flatMap(c => c.groups)) : null; }
+$('pickfilter').onchange = pickFilterApply;
+$('tesearch').oninput = () => { const q = $('tesearch').value.toLowerCase(); for (const d of $('tetools').children) d.style.display = !q || d.dataset.search.includes(q) ? '' : 'none'; };
 async function doUndo() { const r = await api('/api/undo', {}); shown(r, 'undone: ' + r.undone); if (r.ok) await refresh(true); return r; }
 async function doRedo() { const r = await api('/api/redo', {}); shown(r, 'redone: ' + r.redone); if (r.ok) await refresh(true); return r; }
 $('apply').onclick = () => ST.sel && doEdit(ST.sel.kind, ST.sel.index, [+$('dx').value, +$('dy').value, +$('dz').value]);
@@ -999,6 +1228,33 @@ async function selftestScenery(ok, C0) {
   for (let k = 0; k < 5; k++) await doUndo(); ok('undo (5 edits) back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
   $('xpts').value = ''; $('xconfirm').checked = false; $('xrep').value = 'route'; $('spts').value = ''; $('urect').value = ''; $('uop').value = 'fit';
   ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
+// TE queue: the authoring panel (generic tools over the real ops), a profiled road through it, diagnostics, overlays, help, filter
+async function selftestTE(ok, C0) {
+  const n = TE_TOOLS.length, shown = () => [...$('tetools').children].filter(d => d.style.display !== 'none').length;
+  ok('TE panel: every tool rendered as a form', n >= 30 && $('tetools').children.length === n, n + ' tools');
+  $('tesearch').value = 'junction'; $('tesearch').oninput(); const nj = shown(); $('tesearch').value = ''; $('tesearch').oninput();
+  ok('tool search filters the list', nj >= 1 && nj < n && shown() === n, nj + ' matching "junction"');
+  const t = TE_TOOLS.find(x => x.id === 'proad');
+  $('te_proad_points').value = '-6060 20.5 -6025\n-6000 20.5 -6012\n-5940 20.5 -6025'; $('te_proad_widths').value = '8, 10, 12';
+  $('te_proad_banks').value = '0, 2, 3'; $('te_proad_material').value = 'asphalt';
+  const u0 = ST.scene.state.undo.length, pv = await teRun(t, false);
+  ok('profiled road preview: faces drawn, cross-section chart, nothing changed', pv && pv.ok && ST.lines.ln.n > 0 && /<svg/.test($('xsec').innerHTML) && ST.scene.state.undo.length === u0,
+     pv && (pv.ok ? pv.summary_lines[0] : pv.error));
+  const ap = await teRun(t, true);
+  ok('profiled road applied (one undo entry), on top of the ground (layered, not refused)', ap && ap.ok && ST.scene.state.undo.length === u0 + 1 && ap.overlap && ap.overlap.overlaps === 0,
+     ap && (ap.ok ? ap.label + '; on top of ' + ap.overlap.on_top_of_existing_floor + ' floor face(s)' : ap.error));
+  ok('the new road is offered for re-generation', [...$('te_proad_road').options].some(o => o.value === ap.road), ap.road);
+  const dg = await teRun(TE_TOOLS.find(x => x.id === 'diag'), false), items = $('xsec').children;
+  ok('diagnostics listed as clickable items', dg && dg.ok && items.length === dg.items.length && items.length >= 6, dg && dg.summary_lines[0]);
+  const it = dg.items.findIndex(x => x.faces && x.faces.length); if (it >= 0) items[it].onclick();
+  ok('clicking an item highlights its faces', it < 0 || (ST.lines.lf.n > 0), it < 0 ? 'no item with faces' : dg.items[it].check);
+  $('L_wire').checked = true; $('L_normals').checked = true; build(); draw();
+  ok('wireframe + stored normals overlays drawn', ST.lines.wire.n > 0 && ST.lines.nok.n > 0, `${ST.ovl.wire} triangles, ${ST.ovl.normals} normals, ${ST.ovl.bad} disagree`);
+  $('L_wire').checked = false; $('L_normals').checked = false; build(); draw();
+  $('helpbtn').onclick(); ok('help / shortcuts shown', $('helpbox').style.display === 'block' && /Ctrl\+S/.test($('helpbox').textContent), ''); $('helpbtn').onclick();
+  ok('click filter offers materials and block kinds', [...$('pickfilter').options].some(o => o.value === 'mat:asphalt') && [...$('pickfilter').options].some(o => o.value === 'kind:road'), $('pickfilter').options.length + ' options');
+  await doUndo(); ok('undo back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  ST.lay = null; $('layout_out').style.display = 'none'; $('xsec').style.display = 'none'; build(); draw(); }
 async function selftestAuthored(ok) {
   const S0 = ST.scene.state.sha256, C0 = ST.scene.state.content_sha256;
   ok('webgl context', !!gl, gl && gl.getParameter(gl.VERSION));
@@ -1059,6 +1315,7 @@ async function selftestAuthored(ok) {
   if (inSec('road')) { await selftestRoad(ok, C0); select('group', grp); }
   if (inSec('race')) { await selftestRace(ok, C0); select('group', grp); }
   if (inSec('scenery')) { await prefabList(); await selftestScenery(ok, C0); select('group', grp); }
+  if (inSec('te')) { await selftestTE(ok, C0); select('group', grp); }
   if (inSec('props')) {
   // v0.16 material property edits
   $('mprops').onclick(); ok('group -> its material\'s property box', ST.sel && ST.sel.kind === 'material' && ST.sel.index === 'grass' && $('propbox').style.display === 'block', $('propinfo').textContent);
@@ -1160,13 +1417,15 @@ async function selftest() {
     } else {
       const st = ST.scene.stations, N = st.length;
       if (N) { const c = [0,0,0]; st.forEach(s => { c[0] += s.p[0]; c[1] += s.p[1]; c[2] += s.p[2]; }); ST.origin = c.map(v => v / N); }
-      await refresh(false);
+      await refresh(false); teRender(); pickFilterFill();
     }
+    if (ST.retail) $('tebox').style.display = 'none';      // TE tools edit authored projects only
     const xs = ST.pick.map(o => o.p[0]), zs = ST.pick.map(o => o.p[2]);
     ST.cam.dist = Math.max(200, (Math.max(...xs) - Math.min(...xs) + Math.max(...zs) - Math.min(...zs)) * 0.8);
     // v0.27: optional view for documentation screenshots (read only): view=pitch,yaw,dist (radians, m), layers=collision,units,...
     if (Q.get('view')) { const [vp, vy, vd] = Q.get('view').split(',').map(Number); if (isFinite(vp)) ST.cam.pitch = Math.max(-1.45, Math.min(1.45, vp)); if (isFinite(vy)) ST.cam.yaw = vy; if (isFinite(vd)) ST.cam.dist = Math.max(5, Math.min(8000, vd)); }
-    for (const l of (Q.get('layers') || '').split(',')) { const b = ['mesh','collision','units','route','starts'].includes(l) && $('L_' + l); if (b) b.checked = true; }
+    for (const l of (Q.get('layers') || '').split(',')) { const b = ['mesh','collision','units','route','starts','wire','normals'].includes(l) && $('L_' + l); if (b) b.checked = true; }
+    if (/wire|normals/.test(Q.get('layers') || '')) build();      // TE: overlays are line sets built from the layers
     draw(); addEventListener('resize', draw);
     if (SELFTEST) await selftest();
   } catch (e) { $('hud').textContent = 'ERROR: ' + e.message; if (SELFTEST) api('/api/selftest', {ok: false, error: String(e && e.stack || e)}); }

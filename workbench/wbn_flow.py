@@ -153,6 +153,18 @@ def project_kind(project):
 
 
 # ------------------------------------------------------------------------------------------------ plan helpers
+def bundle_dirs(b):
+    r"""0.2.0 (launcher bmpaths.py, same rule): in the Windows package (layout 2: <install>\app\launcher with
+    <install>\Burnout Mashup.exe) the game copy and mods\user / mods\generated live in <install>\gamedata; else in the launcher folder.
+    -> (gamedata, mods\generated, mods\user)"""
+    t = os.path.dirname(os.path.abspath(b))
+    inst = os.path.dirname(t)
+    if os.path.basename(t).lower() == 'app' and os.path.isfile(os.path.join(inst, 'Burnout Mashup.exe')):
+        gd = os.path.join(inst, 'gamedata')
+        return gd, os.path.join(gd, 'mods', 'generated'), os.path.join(gd, 'mods', 'user')
+    return os.path.join(b, 'gamedata'), os.path.join(b, 'mods', 'generated'), os.path.join(b, 'mods', 'user')
+
+
 def bundle_plan(s, staged, mod_id, kind):
     """play.cmd (tester package 0.3.0) logic, re-done read only: which host, which profile folders, which mod folders"""
     b = s['bundle']
@@ -162,15 +174,15 @@ def bundle_plan(s, staged, mod_id, kind):
     hostdir = os.path.join(b, 'host-local') if os.path.isfile(loc) else os.path.join(b, 'host')
     kindtxt = 'local build (host-local holds a host)' if os.path.isfile(loc) else 'prebuilt host (host-local is empty)'
     exe = os.path.join(hostdir, 'burnout3_bmashup.exe')
+    gd, mgen, muser = bundle_dirs(b)
+    mods = ';'.join((root + r'mods\demo', mgen, muser))
     plan = {'bundle': b, 'is_bundle': os.path.isfile(os.path.join(b, 'play.cmd')) and os.path.isfile(os.path.join(b, 'BUNDLE.json')),
             'host': kindtxt, 'exe': exe, 'exe_present': os.path.isfile(exe),
-            'gamedata_ready': os.path.isfile(os.path.join(b, 'gamedata', '.complete')),
+            'gamedata_ready': os.path.isfile(os.path.join(gd, '.complete')),
             'env': {'APPDATA': root + r'profile\Roaming', 'LOCALAPPDATA': root + r'profile\Local',
-                    'BMASHUP_DATA': root + 'gamedata', 'TAKEDAWN_DATA': root + 'gamedata',
-                    'BMASHUP_MODS': ';'.join(root + x for x in (r'mods\demo', r'mods\generated', r'mods\user')),
-                    'TAKEDAWN_MODS': ';'.join(root + x for x in (r'mods\demo', r'mods\generated', r'mods\user'))},
-            'install_step': 'copy the folder "%s" to "%s" (not done by the Workbench)' % (staged, os.path.join(b, 'mods', 'user', mod_id)),
-            'already_installed': os.path.isdir(os.path.join(b, 'mods', 'user', mod_id)),
+                    'BMASHUP_DATA': gd, 'TAKEDAWN_DATA': gd, 'BMASHUP_MODS': mods, 'TAKEDAWN_MODS': mods},
+            'install_step': 'copy the folder "%s" to "%s" (not done by the Workbench)' % (staged, os.path.join(muser, mod_id)),
+            'already_installed': os.path.isdir(os.path.join(muser, mod_id)),
             'start_command': '"%s"' % os.path.join(b, 'play.cmd'), 'source': 'play.cmd (read, not run); BMASHUP_HOST unset',
             'approvals_file_of_this_profile': os.path.join(b, 'profile', 'Roaming', 'BurnoutMashup', 'plugin-approvals.toml')}
     hi = os.path.join(hostdir, 'HOST_INFO.json')

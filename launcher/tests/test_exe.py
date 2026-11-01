@@ -47,9 +47,9 @@ def deterministic_build():
 @case
 def starts_launcher_with_dropped_paths():
     root = os.path.join(T, "Bündel mit Leerzeichen")
-    os.makedirs(os.path.join(root, "tools", "launcher"))
+    os.makedirs(os.path.join(root, "app", "launcher", "tools", "launcher"))          # layout 2 (0.2.0): the program in app\
     rec = os.path.join(T, "argv.json")
-    open(os.path.join(root, "tools", "launcher", "bmlauncher.pyw"), "w", encoding="utf-8").write(
+    open(os.path.join(root, "app", "launcher", "tools", "launcher", "bmlauncher.pyw"), "w", encoding="utf-8").write(
         "import json, os, sys\njson.dump({'argv': sys.argv, 'cwd': os.getcwd()}, open(%r, 'w', encoding='utf-8'))\n" % rec)
     exe = os.path.join(root, "Burnout Mashup.exe")
     shutil.copy2(A, exe)
@@ -63,7 +63,7 @@ def starts_launcher_with_dropped_paths():
             break
         time.sleep(0.1)
     got = json.load(open(rec, encoding="utf-8"))
-    assert os.path.normcase(got["argv"][0]) == os.path.normcase(os.path.join(root, "tools", "launcher", "bmlauncher.pyw")), got
+    assert os.path.normcase(got["argv"][0]) == os.path.normcase(os.path.join(root, "app", "launcher", "tools", "launcher", "bmlauncher.pyw")), got
     assert got["argv"][1:] == drops, got["argv"]
     assert os.path.normcase(got["cwd"]) == os.path.normcase(root), got["cwd"]
 

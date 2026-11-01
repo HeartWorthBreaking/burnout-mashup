@@ -24,6 +24,15 @@ import subprocess
 import sys
 
 sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "launcher"))
+try:
+    import bmpaths  # noqa: E402  (0.2.0 layout 2: game copy + mods\\user / mods\\generated in <install>\\gamedata)
+except ImportError:      # this tool copied without tools\\launcher (the tester bundle layout): everything stays in this folder
+    import types
+    bmpaths = types.SimpleNamespace(
+        install_root=lambda l: None, gamedata=lambda l: os.path.join(os.path.abspath(l), "gamedata"),
+        mods_dir=lambda l, k: os.path.join(os.path.abspath(l), "mods", k), display=lambda l, p: os.path.relpath(p, l),
+        game_entries=lambda gd: sorted(n for n in (os.listdir(gd) if os.path.isdir(gd) else []) if n.lower() != "mods"))
 
 BUNDLE = "bmashup-alpha-tester"
 HOST_DIR = "host"
@@ -469,7 +478,7 @@ def check_mods(here):
         say("PASS", "demo mods", "%d ready-made demo mods in mods\\demo" % n)
     else:
         say("FAIL", "demo mods", "mods\\demo has no mods", "unpack the zip again")
-    gen = os.path.join(here, "mods", "generated")
+    gen = bmpaths.mods_dir(here, "generated")
     st = os.path.join(gen, "PREPARE_STATE.json")
     if os.path.isfile(st):
         try:
@@ -481,7 +490,7 @@ def check_mods(here):
     else:
         say("INFO", "generated demos", "not built yet (the coupe and the test tracks need your game data)",
             "after the game data step: prepare.cmd demos")
-    user = os.path.join(here, "mods", "user")
+    user = bmpaths.mods_dir(here, "user")
     if os.path.isdir(user):
         mods = [d for d in os.listdir(user) if os.path.isfile(os.path.join(user, d, "mod.toml"))]
         if mods:
@@ -535,7 +544,7 @@ def main(argv):
     if check_os():
         check_system_dlls()
         check_gpu()
-    check_data(os.path.join(here, "gamedata"), True)
+    check_data(bmpaths.gamedata(here), True)
     if a.data:
         check_data(a.data, False)
     check_mods(here)

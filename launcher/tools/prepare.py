@@ -23,6 +23,19 @@ import sys
 sys.dont_write_bytecode = True
 HERE = os.path.dirname(os.path.abspath(__file__))
 ROOT = os.path.dirname(HERE)
+sys.path.insert(0, os.path.join(HERE, "launcher"))
+try:
+    import bmpaths  # noqa: E402  (0.2.0 layout 2: game copy + mods\\user / mods\\generated in <install>\\gamedata)
+except ImportError:      # this tool copied without tools\\launcher (the tester bundle layout): everything stays in this folder
+    import types
+    bmpaths = types.SimpleNamespace(
+        install_root=lambda l: None, gamedata=lambda l: os.path.join(os.path.abspath(l), "gamedata"),
+        mods_dir=lambda l, k: os.path.join(os.path.abspath(l), "mods", k), display=lambda l, p: os.path.relpath(p, l),
+        game_entries=lambda gd: sorted(n for n in (os.listdir(gd) if os.path.isdir(gd) else []) if n.lower() != "mods"))
+GAMEDATA = bmpaths.gamedata(ROOT)
+MODS_GENERATED = bmpaths.mods_dir(ROOT, "generated")
+LAYOUT2 = bool(bmpaths.install_root(ROOT))
+STAGE_COPY, STAGE_INSTALL = ".copying", ".installing-data"     # 0.2.0: staged INSIDE gamedata\, moved into place at the end
 GAME_DIR = "Burnout 3 Takedown"
 GAME_SIGNATURE = "D0FC2EF4E9B2A86F"
 MANIFEST_ID = "81dc20fd647fb0b1"
@@ -111,8 +124,23 @@ def missing_host_message():
             "with an installed copy of the game" % HOST)
 
 
+def _clear_game(dest):
+    """remove the game copy in dest (everything but mods\\ - your mods are never touched)"""
+    for n in bmpaths.game_entries(dest):
+        p = os.path.join(dest, n)
+        shutil.rmtree(p) if os.path.isdir(p) else os.remove(p)
+
+
+def _move_into(stage, dest):
+    """move the staged game copy's entries into dest; the .complete marker last (it makes the copy count as checked)"""
+    names = sorted(os.listdir(stage), key=lambda n: (n == ".complete", n))
+    for n in names:
+        os.replace(os.path.join(stage, n), os.path.join(dest, n))
+    os.rmdir(stage)
+
+
 def cmd_data(a):
-    dest = os.path.join(ROOT, "gamedata")
+    dest = GAMEDATA
     if os.path.isfile(os.path.join(dest, ".complete")):
         check_installed_root(dest, "gamedata")
         say("gamedata already holds a checked install (%s). Nothing to do. To replace it, delete the gamedata folder first."
@@ -121,24 +149,27 @@ def cmd_data(a):
     if os.path.isfile(os.path.join(ROOT, INSTALL_MARK)):     # R1: our own unfinished install (Cancel / crash): start over
         say("removing an unfinished install in %s and starting again" % dest)
         if os.path.isdir(dest):
-            shutil.rmtree(dest)
+            _clear_game(dest) if LAYOUT2 else shutil.rmtree(dest)
         os.remove(os.path.join(ROOT, INSTALL_MARK))
-    if os.path.isdir(dest) and os.listdir(dest):
-        raise Refused("%s exists and is not empty but has no .complete marker (an interrupted copy?). Delete the gamedata "
-                      "folder and run this step again" % dest)
+    left = [n for n in bmpaths.game_entries(dest) if n not in (STAGE_COPY, STAGE_INSTALL)]
+    if left:
+        raise Refused("%s holds game files but no .complete marker (an interrupted copy?). Delete them (keep the mods folder) "
+                      "and run this step again: %s" % (dest, ", ".join(left[:6])))
     if a.copy_from:
         src = data_root_of(a.copy_from)
-        if inside(src, ROOT) or inside(ROOT, src):
-            raise Refused("the source %s and the bundle %s overlap" % (src, ROOT))
+        base = bmpaths.install_root(ROOT) or ROOT
+        if inside(src, base) or inside(base, src) or inside(src, dest):
+            raise Refused("the source %s and the bundle %s overlap" % (src, base))
         marker = check_installed_root(src, "source")
         need = 0
         for dp, dn, fn in os.walk(os.path.join(src, GAME_DIR)):
             for f in fn:
                 need += os.path.getsize(os.path.join(dp, f))
-        free = shutil.disk_usage(ROOT).free
+        os.makedirs(dest, exist_ok=True)
+        free = shutil.disk_usage(dest).free
         if free < need + 512 * 1024 * 1024:
             raise Refused("not enough space: %.1f GB needed, %.1f GB free on the bundle's drive" % (need / 1e9, free / 1e9))
-        tmp = dest + ".partial"
+        tmp = os.path.join(dest, STAGE_COPY) if LAYOUT2 else dest + ".partial"
         if os.path.exists(tmp):                    # R1: our own scratch copy from an interrupted run (Cancel): start over
             say("removing an interrupted copy (%s) and starting again" % tmp)
             shutil.rmtree(tmp)
@@ -159,9 +190,12 @@ def cmd_data(a):
             f.write(marker)
         if sha256_file(os.path.join(tmp, GAME_DIR, "default.xbe")) != sha256_file(os.path.join(src, GAME_DIR, "default.xbe")):
             raise Refused("default.xbe copy differs from the source")
-        if os.path.isdir(dest):
-            os.rmdir(dest)
-        os.replace(tmp, dest)
+        if LAYOUT2:
+            _move_into(tmp, dest)
+        else:
+            if os.path.isdir(dest):
+                os.rmdir(dest)
+            os.replace(tmp, dest)
         check_installed_root(dest, "gamedata")
         say("OK: %d files copied; gamedata holds a checked install (manifest %s). Next: preflight.cmd, then prepare.cmd demos"
             % (n, MANIFEST_ID))
@@ -173,6 +207,11 @@ def cmd_data(a):
         if not os.path.isfile(HOST):
             raise Refused(missing_host_message())
         os.makedirs(dest, exist_ok=True)
+        stage = os.path.join(dest, STAGE_INSTALL) if LAYOUT2 else dest
+        if LAYOUT2:
+            if os.path.exists(stage):
+                shutil.rmtree(stage)
+            os.makedirs(stage)
         env = dict(os.environ)
         for k in list(env):
             if k.upper().startswith(("RECOMP_", "BO3_", "TAKEDAWN_", "BMASHUP_")):
@@ -181,7 +220,7 @@ def cmd_data(a):
         env["LOCALAPPDATA"] = os.path.join(ROOT, "profile", "Local")
         os.makedirs(env["APPDATA"], exist_ok=True)
         os.makedirs(env["LOCALAPPDATA"], exist_ok=True)
-        cmd = [HOST, "--install", src, "--dest", dest]
+        cmd = [HOST, "--install", src, "--dest", stage]
         with open(os.path.join(ROOT, INSTALL_MARK), "w", encoding="utf-8") as f:     # removed only after a checked install
             f.write("install from %s started by prepare.py %s\n" % (src, PREPARE_VERSION))
         say("running the host's installer (checks every file against the retail NTSC-U manifest): %s" % " ".join(cmd))
@@ -189,6 +228,9 @@ def cmd_data(a):
         if rc != 0:
             raise Refused("the installer ended with exit status %d (see its STEP / RESULT lines above). An image or folder "
                           "of the retail NTSC-U disc is needed" % rc)
+        if LAYOUT2:
+            check_installed_root(stage, "gamedata")
+            _move_into(stage, dest)
         check_installed_root(dest, "gamedata")
         os.remove(os.path.join(ROOT, INSTALL_MARK))
         say("OK: gamedata holds a checked install. Next: preflight.cmd, then prepare.cmd demos")
@@ -347,14 +389,14 @@ def demo_track(tools, ctx, log, out, key):
 def cmd_demos(a):
     if sys.version_info < (3, 11):
         raise Refused("Python %d.%d: the demo generators need Python 3.11 or newer (python.org)" % sys.version_info[:2])
-    gd = os.path.join(ROOT, "gamedata")
+    gd = GAMEDATA
     check_installed_root(gd, "gamedata (run prepare.cmd data first)")
     tools = load_tools()
     want = [x.strip() for x in (a.only or ",".join(tools["demos"].keys())).split(",") if x.strip()]
     for x in want:
         if x not in tools["demos"]:
             raise Refused("unknown demo %s (known: %s)" % (x, ", ".join(tools["demos"])))
-    out = os.path.join(ROOT, "mods", "generated")
+    out = MODS_GENERATED
     os.makedirs(out, exist_ok=True)
     state_p = os.path.join(out, "PREPARE_STATE.json")
     state = json.load(open(state_p, encoding="utf-8")) if os.path.isfile(state_p) else {"mods": [], "results": {}}
@@ -413,13 +455,13 @@ def cmd_demos(a):
 
 
 def cmd_status(a):
-    gd = os.path.join(ROOT, "gamedata")
+    gd = GAMEDATA
     try:
         check_installed_root(gd, "gamedata")
         say("game data: OK (%s)" % gd)
     except Refused as e:
         say("game data: not ready - %s" % e)
-    st = os.path.join(ROOT, "mods", "generated", "PREPARE_STATE.json")
+    st = os.path.join(MODS_GENERATED, "PREPARE_STATE.json")
     say("generated demos: %s" % (open(st, encoding="utf-8").read().strip() if os.path.isfile(st) else "none"))
     return 0
 

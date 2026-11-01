@@ -23,6 +23,7 @@ import bmmods  # noqa: E402
 import bmops  # noqa: E402
 import bmtheme  # noqa: E402
 import bmhost  # noqa: E402  (BUILD MASHUP: the installed host and the Play rule)
+import bmpaths  # noqa: E402  (0.2.0 layout 2: game copy + your mods in <install>\\gamedata)
 
 ROOT = bmops.ROOT
 TITLE = "Burnout Mashup"
@@ -42,8 +43,8 @@ def bundle_state(root=ROOT):
     """What is prepared: dict for the Setup tab (reads files only)."""
     ps = bmhost.play_state(root)        # BUILD MASHUP: a host counts only as a verified build with a consistent HOST_INFO.json
     host = ps["host_kind"] if ps["host_ok"] else None
-    gen = os.path.join(root, "mods", "generated")
-    return {"host": host, "host_problems": ps["problems"], "data": os.path.isfile(os.path.join(root, "gamedata", ".complete")),
+    gen = bmpaths.mods_dir(root, "generated")
+    return {"host": host, "host_problems": ps["problems"], "data": os.path.isfile(os.path.join(bmpaths.gamedata(root), ".complete")),
             "demos": os.path.isdir(gen) and any(os.path.isfile(os.path.join(gen, d, "mod.toml")) for d in os.listdir(gen)),
             "preflight": _read(os.path.join(root, "diag", "preflight_last.txt"))}
 
@@ -598,9 +599,44 @@ def _enable_drop(win, callback):
         pass
 
 
+def startup_layout(root=ROOT):
+    r"""rel020: in the Windows package (layout 2): work in the install folder (never inside app\, which an update renames), finish or
+    undo an interrupted update, and move a Burnout Mashup 0.1.0-alpha.1 folder around app\ into the new layout (bmlayout.py:
+    one transaction of renames, undone on any error; nothing is deleted). -> (title, text, error) for a message, or None"""
+    inst = bmpaths.install_root(root)
+    if not inst:
+        return None
+    try:
+        os.chdir(inst)
+    except OSError:
+        pass
+    import bmlayout
+    r = bmlayout.startup(root)
+    if r.get("error"):
+        return ("Burnout Mashup - not moved", "The move of your older Burnout Mashup folder into the new layout did not happen:\n\n%s\n\n"
+                "Nothing was lost; start Burnout Mashup.exe again to retry." % r["error"], True)
+    m = r.get("migrated")
+    if m:
+        txt = ("Your Burnout Mashup %s folder now uses the new layout:\n\n  gamedata\\  your game copy and your mods (mods\\user, "
+               "mods\\generated)\n  app\\  the program, with your saves, settings, plugin approvals and builds\n\n"
+               "%d item(s) of your data were moved. The old program files are kept in app\\.update\\versions (report: %s)."
+               % (m["from"], len(m["moved"]), m.get("report_file")))
+        if m.get("changed_shipped"):
+            txt += "\n\nFiles of the old version you had changed (kept there, not used): %s" % ", ".join(m["changed_shipped"][:8])
+        if m.get("conflicts"):
+            txt += "\n\nNot moved (the new version ships a file with that name; kept there): %s" % ", ".join(m["conflicts"][:8])
+        return ("Burnout Mashup - moved to the new layout", txt, False)
+    if r.get("recovered") == "rolledback":
+        return ("Burnout Mashup", "An update was interrupted; it was undone. The version you used before is in use.", False)
+    return None
+
+
 def main(argv):
     dpi_aware()
+    note = startup_layout()
     app = Launcher(dropped=[a for a in argv if os.path.exists(a)] or None)
+    if note:
+        app.after(300, lambda: (messagebox.showerror if note[2] else messagebox.showinfo)(note[0], note[1], parent=app))
     app.mainloop()
     return 0
 

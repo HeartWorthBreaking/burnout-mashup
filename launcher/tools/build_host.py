@@ -22,6 +22,15 @@ import sys
 
 sys.dont_write_bytecode = True
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.abspath(__file__)), "launcher"))
+try:
+    import bmpaths  # noqa: E402  (0.2.0 layout 2: game copy + mods\\user / mods\\generated in <install>\\gamedata)
+except ImportError:      # this tool copied without tools\\launcher (the tester bundle layout): everything stays in this folder
+    import types
+    bmpaths = types.SimpleNamespace(
+        install_root=lambda l: None, gamedata=lambda l: os.path.join(os.path.abspath(l), "gamedata"),
+        mods_dir=lambda l, k: os.path.join(os.path.abspath(l), "mods", k), display=lambda l, p: os.path.relpath(p, l),
+        game_entries=lambda gd: sorted(n for n in (os.listdir(gd) if os.path.isdir(gd) else []) if n.lower() != "mods"))
 SRC = os.path.join(ROOT, "host-source")
 HOST = os.path.join(ROOT, "host-local")        # your build; the shipped prebuilt host\ is never written
 EXE = "burnout3_bmashup.exe"
@@ -38,7 +47,7 @@ def sha(p):
 
 def main(argv):
     ap = argparse.ArgumentParser(description="build the host from source with your own game and install it into host\\")
-    ap.add_argument("--xbe", default=os.path.join(ROOT, "gamedata", "Burnout 3 Takedown", "default.xbe"))
+    ap.add_argument("--xbe", default=os.path.join(bmpaths.gamedata(ROOT), "Burnout 3 Takedown", "default.xbe"))
     ap.add_argument("--deps", default=os.path.join(ROOT, "build", "deps"))
     ap.add_argument("--python-capstone")
     ap.add_argument("--takedawn", default="https://github.com/xenophobentx/takedawn")

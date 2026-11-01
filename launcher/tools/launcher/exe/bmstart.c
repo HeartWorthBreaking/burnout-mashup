@@ -1,10 +1,13 @@
-/* bmstart.c - "Burnout Mashup.exe": the friendly starter of the Burnout Mashup launcher (Windows; no console window).
+/* bmstart.c - "Burnout Mashup.exe": the starter of the Burnout Mashup launcher (Windows; no console window).
  *
- * It opens the launcher window (tools\launcher\bmlauncher.pyw beside this exe) with Python 3.11+ - the Python launcher pyw.exe
- * ("pyw -3"), else pythonw.exe on PATH. Files or folders dropped onto the exe are passed on (game data, a mod folder / .zip),
- * exactly like dropping them onto "Burnout Mashup.cmd". Without Python a normal Windows message says what to install.
- * Test hook: BMASHUP_PYW = the full path of a pythonw stand-in (used instead of the search).
- * Built by build_exe.py (llvm-mingw, deterministic, no timestamp); source shipped with the bundle. */
+ * Layout 2 (the Windows package, 0.2.0): this exe sits in the install folder beside "Burnout Mashup Workbench.exe", gamedata\ and
+ * app\. It opens the launcher window (app\launcher\tools\launcher\bmlauncher.pyw) with Python 3.11+ - the Python launcher pyw.exe
+ * ("pyw -3"), else pythonw.exe on PATH. Files or folders dropped onto the exe are passed on (game data, a mod folder / .zip).
+ * If an update or a migration was interrupted (app\.update\JOURNAL.json exists), it first runs app\.update\bmapply.py recover,
+ * which finishes or undoes that change and then opens the launcher. The working folder is the install folder (never inside app\,
+ * so an update can rename the entries of app\). Without Python a normal Windows message says what to install.
+ * Test hooks: BMASHUP_PYW = the full path of a pythonw stand-in (used instead of the search); BMASHUP_NO_DIALOG = 1 returns the
+ * exit code without showing a message box. Built by build_exe.py (llvm-mingw, deterministic, no timestamp); source in the tree. */
 #define WIN32_LEAN_AND_MEAN
 #ifndef UNICODE
 #define UNICODE
@@ -17,6 +20,9 @@
 #include <wchar.h>
 
 #define CMD_MAX 32768
+#define TITLE L"Burnout Mashup"
+#define SCRIPT L"\\app\\launcher\\tools\\launcher\\bmlauncher.pyw"
+#define THEN L"launcher"
 
 static void append(wchar_t *dst, size_t cap, const wchar_t *s)
 {
@@ -59,6 +65,17 @@ static void append_arg(wchar_t *dst, size_t cap, const wchar_t *a)
     dst[n] = 0;
 }
 
+static int no_dialog(void)
+{
+    wchar_t v[8];
+    return GetEnvironmentVariableW(L"BMASHUP_NO_DIALOG", v, 8) > 0;
+}
+
+static int exists(const wchar_t *p)
+{
+    return GetFileAttributesW(p) != INVALID_FILE_ATTRIBUTES;
+}
+
 static int find_exe(const wchar_t *name, wchar_t *out, DWORD cap)
 {
     return SearchPathW(NULL, name, NULL, cap, out, NULL) > 0;
@@ -66,10 +83,11 @@ static int find_exe(const wchar_t *name, wchar_t *out, DWORD cap)
 
 int WINAPI wWinMain(HINSTANCE h, HINSTANCE prev, PWSTR cmdline, int show)
 {
-    static wchar_t self[MAX_PATH], dir[MAX_PATH], script[MAX_PATH], py[MAX_PATH], cmd[CMD_MAX], env[MAX_PATH];
+    static wchar_t self[MAX_PATH], dir[MAX_PATH], script[MAX_PATH], journal[MAX_PATH], helper[MAX_PATH], py[MAX_PATH],
+        cmd[CMD_MAX], env[MAX_PATH];
     STARTUPINFOW si;
     PROCESS_INFORMATION pi;
-    int argc = 0, use_py_launcher = 0;
+    int argc = 0, use_py_launcher = 0, recover = 0;
     LPWSTR *argv;
     wchar_t *slash;
     (void)h; (void)prev; (void)cmdline; (void)show;
@@ -80,21 +98,28 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE prev, PWSTR cmdline, int show)
     if (slash)
         *slash = 0;
     wcscpy(script, dir);
-    append(script, MAX_PATH, L"\\tools\\launcher\\bmlauncher.pyw");
-    if (GetFileAttributesW(script) == INVALID_FILE_ATTRIBUTES) {
-        MessageBoxW(NULL, L"The launcher files are missing (tools\\launcher\\bmlauncher.pyw).\n\n"
-                    L"Unpack the whole Burnout Mashup package again and start Burnout Mashup.exe from its folder.",
-                    L"Burnout Mashup", MB_ICONERROR | MB_OK);
+    append(script, MAX_PATH, SCRIPT);
+    wcscpy(journal, dir);
+    append(journal, MAX_PATH, L"\\app\\.update\\JOURNAL.json");
+    wcscpy(helper, dir);
+    append(helper, MAX_PATH, L"\\app\\.update\\bmapply.py");
+    recover = exists(journal) && exists(helper);
+    if (!recover && !exists(script)) {
+        if (!no_dialog())
+            MessageBoxW(NULL, L"The program folder \"app\" is missing or incomplete beside Burnout Mashup.exe.\n\n"
+                        L"Unpack the whole Burnout Mashup package (both exes, the gamedata folder and the app folder) into one "
+                        L"folder and start Burnout Mashup.exe from there.", TITLE, MB_ICONERROR | MB_OK);
         return 2;
     }
-    if (GetEnvironmentVariableW(L"BMASHUP_PYW", env, MAX_PATH) > 0 && GetFileAttributesW(env) != INVALID_FILE_ATTRIBUTES) {
+    if (GetEnvironmentVariableW(L"BMASHUP_PYW", env, MAX_PATH) > 0 && exists(env)) {
         wcscpy(py, env);
     } else if (find_exe(L"pyw.exe", py, MAX_PATH)) {
         use_py_launcher = 1;
     } else if (!find_exe(L"pythonw.exe", py, MAX_PATH)) {
-        int r = MessageBoxW(NULL, L"Burnout Mashup needs Python 3.11 or newer (free, from python.org).\n\n"
+        int r = no_dialog() ? IDNO :
+                MessageBoxW(NULL, L"Burnout Mashup needs Python 3.11 or newer (free, from python.org).\n\n"
                             L"Install it with \"Add python.exe to PATH\" ticked, then start Burnout Mashup.exe again.\n\n"
-                            L"Open the Python download page now?", L"Burnout Mashup", MB_ICONINFORMATION | MB_YESNO);
+                            L"Open the Python download page now?", TITLE, MB_ICONINFORMATION | MB_YESNO);
         if (r == IDYES)
             ShellExecuteW(NULL, L"open", L"https://www.python.org/downloads/", NULL, NULL, SW_SHOWNORMAL);
         return 9;
@@ -105,18 +130,29 @@ int WINAPI wWinMain(HINSTANCE h, HINSTANCE prev, PWSTR cmdline, int show)
     append(cmd, CMD_MAX, L"\"");
     if (use_py_launcher)
         append(cmd, CMD_MAX, L" -3");
-    append_arg(cmd, CMD_MAX, script);
-    argv = CommandLineToArgvW(GetCommandLineW(), &argc);
-    for (int i = 1; argv && i < argc; i++)
-        append_arg(cmd, CMD_MAX, argv[i]);         /* dropped files / folders */
-    if (argv)
-        LocalFree(argv);
+    if (recover) {
+        /* an interrupted update / migration: finish or undo it first, then the window opens (bmapply.py --then) */
+        append_arg(cmd, CMD_MAX, helper);
+        append_arg(cmd, CMD_MAX, L"recover");
+        append_arg(cmd, CMD_MAX, L"--root");
+        append_arg(cmd, CMD_MAX, dir);
+        append_arg(cmd, CMD_MAX, L"--then");
+        append_arg(cmd, CMD_MAX, THEN);
+    } else {
+        append_arg(cmd, CMD_MAX, script);
+        argv = CommandLineToArgvW(GetCommandLineW(), &argc);
+        for (int i = 1; argv && i < argc; i++)
+            append_arg(cmd, CMD_MAX, argv[i]);         /* dropped files / folders */
+        if (argv)
+            LocalFree(argv);
+    }
     ZeroMemory(&si, sizeof si);
     si.cb = sizeof si;
     ZeroMemory(&pi, sizeof pi);
     if (!CreateProcessW(NULL, cmd, NULL, NULL, FALSE, 0, NULL, dir, &si, &pi)) {
-        MessageBoxW(NULL, L"Python was found but could not be started. Reinstall Python 3.11+ from python.org.",
-                    L"Burnout Mashup", MB_ICONERROR | MB_OK);
+        if (!no_dialog())
+            MessageBoxW(NULL, L"Python was found but could not be started. Reinstall Python 3.11+ from python.org.", TITLE,
+                        MB_ICONERROR | MB_OK);
         return 3;
     }
     CloseHandle(pi.hThread);

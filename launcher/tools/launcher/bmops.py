@@ -33,7 +33,7 @@ STEPS = {   # name -> (tool, fixed arguments); user paths are appended as separa
 class Step:
     """One running tool: lines arrive on .lines (None = finished); .rc after the end; .cancel() stops it."""
 
-    def __init__(self, name, extra=(), root=ROOT):
+    def __init__(self, name, extra=(), root=ROOT, cwd=None):
         tool, fixed = STEPS[name]
         self.name = name
         self.cmd = [sys.executable, "-B", os.path.join(root, "tools", tool)] + fixed + [str(x) for x in extra]
@@ -42,7 +42,8 @@ class Step:
         self.cancelled = False
         env = dict(os.environ, PYTHONIOENCODING="utf-8", PYTHONUNBUFFERED="1")
         flags = getattr(subprocess, "CREATE_NO_WINDOW", 0)
-        self.p = subprocess.Popen(self.cmd, cwd=root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
+        # rel020: an install / switch back renames folders of app\; its child runs in the install folder (cwd=), never inside app\
+        self.p = subprocess.Popen(self.cmd, cwd=cwd or root, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, stdin=subprocess.DEVNULL,
                                   env=env, creationflags=flags, text=True, encoding="utf-8", errors="replace", bufsize=1)
         threading.Thread(target=self._pump, daemon=True).start()
 

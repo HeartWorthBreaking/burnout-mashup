@@ -1,6 +1,6 @@
 # Burnout Mashup
 
-**A modding platform for Burnout 3: Takedown on PC, built on the Takedawn native port. Experimental alpha, source code only.**
+**A modding platform for Burnout 3: Takedown on PC, built on the Takedawn native port. Experimental alpha.**
 
 > **Unofficial.** Burnout Mashup is an unofficial fan project. It is not affiliated with, authorised by or endorsed by Electronic Arts, Criterion Games, Microsoft or the Takedawn project. "Burnout" is a trademark of its owner. Whether the working name "Burnout Mashup" may be used has NOT been cleared (a disclaimer is not a permission); the name may change.
 >
@@ -21,19 +21,24 @@ Takedawn runs Burnout 3: Takedown natively on Windows. Burnout Mashup adds a lay
 - Windows 10 or 11 (64-bit), a graphics driver with Vulkan 1.3, and Python 3.11 or newer.
 - **Your own copy of Burnout 3: Takedown** for the original Xbox, North American (NTSC-U) version.
 
-There is no game in this repository: no game data, no game files, no executable and no prebuilt package. The launcher builds
-the game on your PC from your own copy, using the upstream recompiler. Everything that build produces, and everything the
+There is no game in this repository or in a release: no game data, no game files and no game executable. The launcher builds
+the game on your PC from your own copy, using the upstream recompiler. The releases add two small starter programs
+(`Burnout Mashup.exe`, `Burnout Mashup Workbench.exe`) that open the launcher and the Workbench; they are built from
+`launcher/tools/launcher/exe` and `workbench/exe` in this repository and are never committed to it. Everything that build produces, and everything the
 tools make from your game data, stays on your PC (`docs/LOCAL_OUTPUTS.md`). Please never share it.
 
 ## Getting started
-1. Get this source: clone the repository (keep line endings unchanged, see `.gitattributes`) or download the source zip of a
-   release, into a new folder.
-2. Start `launcher\Burnout Mashup.cmd`.
+1. Download `BurnoutMashup-<version>-windows.zip` from the latest release and unpack it into a new folder of its own. It holds
+   only `Burnout Mashup.exe`, `Burnout Mashup Workbench.exe`, `gamedata\` (your game copy and your mods go here: `gamedata\mods\user`)
+   and `app\` (the program: exactly this repository).
+2. Start `Burnout Mashup.exe`. (From a clone of this repository or the source zip: `launcher\Burnout Mashup.cmd`.)
 3. On the Setup tab: drop your game folder on the window, press **Build Mashup...** and follow it. The launcher checks your
    copy, offers the build tools it needs (each download is pinned to an exact version and checked), builds, verifies the result
    against the reference build and installs it. Then **Check this PC**, and Play.
 
-The full walk-through is `launcher/docs/QUICKSTART.md`. Developers can use the command-line build described in `docs/BUILDING.md`.
+The full walk-through is `launcher/docs/QUICKSTART.md`. Coming from 0.1.0-alpha.1? Unpack the new zip INTO your old folder and
+start `Burnout Mashup.exe`: it moves your saves, settings, mods, game copy and builds into the new layout in one step that is undone
+if anything fails (`launcher/docs/UPDATES.md`). Later versions: Help -> **Check for updates...**. Developers can use the command-line build described in `docs/BUILDING.md`.
 
 ## Status
 This is an **experimental alpha**. It has been tested by its authors on one Windows 11 PC: automated test suites, rebuilds
@@ -50,7 +55,7 @@ Nothing here is legal advice, and nothing here claims legal clearance.
 |---|---|
 | `host/` | the Mashup host, stored as changes on top of pinned upstream commits (Takedawn `4f074e211822`, xboxrecomp `e3756d1b2fef`) |
 | `sdk/` | the plugin SDK: headers, examples and CMake helpers |
-| `launcher/` | the launcher, including Build Mashup and an updater (no update channel is set up yet, so it never checks anything) |
+| `launcher/` | the launcher, including Build Mashup and the updater (it checks the signed releases of this repository only when you ask) |
 | `workbench/` | the Workbench |
 | `tools/` | content tools: bmpack, trackbuild, carimport, fetex, vehtool, bmdiag, ps2look, migrate |
 | `examples/` | original example mods and small original assets |

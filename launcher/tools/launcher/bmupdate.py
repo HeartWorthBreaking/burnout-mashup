@@ -10,10 +10,15 @@ plugin approvals and game data are never read or changed by an update; new plugi
     update.cmd status                       what is configured, the version in use, the previous one, the next step (no network)
     update.cmd check                        fetch the channel's signed release manifest, verify it, show what is new and what will happen
     update.cmd download                     download the new source archive (sha256 + size checked; an interrupted download continues)
-    update.cmd prepare                      unpack it into a NEW folder beside the current source (never over it) and verify the tree
+    update.cmd prepare                      unpack it into a NEW folder (never over the version in use) and verify every file
+    update.cmd install                      (Windows package, layout 2) install the prepared package: the program folder app\\ and the two
+                                            exes are replaced in one transaction (rename only, undone on any error), your data is
+                                            carried over, the version in use is kept for Switch back; then start the launcher again
     update.cmd build [BUILD OPTIONS]        BUILD MASHUP from the new source (bmbuild.py: its cache and pinned tools), compare the exe with
-                                            the manifest's reference, install (the previous build and source are kept)
-    update.cmd switch-back                  use the previous version again (source and build together); again = forward
+                                            the manifest's reference, install (the previous build and source are kept); in the package
+                                            layout only when the new release has another reference host than the build in use
+    update.cmd switch-back                  use the previous version again (package: program + exes; source layout: source and build
+                                            together); again = forward
     update.cmd install-older VERSION --yes  the same steps for an OLDER signed release of the channel (only when you ask for it)
     update.cmd discard [--yes]              forget the pending update (its download and its unpacked folder, never the version in use)
     update.cmd cancel                       stop a running download or build
@@ -24,6 +29,10 @@ BUILD OPTIONS are passed to bmbuild.py (--input, --build-dir, --toolchain, --sou
 out, --input and the upstream source come from the last build (BUILD_STATE.json of the build folder). --updates DIR: the download cache
 (default %LOCALAPPDATA%\\BurnoutMashup\\updates). --sources-dir DIR: where the new source folder is made (default: beside the current
 source). --events: machine-readable progress ("@@ {json}" lines).
+
+Two layouts (bmpaths.py): the Windows PACKAGE (layout 2: Burnout Mashup.exe, Burnout Mashup Workbench.exe, gamedata\\, app\\) updates
+by the release's package (check, download, prepare, install); a source checkout (layout 1) updates by the source archive as in 0.1.0
+(check, download, prepare into a new folder beside it, build). Launcher 1.1.0.
 
 Release manifest (bm-release-manifest 1, docs\\UPDATES.md) is verified BEFORE any field is used: an OpenSSH Ed25519 signature
 (ssh-keygen -Y sign, namespace bmashup-update; bmed25519.py) by a key listed in update_channel.json. Refused: no channel / no trusted key,
@@ -49,6 +58,8 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import bmed25519  # noqa: E402
 import bmhost  # noqa: E402
+import bmlayout  # noqa: E402  (rel020: transactional install / switch back / recover, layout 2)
+import bmpaths  # noqa: E402
 
 LAUNCHER = bmhost.LAUNCHER
 CONFIG = "update_channel.json"
@@ -56,7 +67,9 @@ VERSION = "VERSION.json"
 ASSET = "bmashup-release.json"
 PRODUCT = "BurnoutMashup"
 FORMAT = "bm-release-manifest 1"
-UA = "BurnoutMashup-launcher/1 (update check on request)"
+UA = "BurnoutMashup-launcher/1.1 (update check on request)"
+LAYOUT2 = "bm-layout 2"
+PACKAGE_EXES = (bmpaths.EXE, bmpaths.WB_EXE)
 UPSTREAM_OWNERS = ("xenophobentx",)
 RC_OK, RC_USAGE, RC_REFUSED, RC_FAILED, RC_CANCELLED, RC_NOCHANNEL, RC_OFFLINE = 0, 1, 2, 3, 5, 6, 7
 HEX64 = re.compile(r"^[0-9a-f]{64}$")
@@ -97,6 +110,12 @@ RECOVERY = {
               "'Previous build' in the Setup tab to swap the two builds.",
     "cancelled": "Cancelled. Nothing was changed; a partial download is kept and continues next time.",
     "older": "install-older needs --yes (you choose to install an older version on purpose).",
+    "package": "The downloaded package does not match the signed manifest or is not a Burnout Mashup package: it is not used. Run discard "
+               "and start again with check; report it if it persists.",
+    "install": "The install did not finish and was UNDONE: the version in use is unchanged (program, exes and your data). Close the game, "
+               "the Workbench and any window showing a file of this folder, then run install again.",
+    "broken": "The install stopped and could not be fully undone. Nothing was deleted: do not move files by hand; start Burnout Mashup.exe "
+              "again (it finishes or undoes the change from app\\.update\\JOURNAL.json) and report it (SECURITY.md / issues).",
 }
 
 
@@ -430,9 +449,22 @@ def verify_manifest(cfg, data, sig, url=None):
                                                   for k, v in m[sec].items()), "%s (versions)" % sec)
     need(m["provides"].get("release") == m["version"], "provides.release = version")
     need(isinstance(m.get("notes_url", ""), str), "notes_url")
+    pk = m.get("package")
+    if pk is not None:                  # rel020: the Windows package (layout 2)
+        need(isinstance(pk, dict) and pk.get("layout") == LAYOUT2 and pk.get("app_folder") == bmpaths.APP, "package.layout / app_folder")
+        need(isinstance(pk.get("name"), str) and re.match(r"^[A-Za-z0-9._-]{1,120}\.zip$", pk["name"]), "package.name (a .zip file name)")
+        need(isinstance(pk.get("sha256"), str) and HEX64.match(pk["sha256"]), "package.sha256")
+        need(isinstance(pk.get("size"), int) and 0 < pk["size"] <= 4 << 30, "package.size")
+        need(isinstance(pk.get("urls"), list) and pk["urls"] and all(isinstance(u, str) for u in pk["urls"]), "package.urls")
+        need(isinstance(pk.get("files"), int) and 0 < pk["files"] <= 50000, "package.files")
+        need(isinstance(pk.get("tree_sha256"), str) and HEX64.match(pk["tree_sha256"]), "package.tree_sha256")
+        ex = pk.get("exes")
+        need(isinstance(ex, dict) and sorted(ex) == sorted(PACKAGE_EXES) and all(isinstance(v, str) and HEX64.match(v) for v in ex.values()),
+             "package.exes (%s)" % ", ".join(PACKAGE_EXES))
     base = url or manifest_url(cfg)
     m["_urls"] = [urllib.parse.urljoin(base, u) for u in a["urls"]]
-    for u in m["_urls"] + ([m["notes_url"]] if m.get("notes_url") else []):
+    m["_pkg_urls"] = [urllib.parse.urljoin(base, u) for u in pk["urls"]] if pk else []
+    for u in m["_urls"] + m["_pkg_urls"] + ([m["notes_url"]] if m.get("notes_url") else []):
         check_url(u, "release")
     m["_sha256"], m["_signer"], m["_url"] = sha_b(data), signer, base
     return m
@@ -476,6 +508,16 @@ class Updater:
         self.build_fn = build_fn or self._bmbuild
         self._cancelled = cancelled
         self.cancel_file = os.path.join(self.updates, "CANCEL")
+        self.inst = bmpaths.install_root(self.launcher)       # rel020: the package layout (None: a source checkout)
+        self.tree = bmpaths.tree_root(self.launcher)
+
+    def pkg(self, m):
+        """the package section when this install is the Windows package (layout 2) and the release has one, else None"""
+        return m.get("package") if self.inst else None
+
+    def archive_of(self, m):
+        pk = self.pkg(m)
+        return (pk, m["_pkg_urls"]) if pk else (m["source"]["archive"], m["_urls"])
 
     def say(self, s):
         self.out(s)
@@ -516,12 +558,15 @@ class Updater:
         nxt = None
         if p:
             nxt = "build" if p.get("prepared") else "prepare" if p.get("archive") else "download"
+            if self.inst and p.get("prepared") and not p.get("installed"):
+                nxt = "install"
         return {"configured": cfg.get("configured", False), "channel": cfg.get("id"), "where": cfg.get("repo") or cfg.get("base"),
                 "trusted_keys": cfg.get("fingerprints", []), "why": cfg.get("why"), "version": cur, "source": src,
                 "launcher_version": version_info(self.launcher)["launcher"], "host": hl.get("identity") if hl["ok"] else None,
                 "previous": (st.get("previous") or {}).get("version"), "previous_source": (st.get("previous") or {}).get("source"),
-                "pending": {k: p.get(k) for k in ("version", "older", "archive", "prepared")} if p else None, "next_step": nxt,
-                "automatic_checks": False}
+                "pending": {k: p.get(k) for k in ("version", "older", "archive", "prepared", "installed")} if p else None, "next_step": nxt,
+                "automatic_checks": False, "layout": 2 if self.inst else 1,
+                "kept_previous": (bmlayout.previous_of(self.inst) or {}).get("version") if self.inst else None}
 
     # ---- check
     def _get_manifest(self, cfg, version=None):
@@ -543,7 +588,7 @@ class Updater:
             if m["serial"] >= (seen.get(cfg["id"]) or {}).get("serial", 0):
                 seen[cfg["id"]] = {"serial": m["serial"], "version": m["version"], "manifest_sha256": m["_sha256"]}
         res = {"verdict": verdict, "version": m["version"], "current": cur, "created": m["created"], "signer": m["_signer"],
-               "size_mb": round(m["source"]["archive"]["size"] / 1e6, 1), "notes_url": m.get("notes_url"), "notes": m.get("notes"),
+               "size_mb": round(self.archive_of(m)[0]["size"] / 1e6, 1), "package": bool(self.pkg(m)), "notes_url": m.get("notes_url"), "notes": m.get("notes"),
                "tag": m["source"]["tag"], "commit": m["source"]["commit"], "expected_identity": m["expected"]["identity"]}
         if verdict == "up_to_date":
             self.save(st)
@@ -563,6 +608,16 @@ class Updater:
         return res
 
     def plan_text(self, m, src):
+        pk = self.pkg(m)
+        if pk:
+            return ["download %s (%.1f MB) into %s (sha256 + size checked)" % (pk["name"], pk["size"] / 1e6, os.path.join(self.updates, "downloads")),
+                    "unpack it into app\\.update\\stage (the version in use is not changed) and verify every file and both exes",
+                    "install: the program folder app\\ and the two exes are replaced in ONE step that is undone on any error; then the "
+                    "launcher starts again (version %s is kept: 'Switch back')" % version_info(self.launcher)["release"],
+                    "carried over unchanged: gamedata\\ (your game copy and mods), profile (saves, settings, approvals), your builds "
+                    "(host-local), the Workbench's settings and anything else you added",
+                    ("the new release uses the same reference host as your build: no rebuild" if self.host_same(m) else
+                     "the new release has another reference host: then Build Mashup (about 3 minutes; your build stays until it is replaced)")]
         return ["download %s (%.1f MB) into %s (sha256 + size checked)" % (m["source"]["archive"]["name"], m["source"]["archive"]["size"] / 1e6,
                                                                        os.path.join(self.updates, "downloads")),
                 "unpack it into a NEW folder %s (your current source %s is not changed)" % (self.target_dir(m, probe=True), src),
@@ -594,10 +649,14 @@ class Updater:
             raise Refused("pending", "run %s first" % {"archive": "download", "prepared": "prepare"}[need])
         return cfg, st, p, m
 
+    def host_same(self, m):
+        hl = bmhost.folder_state(os.path.join(self.launcher, "host-local"))
+        return bool(hl["ok"] and hl.get("sha256") == m["expected"]["exe_sha256"])
+
     # ---- download
     def download(self):
         cfg, st, p, m = self.pending()
-        a = m["source"]["archive"]
+        a, urls = self.archive_of(m)
         dest = os.path.join(self.updates, "downloads", "%s-%s" % (a["sha256"][:16], a["name"]))
         if os.path.isfile(dest) and os.path.getsize(dest) == a["size"] and sha_f(dest) == a["sha256"]:
             self.say("already downloaded and verified: %s" % dest)
@@ -609,7 +668,7 @@ class Updater:
                 os.remove(self.cancel_file)
             self.ev(ev="update", step="download", status="running")
             try:
-                fetch_resumable(m["_urls"], dest, a["sha256"], a["size"], log=self.say, cancelled=self.cancelled,
+                fetch_resumable(urls, dest, a["sha256"], a["size"], log=self.say, cancelled=self.cancelled,
                                 progress=lambda n, t: (self.ev(ev="download", bytes=n, total=t) if self.events else self.say("  %.1f / %.1f MB" % (n / 1e6, t / 1e6))))
             except Cancelled:
                 self.ev(ev="update", step="download", status="cancelled")
@@ -633,6 +692,8 @@ class Updater:
 
     def prepare(self):
         cfg, st, p, m = self.pending("archive")
+        if self.pkg(m):
+            return self.prepare_package(st, p, m)
         a, s = m["source"]["archive"], m["source"]
         if sha_f(p["archive"]) != a["sha256"]:
             raise Refused("integrity", "the downloaded archive changed since the download: run download again")
@@ -680,6 +741,143 @@ class Updater:
         self.save(st)
         self.ev(ev="update", step="prepare", status="done")
         return {"source": target, "files": s["files"]}
+
+    # ---- the Windows package (layout 2, rel020)
+    def stage_dir(self, m):
+        return os.path.join(bmlayout.update_dir(self.inst), "stage", m["version"])
+
+    @staticmethod
+    def safe_package_members(z):
+        """the package's entries: exactly the two exes and app/... (+ the empty folders gamedata/, gamedata/mods/); safe paths only"""
+        out = []
+        bad = re.compile(r"(^|/)(CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(\.[^/]*)?$", re.I)
+        for i in z.infolist():
+            n = i.filename
+            parts = n.split("/")
+            if ("\\" in n or ":" in n or n.startswith("/") or "\x00" in n or ".." in parts or bad.search(n.rstrip("/"))
+                    or any(x.endswith((" ", ".")) for x in parts[:-1] + ([parts[-1]] if parts[-1] else []))):
+                raise Refused("package", "unsafe path in the package: %r" % n)
+            if stat.S_ISLNK(i.external_attr >> 16):
+                raise Refused("package", "the package holds a symbolic link (%s): refused" % n)
+            if n.endswith("/"):
+                if n not in ("gamedata/", "gamedata/mods/") and not n.startswith(bmpaths.APP + "/"):
+                    raise Refused("package", "unexpected folder in the package: %r" % n)
+                continue
+            if n in PACKAGE_EXES or (parts[0] == bmpaths.APP and len(parts) >= 2 and parts[-1]):
+                out.append(i)
+                continue
+            raise Refused("package", "unexpected entry in the package: %r (only the two exes and app/...)" % n)
+        if sum(i.file_size for i in out) > 4 << 30:
+            raise Refused("package", "the package unpacks to more than 4 GB")
+        return out
+
+    def verify_stage(self, d, m):
+        """the unpacked package = the signed digest; the exes = the signed sha256; app\\ = the signed SOURCE tree (+ verify_source)"""
+        pk = m["package"]
+        files = dir_files(d)
+        if len(files) != pk["files"] or sha_b(tree_sums(files).encode("utf-8")) != pk["tree_sha256"]:
+            raise Refused("package", "the unpacked package is not the signed one (digest differs)")
+        for e in PACKAGE_EXES:
+            if files.get(e) != pk["exes"][e]:
+                raise Refused("package", "%s is not the signed one" % e)
+        app = os.path.join(d, bmpaths.APP)
+        self.verify_source(app, m)
+        sh = bmlayout.read_sums(os.path.join(app, bmlayout.SHIPPED)) if os.path.isfile(os.path.join(app, bmlayout.SHIPPED)) else None
+        tree = {k[len(bmpaths.APP) + 1:]: v for k, v in files.items() if k.startswith(bmpaths.APP + "/")}
+        tree.pop(bmlayout.SHIPPED, None)
+        if sh != tree:
+            raise Refused("package", "app\\%s does not list the package's program files" % bmlayout.SHIPPED)
+        return files
+
+    def prepare_package(self, st, p, m):
+        pk = m["package"]
+        if sha_f(p["archive"]) != pk["sha256"]:
+            raise Refused("integrity", "the downloaded package changed since the download: run download again")
+        target = self.stage_dir(m)
+        if p.get("prepared") and os.path.isdir(p["prepared"]):
+            self.verify_stage(p["prepared"], m)
+            self.say("already prepared and verified: %s" % p["prepared"])
+            return {"source": p["prepared"]}
+        part = target + ".partial"
+        for x in (part, target):
+            if os.path.exists(x):
+                shutil.rmtree(x)
+        try:
+            z = zipfile.ZipFile(p["archive"])
+        except (zipfile.BadZipFile, OSError) as e:
+            raise Refused("package", "the package cannot be read (%s)" % e)
+        with z:
+            infos = self.safe_package_members(z)
+            if len(infos) != pk["files"]:
+                raise Refused("package", "the package holds %d files, the signed manifest names %d" % (len(infos), pk["files"]))
+            total = sum(i.file_size for i in infos)
+            if free_mb(self.inst) < total / 1e6 + 50:
+                raise Refused("space", "%s needs %.0f MB free" % (self.inst, total / 1e6 + 50))
+            os.makedirs(part)
+            self.ev(ev="update", step="prepare", status="running")
+            try:
+                for i in infos:
+                    if self.cancelled():
+                        raise Cancelled()
+                    dst = os.path.join(part, *i.filename.split("/"))
+                    os.makedirs(os.path.dirname(dst), exist_ok=True)
+                    with z.open(i) as r, open(dst, "wb") as w:
+                        shutil.copyfileobj(r, w, 1 << 20)
+                self.verify_stage(part, m)
+            except BaseException:
+                shutil.rmtree(part, ignore_errors=True)
+                raise
+        os.rename(part, target)
+        st["pending"]["prepared"] = target
+        self.save(st)
+        self.ev(ev="update", step="prepare", status="done")
+        return {"source": target, "files": pk["files"]}
+
+    def install(self, fail_after=None):
+        """the prepared package replaces app\\ and the exes (bmlayout: one transaction of renames, undone on any error)"""
+        if not self.inst:
+            raise Refused("pending", "install is the step of the Windows package; this is a source checkout: use build", RC_USAGE)
+        cfg, st, p, m = self.pending("prepared")
+        if not self.pkg(m) or p.get("installed"):
+            raise Refused("pending", "nothing to install (run check / download / prepare first)")
+        stage = p["prepared"]
+        self.verify_stage(stage, m)
+        os.chdir(self.inst)                     # never work inside app\ (renamed by the install)
+        cur = version_info(self.launcher)["release"]
+        same = self.host_same(m)
+        # the state the NEW version will read (it is carried over with launcher\update-state)
+        st.setdefault("seen", {})
+        st["package_active"] = {"version": m["version"], "manifest_sha256": m["_sha256"], "serial": m["serial"],
+                                "installed": time.strftime("%Y-%m-%d %H:%M:%S")}
+        st["package_previous"] = {"version": cur}
+        if same:
+            st.pop("pending", None)
+        else:
+            st["pending"] = dict(p, installed=True, prepared=self.tree)
+        self.save(st)
+        self.ev(ev="update", step="install", status="running")
+        try:
+            r = bmlayout.apply_update(self.inst, os.path.join(stage, bmpaths.APP), stage, m["version"], out=self.say, fail_after=fail_after)
+        except bmlayout.LayoutError as e:
+            st = self.state()            # the old version's state is back in place (undone): drop what install wrote
+            for k in ("package_active", "package_previous"):
+                st.pop(k, None)
+            st["pending"] = p
+            self.save(st)
+            self.ev(ev="update", step="install", status="failed")
+            raise Refused("broken" if e.rc == bmlayout.RC_BROKEN else "install", str(e), RC_FAILED)
+        shutil.rmtree(stage, ignore_errors=True)            # now empty
+        self.ev(ev="update", step="install", status="done")
+        return {"version": m["version"], "previous_version": cur, "kept_as": r["kept_as"], "carried": len(r["moved"]),
+                "changed_shipped": r["changed_shipped"], "conflicts": r["conflicts"], "rebuild_needed": not same, "restart": True}
+
+    def verify_installed(self, tree):
+        """the program files in use = their SHIPPED_FILES.sha256 (your files beside them do not count)"""
+        sh = bmlayout.read_sums(os.path.join(tree, bmlayout.SHIPPED))
+        for rel, h in sh.items():
+            p = os.path.join(tree, *rel.split("/"))
+            if not os.path.isfile(p) or sha_f(p) != h:
+                raise Refused("source", "the installed program file %s is missing or changed (remove.cmd verify / repair)" % rel)
 
     @staticmethod
     def safe_members(z, top):
@@ -732,7 +930,12 @@ class Updater:
     def build(self, build_args=()):
         cfg, st, p, m = self.pending("prepared")
         target = p["prepared"]
-        self.verify_source(target, m)
+        if self.inst and self.pkg(m) and not p.get("installed"):
+            raise Refused("pending", "run install first (the package replaces the program; then build if the reference host changed)")
+        if p.get("installed"):
+            self.verify_installed(target)               # the package in use (your files beside it do not count)
+        else:
+            self.verify_source(target, m)
         src, cur = self.current()
         args = list(build_args)
         if "--input" not in args or "--source" not in args:            # from the last build (BUILD_STATE.json of the build folder)
@@ -781,6 +984,14 @@ class Updater:
                           % (after.get("sha256") or "none")[:12], RC_FAILED)
         host_changed = after["sha256"] != bsha
         st = self.state()
+        if p.get("installed"):                          # the package layout: the program was replaced by install already
+            st.pop("pending", None)
+            st.setdefault("package_active", {})["host_sha256"] = after["sha256"]
+            self.save(st)
+            self.ev(ev="update", step="build", status="done")
+            return {"version": m["version"], "source": target, "exe_sha256": after["sha256"], "identity": after["identity"],
+                    "host_changed": host_changed, "previous_version": (st.get("package_previous") or {}).get("version"),
+                    "previous_source": None, "previous_build_kept": os.path.join(self.launcher, "host-local.prev")}
         old = st.get("active") or {"source": src, "version": cur}
         old = dict(old, host_sha256=bsha)
         st["previous"] = old
@@ -794,7 +1005,14 @@ class Updater:
                 "previous_build_kept": os.path.join(self.launcher, "host-local.prev") if host_changed else "(same program as before)"}
 
     # ---- switch back / discard
-    def switch_back(self):
+    def switch_back(self, fail_after=None):
+        if self.inst and bmlayout.previous_of(self.inst):
+            os.chdir(self.inst)
+            try:
+                r = bmlayout.switch_back(self.inst, out=self.say, fail_after=fail_after)
+            except bmlayout.LayoutError as e:
+                raise Refused("broken" if e.rc == bmlayout.RC_BROKEN else "switch", str(e), RC_FAILED)
+            return {"now": r["to"], "source": self.tree, "previous": r["from"], "restart": True}
         st = self.state()
         a, b = st.get("active"), st.get("previous")
         if not a or not b:
@@ -829,6 +1047,8 @@ class Updater:
                     os.remove(f)
                     gone.append(f)
             d = p.get("prepared")
+            if p.get("installed"):
+                d = None                                   # the program in use: never removed
             if d and os.path.isdir(d) and os.path.normcase(os.path.abspath(d)) not in keep:
                 shutil.rmtree(d)
                 gone.append(d)
@@ -865,6 +1085,9 @@ def make_manifest(a):
          "notes_url": a.get("notes_url") or ""}
     if a.get("notes"):
         m["notes"] = a["notes"]
+    if a.get("package"):
+        m["package"] = package_section(a["package"], files, a.get("package_url") or [os.path.basename(a["package"])])
+        m["requires"]["launcher"] = a.get("requires_launcher") or "1.1.0"
     data = (json.dumps(m, indent=1, sort_keys=True) + "\n").encode("utf-8")
     with open(a["out"], "wb") as f:
         f.write(data)
@@ -874,12 +1097,25 @@ def make_manifest(a):
     return {"manifest": a["out"], "sha256": sha_b(data), "files": len(files), "tree_sha256": m["source"]["tree_sha256"]}
 
 
+def package_section(zp, source_files, urls):
+    """the manifest's package section for a Windows package zip; its app/ must be the source zip's tree byte for byte"""
+    z = zipfile.ZipFile(zp)
+    infos = Updater.safe_package_members(z)
+    files = {i.filename: sha_b(z.read(i)) for i in infos}
+    app = {k[len(bmpaths.APP) + 1:]: v for k, v in files.items() if k.startswith(bmpaths.APP + "/")}
+    if app != source_files:
+        raise Refused("package", "the package's app/ is not the source tree (%d differences)" % len(set(app.items()) ^ set(source_files.items())), RC_USAGE)
+    return {"layout": LAYOUT2, "app_folder": bmpaths.APP, "name": os.path.basename(zp), "sha256": sha_f(zp), "size": os.path.getsize(zp),
+            "urls": list(urls), "files": len(files), "tree_sha256": sha_b(tree_sums(files).encode("utf-8")),
+            "exes": {e: files[e] for e in PACKAGE_EXES}}
+
+
 # ------------------------------------------------------------------------------------------------------------------ CLI
 def parse(argv):
     a = {"cmd": argv[0] if argv else "help", "args": [], "url": [], "build": []}
     flags = {"--yes": "yes", "--events": "events", "--json": "json"}
     own = {"--updates", "--sources-dir", "--launcher", "--zip", "--version", "--serial", "--channel", "--tag", "--commit", "--url",
-           "--notes-url", "--notes", "--out", "--sums", "--created", "--requires-launcher"}
+           "--notes-url", "--notes", "--out", "--sums", "--created", "--requires-launcher", "--package", "--package-url"}
     i = 1
     while i < len(argv):
         x = argv[i]
@@ -890,6 +1126,8 @@ def parse(argv):
                 raise SystemExit("usage: %s needs a value" % x)
             if x == "--url":
                 a["url"].append(argv[i + 1])
+            elif x == "--package-url":
+                a.setdefault("package_url", []).append(argv[i + 1])
             else:
                 a[x[2:].replace("-", "_")] = argv[i + 1]
             i += 1
@@ -962,6 +1200,11 @@ def main(argv=None, out=None):
         if cmd == "prepare":
             r = u.prepare()
             return result(RC_OK, "prepared", "unpacked and verified: %s; next: build" % r["source"], rec="", **r)
+        if cmd == "install":
+            r = u.install()
+            return result(RC_OK, "installed", "Burnout Mashup %s is installed (%d item(s) of your data carried over; %s kept for 'switch-back')%s"
+                          % (r["version"], r["carried"], r["previous_version"], "; next: build (the reference host changed)" if r["rebuild_needed"] else ""),
+                          rec="", **r)
         if cmd == "build":
             r = u.build(a["build"])
             return result(RC_OK, "installed", "Burnout Mashup %s is installed (%s); 'switch-back' returns to %s" % (r["version"], r["identity"], r["previous_version"]), rec="", **r)
@@ -983,7 +1226,7 @@ def main(argv=None, out=None):
             for k in ("zip", "version", "serial", "channel", "tag", "commit", "out"):
                 if not a.get(k):
                     pr("usage: make-manifest --zip Z --version V --serial N --channel ID --tag T --commit SHA --url URL [--url URL] --out F "
-                       "[--notes-url U] [--sums SHA256SUMS] [--requires-launcher V]")
+                       "[--notes-url U] [--sums SHA256SUMS] [--requires-launcher V] [--package WINDOWS_ZIP [--package-url URL]]")
                     return RC_USAGE
             if not a["url"]:
                 pr("usage: make-manifest needs at least one --url (where the zip is published; relative to the manifest is allowed)")

@@ -69,9 +69,9 @@ def main():
         rc = os.path.join(t, "wbstart.rc")
         open(rc, "w", encoding="ascii").write(
             '1 ICON "wb.ico"\n'
-            '1 VERSIONINFO FILEVERSION 1,0,0,0 PRODUCTVERSION 1,0,0,0\nBEGIN\n BLOCK "StringFileInfo"\n BEGIN\n'
+            '1 VERSIONINFO FILEVERSION 1,1,0,0 PRODUCTVERSION 1,1,0,0\nBEGIN\n BLOCK "StringFileInfo"\n BEGIN\n'
             '  BLOCK "040904B0"\n  BEGIN\n   VALUE "FileDescription", "Burnout Mashup Workbench starter"\n'
-            '   VALUE "ProductName", "Burnout Mashup Workbench"\n   VALUE "FileVersion", "1.0.0"\n   VALUE "OriginalFilename", '
+            '   VALUE "ProductName", "Burnout Mashup Workbench"\n   VALUE "FileVersion", "1.1.0"\n   VALUE "OriginalFilename", '
             '"Burnout Mashup Workbench.exe"\n  END\n END\n BLOCK "VarFileInfo"\n BEGIN\n  VALUE "Translation", 0x409, 1200\n END\nEND\n')
         res = os.path.join(t, "wbstart.res.o")
         subprocess.run([windres, rc, "-O", "coff", "-o", res], check=True, cwd=t)
