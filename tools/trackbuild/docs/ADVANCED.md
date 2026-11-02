@@ -82,7 +82,7 @@ Retail constants without a known reader are listed in `BUILD_REPORT.json` `retai
 | V3_winding, V3_pvs_walk | front faces agree with normals; the PVS walk reaches every record once |
 | V4_static_identity, V4_unit_table_tiles_streamed | static.dat strict parse -> identical rebuild; the unit table tiles streamed.dat |
 | V5_gamedata, V5_route, V5_grid_on_main_lane, V5_grid_in_regions | Gamedata model identity / check; route identity / check / lint / camera + planner hazards; grid slots on the main lane and in their start unit |
-| V6_budgets | slot / pool budgets |
+| V6_budgets | slot / pool budgets: mesh / LOD block, static.dat, Gamedata need, route lanes against the game's defaults; 0.3.4 capacity auto: against the capacity the build report declares (trackbuild.capacity), never above the host ceiling |
 | V7_traffic (authored traffic), V8_lod (decimate), V9_pvs_computed (computed PVS) | traffic structure + nodes on the floor; LOD error bound; stored PVS vs a denser recomputation |
 A failing gate: exit 1, the gate is named and `VALIDATION.json` has the details; such a build is never packaged.
 
@@ -95,6 +95,11 @@ the whole test set from a clean folder with a minimal environment and the develo
 accesses (CHECKPOINT.md). That is same-machine isolation, not a second machine.
 
 ## 7. Packaging details
+0.3.4 capacity: `[package] capacity = "auto"` (default) writes mod.toml `[bmashup.capacity]` (`version = 1`, then `lanes`,
+`low_unit_bytes`, `full_unit_bytes`, `static_bytes`, `gamedata_bytes`; bytes as hex page multiples) for every need above the
+game's default, merged (largest value per key) with the package's own `lanes` and `[package.capacity_keys]` (e.g.
+`lanes = 80`). `"game"` refuses a build that needs more than the game's defaults unless the package's own keys cover it.
+LABELS.json gets a `capacity` section (keys, per-key minimum host, overall minimum host) only when something is declared.
 `package` writes `SET_ROOT\<set>\<folder>\` (mod.toml, bmpack.json, `files\Tracks\RR\NN_VN\` with the 10 track files, the
 Gamedata donor ID renamed to the new track ID by the documented bmpack rule), `SET_ROOT\SHA256SUMS.txt` and
 `SET_ROOT\LABELS.json`. The two example TOMLs are the 0.1.6 package descriptions, unchanged (their text still says 0.1.6 and

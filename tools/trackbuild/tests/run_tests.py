@@ -3,7 +3,7 @@
     py -3 -B tests\\run_tests.py RUN_DIR [--game-data DIR] [--converted TRACK_DIR]
 
 RUN_DIR must not exist. Runs tb.py selfcheck, tests\\test_errors.py, tests\\test_trackbuild.py, tests\\test_regression.py and
-tests\\test_slopes.py (0.3.0; each in RUN_DIR\\<suite>) and writes RUN_DIR\\SUMMARY.txt. Game data: --game-data DIR, else TRACKBUILD_GAME_DATA /
+tests\\test_slopes.py (0.3.0), tests\\test_capacity.py (0.3.4; each in RUN_DIR\\<suite>) and writes RUN_DIR\\SUMMARY.txt. Game data: --game-data DIR, else TRACKBUILD_GAME_DATA /
 BMKIT_GAME_DATA; without it the game-data checks are SKIPPED (named in each RESULTS file). Exit 0 = no failure."""
 import os
 import subprocess
@@ -29,7 +29,8 @@ def main(argv):
               ("errors", [os.path.join(HERE, "test_errors.py"), os.path.join(run, "errors")] + gd),
               ("trackbuild", [os.path.join(HERE, "test_trackbuild.py"), os.path.join(run, "trackbuild")] + gd + cv),
               ("regression", [os.path.join(HERE, "test_regression.py"), os.path.join(run, "regression")] + gd),
-              ("slopes", [os.path.join(HERE, "test_slopes.py"), os.path.join(run, "slopes")] + gd)]
+              ("slopes", [os.path.join(HERE, "test_slopes.py"), os.path.join(run, "slopes")] + gd),
+              ("capacity", [os.path.join(HERE, "test_capacity.py"), os.path.join(run, "capacity")] + gd)]   # 0.3.4
     out, bad = [], 0
     for name, cmd in suites:
         r = subprocess.run([sys.executable, "-B"] + cmd, capture_output=True, text=True)

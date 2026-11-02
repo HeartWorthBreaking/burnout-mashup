@@ -11,16 +11,31 @@ import math
 
 import wb_construct as wc
 import wb_te_geom as tg
+import wb_te_health as th
+import wb_te_bldg as tb
+import wb_te_guide as tgd
+import wb_te_share as tsh
+import wb_te_retail as trt
+import wb_rta_gen as trg                      # rta: retail-style generation (Workbench 0.33 retail-style authoring)
+import wb_rta_ops as tro                      # rta: the Retail-style panel operations
+import wb_rta_design as trd                   # rta2: guided environment designer
 
 T = {}                                          # wb_trackedit globals (bind)
-VERSION = '0.31'                                # the authoring queue's editor version (wb_core.VERSION follows)
+VERSION = '0.33'                                # the authoring queue's editor version (wb_core.VERSION follows)
 # block kinds whose faces may cross unit cuts with the kit clipper's 4-decimal rounding slivers (< 0.00005 m x perimeter,
 # reported as cut_rounding_slivers_m2), as terrain / barrier / prefab since v0.26; roads of v0.24 keep the strict rule
-ROUND_TOL_KINDS = ('proad', 'hterrain', 'junction', 'join', 'scatter')
+ROUND_TOL_KINDS = ('proad', 'hterrain', 'junction', 'join', 'scatter', 'building', 'tree')   # v0.33: + building, tree
 
 
 def bind(g):
     T.update(g)
+    th.T.update(g)                              # v0.33 modules share the same globals
+    tb.T.update(g)
+    tgd.T.update(g)
+    tsh.T.update(g)
+    trt.T.update(g)
+    trg.T.update(g)
+    trd.T.update(g)
 
 
 def E(msg, detail=None):
@@ -142,7 +157,7 @@ def backup_before_save(src):
     return d
 
 
-class AuthorMixin:
+class AuthorMixin(th.HealthMixin, tb.BldgMixin, tgd.GuideMixin, tsh.ShareMixin, trt.RetailMixin, trg.GenMixin, tro.OpsMixin, trd.DesignMixin):
     # ================================================================== stage 1: road design
     START_FLAT_BACK, START_FLAT_AHEAD = 45.0, 30.0       # the grid (12..32 m back) + rolling start must stay level (kit 0.3.0 README)
 
@@ -1639,12 +1654,8 @@ class AuthorMixin:
     # ================================================================== stage 7: streaming, LOD, visibility
     LIMITS = [
         # (name, value, class, evidence, what raising it would take)
-        ('mesh block per unit', '0x28000 bytes', 'HOST ceiling', 'trackbuild/_vendor/trackconv/streamed.py:22 "retail streaming pool '
-         'layout 1: 10 x 0x28000"; build.py:142; validate.py V6_budgets', 'host work: a larger streaming pool / slot layout (the SDK '
-         'capacity example relocates the track pool) - separate host checkpoint, not editor work'),
-        ('LOD block per unit', '0x18000 bytes', 'HOST ceiling', 'streamed.py:22 "18 x 0x18000"; build.py:143', 'as above (host)'),
-        ('static.dat', '0xD00000 bytes', 'HOST ceiling', 'validate.py:391 V6_budgets', 'host pool size (host work)'),
-        ('Gamedata need', '0x176000 bytes', 'HOST ceiling', 'validate.py:391 V6_budgets', 'host pool size (host work)'),
+        # RTA5: the HOST rows (mesh / LOD block, static.dat, Gamedata, lanes) come from the kit's capacity table:
+        # wb_capacity.limit_rows (game default, host ceiling, mod.toml key, minimum host per range)
         ('records per block', '127', 'FORMAT ceiling', 'xbtopo.py:134 "s8 chain index"; blocks.py:127', 'none (s8 field)'),
         ('vertices per block', '65,536', 'FORMAT ceiling', 'xbtopo.py:136; blocks.py:117 (u16 indices)', 'none (u16 field)'),
         ('material rows', '83', 'FORMAT ceiling', 'blocks.py:24 / xbmesh.py:20 "s16[83] material per row"; preflight.py:13', 'none'),
@@ -1697,6 +1708,9 @@ class AuthorMixin:
         streamed, table, units, info = self._build_full()
         d = self.desc()
         K = T['kit_trackbuild'](self.cfg)
+        import wb_capacity as WC                                # RTA5: game default + host ceiling (kit capacity table)
+        crow = {c['unit']: c for c in WC.unit_rows(K, info['units'], d)}
+        cmode = WC.mode_of(K, d)
         MS, LS = K['build'].MESH_SLOT, K['build'].LOD_SLOT
         samp = wc.route_samples(d.get('stations') or [])
         per = []
@@ -1710,6 +1724,9 @@ class AuthorMixin:
                         'records': x['records'], 'mesh_bytes': x['mesh_bytes'], 'lod_bytes': x['lod_bytes'],
                         'mesh_pct': round(100.0 * x['mesh_bytes'] / MS, 1), 'lod_pct': round(100.0 * x['lod_bytes'] / LS, 1),
                         'vertex_pct': round(100.0 * x['vertices'] / 65536, 1), 'record_pct': round(100.0 * x['records'] / 127, 1),
+                        'mesh_limit_pct': crow[k]['mesh_limit_pct'], 'lod_limit_pct': crow[k]['lod_limit_pct'],
+                        'mesh_state': crow[k]['mesh_state'], 'lod_state': crow[k]['lod_state'],
+                        'capacity_notes': crow[k].get('capacity_notes', []),
                         'dropped_slivers': x['dropped_slivers'], 'region_corners': x['region_corners']})
         worst = max(per, key=lambda r: max(r['mesh_pct'], r['lod_pct'], r['vertex_pct'], r['record_pct']))
         wp = max(worst['mesh_pct'], worst['lod_pct'], worst['vertex_pct'], worst['record_pct'])
@@ -1719,21 +1736,26 @@ class AuthorMixin:
                {'mode': 'computed', 'visible_per_unit': pv['computed']['visible_per_unit'], 'max_ahead': pv['computed']['max_ahead'],
                 'ahead_beyond_4': pv['computed']['ahead_beyond_4'], 'matrix': pv['computed']['matrix']})
         lod = info['lod'] or {'mode': 'identity', 'note': 'LOD records = the full-detail mesh (no decimation)'}
-        warn = ['unit %d at %.1f %% of a slot / vertex / record limit' % (r['unit'], max(r['mesh_pct'], r['lod_pct'], r['vertex_pct'],
-                                                                                        r['record_pct'])) for r in per
-                if max(r['mesh_pct'], r['lod_pct'], r['vertex_pct'], r['record_pct']) >= 80]
+        lim_pct = lambda r: max(r['mesh_limit_pct'], r['lod_limit_pct'], r['vertex_pct'], r['record_pct'])  # noqa: E731
+        warn = ['unit %d at %.1f %% of a slot / vertex / record limit%s' % (r['unit'], lim_pct(r), ' (capacity auto: of the host '
+                                                                            'ceiling)' if cmode == 'auto' else '') for r in per
+                if lim_pct(r) >= 80]
+        cinfo = [n for r in per for n in r['capacity_notes'] if 'declared' in (r['mesh_state'], r['lod_state'])]
+        limits = WC.limit_rows(K, d) + list(self.LIMITS)
         y = (d.get('stations') or [{'p': [0, 0, 0]}])[0]['p'][1] + 0.6
         return {'ok': True, 'units': per, 'streamed_bytes': len(streamed), 'worst_unit': worst['unit'], 'worst_pct': wp,
                 'visibility': vis, 'lod': {k: v for k, v in lod.items() if k != 'per_unit'}, 'lod_per_unit': lod.get('per_unit'),
-                'limits': [{'limit': a, 'value': b, 'class': c, 'evidence': e_, 'to_raise': f} for a, b, c, e_, f in self.LIMITS],
-                'warnings': warn, 'regions': [{'unit': r['unit'], 'corners': [[c[0], y, c[1]] for c in r['region_corners']],
+                'limits': [{'limit': a, 'value': b, 'class': c, 'evidence': e_, 'to_raise': f} for a, b, c, e_, f in limits],
+                'warnings': warn, 'capacity_mode': cmode, 'capacity_info': cinfo, 'regions': [{'unit': r['unit'], 'corners': [[c[0], y, c[1]] for c in r['region_corners']],
                                                'changed': r['unit'] == worst['unit']} for r in per],
                 'summary_lines': ['%d sections, %d streamed bytes; worst unit %d at %.1f %% of a limit; pvs %s; lod %s' % (
                     len(per), len(streamed), worst['unit'], wp, pv['mode'], lod['mode'])] +
                 ['unit %2d: stations %s, %d render / %d collision polys, mesh %.1f %%, LOD %.1f %%, %d drivable samples' % (
                     r['unit'], r['stations'], r['render_polys'], r['collision_polys'], r['mesh_pct'], r['lod_pct'], r['drivable_samples'])
-                 for r in per[:40]] + ['WARNING: ' + w for w in warn] +
-                ['limit %s = %s: %s (%s)' % (a, b, c, e_.split(';')[0]) for a, b, c, e_, _f in self.LIMITS]}
+                 for r in per[:40]] + ['WARNING: ' + w for w in warn] + ['INFO: ' + n for n in cinfo] +
+                ['capacity %s (project setting; %s)' % (cmode, 'declare what the track needs in mod.toml, up to the Burnout Mashup '
+                 'host ceilings' if cmode == 'auto' else 'refuse anything above the game\'s defaults')] +
+                ['limit %s = %s: %s (%s)' % (a, b, c, e_.split(';')[0]) for a, b, c, e_, _f in limits]}
 
     def lod_preview(self, unit=None):
         """read only: one unit's LOD geometry as the kit builds it (identity = the full mesh; decimate = trackbuild.lod) with the
@@ -1755,7 +1777,7 @@ class AuthorMixin:
                 'summary_lines': ['unit %d LOD (%s): %d -> %d polygons, %s' % (unit, lodd['mode'], len(u.polys), len(polys),
                                                                               json.dumps(st)[:200])]}
 
-    def _settings_req(self, lod_mode, e_max, pvs_mode):
+    def _settings_req(self, lod_mode, e_max, pvs_mode, drop_below=None, capacity=None):
         if lod_mode not in ('identity', 'decimate'):
             raise E("lod_mode: 'identity' (full detail) or 'decimate' (trackbuild.lod)")
         if lod_mode == 'decimate' and not num(e_max, 0.01, 0.3):
@@ -1766,11 +1788,27 @@ class AuthorMixin:
         lod = dict(d.get('lod') or {}, mode=lod_mode)          # other keys (e_border, debug_tint, unknown ones) are kept
         if lod_mode == 'decimate':
             lod['e_max'] = float(e_max)
-        return {'lod': lod, 'pvs': dict(d.get('pvs') or {}, mode=pvs_mode)}
+        if drop_below is not None:                          # 0.33: needs trackbuild 0.3.1-te2 (far-LOD small-piece rule + V8)
+            if self.tb_version() < (0, 3, 1):
+                raise E('drop_below needs trackbuild 0.3.1 or later (bound: %s)' % '.'.join(map(str, self.tb_version())))
+            if lod_mode != 'decimate' or not num(drop_below, 0.5, 15):
+                raise E('drop_below: 0.5..15 m, with lod_mode decimate (pieces smaller than this are left out of the FAR mesh only)')
+            lod['drop_below'] = float(drop_below)
+        req = {'lod': lod, 'pvs': dict(d.get('pvs') or {}, mode=pvs_mode)}
+        if capacity not in (None, '', 'keep'):              # RTA5: project setting "capacity" (trackbuild 0.3.4); keep = unchanged
+            K = T['kit_trackbuild'](self.cfg)
+            if 'capacity' not in K:
+                raise E('capacity needs trackbuild 0.3.4 or later (bound: %s)' % '.'.join(map(str, self.tb_version())))
+            if capacity not in K['capacity'].MODES:
+                raise E("capacity: 'auto' (declare what the track needs in mod.toml, up to the Burnout Mashup host's ceilings) or "
+                        "'game' (refuse anything above the game's defaults; for hosts without capacity declarations)")
+            req['capacity'] = capacity
+        return req
 
-    def streaming_settings_preview(self, lod_mode=None, e_max=None, pvs_mode=None):
-        """TE stage 7: LOD / visibility settings of the description, checked by the kit build_units dry run, WITHOUT changing"""
-        req = self._settings_req(lod_mode, e_max, pvs_mode)
+    def streaming_settings_preview(self, lod_mode=None, e_max=None, pvs_mode=None, drop_below=None, capacity=None):
+        """TE stage 7: LOD / visibility (RTA5: + capacity auto / game) settings of the description, checked by the kit build_units
+        dry run, WITHOUT changing"""
+        req = self._settings_req(lod_mode, e_max, pvs_mode, drop_below, capacity)
         nd = T['desc_splice'](self.cur, req)
         streamed, table, units, info = self._build_full(self.obj_cur, nd)
         return {'ok': True, 'settings': req, 'units': len(units), 'streamed_bytes': len(streamed), 'lod': info['lod'] and
@@ -1778,14 +1816,15 @@ class AuthorMixin:
                 'preview_key': self._cons_key('stream', req), 'note': 'preview only: nothing changed',
                 'summary_lines': ['settings %s: build_units ok, %d units, %d streamed bytes' % (json.dumps(req), len(units), len(streamed))]}
 
-    def streaming_settings(self, lod_mode=None, e_max=None, pvs_mode=None, preview_key=None):
-        req = self._settings_req(lod_mode, e_max, pvs_mode)
+    def streaming_settings(self, lod_mode=None, e_max=None, pvs_mode=None, drop_below=None, preview_key=None, capacity=None):
+        req = self._settings_req(lod_mode, e_max, pvs_mode, drop_below, capacity)
         if preview_key != self._cons_key('stream', req):
             raise E('NEEDS PREVIEW: preview these settings first and apply them with the preview_key')
         nd = T['desc_splice'](self.cur, req)
         self._build_full(self.obj_cur, nd)
         exact = self._check_desc_splice(self.cur, nd, set(req))
-        label = 'streaming settings lod %s / pvs %s' % (req['lod']['mode'], req['pvs']['mode'])
+        label = 'streaming settings lod %s / pvs %s%s' % (req['lod']['mode'], req['pvs']['mode'],
+                                                         ' / capacity %s' % req['capacity'] if 'capacity' in req else '')
         self._push('desc', label, nd, kind='settings', index=None)
         return {'ok': True, 'label': label, 'settings': req, 'exact': exact,
                 'note': 'the kit gates decide at Build -> Validate (V8_lod, V9_pvs_computed / V3_pvs_walk)'}
@@ -1799,7 +1838,9 @@ class AuthorMixin:
         def add(check, ok, text, faces=(), extra=None):
             faces = [[list(map(float, p)) for p in f] for f in list(faces)[:200]]
             focus = [sum(p[k] for p in faces[0]) / len(faces[0]) for k in range(3)] if faces else None
-            items.append(dict({'check': check, 'ok': bool(ok), 'text': text, 'faces': faces, 'focus': focus}, **(extra or {})))
+            fx, tool = tgd.fix_for(check) if not ok else (None, None)        # v0.33: how to fix it + the tool that helps
+            items.append(dict({'check': check, 'ok': bool(ok), 'text': text, 'faces': faces, 'focus': focus, 'fix': fx, 'tool': tool},
+                              **(extra or {})))
         if self.obj_cur is None:
             return {'ok': True, 'items': [{'check': 'obj', 'ok': False, 'text': 'the OBJ did not pass the input check', 'faces': []}]}
         o = tm.Obj(self.obj_cur)
@@ -1975,7 +2016,7 @@ class AuthorMixin:
             raise E('not a source zip with MANIFEST.json (%s)' % e)
         if man.get('format') != 'workbench-track-sources 1':
             raise E('unknown manifest format %r' % man.get('format'))
-        names = set(z.namelist()) - {'MANIFEST.json'}
+        names = set(z.namelist()) - {'MANIFEST.json'} - ({'SHARING.md'} if man.get('share') == 'workbench-share 1' else set())   # v0.33
         want = {'sources/' + r for r in man['files']}
         if names != want:
             raise E('the zip and its manifest disagree (%d extra, %d missing): refused' % (len(names - want), len(want - names)))
@@ -2082,6 +2123,7 @@ class AuthorMixin:
                  'join_preview': 'join_preview', 'join': 'join', 'routing': 'routing',
                  'hterrain_preview': 'hterrain_preview', 'hterrain': 'hterrain',
                  'terrain_brush_preview': 'terrain_brush_preview', 'terrain_brush': 'terrain_brush'}
+    TE_LAYOUT = dict(TE_LAYOUT, **th.HealthMixin.HEALTH_LAYOUT, **tb.BldgMixin.BLDG_LAYOUT, **tgd.GuideMixin.GUIDE_LAYOUT, **tsh.ShareMixin.SHARE_LAYOUT, **trt.RetailMixin.RETAIL_LAYOUT, **trg.GenMixin.RTA_LAYOUT, **tro.OpsMixin.RTA_OPS_LAYOUT, **trd.DesignMixin.DESIGN_LAYOUT)   # v0.33 + rta
 
     def _cons_key_any(self, kind, req):
         return hashlib.sha256(('%s|%s|%s' % (self.content_sha(), kind, json.dumps(req, sort_keys=True))).encode()).hexdigest()[:16]

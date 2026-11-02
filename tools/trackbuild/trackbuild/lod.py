@@ -233,20 +233,56 @@ def simplify_mesh(m, e_max=0.3, e_border=0.05):
     return out, collapses
 
 
-def decimate(polys, e_max=0.3, e_border=0.05):
+def small_components(tris, drop_below):
+    """0.3.1-te2: indices of the triangles (each a sequence of >= 3 positions) that belong to a connected piece (shared positions,
+    3 decimals) whose bounding-box diagonal is below drop_below m. One rule for the builder and the V8 gate."""
+    if not drop_below:
+        return set()
+    parent = {}
+
+    def find(a):
+        while parent.setdefault(a, a) != a:
+            parent[a] = parent[parent[a]]
+            a = parent[a]
+        return a
+    keys = []
+    for t in tris:
+        ks = [tuple(round(c, 3) for c in p) for p in t]
+        keys.append(ks)
+        for k in ks[1:]:
+            ra, rb = find(ks[0]), find(k)
+            if ra != rb:
+                parent[ra] = rb
+    box = {}
+    for i, ks in enumerate(keys):
+        r = find(ks[0])
+        lo, hi = box.setdefault(r, [[1e18] * 3, [-1e18] * 3])
+        for k in ks:
+            for j in range(3):
+                lo[j], hi[j] = min(lo[j], k[j]), max(hi[j], k[j])
+    small = {r for r, (lo, hi) in box.items() if math.sqrt(sum((hi[j] - lo[j]) ** 2 for j in range(3))) < drop_below}
+    return {i for i, ks in enumerate(keys) if find(ks[0]) in small}
+
+
+def decimate(polys, e_max=0.3, e_border=0.05, drop_below=None):
     """polys [(mat, [(pos, uv, nrm, rgb)])] of ONE unit -> (simplified polys (triangles, flat normals), stats). The bound is
     checked by measurement: every source vertex lies within e_max (+ 1 mm) of the simplified surface of its material."""
     by_mat = {}
     for mat, p in polys:
         by_mat.setdefault(mat, []).append(p)
-    out, st = [], {"tris_in": 0, "tris_out": 0, "max_err": 0.0, "collapses": 0}
+    out, st = [], {"tris_in": 0, "tris_out": 0, "max_err": 0.0, "collapses": 0, "full_detail_materials": [], "dropped_small_polys": 0}
     for mat, ps in sorted(by_mat.items()):
+        if drop_below:                              # 0.3.1-te2: small pieces stay out of the FAR mesh (collision is untouched)
+            drop = small_components([[c[0] for c in p] for p in ps], drop_below)
+            st["dropped_small_polys"] += len(drop)
+            ps = [p for i, p in enumerate(ps) if i not in drop]
+            if not ps:
+                continue
         m = _weld(ps)
         tris, nc = simplify_mesh(m, e_max, e_border)
-        st["tris_in"] += len(m.tris)
-        st["tris_out"] += len(tris)
-        st["collapses"] += nc
         P = [v[0] for v in m.verts]
+        st_all = st
+        st = {"max_err": 0.0}                       # 0.3.1-te2: this material's own measured error
         # measured error: every source vertex to the simplified surface (same material)
         boxes = []
         for t in tris:
@@ -278,6 +314,20 @@ def decimate(polys, e_max=0.3, e_border=0.05):
                     if best < 1e-6:
                         break
                 st["max_err"] = max(st["max_err"], best)
+        err, st = st["max_err"], st_all
+        if err > e_max + 1e-3:
+            # 0.3.1-te2: a material that cannot be simplified within the bound keeps its FULL detail in the LOD block (exactly the
+            # identity records: error 0) instead of failing the whole build; every other material is still decimated.
+            st["full_detail_materials"].append({"material": mat, "simplified_err_m": round(err, 4), "tris": len(m.tris)})
+            st["tris_in"] += len(m.tris)
+            st["tris_out"] += len(m.tris)
+            for p in ps:
+                out.append((mat, p))
+            continue
+        st["tris_in"] += len(m.tris)
+        st["tris_out"] += len(tris)
+        st["collapses"] += nc
+        st["max_err"] = max(st["max_err"], err)
         for t in tris:
             a, b, c = (P[i] for i in t)
             n = _cross(_sub(b, a), _sub(c, a))

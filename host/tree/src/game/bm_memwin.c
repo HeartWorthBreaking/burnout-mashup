@@ -20,7 +20,7 @@ static uint64_t pages(uint32_t b)
 
 uint64_t bm_memwin_total(const bm_memwin_plan *p)
 {
-    return pages(p->static_bytes) + pages(p->gamedata_bytes) + pages(p->lod_bytes) + pages(p->fetex_reserve) +
+    return pages(p->static_bytes) + pages(p->gamedata_bytes) + pages(p->lod_bytes) + pages(p->full_bytes) + pages(p->fetex_reserve) +
            pages(p->paint_reserve) + pages(p->stress_bytes);
 }
 
@@ -39,9 +39,10 @@ int bm_memwin_check(const bm_memwin_plan *p, uint32_t window_rt, uint32_t window
         return BM_MEMWIN_MISMATCH;
     }
 #endif
-    snprintf(why, wn, "STATIC 0x%X + GAMEDATA 0x%X + LOD 0x%X + front-end textures 0x%X (reserve) + paints 0x%X (reserve)"
-             " + dev stress 0x%X = %llu KB; high zone %u KB, %u KB in use, %llu KB free",
-             (unsigned)p->static_bytes, (unsigned)p->gamedata_bytes, (unsigned)p->lod_bytes, (unsigned)p->fetex_reserve,
+    snprintf(why, wn, "STATIC 0x%X + GAMEDATA 0x%X + LOD 0x%X + FULL 0x%X + front-end textures 0x%X (reserve) + paints 0x%X"
+             " (reserve) + dev stress 0x%X = %llu KB; high zone %u KB, %u KB in use, %llu KB free",
+             (unsigned)p->static_bytes, (unsigned)p->gamedata_bytes, (unsigned)p->lod_bytes, (unsigned)p->full_bytes,
+             (unsigned)p->fetex_reserve,
              (unsigned)p->paint_reserve, (unsigned)p->stress_bytes, (unsigned long long)(need >> 10), (unsigned)(zone >> 10),
              (unsigned)(zone_in_use >> 10), (unsigned long long)(free_ >> 10));
     return need <= free_ ? BM_MEMWIN_OK : BM_MEMWIN_OVER;
@@ -160,6 +161,7 @@ void bm_memwin_gate(void)
     (void)bo3_gds_request(0, &gd);             /* bytes 0: no change, answers the merged request */
     p.gamedata_bytes = gd > BO3_GDS_GAME ? gd : 0;
     p.lod_bytes = g_bo3_us.low_bytes * BO3_US_LOW1_N;
+    p.full_bytes = g_bo3_us.full_bytes * BO3_US_FULL1_N;   /* patch 131 */
     p.fetex_reserve = BM_MEMWIN_FETEX_RESERVE;
     p.paint_reserve = BM_MEMWIN_PAINT_RESERVE;
     p.stress_bytes = dev_stress_bytes();

@@ -76,7 +76,7 @@
  * [bmashup.<table>] this host reads (bm_capdecl.c, bm_tune.c, bm_tracks.c regions / tracks, bm_wtour.c, bm_music.c). The keys are
  * the exact keys each reader accepts ("bmashup.<table>.<key>"). [bmashup] itself takes BO3_PLATFORM_OWN_KEYS. */
 #define BO3_PLATFORM_TABLES(T)                                                      \
-    T("capacity",     1, "version lanes low_unit_bytes static_bytes gamedata_bytes")              \
+    T("capacity",     1, "version lanes low_unit_bytes static_bytes gamedata_bytes full_unit_bytes")   /* main21 patch 131: + full_unit_bytes */ \
     T("tune",         3, "version set sliders")   /* GP-AITUNE1: 2 = + AI values, signed; main21 patch 130: 3 = + sliders (MODS page) */  \
     T("regions",      1, "version add dj")                                         \
     T("tracks",       1, "version add point_to_point names locations")             \

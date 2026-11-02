@@ -1,16 +1,16 @@
 {
  "exe_file": "burnout3.exe (staged copy: stage/BurnoutMashup.exe)",
- "exe_sha256": "cae5f5ff4d85fdcce2f1f66fc28e6edaffe20a7bf28a7e2bdc4ade53f058f78d",
- "exe_size": 28062208,
+ "exe_sha256": "cbc2c2a24e7341b32d670ce1f4ee9d3ea4bf10ec8d622a282fcb2448a8862177",
+ "exe_size": 28066816,
  "format": 1,
  "generator": "build/host_info.py 1",
- "host_name": "bmp-0.1.9+6f17b9e08be3",
- "identity": "bmp-0.1.9+6f17b9e08be3",
+ "host_name": "bmp-0.1.9+136ebbf6a46f",
+ "identity": "bmp-0.1.9+136ebbf6a46f",
  "inputs": {
-  "anchors_json_sha256": "7794adf4784b00be75ce665e397a43afe29192be73fee92860298c06fe38af18",
+  "anchors_json_sha256": "2fbe98197d15ab3d67b60f61f3fb1c788358b4aa084c57f6a74ce2b864a1c0cd",
   "bm_gen_access_h_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985",
   "gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
-  "marks": 512,
+  "marks": 518,
   "takedawn_commit": "4f074e211822eaf43d4a3902c744d5ed0e9c9adf",
   "takedawn_tree_id": "26cdbea6f8c4a0f6092900c5715ac18393aeb41f",
   "xboxrecomp_commit": "e3756d1b2fefdae6888038384c748cbdd37a41ba",
@@ -45,7 +45,7 @@
   "bmashup.vphysics": 3,
   "takedawn.race": 1
  },
- "source_digest_sha256": "6f17b9e08be399c2078a081f3c1e8bd2a31fc4695f3d033cd41304be0ef1b009",
+ "source_digest_sha256": "136ebbf6a46fad9b8c6859ac4a55ab87094b5d4abaca049db13a671286235cb5",
  "source_files": {
   "bmp_files": 338,
   "toolkit_files": 394
@@ -79,7 +79,8 @@
     "lanes",
     "low_unit_bytes",
     "static_bytes",
-    "gamedata_bytes"
+    "gamedata_bytes",
+    "full_unit_bytes"
    ],
    "version": 1
   },
@@ -193,12 +194,12 @@
   "ninja": "1.13.2",
   "sdl2": "2.32.10"
  },
- "toolkit_digest_sha256": "e6f090bafbbbffdf6865d763e36503827c77f3c0945c5e0eb7e009437234f89b",
- "toolkit_identity": "xr+e6f090bafbbb",
+ "toolkit_digest_sha256": "b2b18c9c9cc3dd365c5a5862e0b74ae0fa9bf5e4cad3e3290f88c88662a61ab9",
+ "toolkit_identity": "xr+b2b18c9c9cc3",
  "verification": {
   "exe": "identical to the reference in EXPECTED.json",
-  "expected_exe_sha256": "cae5f5ff4d85fdcce2f1f66fc28e6edaffe20a7bf28a7e2bdc4ade53f058f78d",
-  "expected_json_sha256": "5e9c36ed1438b14e73ed44a16f18cbd7cd26975f75a696d9f414c989aacc79ed",
+  "expected_exe_sha256": "cbc2c2a24e7341b32d670ce1f4ee9d3ea4bf10ec8d622a282fcb2448a8862177",
+  "expected_json_sha256": "2f2ef14c6b9bd288f017b1f3515f58277f7ec55b8e6cb585e1ba249a5c011bf8",
   "generated_objects": "27/27 identical"
  }
 }

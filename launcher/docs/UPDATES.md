@@ -50,7 +50,7 @@ version you came from.
 
 0.1.0-alpha.1 was a source tree with everything under `launcher\` and no update channel, so it cannot update itself. Two ways:
 
-- **In place (recommended):** unpack `BurnoutMashup-0.2.0-alpha.1-windows.zip` INTO your 0.1.0-alpha.1 folder (all its names are
+- **In place (recommended):** unpack the newest `BurnoutMashup-0.2.0-alpha.N-windows.zip` (alpha.1 or later) INTO your 0.1.0-alpha.1 folder (all its names are
   new: nothing is overwritten) and start `Burnout Mashup.exe`. It finds the old version around `app\` and moves it into the new
   layout by itself, in one transaction like Install: `launcher\gamedata` -> `gamedata\`; `launcher\mods\user` and `mods\generated`
   -> `gamedata\mods\...`; `launcher\profile`, `host-local`, `host-local.prev`, `update-state`, `build`, `work`, `diag`, `HOST_INFO.json`,

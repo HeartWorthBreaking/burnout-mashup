@@ -27,12 +27,14 @@ from .io import need, read_desc, read_obj, read_png
 
 from ._vendor.trackconv import b3static as S  # noqa: E402   (0.2.0: vendored, package-relative; no workspace sys.path)
 from . import donor as DN  # noqa: E402
+from . import capacity as CAP  # noqa: E402   (0.3.4: game defaults / host ceilings, ONE table)
 
 HOST_DEFAULT = DN.HOST_DEFAULT
 DONOR_FILES = DN.DONOR_FILES
-MESH_SLOT, LOD_SLOT = 0x28000, 0x18000
-STATIC_POOL = 0xD00000
-GAMEDATA_SLOT = 0x176000
+# the GAME's default sizes (0.3.3 names kept); the limits a build applies come from trackbuild.capacity (mode auto / game)
+MESH_SLOT, LOD_SLOT = CAP.TABLE["full_unit_bytes"]["game"], CAP.TABLE["low_unit_bytes"]["game"]
+STATIC_POOL = CAP.TABLE["static_bytes"]["game"]
+GAMEDATA_SLOT = CAP.TABLE["gamedata_bytes"]["game"]
 
 
 def sha(b):
@@ -63,11 +65,31 @@ def material_record(type_=0, flags=0):
     return bytes(raw)
 
 
-def static_object(src_dir, desc, unit_table):
+def type_keys(objs, family):
+    """distinct (track, index) of one family in first-appearance order = the written type order"""
+    out = []
+    for ob in objs or []:
+        if ob["family"] == family and (ob["track"], ob["index"]) not in out:
+            out.append((ob["track"], ob["index"]))
+    return out
+
+
+def static_object(src_dir, desc, unit_table, retail=None, objs=None):
+    """0.3.2: `retail` = {material name: trackbuild.retailmat.resolve(...)} -> that material's record and textures verbatim"""
     texs, mats = [], []
     tex_index = {}
     for r, mat in enumerate(desc["rows"]):
         m = desc["materials"][mat]
+        if retail and mat in retail:
+            rm = retail[mat]
+            ids = []
+            for t in rm["textures"]:
+                if t["_src"] not in tex_index:
+                    tex_index[t["_src"]] = len(texs)
+                    texs.append({k: v for k, v in t.items() if k != "_src"})
+                ids.append(tex_index[t["_src"]])
+            mats.append({"raw": rm["raw"], "tex": ids})
+            continue
         tp = m["texture"]
         if tp not in tex_index:
             w, h, rgb = read_png(os.path.join(src_dir, tp))
@@ -75,15 +97,59 @@ def static_object(src_dir, desc, unit_table):
             texs.append(texture_record(os.path.splitext(os.path.basename(tp))[0], w, h, rgb))
         mats.append({"raw": material_record(), "tex": [tex_index[tp]]})
     n = len(unit_table)
+    inst, ptypes, pbytes, matrices = [], [], b"", []
+    ucounts, ulists = [b""] * n, [[] for _ in range(n)]
+    if objs:                                                    # 0.3.2: verbatim records, materials appended after the rows
+        mat_index = {}
+
+        def mat_of(src_mi, rm):
+            key = (rm["source"]["track"], src_mi)
+            if key not in mat_index:
+                ids = []
+                for t in rm["textures"]:
+                    if t["_src"] not in tex_index:
+                        tex_index[t["_src"]] = len(texs)
+                        texs.append({k: v for k, v in t.items() if k != "_src"})
+                    ids.append(tex_index[t["_src"]])
+                mat_index[key] = len(mats)
+                mats.append({"raw": rm["raw"], "tex": ids})
+            return mat_index[key]
+        recs = {}
+        for ob in objs:
+            key = (ob["family"], ob["track"], ob["index"])
+            if key in recs:
+                continue
+            raw = bytearray(ob["record"]["raw"])
+            for at, m in zip((0x5C, 0x5E, 0x60), ob["materials"]):
+                struct.pack_into("<h", raw, at, -1 if m is None else mat_of(m[0], m[1]))
+            recs[key] = {"raw": bytes(raw), "lods": ob["record"]["lods"]}
+        inst = [recs[("instance",) + k] for k in type_keys(objs, "instance")]
+        pk = type_keys(objs, "prop")
+        if pk:
+            ptypes = [recs[("prop",) + k] for k in pk]
+            cls = {}
+            per = [[[] for _ in pk] for _ in range(n)]
+            for ob in objs:
+                if ob["family"] != "prop":
+                    continue
+                ty = pk.index((ob["track"], ob["index"]))
+                cls[ty] = ob["class"]
+                for u, m in zip(ob["units"], ob["matrices"]):
+                    per[u][ty].append((cls[ty] << 16) | len(matrices))
+                    matrices.append(m)
+            need(len(matrices) <= 0xFFFF, "more than 65,535 prop placements")
+            pbytes = bytes(cls[t] for t in range(len(pk)))
+            ucounts = [bytes(len(L) for L in per[u]) for u in range(n)]          # never null (retail 2,838 / 2,838)
+            ulists = [[struct.pack("<%dI" % len(L), *L) if L else None for L in per[u]] for u in range(n)]
     o = {"game": "b3", "w14": 0, "textures": texs, "materials": mats, "anim": [],
-         "sets": {0x24: [], 0x28: [], 0x2C: [], 0x30: []}, "instances": [], "proptypes": [], "w56": 0,
-         "pbytes": b"", "matrices": [], "ucounts": [b""] * n, "ulists": [[] for _ in range(n)],
+         "sets": {0x24: [], 0x28: [], 0x2C: [], 0x30: []}, "instances": inst, "proptypes": ptypes, "w56": 0,
+         "pbytes": pbytes, "matrices": matrices, "ucounts": ucounts, "ulists": ulists,
          "units": [tuple(e) for e in unit_table], "garbage": []}
     return o
 
 
 # ---------------------------------------------------------------------------------------------- streamed units
-def build_units(src_dir, desc):
+def build_units(src_dir, desc, first_pass=None, objs=None):
     obj = read_obj(os.path.join(src_dir, desc["obj"]))
     for m in obj["materials_used"]:
         need(m in desc["rows"], "OBJ material %s has no row (description 'rows'): describe it under 'materials' and list it in 'rows'" % m)
@@ -98,8 +164,21 @@ def build_units(src_dir, desc):
     if pvs_mode == "all":
         need(4 <= U <= 17, "trackbuild 0.1 supports 4..17 units (every unit stays inside the +-8 low ring; see README s5)")
     else:
-        need(pvs_mode == "computed" and 4 <= U <= 162, "pvs mode computed: 4..162 units (retail STATIC unit range)")
+        need(pvs_mode == "computed", "pvs mode must be all or computed")
+        need(CAP.units_check(U, "computed") is None, CAP.units_check(U, "computed") or "")   # 0.3.4: 4..162 (largest retail)
     units = UN.make_units(desc)
+    inst_tail, obj_cap = None, None
+    if objs:                                                    # 0.3.2: retail instance models / props (trackbuild.retailobj)
+        from . import retailobj as RO
+        obj_cap = RO.assign_units(objs, units)
+        itypes = type_keys(objs, "instance")
+        if itypes:
+            inst_tail = [{} for _ in units]
+            for ob in objs:
+                if ob["family"] == "instance":
+                    ty = itypes.index((ob["track"], ob["index"]))
+                    for u, m in zip(ob["units"], ob["matrices"]):
+                        inst_tail[u].setdefault(ty, []).append(m)
     ast = UN.assign(units, obj, desc["materials"])
     need(ast["render_unassigned"] == 0, "%d render polygons lie outside every unit region" % ast["render_unassigned"])
     need(ast["coll_unassigned"] == 0, "%d collision polygons lie outside every unit region" % ast["coll_unassigned"])
@@ -111,7 +190,7 @@ def build_units(src_dir, desc):
         from . import lod as LD
         gl = []
         for u in units:
-            polys, sst = LD.decimate(u.polys, lodd.get("e_max", 0.3), lodd.get("e_border", 0.05))
+            polys, sst = LD.decimate(u.polys, lodd.get("e_max", 0.3), lodd.get("e_border", 0.05), lodd.get("drop_below"))
             tint = lodd.get("debug_tint")
             if tint:                                            # diagnostic only: makes the LOD records identifiable
                 polys = [(m, [(p, uv, n, tuple(min(1.0, c * k) for c, k in zip(rgb, tint))) for p, uv, n, rgb in poly])
@@ -137,10 +216,11 @@ def build_units(src_dir, desc):
         ys = [v[0][1] for v in gm[k].verts]
         prism = BK.prism_of(u, (min(ys), max(ys)))
         pvs = BK.pvs_chunks(k, U, gm, gl, len(rows), visible)
-        m = BK.mesh_block(k, prism, gm[k], rows, pvs)
-        l, tst = BK.lod_block(k, prism, u, gl[k], u.coll)
-        need(len(m) <= MESH_SLOT, "unit %d mesh block 0x%X > slot 0x%X" % (k, len(m), MESH_SLOT))
-        need(len(l) <= LOD_SLOT, "unit %d LOD block 0x%X > slot 0x%X" % (k, len(l), LOD_SLOT))
+        m = BK.mesh_block(k, prism, gm[k], rows, pvs, first_pass)
+        l, tst = BK.lod_block(k, prism, u, gl[k], u.coll,
+                              (len(type_keys(objs, "instance")), inst_tail[k]) if inst_tail else None)
+        CAP.check_value("full_unit_bytes", len(m), CAP.mode_of(desc), "unit %d mesh block" % k)
+        CAP.check_value("low_unit_bytes", len(l), CAP.mode_of(desc), "unit %d LOD block" % k)
         meshes.append(m)
         lods.append(l)
         need(gm[k].dropped_area < 0.5, "unit %d: %.3f m2 of sliver triangles would be dropped" % (k, gm[k].dropped_area))
@@ -159,7 +239,7 @@ def build_units(src_dir, desc):
                    "tris_out": sum(s["tris_out"] for s in lod_stats), "max_err": max(s["max_err"] for s in lod_stats),
                    "per_unit": lod_stats, "debug_tint": lodd.get("debug_tint")}
     return b"".join(parts), table, units, {"assign": ast, "units": info, "obj": obj["counts"], "lod": lod_sum,
-                                           "pvs": {"mode": pvs_mode, "computed": vis_info}}
+                                           "pvs": {"mode": pvs_mode, "computed": vis_info}, "objects": obj_cap}
 
 
 # ---------------------------------------------------------------------------------------------- route (S4) + S1 page
@@ -208,24 +288,31 @@ def route_model(desc):
                                 max(0, 255 - rad // 20), dirn | hard, 0))
         for k in range(c["first"], c["last"] + 1):
             seg_corner[k % slices] = ci
-    r.lanes = []
-    for li, ld in enumerate(lanes_d):
-        rungs = [[node[k % slices][li], node[k % slices][li + 1]] for k in range(slices + 1)]
-        segs, dims, acc = [], [], 0.0
-        for k in range(slices):
-            left = li - 1 if li > 0 else 0xFF
-            right = li + 1 if li < len(lanes_d) - 1 else 0xFF
-            cb = seg_corner.get(k, 0xFF) if li == main else 0xFF
-            segs.append([k, cb, ld["type"], left, right, k if left != 0xFF else 0xFFFF, k if right != 0xFF else 0xFFFF])
-            a0, b0 = rungs[k]
-            a1, b1 = rungs[k + 1]
-            c0 = [(r.pos[a0][i] + r.pos[b0][i]) / 2 for i in range(3)]
-            c1 = [(r.pos[a1][i] + r.pos[b1][i]) / 2 for i in range(3)]
-            acc += math.dist(c0, c1)
-            w0 = math.dist(r.pos[a0][:3], r.pos[b0][:3])
-            w1 = math.dist(r.pos[a1][:3], r.pos[b1][:3])
-            dims.append([acc, (w0 + w1) / 2])
-        r.lanes.append({"flags": 1, "rungs": rungs, "dims": dims, "segs": segs})
+    strips = desc["route"].get("strips") or []
+    if not strips:
+        r.lanes = []
+        for li, ld in enumerate(lanes_d):
+            rungs = [[node[k % slices][li], node[k % slices][li + 1]] for k in range(slices + 1)]
+            segs, dims, acc = [], [], 0.0
+            for k in range(slices):
+                left = li - 1 if li > 0 else 0xFF
+                right = li + 1 if li < len(lanes_d) - 1 else 0xFF
+                cb = seg_corner.get(k, 0xFF) if li == main else 0xFF
+                segs.append([k, cb, ld["type"], left, right, k if left != 0xFF else 0xFFFF, k if right != 0xFF else 0xFFFF])
+                a0, b0 = rungs[k]
+                a1, b1 = rungs[k + 1]
+                c0 = [(r.pos[a0][i] + r.pos[b0][i]) / 2 for i in range(3)]
+                c1 = [(r.pos[a1][i] + r.pos[b1][i]) / 2 for i in range(3)]
+                acc += math.dist(c0, c1)
+                w0 = math.dist(r.pos[a0][:3], r.pos[b0][:3])
+                w1 = math.dist(r.pos[a1][:3], r.pos[b1][:3])
+                dims.append([acc, (w0 + w1) / 2])
+            r.lanes.append({"flags": 1, "rungs": rungs, "dims": dims, "segs": segs})
+        sinfo = None
+    else:
+        sinfo = _strip_lanes(r, desc, st, sps, slices, lanes_d, main, seg_corner, corners)
+        recs = r.corners_built
+    CAP.check_value("lanes", len(r.lanes), CAP.mode_of(desc), "%d route lanes (route-lane table)" % len(r.lanes))
     r.slices = slices
     md = r.lanes[main]["dims"]
     r.dist = [[md[k][0], 0] for k in range(slices)]
@@ -238,8 +325,154 @@ def route_model(desc):
         struct.pack_into("<3fI", z, 16 * q, length, 8.0, 15.0, a)
     r.zones_raw = bytes(z)
     r.size = 0
-    return r, {"slices": slices, "lanes": len(r.lanes), "nodes": len(r.pos), "corners": len(recs), "main_lane": main,
-               "main_length_m": round(md[-1][0], 3)}
+    info = {"slices": slices, "lanes": len(r.lanes), "nodes": len(r.pos), "corners": len(recs), "main_lane": main,
+            "main_length_m": round(md[-1][0], 3)}
+    if sinfo is not None:
+        info["strips"] = sinfo
+    return r, info
+
+
+def _strip_lanes(r, desc, st, sps, slices, lanes_d, main, seg_corner, corners):
+    """0.3.3-rta: route strips (branches, medians) inserted into the lateral lane sequence - the retail rule decoded in
+    trackbuild.lanegraph (36 / 36 tracks). desc["route"]["strips"][k] = {name, type, between [A, B] (lane indices; cyclic
+    lanes 0..nc-1, strip k = nc + k, earlier strips only), first, last (slices, 1 <= first < last <= slices - 2: no wrap),
+    edges [[lo, hi] per rung k = 0..last-first+1, offsets along n+ at the row station], corners: "main" | "none"}.
+    Rung 0 and the last rung must have zero width at the A | B boundary (|lo - hi| <= 1e-4 and within 0.05 m of it);
+    nodes / links / segment indices are DERIVED from the per-row lateral sequence (nothing is guessed). Replaces r.pos /
+    r.lanes; r.corners_built = the corner records sorted by lane (main first, then strips that copy main corners)."""
+    nc = len(lanes_d)
+    strips = desc["route"]["strips"]
+    CAP.check_value("lanes", len(strips) + nc, CAP.mode_of(desc), "%d route lanes (route-lane table)" % (len(strips) + nc))
+    for k, sd in enumerate(strips):
+        a, b = sd["between"]
+        need(0 <= a < nc + k and 0 <= b < nc + k and a != b, "strip %d (%s): between %s must name earlier lanes" % (k, sd.get("name"), sd["between"]))
+        need(1 <= sd["first"] < sd["last"] <= slices - 2, "strip %d (%s): slices %d..%d outside 1..%d (no wrap at the start line)"
+             % (k, sd.get("name"), sd["first"], sd["last"], slices - 2))
+        need(len(sd["edges"]) == sd["last"] - sd["first"] + 2, "strip %d (%s): %d edge pairs, need %d (one per rung)"
+             % (k, sd.get("name"), len(sd["edges"]), sd["last"] - sd["first"] + 2))
+        need(sd["type"] in (0x00, 0x01, 0x04, 0x05, 0x40, 0x41, 0x80, 0x81), "strip %d: type 0x%X not a retail strip type" % (k, sd["type"]))
+        need(sd["last"] - sd["first"] + 1 >= 3, "strip %d: shorter than 3 segments" % k)
+    pos, rows = [], []                      # rows[t] = {"seq": [lanes], "node": [node per boundary]}
+    for t in range(slices):
+        s_ = st[t * sps]
+        nx, nz = -s_["t"][1], s_["t"][0]
+        seq = list(range(nc))
+        bnd = list(s_["offsets"])
+        for k, sd in enumerate(strips):
+            X = nc + k
+            if not sd["first"] <= t <= sd["last"]:
+                continue
+            A, B = sd["between"]
+            need(A in seq and B in seq and seq.index(B) == seq.index(A) + 1,
+                 "strip %d (%s) at slice %d: lanes %d | %d are not neighbours there" % (k, sd.get("name"), t, A, B))
+            i = seq.index(B)                # boundary index between A and B = i
+            lo, hi = sd["edges"][t - sd["first"]]
+            if t == sd["first"]:
+                need(abs(lo - hi) <= 1e-4 and abs(lo - bnd[i]) <= 0.05,
+                     "strip %d (%s): opens at %.3f / %.3f m, must open at zero width on the %d | %d boundary (%.3f m)"
+                     % (k, sd.get("name"), lo, hi, A, B, bnd[i]))
+                lo = hi = bnd[i]
+            else:
+                need(hi - lo > 0.05, "strip %d (%s): width %.3f m at slice %d (zero width only at the first / last rung, KB R1)"
+                     % (k, sd.get("name"), hi - lo, t))
+            seq.insert(i, X)
+            bnd[i:i + 1] = [lo, hi]
+        for j in range(len(bnd) - 1):
+            need(bnd[j + 1] - bnd[j] >= -1e-6, "slice %d: lane boundaries out of order (%s)" % (t, [round(x, 3) for x in bnd]))
+        node = []
+        for j, o in enumerate(bnd):
+            if j and abs(o - bnd[j - 1]) <= 1e-4:
+                node.append(node[-1])       # zero-width opening rung: the strip's two edges are ONE node (retail)
+                continue
+            pos.append([s_["p"][0] + nx * o, s_["p"][1], s_["p"][2] + nz * o, 0.0])
+            node.append(len(pos) - 1)
+        rows.append({"seq": seq, "node": node, "bnd": bnd})
+    for k, sd in enumerate(strips):         # closing rung: zero width on the A | B boundary of row last + 1
+        t = sd["last"] + 1
+        A, B = sd["between"]
+        seq = rows[t]["seq"]
+        need(A in seq and B in seq and seq.index(B) == seq.index(A) + 1,
+             "strip %d (%s): lanes %d | %d are not neighbours at its closing slice %d" % (k, sd.get("name"), A, B, t))
+        lo, hi = sd["edges"][-1]
+        ob = rows[t]["bnd"][seq.index(B)]
+        need(abs(lo - hi) <= 1e-4 and abs(lo - ob) <= 0.05,
+             "strip %d (%s): closes at %.3f / %.3f m, must close at zero width on the %d | %d boundary (%.3f m)"
+             % (k, sd.get("name"), lo, hi, A, B, ob))
+    r.pos = pos
+
+    def rung(L, t):
+        """L's rung on row t: its own two boundary nodes, or (closing) the node between its last neighbours"""
+        row = rows[t % slices]
+        if L in row["seq"]:
+            i = row["seq"].index(L)
+            return [row["node"][i], row["node"][i + 1]]
+        sd = strips[L - nc]
+        A, B = sd["between"]
+        i = row["seq"].index(B)
+        return [row["node"][i], row["node"][i]]
+
+    def segidx(L, t):
+        return t if L < nc else t - strips[L - nc]["first"]
+
+    lane_types = [ld["type"] for ld in lanes_d] + [sd["type"] for sd in strips]
+    span = [(0, slices - 1)] * nc + [(sd["first"], sd["last"]) for sd in strips]
+    copied = {}                              # strip lane -> [(corner index, first, apex, last) relative]
+    for k, sd in enumerate(strips):
+        if sd.get("corners", "none") == "main" and lane_types[nc + k] & 0xC0:
+            for ci, c in enumerate(corners):
+                if sd["first"] <= c["first"] and c["last"] <= sd["last"]:
+                    copied.setdefault(nc + k, []).append(ci)
+    r.lanes = []
+    for L in range(nc + len(strips)):
+        f, l = span[L]
+        segs, dims, rungs, acc = [], [], [], 0.0
+        for t in range(f, l + 1):
+            seq = rows[t]["seq"]
+            i = seq.index(L)
+            left = seq[i - 1] if i > 0 else 0xFF
+            right = seq[i + 1] if i + 1 < len(seq) else 0xFF
+            if L == main:
+                cb = seg_corner.get(t, 0xFF)
+            elif L in copied:
+                cb = next((ci for ci in copied[L] if corners[ci]["first"] <= t <= corners[ci]["last"]), 0xFF)
+            else:
+                cb = 0xFF
+            segs.append([t, cb, lane_types[L], left, right, segidx(left, t) if left != 0xFF else 0xFFFF,
+                         segidx(right, t) if right != 0xFF else 0xFFFF])
+            rungs.append(rung(L, t))
+        rungs.append(rung(L, l + 1))
+        for j in range(len(segs)):
+            a0, b0 = rungs[j]
+            a1, b1 = rungs[j + 1]
+            c0 = [(pos[a0][i] + pos[b0][i]) / 2 for i in range(3)]
+            c1 = [(pos[a1][i] + pos[b1][i]) / 2 for i in range(3)]
+            acc += math.dist(c0, c1)
+            dims.append([acc, (math.dist(pos[a0][:3], pos[b0][:3]) + math.dist(pos[a1][:3], pos[b1][:3])) / 2])
+        r.lanes.append({"flags": 1 if L < nc else 0, "rungs": rungs, "dims": dims, "segs": segs})
+    # corner records sorted by lane (the planner stops at the first record of a higher lane: AI s5)
+    recs = []
+    for ci, c in enumerate(corners):
+        rad = int(round(1.03 * c["radius"]))
+        dirn = 2 if c["turn"] == "toward_n_plus" else 1
+        hard = 4 if c["degrees"] >= 45 else 0
+        recs.append((main, struct.pack("<4HBBBB", c["first"] % slices, c["apex"] % slices, c["last"] % slices, rad, main,
+                                       max(0, 255 - rad // 20), dirn | hard, 0)))
+    for L, cis in sorted(copied.items()):
+        f = span[L][0]
+        for ci in cis:
+            c = corners[ci]
+            rad = int(round(1.03 * c["radius"]))
+            dirn = 2 if c["turn"] == "toward_n_plus" else 1
+            hard = 4 if c["degrees"] >= 45 else 0
+            recs.append((L, struct.pack("<4HBBBB", c["first"] - f, c["apex"] - f, c["last"] - f, rad, L,
+                                        max(0, 255 - rad // 20), dirn | hard, 0)))
+    recs.sort(key=lambda x: x[0])
+    need(main == min(x[0] for x in recs) if recs else True, "main lane must carry the lowest corner lane index")
+    r.corners_built = [x[1] for x in recs]
+    return {"strips": [{"name": sd.get("name"), "lane": nc + k, "type": "0x%02X" % sd["type"], "between": sd["between"],
+                        "slices": [sd["first"], sd["last"]], "segments": sd["last"] - sd["first"] + 1,
+                        "corner_records": len(copied.get(nc + k, []))} for k, sd in enumerate(strips)],
+            "nodes": len(pos)}
 
 
 def s4_bytes(r):
@@ -357,7 +590,7 @@ def gamedata_authored_traffic(host_bgd, desc, r, units=None):
     pr = GD.check(g2)
     need(not pr, "built Gamedata fails ct2_gamedata.check: %s" % pr)
     needb = max(0x3800 + sum(struct.unpack_from("<I", out, ro + fs)[0] for _, fs in GD.REFS.values()) for ro in g.rec_off)
-    need(needb <= GAMEDATA_SLOT, "route data need 0x%X > slot" % needb)
+    CAP.check_value("gamedata_bytes", needb, CAP.mode_of(desc), "Gamedata route data need")
     return out, {"host_sha256": sha(host_bgd), "zeroed_undecoded_bytes": zeroed, "layout": {"S1": "0x%X" % a1, "S2": "0x%X" % a2, "S3": "0x%X" % a3, "S4": "0x%X" % a4},
                  "s4_bytes": len(s4), "need": "0x%X" % needb, "traffic": {"s3": s3i, "set": sti}, "authored_traffic": True}
 
@@ -387,11 +620,40 @@ def gamedata(host_bgd, desc, r, units=None):
     pr = GD.check(g2)
     need(not pr, "built Gamedata fails ct2_gamedata.check: %s" % pr)
     needb = max(0x3800 + sum(struct.unpack_from("<I", out, ro + fs)[0] for _, fs in GD.REFS.values()) for ro in g.rec_off)
-    need(needb <= GAMEDATA_SLOT, "route data need 0x%X > slot" % needb)
+    CAP.check_value("gamedata_bytes", needb, CAP.mode_of(desc), "Gamedata route data need")
     changed = [i for i in range(min(len(out), len(host_bgd))) if out[i] != host_bgd[i] and not (s1o <= i < s1o + 0x800)
                and i < o4]
     return out, {"host_sha256": sha(host_bgd), "s1_page": "0x%X" % s1o, "s4_offset": "0x%X" % o4, "s4_bytes": len(s4),
                  "need": "0x%X" % needb, "changed_bytes_outside_s1_s4": len(changed)}
+
+
+# ---------------------------------------------------------------------------------------------- 0.3.2 retail materials
+def retail_materials(desc, game_data):
+    """resolve every row material that names retail_material (trackbuild.retailmat; verbatim copy) and order the rows:
+    pass A (no blend bit) first, then pass B (blend bit 0x01) - a stable reorder of desc["rows"] in place, so row r is still
+    material r. -> (retail, report, first_pass row count or None when every row is pass A = the 0.3.1 bytes)"""
+    rows = desc["rows"]
+    named = [r for r in rows if "retail_material" in desc["materials"][r]]
+    if not named:
+        return None, {"retail": [], "first_pass_rows": len(rows), "rows_reordered": False}, None
+    from . import retailmat as RM
+    need(game_data is not None or os.environ.get("TRACKBUILD_GAME_DATA"),
+         "retail_material needs your game data (--game-data) to copy the material from")
+    retail = {r: RM.resolve(r, desc["materials"][r]["retail_material"], game_data) for r in named}
+    a = [r for r in rows if r not in retail or retail[r]["pass"] == "A"]
+    b = [r for r in rows if r in retail and retail[r]["pass"] == "B"]
+    reordered = a + b != rows
+    desc["rows"] = a + b
+    info = {"retail": [{"material": r, "row": (a + b).index(r), "kind": retail[r]["kind"], "flags": "0x%X" % retail[r]["flags"],
+                        "pass": retail[r]["pass"], "formats": retail[r]["formats"],
+                        "source": {k: v for k, v in retail[r]["source"].items() if k != "path"},
+                        "source_record_sha256": sha(retail[r]["raw"]),
+                        "source_texture_sha256": [sha(t["d3d"] + t["name"] + struct.pack("<I", t["f"]) + t["texels"])
+                                                  for t in retail[r]["textures"]]}
+                       for r in named],
+            "first_pass_rows": len(a), "rows_reordered": reordered, "rows": list(desc["rows"]),
+            "label": "LOCAL ONLY: retail material records and texels copied verbatim from your game data"}
+    return retail, info, (len(a) if b else None)
 
 
 # ---------------------------------------------------------------------------------------------- whole track
@@ -402,10 +664,23 @@ def build_track(src_dir, desc_name, host=HOST_DEFAULT, game_data=None, unpinned_
     desc = read_desc(os.path.join(src_dir, desc_name))
     from .preflight import check_desc
     check_desc(src_dir, desc)                                    # 0.2.0: unsupported features refused with a reason
-    streamed, table, units, uinfo = build_units(src_dir, desc)
-    so = static_object(src_dir, desc, table)
+    retail, minfo, first_pass = retail_materials(desc, game_data)
+    objs = None
+    if desc.get("retail_objects"):
+        from . import retailobj as RO
+        objs = RO.resolve(desc["retail_objects"], game_data)
+    streamed, table, units, uinfo = build_units(src_dir, desc, first_pass, objs)
+    so = static_object(src_dir, desc, table, retail, objs)
+    if objs:
+        minfo["objects"] = [{"family": ob["family"], "track": ob["track"], "index": ob["index"], "placements": len(ob["matrices"]),
+                             "units": ob["units"], "class": ob["class"],
+                             "source_record_sha256": sha(ob["record"]["raw"][:0x5C] + ob["record"]["raw"][0x62:]),
+                             "source_lods_sha256": sha(b"".join(L["vtx"] + L["idx"] for L in ob["record"]["lods"])),
+                             "source_material_sha256": [None if m is None else sha(m[1]["raw"]) for m in ob["materials"]],
+                             "matrix_elements_3_7_11_15": "copied from the source's first placement (APPROXIMATE)"}
+                            for ob in objs]
     static = S.build(so, "b3")
-    need(len(static) <= STATIC_POOL, "static.dat 0x%X > pool" % len(static))
+    CAP.check_value("static_bytes", len(static), CAP.mode_of(desc), "static.dat")
     r, rinfo = route_model(desc)
     dfiles = donor_files if donor_files is not None else DN.load_donor(game_data, host, unpinned_donor)
     host_bgd = dfiles["Gamedata.bgd"]
@@ -424,6 +699,8 @@ def build_track(src_dir, desc_name, host=HOST_DEFAULT, game_data=None, unpinned_
                         "donor": donor},
               "retail_constants": BK.RETAIL_CONSTANTS, "units": uinfo, "route": rinfo, "gamedata": ginfo,
               "static": {"bytes": len(static), "textures": len(so["textures"]), "materials": len(so["materials"])},
+              "materials": minfo,
               "streamed": {"bytes": len(streamed), "units": len(table)},
               "sha256": {k: sha(v) for k, v in sorted(products.items())}, "host": host}
+    report["capacity"] = CAP.summary(CAP.needed_capacity(report), CAP.mode_of(desc))      # 0.3.4: what mod.toml must declare
     return products, report, (desc, units, r, so, table)

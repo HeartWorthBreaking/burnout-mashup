@@ -1,4 +1,4 @@
-# Burnout Mashup Workbench v0.30 (gp\workbench, 2026-10-31)
+# Burnout Mashup Workbench v0.33 (2026-11-01; track editor: TRACK_EDITOR_GUIDE.md)
 
 A small Windows window over existing tools. It decides nothing itself:
 - **release pipeline** `gp\release\release.py` (`plan` = preflight + cache decision per node; `run`; `run --resume`)
@@ -955,7 +955,8 @@ Select a face group (click the mesh), enter the offset in metres in "move this f
 Construct box -> **Unit regions** (authored projects; retail READ ONLY). A unit = the streamed section between two cut stations
 (`cut_from` / `cut_to`) and two lateral lines along its chord normal (`lateral` [lo, hi] m); the kit's trackbuild needs the
 units to tile the loop in order (each end cut = the next unit's start cut), convex regions, 4..17 units with pvs `all`
-(4..162 with `computed`), and every unit's mesh / LOD block within its slot (0x28000 / 0x18000 bytes), <= 65,536 vertices and
+(4..162 with `computed`), and every unit's mesh / LOD block within its slot (0x28000 / 0x18000 bytes; RTA5 capacity auto: up to
+the host ceilings 0x200000, declared in mod.toml - wb_capacity / kit trackbuild.capacity), <= 65,536 vertices and
 <= 127 records.
 - **Operations** (unit number + one of): **fit lateral bounds** (refit to the route corridor - station offsets[0] / [-1] - and
   the geometry the unit holds, + 0.25 m: the kit generator's rule), **set lateral bounds** (explicit [lo, hi]), **split at
@@ -1123,6 +1124,48 @@ refresh; a streaming / LOD / visibility report with the limits classified (forma
 overlays and clickable diagnostics; backups on Save, source export / import, a version record and "prepare test" (no launch).
 Tutorial, capability matrix, known limitations and blocked items: **TRACK_EDITOR_AUTHORING.md**. Offline only: every feature is
 runtime-unverified. Tests: suites te31 .. te41.
+
+## v0.32 (2026-11-01, Burnout Mashup 0.2.0-alpha.2): the track editor opens from the window
+**New track project** tab: **Open in track editor...** starts the editor for the project just created, else for the *Project
+folder* when it is a track project, else for a folder you pick (refused with a message when it has no `workbench-track.json`).
+The editor runs in its own console window titled "Burnout Mashup track editor" (the console Python beside the Workbench's
+pythonw; working folder = the project, never the program folder) with the Workbench's settings file; closing that window stops
+it, and when the editor stops with an error the window stays open with the reason. **Track editor guide** opens
+**TRACK_EDITOR_GUIDE.md**, a step-by-step guide for new users (the reference stays TRACK_EDITOR_AUTHORING.md). The editor itself
+is unchanged. Test: rel021 `tests\test_wb_button.py` (command line and quoting, the cmd.exe wrapper and its error pause, the real
+editor serving a project, the window's button, the guide).
+
+## v0.33 (2026-11-02, Burnout Mashup 0.2.0-alpha.2): an easier track editor, buildings, project health, sharing
+User documentation: `TRACK_EDITOR_GUIDE.md` (new users) and `TRACK_EDITOR_AUTHORING.md` (reference, capability matrix, limits).
+- **Authoring tools grouped by task** (Race layout, Roads, Terrain, Buildings / scenery, Materials, Mesh, Streaming, Inspect,
+  Project / test) with **Preset** lists, a **Guide** button per group, tool search and a **First track walkthrough**.
+- **Starter projects** (`data/starters`, original): town_circuit, hill_country and more - replayed through the normal tools as ONE
+  undo step, rolled back completely when a step is refused.
+- **Problems you can act on**: every failing diagnostics item has a "How to fix" line and an "Open tool" button.
+- **Build, validate, stage + prepare test** in one step (new folder per run, last good output kept, a path-length guard for the
+  Windows 260-character limit). Nothing is launched or approved.
+- **Building generator** (footprint, height, roof, wall thickness, door openings that are real gaps in walls and collision) and
+  **low-poly trees** (static geometry).
+- **Project health**: OBJ compaction with a backup first (one undo step); optional backup retention (preview + confirm).
+- **Viewer**: wireframe / normals drawn in 64 m chunks with view culling (large tracks).
+- **Shareable export**: provenance + licence per file, game data and unknown files excluded, deterministic zip.
+- Branch lanes and bridges: templates **branch** (a bypass beside the main road) and **fig8** (a road crossing over itself),
+  checked by trackbuild 0.3.3; race layouts of 18..64 sections with computed visibility.
+Everything here is checked offline; it has not been driven in the game yet (RUNTIME-UNVERIFIED).
+
+## Retail-style track authoring (v0.33)
+Dress your own track in the style of the Burnout 3 tracks on YOUR disc. Panels **Retail-style authoring** and **Retail-style
+designer** in the track editor; step-by-step guide: `RETAIL_STYLE_GUIDE.md`.
+- **Asset library** built locally from your own game data (read only, cached by file hash): textures, roadside models, buildings and
+  structures of every track, with measured sizes, facing and provenance. Nothing from the game is shipped with Burnout Mashup.
+- **Styles** (`data/rta_styles`): measured presets (waterfront city, downtown city, countryside) and an original-only style;
+  derive your own from any track.
+- **Generate** roads, verges, walls, buildings, trees and posts along your route from a style: preview first (problems listed, Apply
+  disabled while there are any), then ONE undo step; regenerate one part with a new seed, lock parts.
+- **Place** single pieces (buildings, posts, trees, props as static scenery) with a preview.
+- **Share recipes, never content**: a shared project holds instructions only; whoever opens it rebuilds the pieces from their own
+  game data. Anything built from your game data stays on your PC.
+Needs trackbuild 0.3.3 (shipped in `tools/trackbuild`). Offline-checked; not yet driven in the game.
 
 ## Safety and limits
 - One operation at a time (buttons disabled + `state\OPERATION.lock` across windows; the pipeline's own cache lock too).

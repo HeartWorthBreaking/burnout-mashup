@@ -106,7 +106,10 @@ WELD_MAX_PAIRS = 4096
 BRIDGE_UV_M = 4.0                                               # v0.22 bridge uv: one texture repeat per 4 m (documented mapping)
 BRIDGE_FOLD_DOT = -0.5                                          # a new face folding more than 120 degrees against a neighbour is refused
 KNOWN_DESC = set(wb_track.DESC_KEYS) | {'format', 'label', 'name', 'generator', 'loop_length', 'closed', 'traffic',
-                                        'gamedata_header', 'pvs', 'lod', 'wall_gaps', 'barrier_station'}
+                                        'gamedata_header', 'pvs', 'lod', 'wall_gaps', 'barrier_station',
+                                        'retail_objects',          # RTA3: trackbuild 0.3.2-rta verbatim retail objects
+                                        'levels',                  # RTA4: trackbuild 0.3.3-rta declared over / under crossings
+                                        'capacity'}                # RTA5: trackbuild 0.3.4 capacity auto / game (wb_capacity)
 NOT_EDITABLE_WHY = {
     'stations': 'stations drive the units, route, collision cut lines and the OBJ itself: moving one needs geometry + collision '
                 '+ unit + route regeneration (deferred: road tools)',
@@ -172,7 +175,8 @@ def kit_trackbuild(cfg):
         p = ln.split()
         if len(p) == 2:
             sums[p[1].lstrip('*')] = p[0]
-    for rel in KIT_MODULES:
+    has_cap = os.path.isfile(os.path.join(tb, 'trackbuild', 'capacity.py'))     # RTA5: trackbuild 0.3.4+ capacity table
+    for rel in KIT_MODULES + (('trackbuild/capacity.py',) if has_cap else ()):
         h = wb_retail.sha_file(os.path.join(tb, *rel.split('/')))
         if sums.get(rel) != h:
             raise EditError('kit %s does not match its SHA256SUMS.txt: material checks refused' % rel)
@@ -181,7 +185,8 @@ def kit_trackbuild(cfg):
     old = sys.dont_write_bytecode
     sys.dont_write_bytecode = True
     try:
-        return {k: importlib.import_module('trackbuild.' + k) for k in ('io', 'preflight', 'build', 'units')}
+        return {k: importlib.import_module('trackbuild.' + k) for k in ('io', 'preflight', 'build', 'units') +
+                (('capacity',) if has_cap else ())}
     finally:
         sys.dont_write_bytecode = old
 
@@ -539,6 +544,8 @@ class TrackSource(ta.AuthorMixin):
             return self.pending.get(f[5:])
         if f == 'both':                                     # v0.23: one undo entry for a description + OBJ edit
             return (self.cur, self.obj_cur)
+        if f == 'all':                                      # rta: description + OBJ + pending imported files in ONE undo entry
+            return (self.cur, self.obj_cur, dict(self.pending), dict(self.pending_meta))
         return self.cur if f == 'desc' else self.obj_cur
 
     def _setbuf(self, f, b):
@@ -550,6 +557,9 @@ class TrackSource(ta.AuthorMixin):
             return
         if f == 'both':
             self.cur, self.obj_cur = b
+        elif f == 'all':
+            self.cur, self.obj_cur = b[0], b[1]
+            self.pending, self.pending_meta = dict(b[2]), dict(b[3])
         elif f == 'desc':
             self.cur = b
         else:
@@ -1538,7 +1548,17 @@ class TrackSource(ta.AuthorMixin):
             with open(p, 'wb') as f:
                 f.write(obj_bytes)
             try:
-                streamed, table, units, info = K['build'].build_units(tmp, d)
+                if (d.get('retail_objects') or any(isinstance(m, dict) and 'retail_material' in m for m in (d.get('materials') or {}).values()))                         and hasattr(K['build'], 'retail_materials'):
+                    # RTA3 (kit 0.3.2): the same inputs as the real build - verbatim retail materials (pass split) + objects
+                    import copy as _copy
+                    import importlib as _il
+                    dk = _copy.deepcopy(d)
+                    _rm, _mi, fp = K['build'].retail_materials(dk, self.cfg['game_data'])
+                    RO = _il.import_module(K['build'].__name__.rsplit('.', 1)[0] + '.retailobj')
+                    objs = RO.resolve(dk['retail_objects'], self.cfg['game_data']) if dk.get('retail_objects') else None
+                    streamed, table, units, info = K['build'].build_units(tmp, dk, fp, objs)
+                else:
+                    streamed, table, units, info = K['build'].build_units(tmp, d)
             except K['io'].SourceError as e:
                 raise EditError('refused: trackbuild cannot regenerate the dependent data for this geometry (%s). Nothing '
                                 'changed; the unit regions / route are authored source data and are not moved by a geometry '
@@ -1560,14 +1580,14 @@ class TrackSource(ta.AuthorMixin):
             per.append({'prism_y': [round(q0[1], 4), round(q0[1] + q0[3] - 0.5, 4)], 'render_polys': len(units[k].polys),
                         'collision_polys': len(units[k].coll), 'mesh_bytes': ms, 'lod_bytes': ls,
                         'blocks_sha256': hashlib.sha256(streamed[pos:pos + ms + ls]).hexdigest()[:16]})
+        import wb_capacity as WC                            # RTA5: game default AND host ceiling from the kit's capacity table
         ms_, ls_ = K['build'].MESH_SLOT, K['build'].LOD_SLOT
-        cap = [{'unit': x['unit'], 'vertices': x['vertices'], 'records': x['records'], 'mesh_bytes': x['mesh_bytes'],
-                'lod_bytes': x['lod_bytes'], 'mesh_slot_pct': round(100.0 * x['mesh_bytes'] / ms_, 1),
-                'lod_slot_pct': round(100.0 * x['lod_bytes'] / ls_, 1), 'vertex_pct': round(100.0 * x['vertices'] / 65536, 1),
-                'record_pct': round(100.0 * x['records'] / 127, 1)} for x in info['units']]
+        cap = WC.unit_rows(K, info['units'], d)
         r = {'units': per, 'streamed_sha256': hashlib.sha256(streamed).hexdigest(), 'capacity': cap,
              'slots': {'mesh': ms_, 'lod': ls_, 'vertices': 65536, 'records': 127},
-             'pvs_mode': info['pvs']['mode'], 'lod_mode': (d.get('lod') or {'mode': 'identity'})['mode']}
+             'pvs_mode': info['pvs']['mode'], 'lod_mode': (d.get('lod') or {'mode': 'identity'})['mode'],
+             'objects': info.get('objects')}
+        r.update(WC.regen_extra(K, cap, d))
         if len(cache) > 8:
             cache.clear()
         cache[key] = r
@@ -2969,10 +2989,12 @@ class TrackSource(ta.AuthorMixin):
             if not num(v, lo, hi):
                 raise EditError('%s %r refused: %g..%g m' % (name, v, lo, hi))
         ii = lambda v: isinstance(v, int) and not isinstance(v, bool)  # noqa: E731
-        if not ii(n_units) or n_units != 17:
-            raise EditError('units %r refused: a race layout uses 17 units - with pvs "all" the kit\'s validator (V3_pvs_walk) accepts '
-                            'exactly 17: every unit lists 17 relative units (-8..+8), so fewer units repeat a target (kit fact, '
-                            'trackbuild.blocks.pvs_chunks)' % (n_units,))
+        if not ii(n_units) or not (n_units == 17 or 18 <= n_units <= 162):
+            raise EditError('units %r refused: 17 (pvs "all": the kit\'s V3_pvs_walk accepts exactly 17 - every unit lists -8..+8) or '
+                            '18..162 (pvs "computed", the kit 0.1.5+ visibility generator; computed visibility on a 30-unit '
+                            'authored track is RUNTIME-VALIDATED, KB gp_trk_7; editor race layouts with more units: RUNTIME-UNVERIFIED)%s'
+                            % (n_units, '; above 162: above the largest retail track; untested in the game'
+                               if ii(n_units) and n_units > 162 else ''))
         if not ii(checkpoints) or not 1 <= checkpoints <= 12:
             raise EditError('checkpoints %r refused: 1..12 (S1 cap)' % (checkpoints,))
         if not isinstance(traffic, bool):
@@ -3062,7 +3084,7 @@ class TrackSource(ta.AuthorMixin):
         values = {'stations': stations, 'stations_per_slice': sps, 'units': units, 'route': {'lanes': wc.LANES, 'corners': corners},
                   'grid': grid, 'start_line': start, 'checkpoints': cps,
                   'traffic': wc.traffic_for(n, hw) if req['traffic'] else None, 'loop_length': round(L, 4), 'closed': True,
-                  'wall_gaps': [], 'pvs': {'mode': 'all'}}
+                  'wall_gaps': [], 'pvs': {'mode': 'all' if req['n_units'] == 17 else 'computed'}}
         if req.get('profile'):
             values = self._race_values_profile(req, values, stations)
 
@@ -3635,6 +3657,9 @@ class TrackSource(ta.AuthorMixin):
                                 'kept_m2': [round(sum(f['kept'] for f in cov0['faces']), 3), round(sum(f['kept'] for f in cov1['faces']), 3)],
                                 'drivable_samples_in_one_unit': nsamp, 'grid_slots_in_one_unit': len(d.get('grid') or [])},
                    'capacity': cap, 'capacity_worst_pct': worst, 'slots': regen['slots'],
+                   'capacity_worst_limit_pct': regen.get('capacity_worst_limit_pct', worst),
+                   'capacity_mode': regen.get('capacity_mode', 'game'), 'capacity_info': regen.get('capacity_info', []),
+                   'capacity_declare': regen.get('capacity_declare', {}),
                    'checked': 'kit make_units (convex, shared cuts), unit count %d..%d (pvs %s), no face loses area, the kit '
                               'validator\'s drivable samples and every grid slot in exactly one unit, build_units dry run '
                               '(slots, LOD, PVS)' % (lim[0], lim[1], pvs)}
@@ -3667,8 +3692,10 @@ class TrackSource(ta.AuthorMixin):
         if S['units_after'] != 17 and S.get('pvs') == 'all':
             warn.append('%d units with pvs all: Build -> Validate refuses V3_pvs_walk until the count is 17 again (the kit lists 17 '
                         'relative units per unit; fewer repeat a target)' % S['units_after'])
-        if S['capacity_worst_pct'] > 80:
-            warn.append('a unit uses %.0f %% of a block slot / vertex / record limit' % S['capacity_worst_pct'])
+        if S.get('capacity_worst_limit_pct', S['capacity_worst_pct']) > 80:
+            warn.append('a unit uses %.0f %% of a block slot / vertex / record limit%s' % (
+                S.get('capacity_worst_limit_pct', S['capacity_worst_pct']),
+                ' (capacity auto: of the host ceiling)' if S.get('capacity_mode') == 'auto' else ''))
         if S['units_after'] != S['units_before']:
             warn.append('unit indices after unit %d shift: the grid start units are recomputed by trackbuild at Build' % req['unit'])
         return dict(S, ok=True, label=label, exact=exact, warnings=warn, regenerated=self._regen_report(plan['base'], plan['regen']),
@@ -3899,18 +3926,42 @@ class TrackSource(ta.AuthorMixin):
             except (TypeError, ValueError):
                 sm = 'not a hex word (trackbuild refuses it)'
             mats[name] = {'texture': tex, 'texture_ok': bool(ok), 'surface': m.get('surface'), 'collide': m.get('collide'),
-                          'car_solid': m.get('car_solid', True), 'extra_keys': sorted(set(m) - {'texture', 'surface', 'collide', 'car_solid'}),
+                          'car_solid': m.get('car_solid', True),
+                          'extra_keys': sorted(set(m) - {'texture', 'surface', 'collide', 'car_solid', 'retail_material'}),
                           'surface_meaning': sm, 'groups': self.material_groups(name), 'in_rows': name in (d.get('rows') or []),
-                          'tex_v': hashlib.sha256(str(tex).encode()).hexdigest()[:8]}
+                          'tex_v': hashlib.sha256(str(tex).encode()).hexdigest()[:8], 'render': 'opaque', 'depth_write': True}
+            rm = m.get('retail_material')
+            if isinstance(rm, dict):                        # RTA3: verbatim retail material -> its render class (flags; preview)
+                ck = self.__dict__.setdefault('_rmcls', {})
+                key = (rm.get('track'), rm.get('material'))
+                if key not in ck:
+                    try:
+                        import wb_rta_world as RW
+                        i_ = RW.material_info(self.cfg, rm['track'], int(rm['material']))
+                        ck[key] = (i_['render'], i_['depth_write'], i_['flags'])
+                    except Exception as ex:  # noqa: BLE001
+                        ck[key] = ('opaque', True, 'unreadable: %s' % str(ex)[:80])
+                mats[name].update(render=ck[key][0], depth_write=ck[key][1], retail_material=dict(rm, flags=ck[key][2]),
+                                  local_only=True)
         for k in d:
             if k not in KNOWN_DESC:
                 flags.append({'key': k, 'flag': 'UNSUPPORTED (not a documented trackbuild key): preserved byte for byte, not shown'})
-        for k in ('traffic', 'lod', 'pvs', 'wall_gaps', 'gamedata_header', 'barrier_station', 'generator', 'label'):
+        for k in ('traffic', 'lod', 'pvs', 'wall_gaps', 'gamedata_header', 'barrier_station', 'generator', 'label', 'capacity'):
             if k in d:
                 flags.append({'key': k, 'flag': 'preserved, read only in this slice', 'value_summary': summarize(d[k])})
         for st, c in mesh.get('unsupported_statements', {}).items():
             flags.append({'key': 'OBJ %s' % st, 'flag': '%d line(s) trackbuild refuses; shown nowhere, file preserved' % c})
+        objects = None
+        if d.get('retail_objects'):                         # RTA3: preview layer of the verbatim retail objects (kit matrix rule)
+            ok_ = self.__dict__.setdefault('_objlayer', {})
+            hk = hashlib.sha256(json.dumps(d['retail_objects'], sort_keys=True).encode()).hexdigest()
+            if hk not in ok_:
+                import wb_rta_world as RW
+                ok_.clear()
+                ok_[hk] = RW.object_layer(self.cfg, d)
+            objects = ok_[hk]
         return {'state': self.state(), 'materials': mats, 'mesh': mesh, 'rows': d.get('rows'), 'constructs': self.constructs(),
+                'objects': objects,
                 'stations': [{'p': s.get('p'), 't': s.get('t'), 'offsets': s.get('offsets')} for s in d.get('stations') or []],
                 'units': d.get('units') or [], 'route': d.get('route') or {}, 'grid': d.get('grid') or [],
                 'start_line': d.get('start_line'), 'checkpoints': d.get('checkpoints') or [],
@@ -3972,6 +4023,12 @@ class TrackSource(ta.AuthorMixin):
         return out
 
     def texture_bytes(self, material):
+        if material.startswith('obj:'):                     # RTA3: a retail object texture (preview, RGBA; LOCAL ONLY)
+            import wb_rta_world as RW
+            try:
+                return RW.object_texture(self.cfg, material[4:])
+            except Exception as ex:  # noqa: BLE001
+                raise EditError('object texture %s: %s' % (material[4:], str(ex)[:120]))
         m = (self.desc().get('materials') or {}).get(material) or {}
         tex = m.get('texture')
         if not isinstance(tex, str) or wb_track.wb_car.rel_problem(tex, 'texture') or not tex.lower().endswith('.png'):
@@ -4057,9 +4114,41 @@ class RetailSource:
                 'units': v['units'], 'route': v['route'], 'starts': v['starts'], 'materials_retail': v['materials'],
                 'texture_alpha': v.get('texture_alpha', {}), 'render_classes': v.get('render_classes', {}),
                 'readers': v['readers'], 'source': v['source'], 'flags': flags, 'validation': val, 'editable': {},
-                'read_only': RETAIL_READ_ONLY, 'not_editable': {}}
+                'read_only': RETAIL_READ_ONLY, 'not_editable': {}, 'objects': self._report_objects()}
+
+    def _report_objects(self):
+        """RTA4: preview of the props / instances a restyle wrote into this folder (tools\\wm_objects.py REPORT_OBJECTS.json:
+        verbatim source records, positions, headings) drawn with the kit matrix rule; None without a report. Read only."""
+        import wb_rta_world as RW
+        try:                                            # the folder's own instance placements (read only; before / after views)
+            inst = RW.folder_instance_layer(self.cfg, os.path.abspath(self.project))
+        except Exception as ex:  # noqa: BLE001
+            inst = {'meshes': [], 'counts': {}, 'problems': ['instances preview: %s' % str(ex)[:160]]}
+        rp = os.path.join(self.project, 'REPORT_OBJECTS.json')
+        if not os.path.isfile(rp):
+            return inst
+        try:
+            r = json.load(open(rp, encoding='utf-8'))
+            ents = []
+            for t in r.get('types') or []:
+                pl = [{'pos': p['pos'], 'yaw_deg': p.get('yaw_deg', 0.0)} for p in (r.get('positions') or {}).get(t['kind'], [])]
+                if pl:
+                    ents.append({'family': t.get('family', 'prop'), 'track': t['source']['track'], 'index': t['source']['index'],
+                                 'static_sha256': t['source_static_sha256'], 'placements': pl})
+            lay = RW.object_layer(self.cfg, {'retail_objects': ents})
+            lay['meshes'] = inst['meshes'] + lay['meshes']
+            lay['counts'] = dict(lay.get('counts') or {}, **(inst.get('counts') or {}))
+            return lay
+        except Exception as ex:  # noqa: BLE001 - a broken preview never blocks the read-only view
+            return {'meshes': [], 'counts': {}, 'problems': ['objects preview: %s' % str(ex)[:160]]}
 
     def texture_bytes(self, ti):
+        if isinstance(ti, str) and ti.startswith('obj:'):     # RTA4: object preview texture (retail view)
+            import wb_rta_world as RW
+            try:
+                return RW.object_texture(self.cfg, ti[4:])
+            except Exception as ex:  # noqa: BLE001
+                raise EditError('object texture %s: %s' % (ti[4:], str(ex)[:120]))
         try:
             ti = int(ti)
         except (TypeError, ValueError):
@@ -4164,7 +4253,9 @@ def read_obj_view(src):
                         vi, ti = idx[j][0], idx[j][1]
                         p, c = V[vi - 1]
                         m['pos'] += [round(p[0], 3), round(p[1], 3), round(p[2], 3)]
-                        m['uv'] += [round(VT[ti - 1][0], 4), round(1.0 - VT[ti - 1][1], 4)]
+                        # v0.33: v unchanged, as trackbuild writes it and the game / the retail view sample it (top image row = v 0);
+                        # the earlier 1 - v showed authored textures upside down in the preview only
+                        m['uv'] += [round(VT[ti - 1][0], 4), round(VT[ti - 1][1], 4)]
                         m['col'] += [round(c[0], 3), round(c[1], 3), round(c[2], 3)]
                         if grp >= 0:
                             key = '%.3f %.3f %.3f' % tuple(c)
@@ -4217,7 +4308,7 @@ class Server:
                         if u.path == '/api/state':
                             return self._send(200, outer.src.state())
                         if u.path == '/tex':
-                            key = q.get('i', [''])[0] if getattr(outer.src, 'mode', '') == 'retail' else q.get('m', [''])[0]
+                            key = q.get('i', [''])[0] if getattr(outer.src, 'mode', '') == 'retail' and 'i' in q else q.get('m', [''])[0]
                             return self._send(200, outer.src.texture_bytes(key), 'image/png')
                         if u.path == '/bin' and getattr(outer.src, 'mode', '') == 'retail':
                             return self._send(200, outer.src.bin(q.get('f', [''])[0]), 'application/octet-stream')

@@ -1,0 +1,17 @@
+{
+ "title": "Town circuit (flat)",
+ "about": "A flat closed circuit with an infield of terrain, a drive-through garage (6 m door), two small houses (gable roofs) and a few low-poly trees. Original content made with the editor's own tools; every piece stays editable.",
+ "template": "testloop",
+ "licence": "original Burnout Mashup Workbench starter (same licence as the Workbench)",
+ "ops": [
+  {"op": "race_layout", "points": [[-6090, 20, -6050], [-5980, 20, -6070], [-5895, 20, -6035], [-5890, 20, -5960], [-5970, 20, -5935], [-6060, 20, -5950], [-6110, 20, -5995]], "replace": "all", "checkpoints": 4},
+  {"op": "units", "unit_op": "include", "unit": 0, "rect": [-6070, -6032, -5930, -5970]},
+  {"op": "hterrain", "rect": [-6060, -6025, -5940, -5975], "cell": 10.0, "height": 19.9, "material": "grass"},
+  {"op": "building", "footprint": [[-6040, -6015], [-6020, -6015], [-6020, -6003], [-6040, -6003]], "ground": true, "height": 6.0, "wall_material": "wall", "roof_material": "asphalt", "roof": "flat", "thickness": 0.3, "openings": [{"edge": 0, "width": 6.0, "height": 4.5}]},
+  {"op": "building", "footprint": [[-5990, -6015], [-5975, -6015], [-5975, -6005], [-5990, -6005]], "ground": true, "height": 4.0, "wall_material": "wall", "roof_material": "wall", "roof": "gable", "roof_height": 2.5},
+  {"op": "building", "footprint": [[-5965, -6000], [-5952, -6000], [-5952, -5990], [-5965, -5990]], "ground": true, "height": 3.5, "wall_material": "wall", "roof_material": "wall", "roof": "gable", "roof_height": 2.0},
+  {"op": "tree", "position": [-6010, 20, -5990], "height": 8.0, "radius": 2.5, "sides": 6, "trunk_material": "wall", "foliage_material": "grass", "ground": true},
+  {"op": "tree", "position": [-6000, 20, -5985], "height": 6.0, "radius": 2.0, "sides": 6, "trunk_material": "wall", "foliage_material": "grass", "ground": true},
+  {"op": "tree", "position": [-5945, 20, -6015], "height": 9.0, "radius": 3.0, "sides": 7, "trunk_material": "wall", "foliage_material": "grass", "ground": true}
+ ]
+}

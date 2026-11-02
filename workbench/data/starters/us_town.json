@@ -1,0 +1,22 @@
+{
+ "title": "US town (LOCAL ONLY: uses your own Burnout 3 data)",
+ "about": "The flat circuit dressed with US Waterfront (US/C1_V1) road, concrete wall, sidewalk and grass textures, with a 60 x 60 m block of real Waterfront geometry (buildings, gas lamps, sidewalks) copied into the infield. Everything is read from YOUR game data when you apply it; nothing retail is stored in the Workbench. The result is retail-derived: keep it on your PC, never share or upload it (the shareable export refuses it).",
+ "template": "testloop",
+ "licence": "recipe: original Workbench starter; the content it copies stays the game publisher's (local use only)",
+ "retail": {"track": "US/C1_V1", "local_only": true},
+ "ops": [
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_Road2", "name": "us_road", "like": "asphalt"},
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_WallCONC1", "name": "us_wall", "like": "wall"},
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_carparkwall", "name": "us_wallback", "like": "wallback"},
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_pave2", "name": "us_pave", "like": "grass"},
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_Grass1", "name": "us_grass", "like": "grass"},
+  {"op": "race_layout", "points": [[-6090, 20, -6050], [-5980, 20, -6070], [-5895, 20, -6035], [-5890, 20, -5960], [-5970, 20, -5935], [-6060, 20, -5950], [-6110, 20, -5995]], "replace": "all", "checkpoints": 4,
+   "material": "us_road", "wall_mat": "us_wall", "back_mat": "us_wallback", "verge_mat": "us_pave"},
+  {"op": "retail_texture", "track": "US/C1_V1", "texture": "WF_Roadedge", "name": "us_edge", "like": "asphalt"},
+  {"op": "road_lanes", "edge_material": "us_edge", "edge_width": 3.0, "main_u_m": 6.2, "main_v_m": 6.0, "edge_u_m": 6.2, "block": "route_road"},
+  {"op": "units", "unit_op": "include", "unit": 0, "rect": [-6070, -6032, -5930, -5970]},
+  {"op": "hterrain", "rect": [-6060, -6025, -5940, -5975], "cell": 10.0, "height": 19.9, "material": "us_grass"},
+  {"op": "streaming_settings", "lod_mode": "identity", "pvs_mode": "all"},
+  {"op": "retail_region", "track": "US/C1_V1", "rect": [960, 840, 1020, 900], "target": [-6000, 19.95, -6000], "angle": 0, "max_tris": 20000, "ground": "all"}
+ ]
+}

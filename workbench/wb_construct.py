@@ -12,7 +12,8 @@ Kit limits that shape this module (facts from the kit source, not guesses):
   compares with the ROUTE height at each sample instead (stations interpolated; route_samples), so a route may climb; the
   race layout generator here still builds one height.
 - V2_walls_hold probes car-solid walls at station offsets[1] / [4] (inner wall faces): a route needs walls on both sides.
-- build_units: 4..17 units with pvs "all" (4..162 computed), mesh / LOD block slots 0x28000 / 0x18000, regions convex, neighbours
+- build_units: 4..17 units with pvs "all" (4..162 computed), mesh / LOD block slots 0x28000 / 0x18000 (game defaults; trackbuild
+  0.3.4 capacity auto: up to the host ceilings, declared in mod.toml), regions convex, neighbours
   share one negated cut lane (units tile the loop in order).
 - route: stations_per_slice divides the station count; 5 lanes (corridor / edge / main / edge / corridor) need 6 offsets.
 """
@@ -474,6 +475,19 @@ class TriGrid:
     def at(self, x, z):
         return self.b.get((int(math.floor(x / self.cell)), int(math.floor(z / self.cell))), [])
 
+    def span(self, x0, z0, x1, z1):
+        """every triangle bucketed in a cell that the plan box of segment (x0, z0)-(x1, z1) overlaps (each once). RTA3: the walls
+        probe used .at() at the segment's start / middle / end only, and a probe crossing a cell corner diagonally missed the
+        cell holding its wall (2.6 km loop: 2 of 986 probes; logs\rta3_walls_diag_large.json)"""
+        seen, out = set(), []
+        for i in range(int(math.floor(min(x0, x1) / self.cell)), int(math.floor(max(x0, x1) / self.cell)) + 1):
+            for j in range(int(math.floor(min(z0, z1) / self.cell)), int(math.floor(max(z0, z1) / self.cell)) + 1):
+                for t in self.b.get((i, j), []):
+                    if id(t) not in seen:
+                        seen.add(id(t))
+                        out.append(t)
+        return out
+
 
 def _bary_y(t, x, z):
     a, b, c = t[0], t[1], t[2]
@@ -584,7 +598,7 @@ def race_checks(desc, faces, units):
             x, z = s_['p'][0] + nx * (o_wall - sgn * 0.3), s_['p'][2] + nz * (o_wall - sgn * 0.3)
             probes += 1
             p0, d = (x, s_['p'][1] + 0.7, z), (nx * sgn, 0.0, nz * sgn)   # v0.28: this station's height (kit 0.3.0)
-            cand = walls.at(x + nx * sgn * 0.5, z + nz * sgn * 0.5) + walls.at(x, z) + walls.at(x + nx * sgn, z + nz * sgn)
+            cand = walls.span(x, z, x + nx * sgn, z + nz * sgn)    # RTA3: every cell the 1 m probe crosses
             if not any(_seg_tri(p0, d, t) for t in cand):
                 miss += 1
                 first.append(i)

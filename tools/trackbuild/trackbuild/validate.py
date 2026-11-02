@@ -11,7 +11,10 @@
   V4 static.dat         trackconv b3static strict parse -> build identity (0 rule mismatches); the unit table tiles streamed.dat
   V5 route / Gamedata   ct2_route parse / identity / check / lint; ctnav camera / planner hazards; grid slots assigned to the
                         main lane by the init-search model (ctnav.grid); ct2_gamedata parse / build identity / check; S1 counts
-  V6 budgets            mesh <= 0x28000, LOD <= 0x18000, static <= 0xD00000, Gamedata need <= 0x176000"""
+  V6 budgets            mesh <= 0x28000, LOD <= 0x18000, static <= 0xD00000, Gamedata need <= 0x176000, route lanes <= 64:
+                        the game's defaults; 0.3.4 capacity "auto": a larger need passes when the build report declares it
+                        ([bmashup.capacity], trackbuild.capacity) and it stays within the Burnout Mashup host's ceiling"""
+import hashlib
 import json
 import math
 import os
@@ -92,6 +95,93 @@ def validate(out_dir, desc_path=None):
     tiles &= pos == len(sm)
     gate("V4_static_identity", ok and info["garbage_bytes"] == 0, info)
     gate("V4_unit_table_tiles_streamed", tiles, {"units": len(U), "streamed_bytes": len(sm), "nprop": nprop})
+    # ---- V11 retail materials (0.3.2): the built static.dat, re-parsed strictly, holds each copied material record and its
+    # textures byte for byte as read from the source (hashes recorded at build time from the SOURCE parse); every row after a
+    # mesh block's first-pass count +0x73 has blend bit 0x01 and no row before it does (retail survey: 18,258 / 18,258 pass-B
+    # rows carry 0x01); a build without retail materials keeps +0x73 = rows (0.3.1 bytes).
+    v11 = {"checked": 0, "mismatch": [], "pass_errors": []}
+    mrep = rep.get("materials") or {"retail": []}
+    if mrep["retail"]:
+        so_ = o
+        for e in mrep["retail"]:
+            m = so_["materials"][e["row"]]
+            v11["checked"] += 1
+            if hashlib.sha256(m["raw"]).hexdigest() != e["source_record_sha256"]:
+                v11["mismatch"].append("material %s record" % e["material"])
+            got = [hashlib.sha256(so_["textures"][t]["d3d"] + so_["textures"][t]["name"] + struct.pack("<I", so_["textures"][t]["f"])
+                                  + so_["textures"][t]["texels"]).hexdigest() for t in m["tex"]]
+            if got != e["source_texture_sha256"]:
+                v11["mismatch"].append("material %s textures" % e["material"])
+    for u, (mo, lo, ms, ls) in enumerate(U):
+        nr, fp = sm[mo + 0x71], struct.unpack_from("<b", sm, mo + 0x73)[0]
+        rowmat = struct.unpack_from("<%dh" % nr, sm, mo + 0x84)
+        for r_ in range(nr):
+            blend = struct.unpack_from("<I", o["materials"][rowmat[r_]]["raw"], 0x24)[0] & 1
+            if bool(blend) != (r_ >= fp):
+                v11["pass_errors"].append((u, r_))
+    gate("V11_retail_materials_verbatim", not v11["mismatch"] and not v11["pass_errors"],
+         dict(v11, pass_errors=v11["pass_errors"][:5], n_pass_errors=len(v11["pass_errors"]),
+              first_pass_rows=mrep.get("first_pass_rows")))
+    # ---- V12 retail objects (0.3.2): every copied instance-model / prop-type record (material fields +0x5C..+0x61 masked) and its
+    # LOD data equal the source (hashes recorded from the SOURCE parse); the materials it names equal the source materials; every
+    # placement lies in the region of the unit whose tail / list holds it; prop list words follow (class << 16) | matrix index;
+    # the LOD tails of all units carry exactly the STATIC instance-type count (nprop).
+    v12 = {"objects": 0, "mismatch": [], "placement_errors": [], "word_errors": 0}
+    objrep = (rep.get("materials") or {}).get("objects") or []
+    if objrep:
+        regs_ = [_region(sm[lo:lo + ls]) for (_mo, lo, _ms, ls) in U]
+        tkeys = {"instance": [], "prop": []}
+        for e in objrep:
+            k = (e["track"], e["index"])
+            if k not in tkeys[e["family"]]:
+                tkeys[e["family"]].append(k)
+        seen = set()
+        for e in objrep:
+            fam, k = e["family"], (e["track"], e["index"])
+            ty = tkeys[fam].index(k)
+            rec = (o["instances"] if fam == "instance" else o["proptypes"])[ty]
+            v12["objects"] += 1
+            if (fam, k) not in seen:
+                seen.add((fam, k))
+                raw = rec["raw"]
+                if hashlib.sha256(raw[:0x5C] + raw[0x62:]).hexdigest() != e["source_record_sha256"]:
+                    v12["mismatch"].append("%s %s record" % (fam, k))
+                if hashlib.sha256(b"".join(L["vtx"] + L["idx"] for L in rec["lods"])).hexdigest() != e["source_lods_sha256"]:
+                    v12["mismatch"].append("%s %s LODs" % (fam, k))
+                for j, want in enumerate(e["source_material_sha256"]):
+                    mi = struct.unpack_from("<h", raw, 0x5C + 2 * j)[0]
+                    got = None if mi < 0 else hashlib.sha256(o["materials"][mi]["raw"]).hexdigest()
+                    if got != want:
+                        v12["mismatch"].append("%s %s material slot %d" % (fam, k, j))
+        # placements: instances from the LOD tails, props from the per-unit lists
+        for u, (_mo, lo, _ms, ls) in enumerate(U):
+            lb = sm[lo:lo + ls]
+            a8, ac = struct.unpack_from("<2I", lb, 0xA8)
+            for ty in range(len(o["instances"])):
+                c = lb[0xA8 + a8 + ty]
+                at = 0xA8 + struct.unpack_from("<I", lb, 0xA8 + ac + 4 * ty)[0]
+                for j in range(c):
+                    m = struct.unpack_from("<16f", lb, at + 0x40 * j)
+                    if not _inside(regs_[u], m[12], m[14]):
+                        v12["placement_errors"].append(("instance", u, ty, j))
+            for ty, L in enumerate(o["ulists"][u] or []):
+                if not L:
+                    continue
+                for w in struct.unpack("<%dI" % (len(L) // 4), L):
+                    if w >> 16 != o["pbytes"][ty]:
+                        v12["word_errors"] += 1
+                    m = struct.unpack("<16f", o["matrices"][w & 0xFFFF])
+                    if not _inside(regs_[u], m[12], m[14]):
+                        v12["placement_errors"].append(("prop", u, ty))
+        want_i = sum(e["placements"] for e in objrep if e["family"] == "instance")
+        want_p = sum(e["placements"] for e in objrep if e["family"] == "prop")
+        got_i = sum(sm[lo + 0xA8 + struct.unpack_from("<I", sm, lo + 0xA8)[0] + ty] for (_mo, lo, _ms, _ls) in U
+                    for ty in range(len(o["instances"])))
+        v12["placements"] = {"instances": [got_i, want_i], "props": [len(o["matrices"]), want_p]}
+        if got_i != want_i or len(o["matrices"]) != want_p:
+            v12["mismatch"].append("placement counts")
+    gate("V12_retail_objects_verbatim", not v12["mismatch"] and not v12["placement_errors"] and not v12["word_errors"],
+         dict(v12, placement_errors=v12["placement_errors"][:5], n_placement_errors=len(v12["placement_errors"])))
     # ---- V1 layout
     v1 = {"mesh_identical": 0, "lod_identical": 0, "uncovered_nonzero": 0, "strict_mesh": 0, "strict_lod": 0, "errors": []}
     blocks = []
@@ -144,6 +234,8 @@ def validate(out_dir, desc_path=None):
     # 0.3.0: each sample is compared with the route height there (the stations' own y, interpolated), not with station 0
     # (0.2.1 required one height for the whole route). A flat route gives the same result as before.
     samples, holes, multi, worst = 0, [], [], 0.0
+    multi_ok, clear_min, clear_n = 0, 1e9, 0
+    level_mode = bool((desc.get("levels") or {}).get("crossings"))     # 0.3.3: a track that declares over / under crossings
     grade = 0.0
     floors = {}
     for u, t in enumerate(trees):
@@ -172,20 +264,35 @@ def validate(out_dir, desc_path=None):
                 z = P[2] + nz * o
                 holders = [u for u in range(n) if _inside(regs[u], x, z)]
                 samples += 1
-                if len(holders) != 1:
+                if not holders:
                     multi.append(((round(x, 2), round(z, 2)), holders))
                     continue
-                u = holders[0]
-                ys = [(y, w) for w, tri in floors[u] for y in [_pip((x, z), *tri)] if y is not None and (w & 0xFF) <= 20]
-                if not ys:
-                    holes.append(((round(x, 2), round(z, 2)), u))
-                    continue
-                y = max(ys)[0]
-                worst = max(worst, abs(y - P[1]))
+                # 0.3.3-rta: the game's unit lookup sub_001AD4A0 returns the FIRST region holding the point in the +-4 window
+                # (plan-only test sub_0019D7F0, XC); retail crossings put BOTH decks into every holder (rta4_crossing_probe).
+                # So a sample may have several holders only if EVERY holder carries the floor at the route's own height; the
+                # floor is the one nearest the route height (not the highest: a deck above must not count). One holder = 0.3.2.
+                if len(holders) > 1:
+                    multi_ok += 1
+                for u in holders:
+                    ys = [(abs(y - P[1]), y) for w, tri in floors[u] for y in [_pip((x, z), *tri)] if y is not None and (w & 0xFF) <= 20]
+                    if not ys:
+                        holes.append(((round(x, 2), round(z, 2)), u))
+                        continue
+                    y = min(ys)[1] if len(holders) > 1 or level_mode else max(y_ for _d, y_ in ys)
+                    worst = max(worst, abs(y - P[1]))
+                    above = [y_ - P[1] for _d, y_ in ys if y_ - P[1] > 0.5]
+                    if above:
+                        clear_min = min(clear_min, min(above))
+                        clear_n += 1
     gate("V2_drivable_coverage", not holes and not multi and worst < 0.05,
          {"samples": samples, "not_one_region": multi[:5], "n_not_one_region": len(multi), "no_floor": holes[:5],
           "n_no_floor": len(holes), "max_floor_dy": round(worst, 4),
-          "max_route_grade_pct": round(100 * grade, 2)})
+          "max_route_grade_pct": round(100 * grade, 2), "samples_with_several_holders": multi_ok})
+    # 0.3.3-rta: vertical clearance under any floor above a route sample (a deck over the road). Refused below 5.5 m
+    # (bridge design rule); retail crossings measured 8.1-10.4 m deck-to-road (rta4_level_survey), reported as the reference.
+    gate("V2_level_clearance", clear_n == 0 or clear_min >= 5.5,
+         {"samples_under_a_floor": clear_n, "min_clearance_m": None if not clear_n else round(clear_min, 3),
+          "rule_min_m": 5.5, "retail_reference_min_m": 8.1})
     # walls: a horizontal probe from the road edge outwards must cross a wall quad of the holding unit
     wall_miss = 0
     wall_n = 0
@@ -199,37 +306,37 @@ def validate(out_dir, desc_path=None):
             x = s_["p"][0] + nx * (o_wall - sgn * 0.3)
             z = s_["p"][2] + nz * (o_wall - sgn * 0.3)
             holders = [u for u in range(n) if _inside(regs[u], x, z)]
-            if len(holders) != 1:
+            if not holders or (len(holders) > 1 and not level_mode):
                 continue
-            wall_n += 1
-            u = holders[0]
-            hit = False
-            for w, (a, b, c) in floors[u]:
-                if (w & 0xFF) < 21 or w & 0x1000:        # only car-solid wall words (flag 0x10 = not in the car query)
-                    continue
-                # segment from (x, y+0.7, z) to 1 m outwards vs triangle (Moller-Trumbore); y = this station's height (0.3.0)
-                p0 = (x, s_["p"][1] + 0.7, z)
-                d = (nx * sgn * 1.0, 0.0, nz * sgn * 1.0)
-                e1 = [b[k] - a[k] for k in range(3)]
-                e2 = [c[k] - a[k] for k in range(3)]
-                h = (d[1] * e2[2] - d[2] * e2[1], d[2] * e2[0] - d[0] * e2[2], d[0] * e2[1] - d[1] * e2[0])
-                det = sum(e1[k] * h[k] for k in range(3))
-                if abs(det) < 1e-9:
-                    continue
-                f = 1 / det
-                sv = [p0[k] - a[k] for k in range(3)]
-                uu = f * sum(sv[k] * h[k] for k in range(3))
-                if not 0 <= uu <= 1:
-                    continue
-                qv = (sv[1] * e1[2] - sv[2] * e1[1], sv[2] * e1[0] - sv[0] * e1[2], sv[0] * e1[1] - sv[1] * e1[0])
-                vv = f * sum(d[k] * qv[k] for k in range(3))
-                if vv < 0 or uu + vv > 1:
-                    continue
-                tt = f * sum(e2[k] * qv[k] for k in range(3))
-                if 0 <= tt <= 1:
-                    hit = True
-                    break
-            wall_miss += not hit
+            for u in holders:                            # 0.3.3: every holder must hold the wall (one holder: as before)
+                wall_n += 1
+                hit = False
+                for w, (a, b, c) in floors[u]:
+                    if (w & 0xFF) < 21 or w & 0x1000:        # only car-solid wall words (flag 0x10 = not in the car query)
+                        continue
+                    # segment from (x, y+0.7, z) to 1 m outwards vs triangle (Moller-Trumbore); y = this station's height (0.3.0)
+                    p0 = (x, s_["p"][1] + 0.7, z)
+                    d = (nx * sgn * 1.0, 0.0, nz * sgn * 1.0)
+                    e1 = [b[k] - a[k] for k in range(3)]
+                    e2 = [c[k] - a[k] for k in range(3)]
+                    h = (d[1] * e2[2] - d[2] * e2[1], d[2] * e2[0] - d[0] * e2[2], d[0] * e2[1] - d[1] * e2[0])
+                    det = sum(e1[k] * h[k] for k in range(3))
+                    if abs(det) < 1e-9:
+                        continue
+                    f = 1 / det
+                    sv = [p0[k] - a[k] for k in range(3)]
+                    uu = f * sum(sv[k] * h[k] for k in range(3))
+                    if not 0 <= uu <= 1:
+                        continue
+                    qv = (sv[1] * e1[2] - sv[2] * e1[1], sv[2] * e1[0] - sv[0] * e1[2], sv[0] * e1[1] - sv[1] * e1[0])
+                    vv = f * sum(d[k] * qv[k] for k in range(3))
+                    if vv < 0 or uu + vv > 1:
+                        continue
+                    tt = f * sum(e2[k] * qv[k] for k in range(3))
+                    if 0 <= tt <= 1:
+                        hit = True
+                        break
+                wall_miss += not hit
     gate("V2_walls_hold", wall_miss == 0 and wall_n > 0, {"probes": wall_n, "missed": wall_miss})
     # ---- V3 render winding + PVS walk
     bad_wind, tris, wind_ex = 0, 0, []
@@ -289,6 +396,13 @@ def validate(out_dir, desc_path=None):
     gate("V5_route", rid and not chk and not lint and not cam and not pl,
          {"identity": rid, "check": chk, "lint": lint, "camera_hazards": len(cam), "planner_hazards": len(pl),
           "lanes": len(r.lanes), "slices": r.slices, "corners": len(r.corners)})
+    # 0.3.3-rta: lateral lane graph (retail strip rule, trackbuild.lanegraph: 36 / 36 retail tracks, 0 / 45,154 slices) and the
+    # NAV-R fallback model; checkpoints / start line must cross every drivable lane where a strip is open
+    from . import lanegraph as LGR  # noqa: E402
+    lg = LGR.check_graph(r)
+    nvr = LGR.nav_r(r)
+    strips_rep = LGR.strip_report(r)
+    gate("V5_lane_graph", not lg and not nvr, {"problems": lg[:8], "nav_r_violations": nvr[:5], "strips": strips_rep[:12]})
     main = rep["route"]["main_lane"]
     slots = GRID.slots(gd)
     asg = [(e, k, GRID.assign(r, p)) for e, page, k, p in slots]
@@ -324,9 +438,10 @@ def validate(out_dir, desc_path=None):
     # ---- V8 LOD: the LOD block's records against the mesh block's, per unit and material row, measured from the FILES
     lodd = desc.get("lod") or {"mode": "identity"}
     if lodd.get("mode") == "decimate":
-        from .lod import pt_tri_dist  # noqa: E402
+        from .lod import pt_tri_dist, small_components  # noqa: E402
         e_max = lodd.get("e_max", 0.3)
-        worst, tri_m, tri_l, area_bad = 0.0, 0, 0, []
+        drop_below = lodd.get("drop_below")
+        worst, tri_m, tri_l, area_bad, dropped = 0.0, 0, 0, [], 0
         for u, (bm, bl) in enumerate(blocks):
             ch0 = bm.chunks[0]                                   # rel 0: rowsA -> this unit's mesh records
             for r in range(bm.rows_total):
@@ -341,7 +456,14 @@ def validate(out_dir, desc_path=None):
                 if kl < 0 or km >= bm.nmesh or kl >= bl.nmesh:          # out-of-range rows are V3's failure
                     continue
                 tm = [tuple(bm.verts[i][:3] for i in t) for t in X.triangles(6, bm.meshes[km]["idx"])[0]]
+                if drop_below:                                       # 0.3.1-te2: the same small-piece rule as the builder
+                    sm = small_components(tm, drop_below)
+                    dropped += len(sm)
+                    tm = [t for i, t in enumerate(tm) if i not in sm]
                 tl = [tuple(bl.verts[i][:3] for i in t) for t in X.triangles(6, bl.meshes[kl]["idx"])[0]]
+                if not tm:
+                    area_bad.append((u, r, 'LOD record for a row whose pieces are all below drop_below')) if tl else None
+                    continue
                 tri_m += len(tm)
                 tri_l += len(tl)
                 area = lambda ts: sum(0.5 * math.sqrt(sum(x * x for x in ((b[1]-a[1])*(c_[2]-a[2])-(b[2]-a[2])*(c_[1]-a[1]),  # noqa: E731
@@ -356,7 +478,8 @@ def validate(out_dir, desc_path=None):
                         worst = max(worst, best)
         gate("V8_lod", worst <= e_max + 1e-3 and not area_bad,
              {"max_two_sided_err_m": round(worst, 4), "bound": e_max, "mesh_tris": tri_m, "lod_tris": tri_l,
-              "reduction": round(1 - tri_l / max(1, tri_m), 3), "area_mismatch": area_bad[:5]})
+              "reduction": round(1 - tri_l / max(1, tri_m), 3), "area_mismatch": area_bad[:5],
+              "drop_below_m": drop_below, "mesh_tris_left_out_of_far_lod": dropped})
     # ---- V7 traffic (authored S2 / S3 only): bolib structural checks + every lane node centre on the drivable floor
     if desc.get("traffic"):
         from ._vendor.bolib import traffic as TR  # noqa: E402
@@ -388,8 +511,17 @@ def validate(out_dir, desc_path=None):
     # ---- V6 budgets
     mm = max(ms for _, _, ms, _ in U)
     ml = max(ls for _, _, _, ls in U)
-    gate("V6_budgets", mm <= 0x28000 and ml <= 0x18000 and len(st) <= 0xD00000 and int(rep["gamedata"]["need"], 16) <= 0x176000,
-         {"max_mesh": hex(mm), "max_lod": hex(ml), "static": hex(len(st)), "gamedata_need": rep["gamedata"]["need"]})
+    from . import capacity as CAP
+    mode = CAP.mode_of(desc)
+    decl = CAP.parse_declared((rep.get("capacity") or {}).get("declared")) if mode == "auto" else {}
+    eff = {k: min(max(CAP.TABLE[k]["game"], decl.get(k, 0)), CAP.TABLE[k]["ceiling"]) for k in CAP.TABLE}
+    gneed = int(rep["gamedata"]["need"], 16)
+    nl = rep.get("route", {}).get("lanes", 0)
+    det = {"max_mesh": hex(mm), "max_lod": hex(ml), "static": hex(len(st)), "gamedata_need": rep["gamedata"]["need"]}
+    if decl or nl > 64:
+        det.update({"capacity_mode": mode, "route_lanes": nl, "limits": {k: CAP.fmt(k, v) for k, v in eff.items()}})
+    gate("V6_budgets", mm <= eff["full_unit_bytes"] and ml <= eff["low_unit_bytes"] and len(st) <= eff["static_bytes"]
+         and gneed <= eff["gamedata_bytes"] and nl <= eff["lanes"], det)
     res["summary"] = {"ok": not fails, "failed": fails, "gates": len(res)}
     return res
 

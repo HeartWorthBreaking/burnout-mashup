@@ -12,9 +12,9 @@
    "changes": [],
    "file": "src/game/bm_admit.c",
    "licence": "MIT (Takedawn, tree LICENSE)",
-   "origin": "main21/src/game/bm_admit.c",
-   "origin_sha256": "a3757ba57822393a687005c1386fca507cc059944ecea7cebf98b3735e676067",
-   "sha256": "a3757ba57822393a687005c1386fca507cc059944ecea7cebf98b3735e676067"
+   "origin": "host/tree/src/game/bm_admit.c (public fork host layer)",
+   "origin_sha256": "cff396979e33be111b530d03b6c100074db96abba06c5c92c41dea147cbe818d",
+   "sha256": "cff396979e33be111b530d03b6c100074db96abba06c5c92c41dea147cbe818d"
   },
   {
    "changes": [],
@@ -116,9 +116,9 @@
    "changes": [],
    "file": "src/game/bm_platform_table.h",
    "licence": "MIT (Takedawn, tree LICENSE)",
-   "origin": "main21/src/game/bm_platform_table.h",
-   "origin_sha256": "7637137f876723783befa4febf01c6cac00f77d86e9a52673ad8b6bda514d8f4",
-   "sha256": "7637137f876723783befa4febf01c6cac00f77d86e9a52673ad8b6bda514d8f4"
+   "origin": "host/tree/src/game/bm_platform_table.h (public fork host layer)",
+   "origin_sha256": "0cde0414ccd22c410a6b87c3adf3f56ee65f42e3bd8d9a17a46e81a4b36f652c",
+   "sha256": "0cde0414ccd22c410a6b87c3adf3f56ee65f42e3bd8d9a17a46e81a4b36f652c"
   },
   {
    "changes": [],
@@ -345,10 +345,10 @@
    "sha256": "6fed15bb5c8af83e437ee4306f96e0e33c22c81804bbfed2c84ebf352fe95661"
   }
  ],
- "host_exe_sha256": "f0b9c8a9bf3baa7ed41703569a23236efd2b7e503fdbf6a73cf8c0d3d5f27656",
- "host_identity": "bmp-0.1.9+2c8142e65f20",
+ "host_exe_sha256": "3ea0df35dfa7291a753784c6e237454c5a2ac32a01be52b4004bb6925690a285",
+ "host_identity": "bmp-0.1.9+c44e37dc0cc1",
  "licences": "Takedawn host code: MIT (LICENSE-takedawn.txt); xboxrecomp recomp_cfg: MIT (xboxrecomp/LICENSE.txt)",
  "platform": "0.1.9",
- "public_fork_note": "src/game files are generated from host/tree at assembly (pf_assemble.py); 10 entries were re-hashed",
+ "public_fork_note": "src/game files are generated from host/tree at assembly (pf_assemble.py); 12 entries were re-hashed (rel021 rc4: bm_admit.c / bm_platform_table.h from the host patch 131 layer)",
  "what": "source of the HOST's own mod readers / admission code, compiled by bmpack 1.5.0 validate (mod kit 0.7.0; mainline host main19 = main18 + the 256 MB guest window + hook request P2 / P3, platform 0.1.9). No generated game code, no game data."
 }

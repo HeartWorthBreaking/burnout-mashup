@@ -11,6 +11,10 @@
 _Static_assert(BO3_US_DESC_VA + 16u * BO3_US_LOW1_FIRST == 0x003F9EE4u, "sub_0019DB30's layout-1 base");
 _Static_assert(BO3_US_DESC_VA + 16u * 52u == 0x003FA004u, "descriptor 52 (GAMEDATA) follows the low slots");
 _Static_assert(BO3_US_LOW_MAX % BO3_US_PAGE == 0 && BO3_US_LOW_RETAIL % BO3_US_PAGE == 0, "page sizes");
+_Static_assert(BO3_US_FULL_MAX % BO3_US_PAGE == 0 && BO3_US_FULL_RETAIL % BO3_US_PAGE == 0 &&
+               BO3_US_FULL_MAX > BO3_US_FULL_RETAIL, "full-detail page sizes (patch 131)");
+_Static_assert(BO3_US_DESC_VA + 16u * BO3_US_FULL1_FIRST == 0x003F9E44u &&
+               BO3_US_FULL1_FIRST + BO3_US_FULL1_N == BO3_US_LOW1_FIRST, "descriptors 24-33 end where the low slots start");
 
 bo3_us g_bo3_us;
 
@@ -85,7 +89,7 @@ int bo3_us_validate(const bo3_us *u, uint32_t *base)
     return BO3_US_OK;
 }
 
-int bo3_us_apply(bo3_us *u)
+static int apply_low(bo3_us *u)
 {
     uint32_t base = 0, va = 0, s;
     uint8_t *d;
@@ -145,6 +149,125 @@ int bo3_us_apply(bo3_us *u)
                     rc == BO3_US_NO_MEMORY ? "the contiguous allocation was refused" : "the descriptor table is unmapped",
                     (unsigned)BO3_US_LOW_RETAIL);
     }
+    return rc;
+}
+
+/* ---------------- patch 131: the full-detail ring (descriptors 24-33) */
+int bo3_us_set_full_bytes(bo3_us *u, uint32_t bytes)
+{
+    if (!u)
+        return BO3_US_BAD_ARG;
+    if (u->full_state != BO3_US_ST_PLANNED)
+        return BO3_US_ALREADY;
+    if (bytes == 0 || bytes == BO3_US_FULL_RETAIL) {
+        u->full_bytes = 0;
+        return BO3_US_OK;
+    }
+    if ((bytes % BO3_US_PAGE) || bytes < BO3_US_FULL_RETAIL || bytes > BO3_US_FULL_MAX)
+        return BO3_US_BAD_ARG;
+    u->full_bytes = bytes;
+    return BO3_US_OK;
+}
+
+int bo3_us_validate_full(const bo3_us *u, uint32_t *base)
+{
+    const uint8_t *d;
+    uint32_t b;
+
+    if (!u || !u->guest)
+        return BO3_US_UNMAPPED;
+    d = u->guest(u->user, BO3_US_DESC_VA + 16u * BO3_US_FULL1_FIRST, 16u * BO3_US_FULL1_N);
+    if (!d)
+        return BO3_US_UNMAPPED;
+    b = get32(d + 0xC);
+    if (!b || (b % BO3_US_PAGE))
+        return BO3_US_MISMATCH;
+    for (uint32_t i = 0; i < BO3_US_FULL1_N; i++) {
+        const uint8_t *e = d + 16u * i;
+#if MUT != 7
+        if (get32(e) != 0 || get32(e + 4) != 1u || get32(e + 8) != BO3_US_FULL_RETAIL ||
+            get32(e + 0xC) != b + BO3_US_FULL_RETAIL * i)
+            return BO3_US_MISMATCH;
+#else
+        (void)e;                            /* defect: any table is taken for the retail one */
+#endif
+    }
+    if (base)
+        *base = b;
+    return BO3_US_OK;
+}
+
+static int apply_full(bo3_us *u)
+{
+    uint32_t base = 0, va = 0, s;
+    uint8_t *d;
+    int rc;
+
+    if (u->full_state != BO3_US_ST_PLANNED)
+        return BO3_US_ALREADY;
+    s = u->full_bytes;
+    if (!s) {
+        u->full_state = BO3_US_ST_RETAIL;
+        u->full_result = BO3_US_OK;
+        if (u->log)
+            fprintf(u->log, "[UNITSLOTS] full-detail unit slots: the game's (10 x 0x%X); unit reads are checked\n",
+                    (unsigned)BO3_US_FULL_RETAIL);
+        return BO3_US_OK;
+    }
+    if (!u->build_check(u->user))
+        rc = BO3_US_UNSUPPORTED;
+    else if ((rc = bo3_us_validate_full(u, &base)) != BO3_US_OK)
+        ;
+    else if (!(va = u->alloc(u->user, BO3_US_FULL1_N * s, BO3_US_PAGE)) || (va % BO3_US_PAGE))
+        rc = BO3_US_NO_MEMORY;
+    else if (!(d = u->guest(u->user, BO3_US_DESC_VA + 16u * BO3_US_FULL1_FIRST, 16u * BO3_US_FULL1_N)))
+        rc = BO3_US_UNMAPPED;
+    else {
+        for (uint32_t i = 0; i < BO3_US_FULL1_N; i++) {
+#if MUT != 8
+            put32(d + 16u * i + 8u, s);
+#endif
+#if MUT == 9
+            put32(d + 16u * i + 0xCu, va + BO3_US_FULL_RETAIL * i);    /* defect: the retail stride (slots overlap) */
+#else
+            put32(d + 16u * i + 0xCu, va + s * i);
+#endif
+        }
+        rc = BO3_US_OK;
+    }
+    u->full_result = rc;
+    u->full_old_base = base;
+    if (rc == BO3_US_OK) {
+        u->full_state = BO3_US_ST_EXPANDED;
+        u->full_region_va = va;
+    } else {
+        u->full_state = BO3_US_ST_FAILED;
+    }
+    if (u->log) {
+        if (rc == BO3_US_OK)
+            fprintf(u->log, "[UNITSLOTS] full-detail unit slots EXPANDED: 10 x 0x%X at 0x%08X (were 10 x 0x%X at 0x%08X; "
+                    "layout 1 only)\n", (unsigned)s, (unsigned)va, (unsigned)BO3_US_FULL_RETAIL, (unsigned)base);
+        else
+            fprintf(u->log, "[UNITSLOTS] full-detail unit slots NOT expanded to 0x%X: %s; the game's 10 x 0x%X stay "
+                    "(unit reads are checked)\n", (unsigned)s,
+                    rc == BO3_US_UNSUPPORTED ? "unsupported game build" :
+                    rc == BO3_US_MISMATCH ? "descriptors 24-33 are not the expected table" :
+                    rc == BO3_US_NO_MEMORY ? "the contiguous allocation was refused" : "the descriptor table is unmapped",
+                    (unsigned)BO3_US_FULL_RETAIL);
+    }
+    return rc;
+}
+
+int bo3_us_apply(bo3_us *u)
+{
+    int rc;
+
+    if (!u || !u->configured)
+        return BO3_US_BAD_ARG;
+    rc = apply_low(u);
+#if MUT != 10
+    (void)apply_full(u);                    /* independent of the low result; it keeps its own state */
+#endif
     return rc;
 }
 

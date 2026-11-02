@@ -16,8 +16,8 @@
    },
    "src/d3d/nv2a_pb_d3d11.c": {
     "base_sha256": "7e560d0322ccc406f621d5849136bda0c8d1a9cbbd154b20ed14315919cc0188",
-    "hunks": 1,
-    "result_sha256": "46ec8b650a2433a3fafd59100fc7023cf14d3466d6062f9b4c0738d438c11c18"
+    "hunks": 2,
+    "result_sha256": "2dbbe645d66497420633e97b89d26eaa1287f0799cafec4c30c5851f7c38bb1f"
    },
    "src/d3d/nv2a_pb_metal.m": {
     "base_sha256": "8458a337514f979c7d8afca595f925bf754e38ed1b3557b02d4ff602c12d30e6",
@@ -26,8 +26,8 @@
    },
    "src/d3d/nv2a_pb_vulkan.c": {
     "base_sha256": "e298ec98646a926e11b95d23d1ea65f637138f8b2cff941cbbbf8afec33a9479",
-    "hunks": 5,
-    "result_sha256": "24cc59eb492c321306f4a850aabc607456d0f8e15251f59d76a8ffeb04a96c97"
+    "hunks": 7,
+    "result_sha256": "12e9cb689bcb8907440d0ab99b7f871d7792f09faf7e36063aa8037a50d8f650"
    },
    "src/kernel/kernel.h": {
     "base_sha256": "5e27f2239d8cb184663dd9d6895a1dff8b5901d63056f520259cd8bf16d9323e",

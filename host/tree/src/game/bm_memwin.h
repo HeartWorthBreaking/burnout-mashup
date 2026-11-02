@@ -28,6 +28,7 @@ typedef struct bm_memwin_plan {
     uint32_t fetex_reserve;    /* the front-end texture pool (sized at first use, at most its cap) */
     uint32_t paint_reserve;    /* the paint palettes (allocated in chunks as paints register) */
     uint32_t stress_bytes;     /* dev only (patch 08): a block placed first to push expansions up */
+    uint32_t full_bytes;       /* patch 131: 10 x the full-detail slot size (0 = the game's) */
 } bm_memwin_plan;
 
 enum { BM_MEMWIN_OK = 0, BM_MEMWIN_OVER = 1, BM_MEMWIN_MISMATCH = 2 };

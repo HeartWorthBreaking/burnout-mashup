@@ -27,6 +27,39 @@ import wb_theme  # noqa: E402
 import wb_track  # noqa: E402
 
 VERSION = core.VERSION                                   # one constant (wb_core.VERSION): the title cannot drift again
+HERE = os.path.dirname(os.path.abspath(__file__))
+EDITOR_TITLE = 'Burnout Mashup track editor'
+GUIDE = 'TRACK_EDITOR_GUIDE.md'
+
+
+def console_python(exe=None):
+    """the console Python beside the running one: the Workbench runs under pythonw.exe (no window), the editor needs a window"""
+    exe = exe or sys.executable
+    d, n = os.path.split(exe)
+    if n.lower() == 'pythonw.exe' and os.path.isfile(os.path.join(d, 'python.exe')):
+        return os.path.join(d, 'python.exe')
+    return exe
+
+
+def track_editor_command(project, config=None, python=None):
+    """v0.32: the command line of the editor's own console window. Through cmd.exe so the window has a title and, when the editor
+    stops with an error, stays open (pause) so the reason can be read; Ctrl+C or closing the window stops the editor. A path with
+    a character cmd.exe would expand or split (% or ") starts Python directly instead (a window too, without the pause)."""
+    argv = [console_python(python), os.path.join(HERE, 'wb_trackedit.py'), project]
+    if config:
+        argv += ['--config', config]
+    line = subprocess.list2cmdline(argv)
+    if '%' in line or '"' in project or (config and '"' in config):
+        return argv
+    comspec = os.environ.get('ComSpec') or 'cmd.exe'
+    return '%s /s /c "title %s & %s || pause"' % (subprocess.list2cmdline([comspec]), EDITOR_TITLE, line)
+
+
+def launch_track_editor(project, config=None, python=None):
+    """starts the editor in a new console window; its working folder is the project (never the program folder, which an update
+    renames)"""
+    return subprocess.Popen(track_editor_command(project, config, python), cwd=project,
+                            creationflags=getattr(subprocess, 'CREATE_NEW_CONSOLE', 0))
 LABELS = {'kit': 'Mod kit', 'cc': 'C compiler', 'cmake': 'CMake', 'ninja': 'Ninja', 'game_data': 'Game data',
           'pipeline': 'Release pipeline'}
 FILE_KEYS = ('cc', 'cmake', 'ninja')
@@ -553,14 +586,20 @@ class App:
         self.btn_trk_create = ttk.Button(bf, text='Create track project', command=self.do_trk_create)
         self.btn_trk_create.pack(side='left', padx=(0, 6))
         self.btn_trk_use = ttk.Button(bf, text='Use in Build / stage', command=self.do_trk_use, state='disabled')
-        self.btn_trk_use.pack(side='left')
+        self.btn_trk_use.pack(side='left', padx=(0, 6))
+        # v0.32: the track editor opens from here (before: a command line only)
+        self.btn_trk_edit = ttk.Button(bf, text='Open in track editor...', command=self.do_trk_edit)
+        self.btn_trk_edit.pack(side='left', padx=(0, 6))
+        self.btn_trk_guide = ttk.Button(bf, text='Track editor guide', command=self.do_trk_guide)
+        self.btn_trk_guide.pack(side='left')
         ttk.Label(f, text='Makes a trackbuild project: the kit\'s demo sources (description .track.json, OBJ, PNG textures; written by '
                           'the kit\'s own generator, copied unchanged), package.toml (trackbuild\'s package keys), workbench-track.json, '
                           'README.txt. Supported: geometry / materials, collision, routes, starts, streaming units, visibility (PVS), LOD, '
                           'authored traffic. DONOR DEPENDENCY: Gamedata header / events, sky (enviro) and audio are retail EU/M1_V1 '
                           'copies from YOUR game data - a built package is LOCAL ONLY. Build: the kit\'s tb.py build / validate / '
                           'package + bmpack with fixed arguments on a copy of the inputs. Deferred: own region, point-to-point, '
-                          'special materials / props, own sky / audio. Edit: wb_trackedit.py (first slice).',
+                          'special materials / props, own sky / audio. Edit: "Open in track editor..." (the project just created, '
+                          'else the folder above if it is a track project, else you pick one); "Track editor guide" explains it.',
                   foreground='#444', wraplength=900, justify='left').grid(row=n + 1, column=0, columnspan=3, sticky='w')
         self.trk_last = None
 
@@ -612,6 +651,48 @@ class App:
             self.proj_var.set(self.trk_last['project'])
             self.mode_var.set('auto')
             self.nb.select(self.tab_stg)
+
+    def trk_editor_project(self, ask=True):
+        """v0.32: which project the editor opens: the one just created, else the folder field if it is a track project, else a
+        folder the user picks (None = cancelled)"""
+        if self.trk_last and self.trk_last.get('ok'):
+            return self.trk_last['project']
+        f = self.trk_vars['folder'].get().strip()
+        if f and wb_track.is_track_project(f):
+            return os.path.normpath(f)
+        if not ask:
+            return None
+        p = filedialog.askdirectory(title='Open a track project in the track editor')
+        return os.path.normpath(p) if p else None
+
+    def do_trk_edit(self):
+        p = self.trk_editor_project()
+        if not p:
+            return None
+        if not wb_track.is_track_project(p):
+            messagebox.showwarning('Track editor', '%s is not a track project (it has no %s).\n\nCreate one on this tab first '
+                                   '("Create track project"), or pick the folder of a track project.' % (p, wb_track.MARKER))
+            return None
+        cfgf = self.config_path if self.config_path and os.path.isfile(self.config_path) else None
+        try:
+            proc = launch_track_editor(p, cfgf)
+        except OSError as e:
+            messagebox.showerror('Track editor', 'The track editor could not be started: %s' % e)
+            return None
+        self.show('TRACK EDITOR: STARTED for %s\n'
+                  '  It opens in your web browser in a few seconds (a page on this PC only, 127.0.0.1).\n'
+                  '  A window titled "%s" keeps it running. When you are done: Save in the editor, then close that window.\n'
+                  '  Unsaved edits are lost when it closes. If the browser page does not appear, the address is in that window.\n'
+                  '  Help: "Track editor guide" on this tab.' % (p, EDITOR_TITLE))
+        self.status['text'] = 'Track editor started for %s' % os.path.basename(p)
+        return proc
+
+    def do_trk_guide(self):
+        path = os.path.join(HERE, GUIDE)
+        try:
+            os.startfile(path)                                    # the program Windows uses for .md files
+        except OSError:
+            subprocess.Popen(['notepad.exe', path])               # no program set for .md: Notepad shows it as text
 
     def _build_stage(self, f):
         f.columnconfigure(1, weight=1)

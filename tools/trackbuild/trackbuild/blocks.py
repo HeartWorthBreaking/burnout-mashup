@@ -124,6 +124,9 @@ class BlockGeom:
                 lo = [min(p[k] for p in pts) for k in range(3)]
                 hi = [max(p[k] for p in pts) for k in range(3)]
                 self.recs.append((r, mat, s, (lo, hi)))
+        if len(self.recs) > 127:                                  # 0.3.4: the message names the host patch 132 figure
+            from .capacity import records_note
+            need(False, records_note(len(self.recs)))
         need(1 <= len(self.recs) <= 127, "a block needs 1..127 records")
         self.row_rec = {r: i for i, (r, _, _, _) in enumerate(self.recs)}
 
@@ -164,7 +167,9 @@ def prism_of(unit, geom_y):
     return [(c[0], y0, c[1], (y1 - y0 + 0.5) if k == 0 else 0.0) for k, c in enumerate(unit.corners)]
 
 
-def mesh_block(unit_index, prism, geom, rows, pvs):
+def mesh_block(unit_index, prism, geom, rows, pvs, first_pass=None):
+    """first_pass (0.3.2): rows before it are drawn in the first pass, the rest (blended retail materials) after it (+0x73;
+    retail survey: every row after +0x73 has material bit 0x01). None = every row (0.3.1 bytes)."""
     out = header(unit_index, prism)
     out += bytes(REC0 - len(out))
     recs, vb_rel, end = geom.records_bytes(REC0)
@@ -172,7 +177,9 @@ def mesh_block(unit_index, prism, geom, rows, pvs):
     struct.pack_into("<h", out, 0x60, len(geom.recs))
     nr = len(rows)
     out[0x70] = 0
-    struct.pack_into("<bBb", out, 0x71, nr, nr, nr)
+    fp = nr if first_pass is None else first_pass
+    need(0 <= fp <= nr, "first-pass row count %d outside 0..%d" % (fp, nr))
+    struct.pack_into("<bBb", out, 0x71, nr, nr, fp)
     struct.pack_into("<8b", out, 0x74, *([-1] * 8))
     # 0x7C u8 0, 0x7D s8 chevron set index: -1 = none (0.2.1, capdbg T1). The game (sub_001AE200) draws chevron entry
     # [STATIC+0x28][+0x7D] whenever +0x7D >= 0 and never checks it against the set count s16 STATIC[+0x1E]; trackbuild writes
@@ -284,7 +291,9 @@ def collision_tree(coll, max_quads=8):
     return tb, {"leaves": len(leaves), "pairs": len(pairs), "quads": len(items), "max_leaf_quads": max(len(q) for _, q, _ in leaves)}
 
 
-def lod_block(unit_index, prism, unit, geom, coll):
+def lod_block(unit_index, prism, unit, geom, coll, inst=None):
+    """inst (0.3.2): (n instance types, {type: [0x40-byte matrices]}) -> tail u8[n] counts at the index end, u32[n] pointers
+    (rel +0xA8) at align4, matrix runs 16-aligned in type order (rule of 2,838 / 2,838 retail LOD blocks). None = nprop 0."""
     out = header(unit_index, prism)
     out += bytes(0xB0 - len(out))
     for k, (a, c, b) in enumerate(unit.lanes):
@@ -303,10 +312,27 @@ def lod_block(unit_index, prism, unit, geom, coll):
     struct.pack_into("<4I", out, 0x50, 1, vb_rel, 0, ma - 0x50)
     struct.pack_into("<h", out, 0x60, len(geom.recs))
     # tail (nprop = 0): [+0xA8] -> the end of the indices, [+0xAC] -> align4 of it (an empty pointer array)
-    arr = al(idx_end, 4)
+    ni, runs = inst if inst else (0, {})
+    arr = al(idx_end + ni, 4)
     struct.pack_into("<4I", out, 0xA0, tree, 0xB0, idx_end - 0xA8, arr - 0xA8)
-    size = al(max(len(out), al(arr, 16)) + 16, 0x1000)
+    end = arr + 4 * ni
+    tail = []
+    if ni:
+        cur = al(end, 16)
+        for ty in range(ni):
+            ms = runs.get(ty) or []
+            need(len(ms) <= 255, "unit %d: more than 255 placements of instance type %d" % (unit_index, ty))
+            tail.append((ty, len(ms), cur if ms else None, ms))
+            if ms:
+                cur = al(cur + 0x40 * len(ms), 16)
+        end = cur
+    size = al(max(len(out), al(end, 16)) + 16, 0x1000)
     out += bytes(size - len(out))
+    for ty, c, at, ms in tail:
+        out[idx_end + ty] = c
+        struct.pack_into("<I", out, arr + 4 * ty, (at - 0xA8) if at else 0)
+        if ms:
+            out[at:at + 0x40 * c] = b"".join(ms)
     struct.pack_into("<I", out, 8, size)
     return bytes(out), tst
 

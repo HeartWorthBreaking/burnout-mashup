@@ -13,6 +13,9 @@
  *           allocated and descriptors 34-51 are pointed at it (+8 size, +0xC pointer). Only after the 18 descriptors
  *           are verified to be the retail table (owner 1, size 0x18000, free, consecutive). Layout 2 (split screen)
  *           and the full-detail slots are not changed. Fails closed: refused / no memory -> the retail table.
+ *   expand full (patch 131): the same for layout 1's 10 full-detail slots (descriptors 24-33, 0x28000 each) when a
+ *           full-detail size above 0x28000 was set (bo3_us_set_full_bytes, from mod.toml [bmashup.capacity]
+ *           full_unit_bytes); its own state (full_state). The low-detail path is unchanged.
  *
  * MUT=n (test builds only) compiles one deliberate defect for the negative controls. */
 #ifndef BM_UNITSLOTS_H
@@ -30,7 +33,12 @@
 #define BO3_US_LOW1_N       18u
 #define BO3_US_LOW_RETAIL   0x18000u
 #define BO3_US_FULL_RETAIL  0x28000u
-#define BO3_US_LOW_MAX      0x30000u        /* the service's ceiling: twice the retail size (18 x = 3.375 MiB) */
+#define BO3_US_LOW_MAX      0x200000u       /* the service's ceiling (18 x = 36 MiB; patch 131: was 0x30000) */
+/* patch 131 (owner 2026-11-02, White Mountain crash "track unit too large"): layout 1's FULL-detail slots, descriptors 24-33
+ * (b3_pc_3 mm_layout.json: owner 1, 0x28000, consecutive), enlarged the same way as the low-detail ones */
+#define BO3_US_FULL1_FIRST  24u
+#define BO3_US_FULL1_N      10u
+#define BO3_US_FULL_MAX     0x200000u       /* ceiling (10 x = 20 MiB; owner 2026-11-02: 2 MiB a slot) */
 #define BO3_US_PAGE         0x1000u
 #define BO3_US_TAKEN        0xFFFFFFFFu
 #define BO3_US_ANY_LAYOUT   0xFFFFFFFFu
@@ -75,6 +83,10 @@ typedef struct bo3_us {
     uint32_t region_va;         /* the new region (EXPANDED) */
     uint32_t old_base;          /* descriptor 34's retail pointer */
     uint32_t checks[2], over[2], unknown[2], max_size[2], max_cap[2];
+    /* patch 131: the full-detail ring (descriptors 24-33), its own request / state / result (BO3_US_ST_* / BO3_US_*) */
+    uint32_t full_bytes;
+    int full_state, full_result;
+    uint32_t full_region_va, full_old_base;
 } bo3_us;
 
 extern bo3_us g_bo3_us;
@@ -86,7 +98,12 @@ int bo3_us_set_low_bytes(bo3_us *u, uint32_t bytes);
 /* Descriptors 34-51 are the retail table: owner 1, size 0x18000, free, pointers consecutive from a page-aligned base
  * (stored in *base). BO3_US_OK / MISMATCH / UNMAPPED. Reads only. */
 int bo3_us_validate(const bo3_us *u, uint32_t *base);
-/* Once, after sub_00022F60. Returns the result (also kept in apply_result). */
+/* patch 131: before the apply: 0 or BO3_US_FULL_RETAIL = no change; else a page multiple in (0x28000, BO3_US_FULL_MAX]. */
+int bo3_us_set_full_bytes(bo3_us *u, uint32_t bytes);
+/* Descriptors 24-33 are the retail full-detail table: owner 1, size 0x28000, free, consecutive from a page-aligned base. */
+int bo3_us_validate_full(const bo3_us *u, uint32_t *base);
+/* Once, after sub_00022F60: the low-detail ring (unchanged behaviour), then the full-detail ring (patch 131, its result in
+ * full_result). Returns the LOW result (also kept in apply_result), as before. */
 int bo3_us_apply(bo3_us *u);
 /* The capacity of the taken descriptor (current layout, or every layout) whose pointer is buf: 1 and *cap, or 0. */
 int bo3_us_capacity(const bo3_us *u, uint32_t buf, uint32_t *cap);

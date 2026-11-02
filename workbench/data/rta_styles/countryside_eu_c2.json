@@ -1,0 +1,222 @@
+{
+ "builder_limits": [
+  "route road width: 14 m default - an 18 m road (2 x 6 m lanes + 2 x 3 m edges) failed the kit walls-hold check on the test loop (earlier retail-look tests): wider retail carriageways are NOT reproduced",
+  "route banking <= ~0.3 deg (kit gate V2); start stretch level (grid written level)",
+  "closed circuits only (trackbuild); one AI route with 5 cyclic lanes; junctions / side roads are geometry only",
+  "materials opaque only: retail cut-out foliage / fences / signs cannot be used; trees are generated low-poly opaque shapes",
+  "scenery = geometry copies (no prop / instance writer): every lamp / building / tree counts in the unit slots (mesh 0x28000, LOD 0x18000 incl. full collision)",
+  "83 material rows per track; sky / fog / lighting = the donor track's enviro.dat unchanged"
+ ],
+ "defaults": {
+  "band_m": 45.0,
+  "building_density": 1.0,
+  "building_depth_m": [
+   10.0,
+   18.0
+  ],
+  "building_gap_m": [
+   4.0,
+   14.0
+  ],
+  "building_height_scale": 0.35,
+  "building_width_m": [
+   12.0,
+   26.0
+  ],
+  "curve_clearance_m": 6.0,
+  "doorways": true,
+  "edge_width_m": 3.0,
+  "lamp_density": 1.0,
+  "road_width_m": 14.0,
+  "seed": 1,
+  "tree_density": 1.0,
+  "variation": 0.25,
+  "verge_in_m": 20.0,
+  "verge_out_m": 10.0,
+  "wall_height_m": 1.5
+ },
+ "id": "countryside_eu_c2",
+ "kind": "countryside",
+ "kind_evidence": "tall vertical surfaces 4 % (< 6 %), ground / verge / foliage 47 % (>= 45 %)",
+ "local_only_when_applied": true,
+ "measured": {
+  "ai_lane_gap_profile_m": [
+   26.49,
+   26.73,
+   26.48
+  ],
+  "barrier_distance_m": 6.81,
+  "building_height_p90_m": 53.22,
+  "building_setback_m": {
+   "median": 63.45,
+   "p10": 20.45
+  },
+  "composition_within_60m": {
+   "barrier / wall": 0.014,
+   "cut-out / blended card (foliage, fence, sign: shown with transparency)": 0.269,
+   "cut-out / blended surface (decal, shadow, glass)": 0.054,
+   "ground / terrain": 0.069,
+   "pavement / verge": 0.129,
+   "road surface": 0.074,
+   "roof / raised surface": 0.15,
+   "tall vertical surface (facade / cliff)": 0.037,
+   "unclassified": 0.202
+  },
+  "edge_strip_repeat_m": {
+   "across_m": 0.95,
+   "along_m": 15.64,
+   "texture": "ATB_ConcreteC"
+  },
+  "paved_width_per_20m_m": {
+   "max": 79.64,
+   "median": 37.55,
+   "min": 2.4,
+   "n": 265,
+   "p10": 16.43,
+   "p90": 62.7
+  },
+  "pavement_distance_m": 10.39,
+  "post_setback_m": [
+   3.8,
+   8.5
+  ],
+  "post_spacing_m": [
+   33.2,
+   31.1
+  ],
+  "road_texture_repeat_m": {
+   "across": 1.96,
+   "along": 5.69
+  },
+  "tree_models_per_km": 78.45,
+  "tree_setback_m": 10.2
+ },
+ "measured_sha256": "8927452891eb52fc9a7e96c7d84a816da52800a2ef7ba47399eacb7feb54d808",
+ "name_note": "the only retail track whose measured composition meets the countryside rule (tall vertical < 6 %, ground / verge / foliage >= 45 %)",
+ "palette": {
+  "edge": {
+   "across_m": 0.95,
+   "along_m": 15.64,
+   "texture": "ATB_ConcreteC"
+  },
+  "facades": [
+   {
+    "repeat_m": 22.41,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "ATB_Viaduct"
+   },
+   {
+    "repeat_m": 40.0,
+    "size": [
+     128,
+     64
+    ],
+    "texture": "ATB_Apartements"
+   },
+   {
+    "repeat_m": 40.0,
+    "size": [
+     256,
+     256
+    ],
+    "texture": "ATB_BuildsA"
+   },
+   {
+    "repeat_m": 40.0,
+    "size": [
+     256,
+     256
+    ],
+    "texture": "ATB_Vien_Builds"
+   }
+  ],
+  "foliage": {
+   "texture": "ATB_Mountain_BlendC"
+  },
+  "ground": {
+   "texture": "ATB_Mountain_BlendC"
+  },
+  "posts": [
+   {
+    "left_fraction": 0.55,
+    "model": "I3",
+    "per_km": 30.21,
+    "setback_m": 3.8,
+    "size_m": [
+     8.743,
+     20.033,
+     1.092
+    ],
+    "spacing_m": 33.2,
+    "texture": "ATB_Lamp"
+   },
+   {
+    "left_fraction": 0.36,
+    "model": "I4",
+    "per_km": 5.84,
+    "setback_m": 8.5,
+    "size_m": [
+     17.07,
+     20.033,
+     1.092
+    ],
+    "spacing_m": 31.1,
+    "texture": "ATB_Lamp"
+   }
+  ],
+  "road": {
+   "across_m": 1.96,
+   "along_m": 5.69,
+   "texture": "ATB_Road_Side"
+  },
+  "roof": {
+   "texture": "ATB_Snow"
+  },
+  "verge": {
+   "texture": "ATB_Road_Lane"
+  },
+  "wall": {
+   "texture": "ATB_Concrt_Tile"
+  },
+  "wallback": {
+   "texture": "ATB_Conc_Barrier"
+  }
+ },
+ "palette_why": {
+  "edge": "road-surface texture with an across repeat of 0.95 m (about half the lane repeat)",
+  "facades": "the 4 largest opaque tall-vertical areas; repeat_m = mean of the measured u / v metres per repeat on vertical faces (None = not measured: 6 m used)",
+  "foliage": "no clearly green opaque ground texture measured: trees use the ground texture",
+  "ground": "largest opaque ground / terrain area (else the second verge texture)",
+  "posts": "opaque tall thin roadside instance models (>= 4.5 m, <= 1.6 m thick) by placements per km; WHAT they are (lamp, tram post, pylon) is not decoded - check the thumbnail",
+  "road": "largest opaque road-surface area (89824 m2) with a measured repeat",
+  "verge": "largest opaque pavement / verge area",
+  "wall": "largest opaque barrier / wall areas"
+ },
+ "schema": "bm-rta-style/1",
+ "source": {
+  "catalogue_key": "315566f1a5c0",
+  "source_sha256": {
+   "CRASH1.RWS": "cc94f4ecab7077e4df6b72a37455e556298e39af0d10ed2babffc4b1534371d1",
+   "CRASH2.RWS": "1a4d2283fe0509822a672b8b0d4764a9bf93d6b4214482afa251efe86c40c098",
+   "CRASH3.RWS": "3c6d41d1168f8c53d0d024959a0b44baebbd2d4a9ce6c07c4ad3f8cc0ed1da25",
+   "E_DJRACE.xwb": "c0921f849b9b9ab1612a953788ada709d9c25bbf8883265b1b4ceabfc83c68fa",
+   "Gamedata.bgd": "14f200a0df1659e36b1ea06dc5d90c3a7242a8f9f3f47614a7d366dc5fb7c07f",
+   "MUSIC.RWS": "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+   "SOUND.AWD": "cadbf3555dd536270dd8ea345541999d2fb9af85d1aea76313e121eaeabc3948",
+   "enviro.dat": "56553d127c56e5ddf868f8e5c78641a74c6cab9d5e380ec255d05262a6b4f523",
+   "static.dat": "1a8a573c8bcf4c51d5e2b9af43e3bc32296e427e0b1abccd2e50647a903a0258",
+   "streamed.dat": "8902ceb9708bfa845e312d8aac8caa0d83b5d4566847acbd3ba150c3f5196dbc"
+  },
+  "track": "EU/C2_V1"
+ },
+ "title": "Countryside (EU/C2_V1)",
+ "trees": {
+  "approximation": true,
+  "how": "generated low-poly OPAQUE trees (retail trees are cut-out cards: not copyable)",
+  "per_km_measured": 78.45,
+  "setback_m_measured": 10.2
+ }
+}

@@ -49,7 +49,15 @@
 #define BO3_ST_WINDOW_USABLE  (0x4000000u - 0x20000u)
 #define BO3_ST_LOW_RESERVE    0x100000u
 #define BO3_ST_GAME_BLOCKS    (0x3C4000u + 0x1A37000u + 0x21000u)
-#define BO3_ST_MAX            ((BO3_ST_WINDOW_USABLE - BO3_ST_LOW_RESERVE - BO3_ST_GAME_BLOCKS) & ~(BO3_ST_PAGE - 1u))
+#define BO3_ST_MAX_W64        ((BO3_ST_WINDOW_USABLE - BO3_ST_LOW_RESERVE - BO3_ST_GAME_BLOCKS) & ~(BO3_ST_PAGE - 1u))
+/* patch 131 (owner 2026-11-02 "safest maximum"): a 256 MiB-window build (MEM256, the default) allocates the region in the
+ * high zone (64 .. 256 MiB, bm_static.c game_alloc -> xbox_ContiguousAllocHigh), not in the game's 64 MiB: the ceiling
+ * there is 64 MiB; the boot budget gate (bm_memwin.c) stays the real fail-closed check of the sum. 64 MiB builds: as before. */
+#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
+#define BO3_ST_MAX            0x4000000u
+#else
+#define BO3_ST_MAX            BO3_ST_MAX_W64
+#endif
 #define BO3_ST_HDR_MIN        0x60u         /* the relocated header reaches +0x5C */
 #define BO3_ST_TAKEN          0xFFFFFFFFu
 

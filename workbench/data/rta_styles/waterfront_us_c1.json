@@ -1,0 +1,229 @@
+{
+ "builder_limits": [
+  "route road width: 14 m default - an 18 m road (2 x 6 m lanes + 2 x 3 m edges) failed the kit walls-hold check on the test loop (earlier retail-look tests): wider retail carriageways are NOT reproduced",
+  "route banking <= ~0.3 deg (kit gate V2); start stretch level (grid written level)",
+  "closed circuits only (trackbuild); one AI route with 5 cyclic lanes; junctions / side roads are geometry only",
+  "materials opaque only: retail cut-out foliage / fences / signs cannot be used; trees are generated low-poly opaque shapes",
+  "scenery = geometry copies (no prop / instance writer): every lamp / building / tree counts in the unit slots (mesh 0x28000, LOD 0x18000 incl. full collision)",
+  "83 material rows per track; sky / fog / lighting = the donor track's enviro.dat unchanged"
+ ],
+ "defaults": {
+  "band_m": 45.0,
+  "building_density": 1.0,
+  "building_depth_m": [
+   10.0,
+   18.0
+  ],
+  "building_gap_m": [
+   4.0,
+   14.0
+  ],
+  "building_height_scale": 0.35,
+  "building_width_m": [
+   12.0,
+   26.0
+  ],
+  "curve_clearance_m": 6.0,
+  "doorways": true,
+  "edge_width_m": 3.0,
+  "lamp_density": 1.0,
+  "road_width_m": 14.0,
+  "seed": 1,
+  "tree_density": 1.0,
+  "variation": 0.25,
+  "verge_in_m": 20.0,
+  "verge_out_m": 10.0,
+  "wall_height_m": 1.5
+ },
+ "id": "waterfront_us_c1",
+ "kind": "city",
+ "kind_evidence": "tall vertical surfaces 26 % of the surface within 60 m (>= 20 %); NOTE: facades and cliffs / rock walls measure alike - check the source track before calling it a city",
+ "local_only_when_applied": true,
+ "measured": {
+  "ai_lane_gap_profile_m": [
+   26.5,
+   7.47,
+   18.97,
+   7.47,
+   26.49
+  ],
+  "barrier_distance_m": 8.73,
+  "building_height_p90_m": 47.09,
+  "building_setback_m": {
+   "median": 31.18,
+   "p10": 9.52
+  },
+  "composition_within_60m": {
+   "barrier / wall": 0.035,
+   "cut-out / blended card (foliage, fence, sign: shown with transparency)": 0.147,
+   "cut-out / blended surface (decal, shadow, glass)": 0.019,
+   "ground / terrain": 0.013,
+   "pavement / verge": 0.2,
+   "road surface": 0.181,
+   "roof / raised surface": 0.085,
+   "tall vertical surface (facade / cliff)": 0.262,
+   "unclassified": 0.059
+  },
+  "edge_strip_repeat_m": {
+   "across_m": 3.0,
+   "along_m": 6.14,
+   "texture": "WF_Roadedge"
+  },
+  "paved_width_per_20m_m": {
+   "max": 76.78,
+   "median": 39.75,
+   "min": 3.95,
+   "n": 331,
+   "p10": 24.74,
+   "p90": 60.31
+  },
+  "pavement_distance_m": 10.58,
+  "post_setback_m": [
+   6.6,
+   4.3
+  ],
+  "post_spacing_m": [
+   46.9,
+   33.9
+  ],
+  "road_texture_repeat_m": {
+   "across": 6.0,
+   "along": 6.12
+  },
+  "tree_models_per_km": 125.49,
+  "tree_setback_m": 13.9
+ },
+ "measured_sha256": "7213b67de98a59cb39f8570fcbf7d1ebb2cd9c270bccb0b73adf874b4b929131",
+ "name_note": "'Waterfront' is the track's name in the Workbench retail guide (earlier retail-look tests: US/C1_V1 = US Waterfront); water itself is neither measured nor generated",
+ "palette": {
+  "edge": {
+   "across_m": 3.0,
+   "along_m": 6.14,
+   "texture": "WF_Roadedge"
+  },
+  "facades": [
+   {
+    "repeat_m": 10.71,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "SD_conv1a"
+   },
+   {
+    "repeat_m": 40.0,
+    "size": [
+     256,
+     256
+    ],
+    "texture": "WF_conv-reflection"
+   },
+   {
+    "repeat_m": 13.01,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "WF_parkwall"
+   },
+   {
+    "repeat_m": 6.0,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "WF_oldbrick"
+   }
+  ],
+  "foliage": {
+   "mean_rgb": [
+    0.186,
+    0.207,
+    0.091
+   ],
+   "texture": "WF_Grass1"
+  },
+  "ground": {
+   "texture": "WF_SAND1"
+  },
+  "posts": [
+   {
+    "left_fraction": 0.48,
+    "model": "I35",
+    "per_km": 11.23,
+    "setback_m": 6.6,
+    "size_m": [
+     12.465,
+     23.927,
+     1.043
+    ],
+    "spacing_m": 46.9,
+    "texture": "CTY_Post"
+   },
+   {
+    "left_fraction": 0.57,
+    "model": "I30",
+    "per_km": 11.09,
+    "setback_m": 4.3,
+    "size_m": [
+     9.964,
+     18.446,
+     0.686
+    ],
+    "spacing_m": 33.9,
+    "texture": "WF_trampost"
+   }
+  ],
+  "road": {
+   "across_m": 6.0,
+   "along_m": 6.12,
+   "texture": "WF_Road2"
+  },
+  "roof": {
+   "texture": "CST_concrete"
+  },
+  "verge": {
+   "texture": "WF_Grass1"
+  },
+  "wall": {
+   "texture": "WF_WallCONC1"
+  },
+  "wallback": {
+   "texture": "WF_rockwall2"
+  }
+ },
+ "palette_why": {
+  "edge": "road-surface texture with an across repeat of 3.00 m (about half the lane repeat)",
+  "facades": "the 4 largest opaque tall-vertical areas; repeat_m = mean of the measured u / v metres per repeat on vertical faces (None = not measured: 6 m used)",
+  "foliage": "greenest opaque ground-like texture by measured mean colour (g - (r + b) / 2 = 0.068)",
+  "ground": "largest opaque ground / terrain area (else the second verge texture)",
+  "posts": "opaque tall thin roadside instance models (>= 4.5 m, <= 1.6 m thick) by placements per km; WHAT they are (lamp, tram post, pylon) is not decoded - check the thumbnail",
+  "road": "largest opaque road-surface area (146623 m2) with a measured repeat",
+  "verge": "largest opaque pavement / verge area",
+  "wall": "largest opaque barrier / wall areas"
+ },
+ "schema": "bm-rta-style/1",
+ "source": {
+  "catalogue_key": "a3c67c7f3ad7",
+  "source_sha256": {
+   "CRASH1.RWS": "4afcd4f762b7dc7bd2be6c570b59de3317850b89d1a421e960139feb25469bdc",
+   "CRASH2.RWS": "5f27d23e208efd129a41f2c5751d87348e34f6097b1b9460192929fbcf77ffd8",
+   "CRASH3.RWS": "724609045039f967e057f2288ca267185ef86cd63278e74f79ebaaf280140eaf",
+   "E_DJRACE.xwb": "ff18ccd17641ba4c79d91a669a92073cb65802b51db3fd30171579056ba834b6",
+   "Gamedata.bgd": "2eb45ce64d944958e25951519812dfcdc71ecacdd039e73b0e922146b545ff52",
+   "MUSIC.RWS": "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+   "SOUND.AWD": "8f86f14cbc5a0e7a0ec78434de353b747e25e772ce8cba54d4796090b22079ab",
+   "enviro.dat": "7c01695616d8609caf67a3c0dbf789f6dea97d7437354a3933912eaa43fc7ca4",
+   "static.dat": "ed6d85c2e0144255a6717b1215d8609b22315714204468c954d18a2a1b597c29",
+   "streamed.dat": "9b12ab40b8775e94ef08142810650ebe8410b0f9f8fc518ba923c51f070949cd"
+  },
+  "track": "US/C1_V1"
+ },
+ "title": "Waterfront city (US/C1_V1)",
+ "trees": {
+  "approximation": true,
+  "how": "generated low-poly OPAQUE trees (retail trees are cut-out cards: not copyable)",
+  "per_km_measured": 125.49,
+  "setback_m_measured": 13.9
+ }
+}

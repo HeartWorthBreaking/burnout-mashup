@@ -41,8 +41,8 @@
 #define AD_EVENTS_PER_MOD 35u              /* BO3_WT_MAX */
 #define AD_REGIONS        23u              /* BO3_CC_REGIONS_MAX */
 #define AD_TUNE           ((unsigned)BM_TUNE_CATALOG_N)
-enum { AD_CAP_LANES = 1u, AD_CAP_LOW = 2u, AD_CAP_STATIC = 4u };   /* = bm_capdecl.h BO3_CAPDECL_* (its reader is not linked here) */
-typedef struct ad_cap { int present; uint32_t have, lanes, low_unit_bytes, static_bytes; } ad_cap;
+enum { AD_CAP_LANES = 1u, AD_CAP_LOW = 2u, AD_CAP_STATIC = 4u, AD_CAP_FULL = 8u /* patch 131 */ };   /* = bm_capdecl.h BO3_CAPDECL_* (its reader is not linked here) */
+typedef struct ad_cap { int present; uint32_t have, lanes, low_unit_bytes, static_bytes, full_unit_bytes; } ad_cap;  /* patch 131: full */
 
 /* the 18 retail race locations and their free rows for added events (6 - retail events; default.xbe, CONTENT_REPORT s3.2;
  * checked against the real sub_00158080 slot rule in tests\test_p3_admit.c through bm_wtour.c's bo3_wt_location_events) */
@@ -571,9 +571,10 @@ static void read_mod(const bo3_admit_mod *m, ad_mod *d)
  * numbers 0 .. 0xFFFFFFFF); the services' range checks stay theirs (exit 91 at commit) */
 static void read_capacity(recomp_cfg *cfg, ad_cap *c, ad_mod *d)
 {
-    static const struct { const char *key; uint32_t bit; } f[3] = {{"bmashup.capacity.lanes", AD_CAP_LANES},
-        {"bmashup.capacity.low_unit_bytes", AD_CAP_LOW}, {"bmashup.capacity.static_bytes", AD_CAP_STATIC}};
-    int r = table_keys(cfg, "bmashup.capacity", "version lanes low_unit_bytes static_bytes gamedata_bytes");
+    static const struct { const char *key; uint32_t bit; } f[4] = {{"bmashup.capacity.lanes", AD_CAP_LANES},
+        {"bmashup.capacity.low_unit_bytes", AD_CAP_LOW}, {"bmashup.capacity.static_bytes", AD_CAP_STATIC},
+        {"bmashup.capacity.full_unit_bytes", AD_CAP_FULL}};                  /* patch 131 */
+    int r = table_keys(cfg, "bmashup.capacity", "version lanes low_unit_bytes static_bytes gamedata_bytes full_unit_bytes");
     if (!r)
         return;
     d->tables |= BO3_AT_CAPACITY;
@@ -581,7 +582,7 @@ static void read_capacity(recomp_cfg *cfg, ad_cap *c, ad_mod *d)
         recomp_cfg_int(cfg, "bmashup.capacity.version", -1) != 1)
         goto bad;
     c->present = 1;
-    for (int k = 0; k < 3; k++) {
+    for (int k = 0; k < 4; k++) {
         long long v;
         if (recomp_cfg_type_of(cfg, f[k].key) == RCFG_NONE)
             continue;
@@ -593,6 +594,8 @@ static void read_capacity(recomp_cfg *cfg, ad_cap *c, ad_mod *d)
             c->lanes = (uint32_t)v;
         else if (k == 1)
             c->low_unit_bytes = (uint32_t)v;
+        else if (k == 3)
+            c->full_unit_bytes = (uint32_t)v;
         else
             c->static_bytes = (uint32_t)v;
     }
@@ -946,9 +949,14 @@ static void make_label(const ad_mod *d, bo3_admit_res *r)
                                   (unsigned)d->cap.low_unit_bytes);
             any = 1;
         }
-        if ((d->cap.have & AD_CAP_STATIC) && o < sizeof r->label)
+        if ((d->cap.have & AD_CAP_STATIC) && o < sizeof r->label) {
             o += (size_t)snprintf(r->label + o, sizeof r->label - o, "%sSTATIC track pool 0x%X bytes", any ? ", " : "",
                                   (unsigned)d->cap.static_bytes);
+            any = 1;
+        }
+        if ((d->cap.have & AD_CAP_FULL) && o < sizeof r->label)          /* patch 131 */
+            o += (size_t)snprintf(r->label + o, sizeof r->label - o, "%sfull-detail unit slot 0x%X bytes", any ? ", " : "",
+                                  (unsigned)d->cap.full_unit_bytes);
         if (o < sizeof r->label)
             o += (size_t)snprintf(r->label + o, sizeof r->label - o, ")");
         snprintf(page + strlen(page), sizeof page - strlen(page), "%s CAPACITY", strcmp(page, "CHANGES GAMEPLAY:") ? "," : "");

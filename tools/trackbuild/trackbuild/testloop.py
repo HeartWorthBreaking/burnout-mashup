@@ -52,6 +52,27 @@ CANYON_VARIANT = dict(name="BM Canyon Ring", Ls=180.0, Rc=120.0, s_start_x=-55.0
 HILL_VARIANT = dict(name="BM Hill Loop", elevation=dict(amp=8.0, s_from=0.30, s_to=0.90))
 
 
+# 0.3.3-rta branch variant (test / demo, separate package): a BYPASS road on the top straight. The outer road edge widens by
+# 11 m (smoothstep tapers), a solid median kerb (3 m + 1 m edge strips) separates an 8 m bypass from the main road, then both
+# rejoin. Route: the retail strip rule (trackbuild.lanegraph): an alternate racing strip 0x41 inserted between edge_out | main,
+# a median edge (4) | corridor (5) | edge (4) inserted between the bypass and main (EU/C4_V1 pattern). AI choice of the bypass,
+# respawn on it and lap progress through it are RUNTIME-UNVERIFIED.
+BRANCH_VARIANT = dict(name="BM Branch Loop", Ls=400.0, st_per_unit=27, pad_w=0.0, traffic=True,
+                      branch=dict(extra=11.0, median=5.0, kerb_h=0.9, e_from=20.0, e_to=380.0, e_taper=40.0,
+                                  m_from=70.0, m_to=330.0, m_taper=25.0))
+
+
+def branch_widths(st_x_local, kind, z_local, p=P):
+    """(e, m) at a station: bypass extra outer width e and median width m (0 outside the top straight / the spans)"""
+    b = p.get("branch")
+    if not b or kind != "line" or z_local <= 0:
+        return 0.0, 0.0
+    u = p["Ls"] / 2 - st_x_local
+    e = b["extra"] * min(smooth((u - b["e_from"]) / b["e_taper"]), smooth((b["e_to"] - u) / b["e_taper"]))
+    m = b["median"] * min(smooth((u - b["m_from"]) / b["m_taper"]), smooth((b["m_to"] - u) / b["m_taper"]))
+    return e, m
+
+
 def height(s, total, p=P):
     """route height at arc length s (0.3.0): the base height, plus the HILL_VARIANT profile when the parameters ask for one"""
     e = p.get("elevation")
@@ -119,8 +140,10 @@ def stations(p=P):
         o_in = p["Rc"] if kind == "line" and abs(abs(tz)) < 1e-9 and (abs(x) < p["Ls"] / 2 - 1e-6) else p["Rc"] - p["infield_arc_gap"]
         if p.get("shape") == "circle" or p.get("infield_strip") is not None:
             o_in = p["hw"] + p["wall_t"] + p.get("infield_strip", p.get("circle_infield", 8.0))
+        be, bm = branch_widths(x, kind, z, p)
         out.append({"i": i, "s": s, "x": x + p["X0"], "z": z + p["Z0"], "tx": tx, "tz": tz, "kind": kind,
-                    "hw_out": p["hw"] + extra, "hw_in": p["hw"], "o_in": o_in, "y": height(s, total, p)})
+                    "hw_out": p["hw"] + extra + be, "hw_in": p["hw"], "o_in": o_in, "y": height(s, total, p),
+                    "br_e": be, "br_m": bm})
     return out, total
 
 
@@ -233,7 +256,7 @@ def build(out_dir, p=P):
              [(0, sA / 14), (0, sB / 14), (1, sB / 14), (1, sA / 14)], up)
         # pad (concrete) between -hw_out .. -hw where the road is wider
         if A["hw_out"] > hw + 0.01 or B["hw_out"] > hw + 0.01:
-            face("pad", [_pt(A, -A["hw_out"], yA), _pt(B, -B["hw_out"], yB), _pt(B, -hw, yB), _pt(A, -hw, yA)],
+            face("asphalt" if (A.get("br_e") or B.get("br_e")) else "pad", [_pt(A, -A["hw_out"], yA), _pt(B, -B["hw_out"], yB), _pt(B, -hw, yB), _pt(A, -hw, yA)],
                  [(-A["hw_out"] / 4, sA / 4), (-B["hw_out"] / 4, sB / 4), (-hw / 4, sB / 4), (-hw / 4, sA / 4)], up)
         # walls: (side sign, inner face offset A/B)
         gap = p.get("wall_gap_st")
@@ -257,6 +280,26 @@ def build(out_dir, p=P):
                  [(uA, 0.05), (uB, 0.05), (uB, 0.0), (uA, 0.0)], up, (0.45, 0.45, 0.45))
             face("wallback", [_pt(A, ba, yA), _pt(B, bb, yB), _pt(B, bb, yB + h), _pt(A, ba, yA + h)],
                  [(uA, 1), (uB, 1), (uB, 0.1), (uA, 0.1)], nb, (0.4, 0.4, 0.4))
+        # 0.3.3: median kerb of the branch variant (solid wall words; zero width at both noses)
+        ka = None
+        if A.get("br_m", 0.0) > 1e-6 or B.get("br_m", 0.0) > 1e-6:
+            kh = p["branch"]["kerb_h"]
+            msp = _median_span(sts, p["st_per_slice"], n // p["st_per_slice"])
+            ka = median_split(-(hw - 1.0), A["br_m"], median_phase(A["i"] // p["st_per_slice"], msp))[2:4]
+            kb = median_split(-(hw - 1.0), B["br_m"], median_phase(B["i"] // p["st_per_slice"], msp))[2:4]
+            if abs(ka[1] - ka[0]) < 1e-4 and abs(kb[1] - kb[0]) < 1e-4:
+                ka = None                                 # no kerb in this station span (median lanes only, phase 0)
+        if (A.get("br_m", 0.0) > 1e-6 or B.get("br_m", 0.0) > 1e-6) and ka is not None:
+            nAv, nBv = _n_plus(A), _n_plus(B)
+            nn = ((nAv[0] + nBv[0]) / 2, 0.0, (nAv[1] + nBv[1]) / 2)
+            Ln = math.hypot(nn[0], nn[2]) or 1.0
+            nn = (nn[0] / Ln, 0.0, nn[2] / Ln)
+            for side, nrm in ((0, (-nn[0], 0.0, -nn[2])), (1, nn)):      # outer face looks to the bypass, inner to main
+                pa, pb = ka[side], kb[side]
+                face("wall", [_pt(A, pa, yA), _pt(B, pb, yB), _pt(B, pb, yB + kh), _pt(A, pa, yA + kh)],
+                     [(sA / 4, 1), (sB / 4, 1), (sB / 4, 0.4), (sA / 4, 0.4)], nrm)
+            face("wall", [_pt(A, ka[0], yA + kh), _pt(B, kb[0], yB + kh), _pt(B, kb[1], yB + kh), _pt(A, ka[1], yA + kh)],
+                 [(0, 0.05), (1, 0.05), (1, 0), (0, 0)], up or (0.0, 1.0, 0.0), (0.45, 0.45, 0.45))
         # grass: outer verge and infield
         go_a, go_b = -(A["hw_out"] + t), -(B["hw_out"] + t)
         ge_a, ge_b = go_a - p["verge"], go_b - p["verge"]
@@ -384,7 +427,7 @@ def build(out_dir, p=P):
         "units": units, "stations_per_slice": sps,
         "route": {"lanes": [{"name": "corridor_out", "type": 5}, {"name": "edge_out", "type": 4},
                             {"name": "main", "type": 0x80}, {"name": "edge_in", "type": 4}, {"name": "corridor_in", "type": 5}],
-                  "corners": corners},
+                  "corners": corners, **({"strips": branch_strips(sts, sps, slices, p)} if p.get("branch") else {})},
         "grid": grid, "start_line": {"pos": [round(st0["x"], 3), st0["y"], round(st0["z"], 3)], "normal": [st0["tx"], 0.0, st0["tz"]],
                                      "width": 45.0},
         "checkpoints": checkpoints,
@@ -407,3 +450,64 @@ def build(out_dir, p=P):
     with open(os.path.join(out_dir, "test_loop.track.json"), "w", newline="\n") as fh:
         json.dump(desc, fh, indent=1)
     return {"faces": len(F), "vertices": len(V), "stations": n, "units": len(units), "slices": slices, "length": total}
+
+
+def median_split(base, m, phase):
+    """median lane boundaries (bypass | edge A | corridor | edge B | main) for median width m: phase 0 = edge A only,
+    1 = edge A + corridor, 2 = all three (strict nesting: the retail strips open / close one after another, EU/C4_V1)"""
+    if phase == 0:
+        return (base - m, base, base, base, base)
+    if phase == 1:
+        return (base - m, base - 4 * m / 5, base - 4 * m / 5, base, base)
+    return (base - m, base - 4 * m / 5, base - 4 * m / 5, base - m / 5, base)
+
+
+def _median_span(sts, sps, slices):
+    on = [t for t in range(slices) if sts[t * sps].get("br_m", 0.0) > 1e-9]
+    return (on[0] - 1, on[-1]) if on else None
+
+
+def median_phase(t, msp):
+    if not msp:
+        return 0
+    f, l = msp
+    if t <= f + 1 or t >= l:
+        return 0
+    if t == f + 2 or t == l - 1:
+        return 1
+    return 2
+
+
+def branch_strips(sts, sps, slices, p=P):
+    """0.3.3: route strips of the branch variant from the station widths (rows = stations t * sps): bypass 0x41 between
+    edge_out (1) | main (2); median edge 4 (lane 6, between bypass 5 | main), corridor 5 (lane 7, between 6 | main, one slice
+    inside), edge 4 (lane 8, between 7 | main, two slices inside) - strictly nested like the retail medians"""
+    hw = p["hw"]
+    rows = [sts[t * sps] for t in range(slices)]
+    e = [r_["br_e"] for r_ in rows]
+    m = [r_["br_m"] for r_ in rows]
+    on = [t for t in range(slices) if e[t] > 1e-9]
+    if not on:
+        return []
+    se = (on[0] - 1, on[-1])
+    sm = _median_span(sts, sps, slices)
+    base = -(hw - 1.0)
+
+    def edges(first, last, fn):
+        return [[round(x, 4) for x in fn(t)] for t in range(first, last + 2)]
+
+    def ms(t):
+        return median_split(base, m[t], median_phase(t, sm))
+    out = [{"name": "bypass", "type": 0x41, "between": [1, 2], "first": se[0], "last": se[1], "corners": "main",
+            "edges": edges(se[0], se[1], lambda t: (base - e[t], base - m[t]))}]
+    if sm:
+        f, l = sm
+        if l - f < 6:
+            raise ValueError("median shorter than 6 slices: cannot nest edge | corridor | edge")
+        out += [{"name": "median_edge_bypass", "type": 0x04, "between": [5, 2], "first": f, "last": l,
+                 "edges": edges(f, l, lambda t: ms(t)[0:2])},
+                {"name": "median_kerb", "type": 0x05, "between": [6, 2], "first": f + 1, "last": l - 1,
+                 "edges": edges(f + 1, l - 1, lambda t: ms(t)[2:4] if median_phase(t, sm) else (base, base))},
+                {"name": "median_edge_main", "type": 0x04, "between": [7, 2], "first": f + 2, "last": l - 2,
+                 "edges": edges(f + 2, l - 2, lambda t: ms(t)[3:5] if median_phase(t, sm) == 2 else (base, base))}]
+    return out

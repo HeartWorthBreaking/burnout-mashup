@@ -2,31 +2,51 @@
  * bm_rowx.c - gp slice mega1 EXPERIMENTAL: the mesh-block material row extension ("BMRX").
  *
  * Retail format: a mesh block holds at most 83 material rows (+0x84 s16[83]; every PVS chunk rowsA / rowsB [83]). A track
- * composed from several retail tracks needs more rows where a unit's 17-unit window spans two sources (gp mega: up to 127).
+ * composed from several retail tracks needs more rows where a unit's 17-unit window spans two sources (gp mega: up to 127;
+ * patch 131: up to 255).
  * A data mod keeps <= 83 rows in the retail arrays (what a host without this extension draws) and puts the complete row list
  * in an extension the generated draw code reads through bo3_rowx_gen.h:
  *
  *   block + 0xC64  'B' 'M' 'R' 'X'    (retail: 0xC64..0xC8F is zero padding after the 17 chunks)
  *   block + 0xC68  u32 ext offset (block-relative)
- *   block + 0xC6C  u8 version (1), u8 nv (virtual rows, 1..127), u8 p1v (virtual pass-1 rows, <= nv), u8 E (extension rows)
+ *   block + 0xC6C  u8 version (1), u8 nv (virtual rows 1..255), u8 p1v (virtual pass-1 rows, <= nv), u8 E (extension rows,
+ *                  <= 172: vmap entries are u8 physical rows, 83 + E - 1 <= 254)
  *   ext            u8 vmap[nv] (virtual row -> physical row: < 83 the retail arrays, 83 + i extension row i) | pad to 2 |
  *                  s16 mats[E] | s8 rowsA[17][E] | s8 rowsB[17][E]
  *
- * Validation (every read; a few compares): magic, version 1, 1 <= nv <= 127, p1v <= nv, E <= 127, the whole extension inside
- * the block (size at +0x08 <= 0x30000), every vmap entry either < min(83, legacy rows) or 83..83+E-1 (checked once per block
+ * Validation (every read; a few compares): magic, version 1, 1 <= nv <= 255, p1v <= nv, E <= 172, the whole extension inside
+ * the block (size at +0x08 <= RX_BLOCK_MAX), every vmap entry either < min(83, legacy rows) or 83..83+E-1 (checked once per block
  * address + content stamp). An invalid header -> the retail bytes (as without the extension) and one log line.
+ * patch 131: the draw code's row loops count in 32-bit registers (marks C2 / C4..C7); its two pre-loop guards (C1 / C3)
+ * test the count as a SIGNED BYTE (cmp LO8(eax), 0; jle), so they read bo3_rowx_gen_count8 = min(count, 127) for an
+ * extension (any count >= 1 passes the guard; the loop then runs to the full 32-bit count) and exactly the retail s8 otherwise.
+ * Record extension (main21 patch 132): retail mesh records (0x90 bytes at block +0x5C, count s16 +0x60) are chained by
+ * s8 indices (a chunk's rowsA / rowsB head, each record's +0x8C next; negative = none), so a block holds at most 128
+ * reachable records. A block with "BMRC" at +0xC70 (the pad after the BMRX header; retail zero) and u8 version 1 at +0xC74
+ * has u8 indices instead: 0xFF = none, 0..254 records. bo3_rowx_gen_recu8 answers it for the four ZRC marks of
+ * sub_001AD510 / sub_001AD5E0 (heads: the drawing block's flag; next: the flag of the block that owns the records,
+ * view + 0x7C / 0xC4 [slot]). A block without the flag: the retail s8 rules, byte for byte.
  * Thread: the game's render path only (the callers); no state but counters.
  */
 #include <stdint.h>
 #include <stdio.h>
 
 #include "bo3_rowx_gen.h"
+#include "bm_unitslots.h"
 
 #define RX_MAGIC 0x58524D42u        /* "BMRX" little-endian */
 #define RX_HDR 0xC64u
 #define RX_LEGACY 83u
 #define RX_CHUNKS 17u
 #define RX_CHUNK 0xA9u
+#if (defined(BO3_HOOKREQ_P23) && !BO3_HOOKREQ_P23) || !BO3_HOOKREQ_ZRX
+#define RX_NV_MAX 127u           /* the count8 marks compiled out: the old cap (the guards read the count as a signed byte) */
+#else
+#define RX_NV_MAX 255u           /* patch 131 (was 127) */
+#endif
+#define RX_E_MAX 172u            /* patch 131: 83 + 172 - 1 = 254, the largest u8 physical row (was 127) */
+/* patch 131: the largest unit block = the largest unit slot (bm_unitslots.h ceilings; was 0x30000) */
+#define RX_BLOCK_MAX (BO3_US_FULL_MAX > BO3_US_LOW_MAX ? BO3_US_FULL_MAX : BO3_US_LOW_MAX)
 
 #ifndef MUT
 #define MUT 0
@@ -64,10 +84,19 @@ static int header(uint32_t blk, rx_hdr *h)
     h->e = rd8(blk + RX_HDR + 11u);
     uint32_t legacy = rd8(blk + 0x71u);
     uint32_t need = h->nv + (h->nv & 1u) + 2u * h->e + 2u * RX_CHUNKS * h->e;
-    int ok = ver == 1u && h->nv >= 1u && h->nv <= 127u && h->p1v <= h->nv && h->e <= 127u && legacy <= RX_LEGACY &&
-             size <= 0x30000u && h->ext >= 0xC90u && h->ext <= size && need <= size - h->ext;
+#if MUT == 4
+    int ok = ver == 1u && h->nv >= 1u && h->nv <= 127u && h->p1v <= h->nv && h->e <= RX_E_MAX && legacy <= RX_LEGACY &&   /* mutant: nv bound left at 127 */
+#elif MUT == 5
+    int ok = ver == 1u && h->nv >= 1u && h->nv <= RX_NV_MAX && h->p1v <= h->nv && h->e <= RX_E_MAX + 1u && legacy <= RX_LEGACY &&   /* mutant: E bound off by one */
+#else
+    int ok = ver == 1u && h->nv >= 1u && h->nv <= RX_NV_MAX && h->p1v <= h->nv && h->e <= RX_E_MAX && legacy <= RX_LEGACY &&
+#endif
+             size <= RX_BLOCK_MAX && h->ext >= 0xC90u && h->ext <= size && need <= size - h->ext;
 #if MUT == 1
     ok = ver == 1u;                 /* mutant: no bounds checks */
+#endif
+#if MUT == 2
+    ok = ok && size <= 0x30000u;    /* mutant (patch 131): the old block bound */
 #endif
     uint32_t unit = rd32(blk + 4u);
     if (ok && (blk != s_last_blk || unit != s_last_unit || h->ext != s_last_ext || !s_last_ok)) {   /* vmap check once per loaded block */
@@ -117,7 +146,7 @@ static uint32_t unit_of_block(uint32_t b)
     /* a unit block: +0x00 = 1, +0x04 = unit index (< 0x8000), +0x08 = block size (KB MESH_AND_COLLISION s1) */
     if (b < 0x00010000u)
         return 0xFFFFu;
-    if (rd32(b + 4u) < 0x8000u && rd32(b + 8u) >= 0x1000u && rd32(b + 8u) <= 0x30000u)
+    if (rd32(b + 4u) < 0x8000u && rd32(b + 8u) >= 0x1000u && rd32(b + 8u) <= RX_BLOCK_MAX)
         return rd32(b + 4u);
     return 0xFFFEu;
 }
@@ -176,6 +205,22 @@ uint32_t bo3_rowx_gen_count(uint32_t blk, uint32_t field)
     return (uint32_t)(int32_t)(int8_t)rd8(blk + field);
 }
 
+/* patch 131: for the draw code's 8-bit signed pre-loop guards (marks C1 / C3): an extension's count clamped to 127 (the
+ * guard only asks "> 0"); a retail block / invalid header: exactly bo3_rowx_gen_count (the retail s8, sign-extended). */
+uint32_t bo3_rowx_gen_count8(uint32_t blk, uint32_t field)
+{
+    rx_hdr h;
+    if (header(blk, &h)) {
+        uint32_t n = field == 0x73u ? h.p1v : h.nv;
+#if MUT == 3
+        return n;                   /* mutant: not clamped (128..255 read as negative by the guard) */
+#else
+        return n > 127u ? 127u : n;
+#endif
+    }
+    return (uint32_t)(int32_t)(int8_t)rd8(blk + field);
+}
+
 uint32_t bo3_rowx_gen_row(uint32_t blk, uint32_t lin, uint32_t row, uint32_t off)
 {
     rx_hdr h;
@@ -193,6 +238,25 @@ uint32_t bo3_rowx_gen_row(uint32_t blk, uint32_t lin, uint32_t row, uint32_t off
     if (off == 0x180u)
         base += RX_CHUNKS * h.e;                                     /* rowsB[17][E] */
     return rd8(base + slot * h.e + i);
+}
+
+/* patch 132: 1 when blk carries the record extension flag ("BMRC" + version 1 at +0xC70 / +0xC74) */
+#define RC_MAGIC 0x43524D42u        /* "BMRC" little-endian */
+#define RC_HDR 0xC70u
+uint32_t bo3_rowx_gen_recu8(uint32_t blk)
+{
+#if MUT == 6
+    (void)blk;
+    return 0;                       /* mutant: the flag ignored */
+#else
+    if (blk < 0x00010000u || rd32(blk + RC_HDR) != RC_MAGIC)
+        return 0;
+#if MUT == 7
+    return 1;                       /* mutant: any version taken */
+#else
+    return rd8(blk + RC_HDR + 4u) == 1u;
+#endif
+#endif
 }
 
 uint32_t bo3_rowx_gen_mat(uint32_t blk, uint32_t row)

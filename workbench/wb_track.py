@@ -41,7 +41,8 @@ TB = r'tools\trackbuild\tb.py'
 TB_REFERENCE = r'tools\trackbuild\tests\REFERENCE_0_2_1.json'
 TB_EXAMPLE_TOML = r'tools\trackbuild\examples\test_loop_package.toml'
 TEMPLATES = {'testloop': None, 'canyon': 'canyon',           # tb.py gen-testloop [--variant canyon] (kit README "Quick start")
-             'hill': 'hill'}                                  # v0.28: trackbuild 0.3.0 sloped demo (+8 m hill; 0.2.1 refuses it)
+             'hill': 'hill',                                  # v0.28: trackbuild 0.3.0 sloped demo (+8 m hill; 0.2.1 refuses it)
+             'branch': 'branch', 'fig8': 'fig8'}              # RTA4: trackbuild 0.3.3-rta bypass branch / figure-8 bridge fixtures
 DESC_RE = re.compile(r'^[A-Za-z0-9_-]{1,64}\.track\.json$')
 TRACK_ID_RE = re.compile(r'^(EU|US|AS)_[A-Z0-9]{2}_V[0-9]$')     # retail regions only (no region declaration: deferred)
 TEXT_RE = re.compile(r"^[A-Za-z0-9 \-'.&]+$")
@@ -586,9 +587,23 @@ def build(job, r, rec, attempt, info):
     r['mode'] = 'project' if rec.get('project') else 'reference'
     paths = {'src': src, 'tbuild': tbuild, 'out': out, 'desc': tr['desc']}
     checks = []
+    import wb_fixture_store as FS                   # RTA4: test-session build store (OFF unless the test runner enables it)
+    store, fkey = FS.enabled(), None
     for name, key, cwd in (('trackbuild build', 'track_build', src), ('trackbuild validate', 'track_validate', src),
                            ('trackbuild package', 'track_package', src)):
+        if name == 'trackbuild build' and store:
+            argv0 = stg.expand(rec[key], cfg, paths)
+            argv_k = [a.replace(src, '{src}').replace(tbuild, '{tbuild}') for a in argv0[1:]]
+            fkey = FS.key(ident['trackbuild']['tree_sha256'], ident['python'].get('version'), copied, argv_k,
+                          FS.donor_hashes(cfg['game_data']))
+            ok_, note = FS.restore(store, fkey, tbuild, src)
+            job.log('# fixture store (tests only): %s' % note)
+            if ok_:
+                r['steps'].append({'step': name, 'rc': 0, 'fixture_store': fkey[:12]})
+                continue
         rc, o = job._run(name, stg.expand(rec[key], cfg, paths), cwd)
+        if name == 'trackbuild build' and store and rc == 0 and fkey:
+            job.log('# fixture store (tests only): %s' % FS.save(store, fkey, tbuild, src, {'argv': argv_k, 'inputs': len(copied)}))
         r['steps'].append({'step': name, 'rc': rc})
         if job.cancelled:
             r.update(verdict='CANCELLED')
@@ -636,6 +651,8 @@ def build(job, r, rec, attempt, info):
     if miss:
         r.update(checks=checks, verdict='BUILD FAILED', excerpt=['expected output missing: %s' % ', '.join(miss)])
         return None
+    cap_ok, cap_detail, r['capacity'] = capacity_check(rep, os.path.join(work, 'mod.toml'))
+    checks.append({'check': 'capacity declaration (mod.toml [bmashup.capacity] = the build\'s need)', 'ok': cap_ok, 'detail': cap_detail})
     req, rbad = wb_kit.requirements(os.path.join(work, 'mod.toml'))
     checks.append({'check': 'mod.toml requirements readable', 'ok': not rbad, 'detail': '; '.join(rbad) or 'readable'})
     k = wb_kit.kit_identity(cfg['kit'])
@@ -689,7 +706,7 @@ def build(job, r, rec, attempt, info):
                          '--cc', '<cc>', '--cache', '<bmpack cache>', '--json']],
         'build_copy': 'only the checked inputs, under <attempt>/src (cwd of tb.py); build in <attempt>/build, set in <attempt>/out',
         'set_files': setfiles, 'set_files_kept_in': out, 'labels': labels,
-        'validation': checks, 'trackbuild_gates': gates, 'requirements': req, 'donor_dependencies': donor_dependency(tr['track_id']),
+        'validation': checks, 'trackbuild_gates': gates, 'requirements': req, 'capacity': r.get('capacity'), 'donor_dependencies': donor_dependency(tr['track_id']),
         'supported': SUPPORTED, 'deferred': DEFERRED, 'notes': info['notes'],
         'evidence': {'offline': 'this build: %d trackbuild gates + layout / sums / donor / bmpack checks above (structure only)'
                                 % len(gates),
@@ -699,6 +716,35 @@ def build(job, r, rec, attempt, info):
         'local_only': 'the package holds retail game data (DONOR Gamedata header / events, enviro, audio): local only, never upload',
         'reference_expected': r['reference_expected']}
     return work
+
+
+def capacity_check(rep, mod_toml):
+    """RTA5 (trackbuild 0.3.4): the package's mod.toml [bmashup.capacity] holds every key the build report says the track needs
+    (capacity auto; a value >= the need), and nothing is declared for a build within the game's defaults (unless the package
+    names its own keys). -> (ok, detail, record)"""
+    c = rep.get('capacity')
+    try:
+        t = tomllib.loads(open(mod_toml, encoding='utf-8').read())
+    except (OSError, tomllib.TOMLDecodeError, UnicodeDecodeError) as e:
+        return False, 'mod.toml unreadable: %s' % e, None
+    have = ((t.get('bmashup') or {}).get('capacity') or {})
+    if c is None:
+        return True, 'trackbuild without a capacity report (<= 0.3.3): game defaults%s' % (
+            '; mod.toml declares %s' % have if have else ''), None
+    want = {k: int(v, 0) if isinstance(v, str) else int(v) for k, v in (c.get('declared') or {}).items()}
+    miss = ['%s (need %s, mod.toml %s)' % (k, c['declared'][k], have.get(k)) for k, v in want.items()
+            if not isinstance(have.get(k), int) or have[k] < v]
+    rec = {'mode': c.get('mode'), 'needed': c.get('needed'), 'declared': {k: v for k, v in have.items() if k != 'version'},
+           'requires': c.get('requires') or [], 'min_host': c.get('min_host')}
+    if miss:
+        return False, 'mod.toml lacks the declared capacity: %s' % '; '.join(miss), rec
+    if not have:
+        return True, 'capacity %s: within the game\'s defaults, nothing declared' % c.get('mode'), rec
+    if have.get('version') != 1:
+        return False, '[bmashup.capacity] version must be 1 (mod.toml has %r)' % have.get('version'), rec
+    return True, 'capacity %s: declared %s; %s' % (c.get('mode'), ', '.join('%s = %s' % (k, hex(v) if k != 'lanes' else v)
+                                                                            for k, v in have.items() if k != 'version'),
+                                                   '; '.join(c.get('requires') or []) or 'package keys'), rec
 
 
 def summary_lines(r):

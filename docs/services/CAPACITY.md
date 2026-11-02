@@ -30,6 +30,30 @@ gamedata_bytes = 0x200000       # GAMEDATA slot (track route data / traffic / ev
 Out of range: the start stops with exit **91** (`[CAPACITY] ... REFUSED` and the reason, e.g. `gamedata_bytes = 0x280800: out of
 range (a page multiple above 0x176000, at most 0x800000)`).
 
+## Raised ceilings (this release's host: main21 patches 131 + 132)
+The host built from this tree raises the ceilings for detailed tracks. The platform string stays **0.1.9**, so a `platform` line
+cannot tell this host from an older 0.1.9 one: an older host refuses a mod that uses `full_unit_bytes` ALONE (platform gate,
+"not a key of [bmashup.capacity] version 1") and the game starts without it.
+
+| key / limit | game value | accepted request (this host) | before | what needs it |
+|---|---|---|---|---|
+| `full_unit_bytes` (**new key**) | 0x28000 | a page multiple 0x28000..0x200000 (10 slots; 2 MiB each at most) | not a key | a full-detail (mesh) unit block larger than the game slot (else exit **89**, "track unit too large") |
+| `low_unit_bytes` | 0x18000 | a page multiple 0x18000..0x200000 (18 slots) | ..0x30000 | a low-detail unit larger than the game slot (else exit **89**) |
+| `static_bytes` | 0xD00000 | at most 0x4000000 (64 MiB) in the default 256 MB guest window build | ..0x20C4000 | a static.dat larger than the game pool |
+| mesh material rows per unit (BMRX, no key) | 83 | up to **255** rows (up to 172 extension rows) | 127 | a unit whose visibility window spans many materials |
+| mesh records per block (BMRC, no key) | 128 (s8 chain) | up to **255** records | 128 | a unit with many separate mesh pieces |
+| renderer texture cache | Vulkan 256 / D3D11 512 entries | Vulkan 512 / D3D11 1024 | - | tracks with many textures in view |
+
+- Slot expansion is fail-closed: the host checks that the game's slot descriptors are still the game's before it moves them, and
+  logs `[UNITSLOTS] full-detail unit slots EXPANDED: 10 x 0x30000 at ...` (and the low-detail line); each loaded unit is checked
+  against its slot (`[UNITSLOTS] full-detail unit 0x2D000 bytes in a slot of 0x30000`).
+- BMRC: a mesh block with `BMRC` at block + 0xC70 and version 1 at + 0xC74 (the pad after the BMRX header; retail zero) chains its
+  records by unsigned 8-bit indices (0xFF = none) instead of the retail signed ones; a block without it is read as retail.
+- The memory budget is checked at start (`[MEMWIN] budget OK ... KB of ... KB`).
+- FACT (runtime, 2026-11-02, host built from these sources' private reference, one guarded run): a restyled White Mountain track
+  declaring `full_unit_bytes = 0x30000` and `low_unit_bytes = 0x22000` loaded units of 0x2D000 / 0x20000 bytes, used 6 BMRX
+  extension rows, raced two laps without a fault. Not runtime-tested: the maxima, BMRC on a real track, split screen, Linux / macOS.
+
 ## The budget: one 64 MB guest memory window (read this before combining capacity requests)
 Every expansion is a NEW region in the game's 64 MB contiguous memory window. The game's own pool stays reserved; it is never
 freed or reused (process lifetime). The requests therefore ADD up:
@@ -83,6 +107,7 @@ observed, not accepted), split screen with a large STATIC pool (NT), online (ref
   track mod should also say `platform = ">=0.1.7"`.
 
 ## Tools
-- `bmpack validate` (host readers main19_final) accepts `gamedata_bytes`; it does not check the RANGE (the host does at start).
+- `bmpack validate` (host readers of this release's host) accepts `gamedata_bytes` and `full_unit_bytes`; it does not check the
+  RANGE (the host does at start).
 - `bmpack build` (package.toml `[capacity]`) writes `lanes`, `low_unit_bytes`, `static_bytes` only: add `gamedata_bytes` to the
   generated mod.toml by hand.

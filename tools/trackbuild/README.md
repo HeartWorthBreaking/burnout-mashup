@@ -69,8 +69,9 @@ Instead of `--game-data` every time, set `TRACKBUILD_GAME_DATA=<game-data>` (or 
 
 - Closed circuits only. 4..17 units with `pvs.mode = all`; up to 162 units with `pvs.mode = computed` (every unit must stay
   visible only inside the +-8 unit ring - long open sight lines need occluders or longer units).
-- LOD: identity or bounded decimation (`lod.mode = decimate`, e_max 0.3 m); mesh block <= 0x28000, LOD block <= 0x18000 bytes,
-  <= 127 records and 65,536 vertices per block, <= 83 material rows.
+- LOD: identity or bounded decimation (`lod.mode = decimate`, e_max 0.3 m); mesh block <= 0x28000, LOD block <= 0x18000 bytes
+  (the game's defaults; 0.3.4 capacity auto: up to the host ceilings, see "Capacity" below), <= 127 records and 65,536 vertices
+  per block, <= 83 material rows.
 - Materials: opaque, one DXT1 texture (power of two 4..1024, 8-bit RGB / opaque RGBA PNG), retail type 0 / flags 0. No alpha,
   additive, animated, reflective or water materials, no props / instances / backdrops.
 - Traffic: authored traffic is one road with 1..4 same-way lanes and one traffic set of the whole-track shape; otherwise the
@@ -78,6 +79,20 @@ Instead of `--game-data` every time, set `TRACKBUILD_GAME_DATA=<game-data>` (or 
 - Runtime status of the demos (0.1.6 runs, same bytes): load, render, streaming, laps, AI, grid, walls / floor, LOD, PVS,
   authored traffic and crash **respawn** were seen working in game. **Off-track reset is UNTESTED** (never triggered).
   Offline gates prove structure, not appearance, collision feel or AI behaviour: every new track needs an in-game check.
+
+## Capacity: game defaults and Burnout Mashup host ceilings (0.3.4)
+
+The game's default sizes (mesh block 0x28000, LOD block 0x18000, static.dat 0xD00000, Gamedata route data 0x176000, 64 AI
+route lanes) are no longer hard limits. With the track description key `"capacity": "auto"` (the DEFAULT) a track may need
+more, up to the Burnout Mashup host's ceilings (mesh / LOD block 0x200000, static.dat 0x4000000, Gamedata 0x800000, 255 lanes;
+one table: `trackbuild\capacity.py`, `tb.py capacity`). `package` then declares exactly what the track needs (page-rounded)
+in mod.toml `[bmashup.capacity]` (`version = 1`), merged with the package's own keys (`lanes`, `[package.capacity_keys]`;
+largest value wins); BUILD_REPORT.json and LABELS.json list the declared keys and the minimum host for each value:
+full_unit_bytes (any value), low_unit_bytes above 0x30000 and static_bytes above 0x20C4000 need a host with **patch 131+**;
+the other values need a host that reads `[bmashup.capacity]` (main21+). A track within the game's defaults declares nothing
+(its package is byte-identical to 0.3.3). `"capacity": "game"` (description or `[package] capacity`) keeps the old behaviour:
+refused above the game's defaults (tracks for hosts without capacity declarations). The 83 material rows per block are a
+format limit, not a capacity: unchanged.
 
 ## Tests
 

@@ -165,8 +165,8 @@ identity string, toolchain versions, objects). The executable contains a build i
 of every source file that was built, so any different input (another upstream revision, edited layer, other line ends, other
 `default.xbe`-derived code) changes it. Hashes of objects are not game data. Release profile: `verify.py --build-dir ... --profile
 release` checks `bin\BurnoutMashup.exe` against `build_release` (without `--profile` the build folder decides). Reference hashes:
-development `burnout3.exe` `cae5f5ff4d85...` (identity `bmp-0.1.9+6f17b9e08be3`), release `BurnoutMashup.exe` `96a9612800bd...`
-(identity `bmp-0.1.9+73d8b45b4380`); both rebuilt from clean checkouts in different folders with identical results.
+development `burnout3.exe` `cbc2c2a24e73...` (identity `bmp-0.1.9+136ebbf6a46f`), release `BurnoutMashup.exe` `0be676e24ae2...`
+(identity `bmp-0.1.9+2a00e1f6856f`); the development build rebuilt from clean checkouts in two different folders with identical results.
 
 **Step 7 - write `HOST_INFO.json` (the host describes itself).** The launcher's compatibility gate and the Workbench check a mod
 against the host you built, and they read that description from `HOST_INFO.json`. It is made from your build only:

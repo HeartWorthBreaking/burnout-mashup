@@ -1,0 +1,642 @@
+{
+ "title": "US Waterfront dressed circuit (LOCAL ONLY)",
+ "about": "The us_town circuit with real US Waterfront city blocks along the whole outside (one per section). Reads your own game data when applied; retail-derived: local only.",
+ "template": "testloop",
+ "licence": "recipe: original Workbench starter; the content it copies stays the game publisher's (local use only)",
+ "retail": {
+  "track": "US/C1_V1",
+  "local_only": true
+ },
+ "ops": [
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_Road2",
+   "name": "us_road",
+   "like": "asphalt"
+  },
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_WallCONC1",
+   "name": "us_wall",
+   "like": "wall"
+  },
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_carparkwall",
+   "name": "us_wallback",
+   "like": "wallback"
+  },
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_pave2",
+   "name": "us_pave",
+   "like": "grass"
+  },
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_Grass1",
+   "name": "us_grass",
+   "like": "grass"
+  },
+  {
+   "op": "race_layout",
+   "points": [
+    [
+     -6090,
+     20,
+     -6050
+    ],
+    [
+     -5980,
+     20,
+     -6070
+    ],
+    [
+     -5895,
+     20,
+     -6035
+    ],
+    [
+     -5890,
+     20,
+     -5960
+    ],
+    [
+     -5970,
+     20,
+     -5935
+    ],
+    [
+     -6060,
+     20,
+     -5950
+    ],
+    [
+     -6110,
+     20,
+     -5995
+    ]
+   ],
+   "replace": "all",
+   "checkpoints": 4,
+   "material": "us_road",
+   "wall_mat": "us_wall",
+   "back_mat": "us_wallback",
+   "verge_mat": "us_pave"
+  },
+  {
+   "op": "retail_texture",
+   "track": "US/C1_V1",
+   "texture": "WF_Roadedge",
+   "name": "us_edge",
+   "like": "asphalt"
+  },
+  {
+   "op": "road_lanes",
+   "edge_material": "us_edge",
+   "edge_width": 3.0,
+   "main_u_m": 6.2,
+   "main_v_m": 6.0,
+   "edge_u_m": 6.2,
+   "block": "route_road"
+  },
+  {
+   "op": "units",
+   "unit_op": "include",
+   "unit": 0,
+   "rect": [
+    -6070,
+    -6032,
+    -5930,
+    -5970
+   ]
+  },
+  {
+   "op": "hterrain",
+   "rect": [
+    -6060,
+    -6025,
+    -5940,
+    -5975
+   ],
+   "cell": 10.0,
+   "height": 19.9,
+   "material": "us_grass"
+  },
+  {
+   "op": "streaming_settings",
+   "lod_mode": "identity",
+   "pvs_mode": "all"
+  },
+  {
+   "op": "retail_region",
+   "track": "US/C1_V1",
+   "rect": [
+    960,
+    840,
+    1020,
+    900
+   ],
+   "target": [
+    -6000,
+    19.95,
+    -6000
+   ],
+   "angle": 0,
+   "max_tris": 20000,
+   "ground": "all"
+  },
+  {
+   "op": "streaming_settings",
+   "lod_mode": "decimate",
+   "e_max": 0.3,
+   "pvs_mode": "all",
+   "drop_below": 12.0
+  },
+  {
+   "track": "US/C1_V1",
+   "model": "I31",
+   "spacing": 30.0,
+   "side": "outer",
+   "offset": 1.0,
+   "start": 10.0,
+   "double_sided": true,
+   "op": "retail_lamps"
+  },
+  {
+   "track": "US/C1_V1",
+   "model": "I35",
+   "spacing": 30.0,
+   "side": "inner",
+   "offset": 1.0,
+   "start": 25.0,
+   "double_sided": true,
+   "op": "retail_lamps"
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 0,
+   "lateral": [
+    -59.68,
+    76.0777
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 1,
+   "lateral": [
+    -58.54,
+    100.2839
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 2,
+   "lateral": [
+    -58.46,
+    100.7966
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 3,
+   "lateral": [
+    -58.61,
+    100.6557
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 4,
+   "lateral": [
+    -58.74,
+    98.0233
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 5,
+   "lateral": [
+    -60.2,
+    60.1377
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 6,
+   "lateral": [
+    -59.77,
+    72.2589
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 7,
+   "lateral": [
+    -59.84,
+    69.5682
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 8,
+   "lateral": [
+    -61.68,
+    14.9955
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 9,
+   "lateral": [
+    -58.72,
+    95.5194
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 10,
+   "lateral": [
+    -58.38,
+    97.3827
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 11,
+   "lateral": [
+    -58.54,
+    97.3369
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 12,
+   "lateral": [
+    -58.71,
+    95.6551
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 13,
+   "lateral": [
+    -58.85,
+    91.2794
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 14,
+   "lateral": [
+    -59.65,
+    78.1604
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 15,
+   "lateral": [
+    -61.51,
+    38.3161
+   ]
+  },
+  {
+   "op": "units",
+   "unit_op": "lateral",
+   "unit": 16,
+   "lateral": [
+    -60.23,
+    58.4177
+   ]
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    1078.0,
+    645.0,
+    1122.0,
+    675.0
+   ],
+   "target": [
+    -6088.218,
+    19.95,
+    -6090.646
+   ],
+   "angle": -22.61,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    358.0,
+    1205.0,
+    402.0,
+    1235.0
+   ],
+   "target": [
+    -6046.789,
+    19.95,
+    -6101.842
+   ],
+   "angle": -9.29,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    318.0,
+    1125.0,
+    362.0,
+    1155.0
+   ],
+   "target": [
+    -6007.27,
+    19.95,
+    -6105.496
+   ],
+   "angle": -1.42,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    1038.0,
+    645.0,
+    1082.0,
+    675.0
+   ],
+   "target": [
+    -5966.47,
+    19.95,
+    -6103.148
+   ],
+   "angle": 8.45,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    958.0,
+    845.0,
+    1002.0,
+    875.0
+   ],
+   "target": [
+    -5926.717,
+    19.95,
+    -6093.822
+   ],
+   "angle": 18.24,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    438.0,
+    925.0,
+    482.0,
+    955.0
+   ],
+   "target": [
+    -5885.822,
+    19.95,
+    -6073.825
+   ],
+   "angle": 36.02,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    1002.0,
+    888.0,
+    1038.0,
+    912.0
+   ],
+   "target": [
+    -5856.653,
+    19.95,
+    -6026.417
+   ],
+   "angle": 73.63,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    358.0,
+    1245.0,
+    402.0,
+    1275.0
+   ],
+   "target": [
+    -5848.815,
+    19.95,
+    -5980.262
+   ],
+   "angle": 94.4,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    398.0,
+    1165.0,
+    442.0,
+    1195.0
+   ],
+   "target": [
+    -5877.883,
+    19.95,
+    -5924.143
+   ],
+   "angle": 145.01,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    998.0,
+    965.0,
+    1042.0,
+    995.0
+   ],
+   "target": [
+    -5922.988,
+    19.95,
+    -5906.36
+   ],
+   "angle": 167.92,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    518.0,
+    1405.0,
+    562.0,
+    1435.0
+   ],
+   "target": [
+    -5962.02,
+    19.95,
+    -5900.903
+   ],
+   "angle": 175.33,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    962.0,
+    928.0,
+    998.0,
+    952.0
+   ],
+   "target": [
+    -6002.343,
+    19.95,
+    -5903.822
+   ],
+   "angle": -175.31,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    478.0,
+    925.0,
+    522.0,
+    955.0
+   ],
+   "target": [
+    -6042.714,
+    19.95,
+    -5907.401
+   ],
+   "angle": -165.8,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    1038.0,
+    965.0,
+    1082.0,
+    995.0
+   ],
+   "target": [
+    -6083.201,
+    19.95,
+    -5923.008
+   ],
+   "angle": -151.65,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    358.0,
+    1085.0,
+    402.0,
+    1115.0
+   ],
+   "target": [
+    -6119.003,
+    19.95,
+    -5948.156
+   ],
+   "angle": -136.91,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    1278.0,
+    1685.0,
+    1322.0,
+    1715.0
+   ],
+   "target": [
+    -6145.568,
+    19.95,
+    -6003.382
+   ],
+   "angle": -90.15,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  },
+  {
+   "track": "US/C1_V1",
+   "rect": [
+    918.0,
+    1005.0,
+    962.0,
+    1035.0
+   ],
+   "target": [
+    -6130.748,
+    19.95,
+    -6054.462
+   ],
+   "angle": -58.93,
+   "max_tris": 20000,
+   "ground": "all",
+   "op": "retail_region"
+  }
+ ],
+ "kit": "trackbuild 0.3.1 or newer"
+}

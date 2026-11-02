@@ -49,18 +49,18 @@
   "recomp_0000.c": "68cf5f2e900cf31aad3a2b396a0f080e0f02cbf4a178bb0eebcd0e10e103a8f8",
   "recomp_0001.c": "d4393088ea6da5e4d53d9af0b08af5ffa4b87031af41a2bc6048c5e8c5aaf3b1",
   "recomp_0002.c": "662793237468b9aeebdd1a4521abd813d88c18f39a948ef625ccdf931b1ca0b4",
-  "recomp_0003.c": "73c51a08cefb268e96972985057955e212c8ace522addc08d93b676569784f09",
+  "recomp_0003.c": "e83fc19fbe9ddb10a595391a5273565e93031430e7dace7e584f5720958f222f",
   "recomp_0004.c": "a39e9a0c9101f7e266a4e02c06bdc913db2ca0d197f70c6de5b309579ff0510a",
   "recomp_types.h": "77caca67daecf91801942c1998d7c713abfd0d6d1524636a1135d181b7d6bfb2"
  },
  "form": "macro",
  "stats": {
-  "marks": 512,
-  "macro": 222,
-  "original": 290,
-  "lines_rewritten": 245,
+  "marks": 518,
+  "macro": 224,
+  "original": 294,
+  "lines_rewritten": 247,
   "rules": {
-   "R3": 109,
+   "R3": 113,
    "R8": 1,
    "R1": 25,
    "R2": 108,
@@ -12506,6 +12506,62 @@
    "function_addr": "0x001AD510",
    "anchor": {
     "kind": "label",
+    "addr": "0x001AD510",
+    "line_sha256": "26276de3ee9879ac4652f002507537c8c8dfc6f7c6abfbba5a8aa321ae52a8f5",
+    "offset": 16,
+    "span_sha256": "23c6eab17ad1f99ec62888abaecb167db89c272310dde25dc0a1c2a800897b1a",
+    "line": 201717
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "9ec748d00455fde3fade5f0c5bd2d675b1ed89b356d2225eea513c45af685d8c",
+    "after": "3aa4032d4d82118566fd36d8fc5a5a6f3a2576c2b57922efe0143b3dd30ce66c"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    if (bo3_rowx_gen_recu8(ecx)) { if (LO8(eax) == 0xFFu) goto loc_001AD5CE; goto loc_001AD53D; }   /* main21 patch 132: record extension: the R1 head as u8, 0xFF = none (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m499",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD510",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001AD540",
+    "line_sha256": "33f42918425dc4539b93b348feead5e63de7e4e510011fbf2aaf2e0f907fd6f1",
+    "offset": 3,
+    "span_sha256": "704525a3b74ed277ae9c9412255f4cb546593e40f142aa2e4ba6db702a4e22b0",
+    "line": 201740
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "d488e5acd41f9a669c7f0e9a438c770e37450c5da5976eef5c82c99ff3f92a8b",
+    "after": "0739a4ed294091fa4284c3b1ca9ab2b9c16a4ccceda0d6db4dcd499b72f40c73"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    eax = eax & 0xFFu;   /* main21 patch 132: record extension: a valid record index 0..254 (retail 0..127: the same value) (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m500",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD510",
+   "anchor": {
+    "kind": "label",
     "addr": "0x001AD574",
     "line_sha256": "8b575a2ae2968b18ad165a802944bef6c5423be0c8e758322583c3d6905d2d84",
     "offset": 3,
@@ -12526,7 +12582,35 @@
    "form": "original"
   },
   {
-   "id": "m499",
+   "id": "m501",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD510",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001AD5BE",
+    "line_sha256": "3d81f062edb4f498b9660d08316d8e509408d7d0d80ca5258b57eb08ee981b3e",
+    "offset": 4,
+    "span_sha256": "3a5af0342415240c64cef7424f619a617da7afbf12e102abe68b5d51af5e69ac",
+    "line": 201802
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "9ec748d00455fde3fade5f0c5bd2d675b1ed89b356d2225eea513c45af685d8c",
+    "after": "cf43221720c36834928c8868b266c0531dc21c19868abd45dd07a5df17f301f6"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    if (bo3_rowx_gen_recu8(BM_RD32(ebp + BM_RD32(esp + 0x18) * 4 + 0x7C))) { if (LO8(eax) != 0xFFu) goto loc_001AD540; goto loc_001AD5CC; }   /* main21 patch 132: record extension: the +0x8C next as u8, 0xFF = end (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "macro"
+  },
+  {
+   "id": "m502",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12551,7 +12635,63 @@
    "form": "original"
   },
   {
-   "id": "m500",
+   "id": "m503",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD5E0",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001AD5E0",
+    "line_sha256": "78baafac8d286f246cb02b524d38063997a1c3233e5a98d975d5f865fafb8216",
+    "offset": 16,
+    "span_sha256": "ca4e6684556415d2d812a905884e9316670efc39c41e08d6f2b55a343070cd18",
+    "line": 201836
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "9ec748d00455fde3fade5f0c5bd2d675b1ed89b356d2225eea513c45af685d8c",
+    "after": "4576a3f632475d4b2858ada8a69e393e747814aeb3ba47f521fcec4a57cee7de"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    if (bo3_rowx_gen_recu8(ecx)) { if (LO8(eax) == 0xFFu) goto loc_001AD6A1; goto loc_001AD60D; }   /* main21 patch 132: record extension: the R3 head as u8, 0xFF = none (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m504",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD5E0",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001AD610",
+    "line_sha256": "33afc2fe7a2188c37d4eff3689297098784b8c242a3ef835adecb2ef51294d01",
+    "offset": 3,
+    "span_sha256": "1c94ca9210971cf2c38a60ee7375bec90f731e62c29a9708b3c2672a91946880",
+    "line": 201859
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "d488e5acd41f9a669c7f0e9a438c770e37450c5da5976eef5c82c99ff3f92a8b",
+    "after": "0739a4ed294091fa4284c3b1ca9ab2b9c16a4ccceda0d6db4dcd499b72f40c73"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    eax = eax & 0xFFu;   /* main21 patch 132: record extension: a valid record index 0..254 (retail 0..127: the same value) (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m505",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12576,7 +12716,35 @@
    "form": "original"
   },
   {
-   "id": "m501",
+   "id": "m506",
+   "file": "recomp_0003.c",
+   "function_addr": "0x001AD5E0",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001AD691",
+    "line_sha256": "8bd6ee867a41e8a66ac42b9be88d6adcb76d71f5b72c70a6cd0b6f94ac580a20",
+    "offset": 4,
+    "span_sha256": "b585387cd31a2c7544c3a8d9696d403bbb963de97af47f97933305e8faa18cd0",
+    "line": 201921
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "9ec748d00455fde3fade5f0c5bd2d675b1ed89b356d2225eea513c45af685d8c",
+    "after": "4574a93320454c62a3ca8b0c65536cd01fcf6664074c3265eba4f573f318972f"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRC\r\n",
+    "    if (bo3_rowx_gen_recu8(BM_RD32(ebp + BM_RD32(esp + 0x18) * 4 + 0xC4))) { if (LO8(eax) != 0xFFu) goto loc_001AD610; goto loc_001AD69F; }   /* main21 patch 132: record extension: the +0x8C next as u8, 0xFF = end (bm_rowx.c) */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRC"
+   ],
+   "form": "macro"
+  },
+  {
+   "id": "m507",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD7A0",
    "anchor": {
@@ -12595,13 +12763,19 @@
     "after": "d8a3a34a7ffd66b18f2e4eda97bd6ef0358922d18d882d0c8e156cd75a63090c"
    },
    "insert": [
-    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count(ecx, 0x73u));   /* GP-MEGA1 C1: pass-1 rows (row extension) */\r\n"
+    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count(ecx, 0x73u));   /* GP-MEGA1 C1: pass-1 rows (row extension) */\r\n",
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRX\r\n",
+    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count8(ecx, 0x73u));   /* main21 patch 131: GP-MEGA1 C1's 8-bit guard sees min(count, 127) (bm_rowx.c) */\r\n",
+    "#endif\r\n"
    ],
-   "switches": [],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRX"
+   ],
    "form": "original"
   },
   {
-   "id": "m502",
+   "id": "m508",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD7A0",
    "anchor": {
@@ -12626,7 +12800,7 @@
    "form": "original"
   },
   {
-   "id": "m503",
+   "id": "m509",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADA40",
    "anchor": {
@@ -12645,13 +12819,19 @@
     "after": "d8a3a34a7ffd66b18f2e4eda97bd6ef0358922d18d882d0c8e156cd75a63090c"
    },
    "insert": [
-    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count(edx, 0x71u));   /* GP-MEGA1 C3: rows (row extension) */\r\n"
+    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count(edx, 0x71u));   /* GP-MEGA1 C3: rows (row extension) */\r\n",
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZRX\r\n",
+    "    SET_LO8(eax, (uint8_t)bo3_rowx_gen_count8(edx, 0x71u));   /* main21 patch 131: GP-MEGA1 C3's 8-bit guard sees min(count, 127) (bm_rowx.c) */\r\n",
+    "#endif\r\n"
    ],
-   "switches": [],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZRX"
+   ],
    "form": "original"
   },
   {
-   "id": "m504",
+   "id": "m510",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADA40",
    "anchor": {
@@ -12676,7 +12856,7 @@
    "form": "original"
   },
   {
-   "id": "m505",
+   "id": "m511",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADD60",
    "anchor": {
@@ -12703,7 +12883,7 @@
    "form": "original"
   },
   {
-   "id": "m506",
+   "id": "m512",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADD60",
    "anchor": {
@@ -12728,7 +12908,7 @@
    "form": "original"
   },
   {
-   "id": "m507",
+   "id": "m513",
    "file": "recomp_0003.c",
    "function_addr": "0x001AE200",
    "anchor": {
@@ -12751,7 +12931,7 @@
    "form": "original"
   },
   {
-   "id": "m508",
+   "id": "m514",
    "file": "recomp_0003.c",
    "function_addr": "0x001AF040",
    "anchor": {
@@ -12774,7 +12954,7 @@
    "form": "original"
   },
   {
-   "id": "m509",
+   "id": "m515",
    "file": "recomp_0004.c",
    "function_addr": "0x001C8A60",
    "anchor": {
@@ -12801,7 +12981,7 @@
    "form": "original"
   },
   {
-   "id": "m510",
+   "id": "m516",
    "file": "recomp_0004.c",
    "function_addr": "0x001C8A60",
    "anchor": {
@@ -12828,7 +13008,7 @@
    "form": "macro"
   },
   {
-   "id": "m511",
+   "id": "m517",
    "file": "recomp_types.h",
    "function_addr": null,
    "anchor": {
@@ -12857,7 +13037,7 @@
    "form": "original"
   },
   {
-   "id": "m512",
+   "id": "m518",
    "file": "recomp_types.h",
    "function_addr": null,
    "anchor": {

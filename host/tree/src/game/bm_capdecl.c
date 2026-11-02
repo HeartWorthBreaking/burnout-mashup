@@ -7,7 +7,9 @@
 
 #include "bm_engine_service.h"
 #include "bm_gdslot.h"
+#include "bm_static.h"            /* patch 131: BO3_ST_MAX / BO3_US_LOW_MAX in the refusal texts */
 #include "bm_streaming_service.h"
+#include "bm_unitslots.h"
 #include "modfs.h"
 #include "recomp_cfg.h"
 
@@ -22,6 +24,7 @@ static const struct { const char *key; uint32_t bit; } s_fields[] = {
     {CD_PREFIX ".low_unit_bytes", BO3_CAPDECL_LOW},
     {CD_PREFIX ".static_bytes", BO3_CAPDECL_STATIC},
     {CD_PREFIX ".gamedata_bytes", 0x80u},   /* GP-MEGA1 */
+    {CD_PREFIX ".full_unit_bytes", BO3_CAPDECL_FULL},   /* patch 131 */
 };
 
 int bo3_capdecl_parse(const char *text, size_t n, bo3_capdecl *out, char *why, size_t wn)
@@ -78,13 +81,15 @@ int bo3_capdecl_parse(const char *text, size_t n, bo3_capdecl *out, char *why, s
                 out->low_unit_bytes = (uint32_t)v;
             else if (s_fields[f].bit == 0x80u)
                 out->gamedata_bytes = (uint32_t)v;
+            else if (s_fields[f].bit == BO3_CAPDECL_FULL)
+                out->full_unit_bytes = (uint32_t)v;
             else
                 out->static_bytes = (uint32_t)v;
         }
 #if MUT != 1
         if (ok && !known) {
             snprintf(why, wn, "%s is not a requirement this build knows (it reads %s version %d: lanes, low_unit_bytes, "
-                     "static_bytes, gamedata_bytes)", k, CD_PREFIX, BO3_CAPDECL_VERSION);
+                     "static_bytes, gamedata_bytes, full_unit_bytes)", k, CD_PREFIX, BO3_CAPDECL_VERSION);
             ok = 0;
         }
 #else
@@ -110,7 +115,7 @@ int bo3_capdecl_parse(const char *text, size_t n, bo3_capdecl *out, char *why, s
     recomp_cfg_free(cfg);
     if (!ok) {
         out->have = 0;
-        out->lanes = out->low_unit_bytes = out->static_bytes = out->gamedata_bytes = 0;
+        out->lanes = out->low_unit_bytes = out->static_bytes = out->gamedata_bytes = out->full_unit_bytes = 0;
     }
     return ok;
 }
@@ -124,9 +129,13 @@ static const char *engine_why(int32_t rc)
 
 static const char *streaming_why(int32_t rc, int stat)
 {
-    return rc == BM_STREAMING_OUT_OF_RANGE ? (stat ? "out of range (a page multiple above 0xA00000, at most 0x20C4000)" :
-                                                     "out of range (a page multiple from 0x18000 to 0x30000)") :
-           rc == BM_STREAMING_UNSUPPORTED ? "this game build is not one the extension is verified for" :
+    static char s_why[96];      /* patch 131: the ceilings are the services' (build-dependent STATIC), printed from them */
+    if (rc == BM_STREAMING_OUT_OF_RANGE) {
+        snprintf(s_why, sizeof s_why, stat ? "out of range (a page multiple above 0xA00000, at most 0x%X)" :
+                 "out of range (a page multiple from 0x18000 to 0x%X)", stat ? (unsigned)BO3_ST_MAX : (unsigned)BO3_US_LOW_MAX);
+        return s_why;
+    }
+    return rc == BM_STREAMING_UNSUPPORTED ? "this game build is not one the extension is verified for" :
            rc == BM_STREAMING_CLOSED ? "too late: the size is fixed" : "refused";
 }
 
@@ -191,6 +200,20 @@ int bo3_capdecl_apply(bo3_capdecl_fail_fn fail)
                     (unsigned)merged);
             if (rc != BM_STREAMING_OK) {
                 snprintf(msg, sizeof msg, "low_unit_bytes = 0x%X: %s", (unsigned)d.low_unit_bytes, streaming_why(rc, 0));
+                CD_FAIL(m->manifest.id, msg);
+            }
+        }
+        if (d.have & BO3_CAPDECL_FULL) {   /* patch 131 */
+            rc = bo3_bm_streaming_request_full(host, d.full_unit_bytes, &merged);
+            fprintf(stderr, "[CAPACITY] mod %s requires full-detail unit slots of 0x%X bytes: %s (merged 0x%X)\n",
+                    m->manifest.id, (unsigned)d.full_unit_bytes, rc == BM_STREAMING_OK ? "accepted" : "REFUSED",
+                    (unsigned)merged);
+            if (rc != BM_STREAMING_OK) {
+                if (rc == BM_STREAMING_OUT_OF_RANGE)
+                    snprintf(msg, sizeof msg, "full_unit_bytes = 0x%X: out of range (a page multiple from 0x%X to 0x%X)",
+                             (unsigned)d.full_unit_bytes, (unsigned)BO3_US_FULL_RETAIL, (unsigned)BO3_US_FULL_MAX);
+                else
+                    snprintf(msg, sizeof msg, "full_unit_bytes = 0x%X: %s", (unsigned)d.full_unit_bytes, streaming_why(rc, 0));
                 CD_FAIL(m->manifest.id, msg);
             }
         }

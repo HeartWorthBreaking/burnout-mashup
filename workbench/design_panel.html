@@ -1,0 +1,36 @@
+  <details id="dsbox"><summary><b>Environment designer</b> <span class="note">(neighbourhoods along a route; build and prepare a test)</span></summary>
+    <div class="note">1 Data: <span id="dsdata">-</span><br>2 Route: the control points of <i>Retail-style authoring -> 3 Route</i>
+      (<span id="dspts">0</span> points). 3 Neighbourhoods below. 4 Quick preview (about a second, approximate) then Full preview
+      (exact; background, Cancel works). 5 Adjust categories. 6 Build / validate / stage + test plan. Nothing changes before Apply.</div>
+    <h3>3 Neighbourhoods</h3>
+    <div class="note">Each row covers part of the loop (fractions 0..1, contiguous). Road / wall / verge materials come from the road style.
+      Transitions blend neighbouring rows over the given length. Landmark = one taller building in the middle of the row; open space = no buildings, more trees.</div>
+    <table id="dsseg" style="font-size:12px"></table>
+    <div><button id="dsadd">Add row</button> <button id="dsdel">Remove last</button> road style <select id="dsroad"></select>
+      transition <input type="number" id="dstr" value="40" style="width:50px"> m, visual junction at <input type="text" id="dsjun" value="0.12" style="width:40px"> (empty = none)</div>
+    <details><summary class="note">Advanced</summary>
+      <div>seed <input type="number" id="dsseed" value="5" style="width:60px"> headroom <input type="number" id="dshead" value="10" style="width:45px"> %
+        <label><input type="checkbox" id="dsplinth" checked> plinths on slopes</label> <label><input type="checkbox" id="dsshell"> allow open-shell retail pieces</label><br>
+        lamps / signs / trees as <select id="dsobj" title="instances: the game's own retail instance models (see-through leaves, no collision, as retail; needs trackbuild 0.3.2). geometry: static copies (phase 2)"><option value="">default</option><option value="instances">retail instances</option><option value="geometry">geometry copies</option></select>
+        props <select id="dsprops" title="roadworks: retail traffic cones before bends - REAL props (solid, they break when hit); needs trackbuild 0.3.2"><option value="none">none</option><option value="roadworks">roadworks cones</option></select><br>
+        categories: <label><input type="checkbox" id="dsc_buildings" checked> buildings</label> <label><input type="checkbox" id="dsc_posts" checked> posts</label>
+        <label><input type="checkbox" id="dsc_signs" checked> signs</label> <label><input type="checkbox" id="dsc_trees" checked> trees</label>
+        <label><input type="checkbox" id="dsc_background" checked> background</label> <label><input type="checkbox" id="dsc_junction" checked> junction</label></div></details>
+    <div><button id="dsquick">Quick preview</button> <button id="dsfull">Full preview</button> <button id="dsapply" disabled>Apply (one undo step)</button></div>
+    <pre id="dsout" class="note" style="max-height:220px;overflow:auto;display:none"></pre>
+    <div id="dsskip" style="max-height:130px;overflow:auto;font-size:12px"></div>
+    <h3>5 Categories</h3>
+    <div><button id="dsparts">Refresh</button> <label><input type="checkbox" id="dsconf"> replace hand edits</label></div>
+    <div id="dspartlist" style="font-size:12px"></div>
+    <h3>6 Build and prepare a test</h3>
+    <div class="note">Save first. Runs Build -> Validate -> Stage (kit gates) -> Prepare test into a new folder beside the project. Nothing is launched.</div>
+    <div><button id="dsbuild">Save, build, validate, stage + test plan</button></div>
+    <pre id="dsbuildout" class="note" style="max-height:140px;overflow:auto;display:none"></pre>
+    <h3>Trusted asset library</h3>
+    <div>track <select id="tlt"></select> kind <select id="tlc"><option value="">any</option><option>intact building</option>
+      <option>building shell / facade</option><option>structure</option><option>scenery fragment</option><option>static mesh (instance model)</option>
+      <option>prop (smashable prop type)</option></select> min confidence <input type="number" id="tlm" value="0.6" step="0.1" style="width:45px">
+      <label><input type="checkbox" id="tlf"> favourites</label> <label><input type="checkbox" id="tlr"> faces its road</label> <button id="tls">Search</button></div>
+    <div id="tlres" style="max-height:140px;overflow:auto;font-size:12px"></div>
+    <div id="tldet" class="note"></div>
+  </details>

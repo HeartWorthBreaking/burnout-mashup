@@ -1,0 +1,211 @@
+{
+ "builder_limits": [
+  "route road width: 14 m default - an 18 m road (2 x 6 m lanes + 2 x 3 m edges) failed the kit walls-hold check on the test loop (earlier retail-look tests): wider retail carriageways are NOT reproduced",
+  "route banking <= ~0.3 deg (kit gate V2); start stretch level (grid written level)",
+  "closed circuits only (trackbuild); one AI route with 5 cyclic lanes; junctions / side roads are geometry only",
+  "materials opaque only: retail cut-out foliage / fences / signs cannot be used; trees are generated low-poly opaque shapes",
+  "scenery = geometry copies (no prop / instance writer): every lamp / building / tree counts in the unit slots (mesh 0x28000, LOD 0x18000 incl. full collision)",
+  "83 material rows per track; sky / fog / lighting = the donor track's enviro.dat unchanged"
+ ],
+ "defaults": {
+  "band_m": 45.0,
+  "building_density": 1.0,
+  "building_depth_m": [
+   10.0,
+   18.0
+  ],
+  "building_gap_m": [
+   4.0,
+   14.0
+  ],
+  "building_height_scale": 0.35,
+  "building_width_m": [
+   12.0,
+   26.0
+  ],
+  "curve_clearance_m": 6.0,
+  "doorways": true,
+  "edge_width_m": 3.0,
+  "lamp_density": 1.0,
+  "road_width_m": 14.0,
+  "seed": 1,
+  "tree_density": 1.0,
+  "variation": 0.25,
+  "verge_in_m": 20.0,
+  "verge_out_m": 10.0,
+  "wall_height_m": 1.5
+ },
+ "id": "city_us_c2",
+ "kind": "city",
+ "kind_evidence": "tall vertical surfaces 48 % of the surface within 60 m (>= 20 %); NOTE: facades and cliffs / rock walls measure alike - check the source track before calling it a city",
+ "local_only_when_applied": true,
+ "measured": {
+  "ai_lane_gap_profile_m": [
+   45.79,
+   7.48,
+   26.5
+  ],
+  "barrier_distance_m": 11.16,
+  "building_height_p90_m": 129.57,
+  "building_setback_m": {
+   "median": 31.63,
+   "p10": 4.57
+  },
+  "composition_within_60m": {
+   "barrier / wall": 0.005,
+   "cut-out / blended card (foliage, fence, sign: shown with transparency)": 0.205,
+   "cut-out / blended surface (decal, shadow, glass)": 0.061,
+   "pavement / verge": 0.219,
+   "road surface": 0.029,
+   "roof / raised surface": 0.001,
+   "tall vertical surface (facade / cliff)": 0.476,
+   "unclassified": 0.004
+  },
+  "edge_strip_repeat_m": {
+   "across_m": 3.0,
+   "along_m": 6.0,
+   "texture": "Chgo_RdCrossing"
+  },
+  "paved_width_per_20m_m": {
+   "max": 78.2,
+   "median": 16.19,
+   "min": 1.71,
+   "n": 110,
+   "p10": 2.0,
+   "p90": 57.43
+  },
+  "pavement_distance_m": 11.71,
+  "post_setback_m": [
+   14.1
+  ],
+  "post_spacing_m": [
+   49.3
+  ],
+  "road_texture_repeat_m": {
+   "across": 6.21,
+   "along": 6.4
+  },
+  "tree_models_per_km": 234.19,
+  "tree_setback_m": 15.9
+ },
+ "measured_sha256": "462fa7f1f0d7957da68396dd9d4dca7780ab804c5a8748ba1b51b0e395939fad",
+ "name_note": "'Downtown' = US/C2_V1 per gp\\mega\\scripts\\mega_src.py; the most built-up retail track by the measured composition",
+ "palette": {
+  "edge": {
+   "across_m": 3.0,
+   "along_m": 6.0,
+   "texture": "Chgo_RdCrossing"
+  },
+  "facades": [
+   {
+    "repeat_m": 40.0,
+    "size": [
+     256,
+     256
+    ],
+    "texture": "Chgo_Glass_Reflec"
+   },
+   {
+    "repeat_m": 17.88,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "Chgo_UpTWin_04"
+   },
+   {
+    "repeat_m": 19.36,
+    "size": [
+     256,
+     256
+    ],
+    "texture": "Chgo_BldSide_02"
+   },
+   {
+    "repeat_m": 32.48,
+    "size": [
+     128,
+     128
+    ],
+    "texture": "Chgo_UpTWin_08"
+   }
+  ],
+  "foliage": {
+   "mean_rgb": [
+    0.317,
+    0.341,
+    0.232
+   ],
+   "texture": "Chgo_Grass"
+  },
+  "ground": {
+   "texture": "Chgo_RedTile"
+  },
+  "posts": [
+   {
+    "left_fraction": 0.93,
+    "model": "I0",
+    "per_km": 14.88,
+    "setback_m": 14.1,
+    "size_m": [
+     3.001,
+     14.954,
+     0.442
+    ],
+    "spacing_m": 49.3,
+    "texture": "Chgo_telegraph"
+   }
+  ],
+  "road": {
+   "across_m": 6.21,
+   "along_m": 6.4,
+   "texture": "Chgo_RdPlainDark"
+  },
+  "roof": {
+   "texture": "Chgo_Conc3"
+  },
+  "verge": {
+   "texture": "Chgo_RdPlainLight"
+  },
+  "wall": {
+   "texture": "Chgo_SmartWall"
+  },
+  "wallback": {
+   "texture": "Chgo_TunnelTile"
+  }
+ },
+ "palette_why": {
+  "edge": "road-surface texture with an across repeat of 3.00 m (about half the lane repeat)",
+  "facades": "the 4 largest opaque tall-vertical areas; repeat_m = mean of the measured u / v metres per repeat on vertical faces (None = not measured: 6 m used)",
+  "foliage": "greenest opaque ground-like texture by measured mean colour (g - (r + b) / 2 = 0.067)",
+  "ground": "largest opaque ground / terrain area (else the second verge texture)",
+  "posts": "opaque tall thin roadside instance models (>= 4.5 m, <= 1.6 m thick) by placements per km; WHAT they are (lamp, tram post, pylon) is not decoded - check the thumbnail",
+  "road": "largest opaque road-surface area (33133 m2) with a measured repeat",
+  "verge": "largest opaque pavement / verge area",
+  "wall": "largest opaque barrier / wall areas"
+ },
+ "schema": "bm-rta-style/1",
+ "source": {
+  "catalogue_key": "cae577c3e765",
+  "source_sha256": {
+   "CRASH1.RWS": "1ac64dce7b580df8a272145463b872bdfb284d7bef83d131582e6ae63032f5f1",
+   "CRASH2.RWS": "0b06b04977bfe59f601bfe129ba2a220a9be80d23ec8da2705787c9c4ba80b5c",
+   "CRASH3.RWS": "96f2699aeca6b6c950eb8fcdd9025537e44ed351af45ef46bf258faf4ed53ade",
+   "E_DJRACE.xwb": "196ee9916834a3921c60178421f58252fe32a3050a2f28ff6ca39db7cbbb9683",
+   "Gamedata.bgd": "37502857990fce697d729cd543dc219eb6e963be533d8f6d6e1c6b95f8aa1e24",
+   "MUSIC.RWS": "9396c110f7c90c4804e5a89357281f4a41f1b3d0667faca2e4f3822faefc5696",
+   "SOUND.AWD": "7d8d739f72c94b8199629c5b1cc9434e92d4178c375c6c4d2467a1320dd2187a",
+   "enviro.dat": "d6c758a494323d7fb5010137509730337786f289d475a53777fb89b04caa6f83",
+   "static.dat": "f96c5fef6f9959bd20032ee53e2abdf2a5ea193abc33c007c156a11f2c55690a",
+   "streamed.dat": "84bcaec8a2d6b03205a433a032d319f7edba9d78b1a3c6ae21a01fbc22180c80"
+  },
+  "track": "US/C2_V1"
+ },
+ "title": "Downtown city (US/C2_V1)",
+ "trees": {
+  "approximation": true,
+  "how": "generated low-poly OPAQUE trees (retail trees are cut-out cards: not copyable)",
+  "per_km_measured": 234.19,
+  "setback_m_measured": 15.9
+ }
+}

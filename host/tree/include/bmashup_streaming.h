@@ -47,11 +47,13 @@ extern "C" {
 #define BM_STREAMING_STATIC_ONE_VIEW_GAME 0xD00000u  /* the game's STATIC pools */
 #define BM_STREAMING_STATIC_SPLIT_GAME    0xA00000u
 /* The largest region the contiguous window could ever hold: 64 MiB less the GPU instance (128 KiB), the 1 MiB low
- * reserve and the game's own memory blocks. Not a promise: the memory is the allocator's answer at boot. */
+ * reserve and the game's own memory blocks. Not a promise: the memory is the allocator's answer at boot.
+ * patch 131: this is the 64 MiB-window build's ceiling; a 256 MiB-window host (the default) accepts up to 0x4000000
+ * (64 MiB, its high zone; the boot budget gate decides). The value is unchanged so a plugin's check stays valid on both. */
 #define BM_STREAMING_STATIC_MAX           0x20C4000u
 
 #define BM_STREAMING_LOW_GAME 0x18000u  /* the game's low-detail slot size */
-#define BM_STREAMING_LOW_MAX  0x30000u  /* the ceiling (twice the game's) */
+#define BM_STREAMING_LOW_MAX  0x200000u /* the ceiling (patch 131: was 0x30000) */
 #define BM_STREAMING_PAGE     0x1000u   /* sizes are whole 4 KiB pages */
 
 /* Results. */

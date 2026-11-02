@@ -53,7 +53,10 @@ static int s_ssupported = -1;
 
 _Static_assert(BM_STREAMING_STATIC_ONE_VIEW_GAME == BO3_ST_L1_GAME && BM_STREAMING_STATIC_SPLIT_GAME == BO3_ST_L2_GAME,
                "the game's STATIC pools");
-_Static_assert(BM_STREAMING_STATIC_MAX == BO3_ST_MAX, "the service's STATIC ceiling is the extension's");
+/* patch 131: the service checks against the extension's BO3_ST_MAX (0x4000000 in a 256 MiB build); the public constant
+ * stays the 64 MiB build's value, which every build accepts */
+_Static_assert(BM_STREAMING_STATIC_MAX == BO3_ST_MAX_W64 && BO3_ST_MAX >= BM_STREAMING_STATIC_MAX,
+               "the service's STATIC ceiling is the extension's");
 _Static_assert(sizeof(bm_streaming_static) == 48, "bm_streaming_static layout");
 
 _Static_assert(BM_STREAMING_LOW_GAME == BO3_US_LOW_RETAIL, "the game's size");
@@ -125,6 +128,63 @@ static int32_t TD_CALL bs_request_low(td_host *host, uint32_t bytes, uint32_t *m
     return BM_STREAMING_OK;
 }
 
+/* patch 131: the full-detail slot size, requested by mod.toml [bmashup.capacity] full_unit_bytes (bm_capdecl.c) - host
+ * internal, not in the plugin table (the service version is unchanged); the same rules as bs_request_low: page multiples
+ * 0x28000..BO3_US_FULL_MAX, the largest request wins, refused once the plugins have started or on an unverified build */
+static struct { td_host *host; uint32_t max; } s_freq[BS_SLOTS];
+static int s_nfreq;
+static uint32_t s_fmerged = BO3_US_FULL_RETAIL;
+static int s_fowner = -1;
+static uint32_t s_ffrozen;
+
+int32_t bo3_bm_streaming_request_full(td_host *host, uint32_t bytes, uint32_t *merged_bytes)
+{
+    int k;
+
+    if (merged_bytes)
+        *merged_bytes = s_fmerged;
+    if (!host)
+        return BM_STREAMING_BAD_ARG;
+    if (bytes < BO3_US_FULL_RETAIL || bytes > BO3_US_FULL_MAX || (bytes % BM_STREAMING_PAGE)) {
+        fprintf(stderr, "[ENGINE] full-detail slot request 0x%X refused: out of range (0x%X..0x%X, whole 4 KiB pages)\n",
+                (unsigned)bytes, (unsigned)BO3_US_FULL_RETAIL, (unsigned)BO3_US_FULL_MAX);
+        return BM_STREAMING_OUT_OF_RANGE;
+    }
+#if MUT != 16
+    if (!s_open) {
+        fprintf(stderr, "[ENGINE] full-detail slot request 0x%X refused: the plugins have started, the size is fixed at "
+                "0x%X\n", (unsigned)bytes, (unsigned)s_ffrozen);
+        return BM_STREAMING_CLOSED;
+    }
+#endif
+    if (!supported()) {
+        fprintf(stderr, "[ENGINE] full-detail slot request 0x%X refused: this game build is not one the slot extension is "
+                "verified for\n", (unsigned)bytes);
+        return BM_STREAMING_UNSUPPORTED;
+    }
+    for (k = 0; k < s_nfreq && s_freq[k].host != host; k++)
+        ;
+    if (k == s_nfreq && s_nfreq < BS_SLOTS) {
+        s_freq[k].host = host;
+        s_freq[k].max = 0;
+        s_nfreq++;
+    }
+    if (k < BS_SLOTS && bytes > s_freq[k].max)
+        s_freq[k].max = bytes;
+#if MUT == 15
+    s_fmerged = bytes;                      /* defect: the last one wins */
+    s_fowner = k;
+#else
+    if (bytes > s_fmerged) {
+        s_fmerged = bytes;
+        s_fowner = k;
+    }
+#endif
+    if (merged_bytes)
+        *merged_bytes = s_fmerged;
+    return BM_STREAMING_OK;
+}
+
 static int32_t TD_CALL bs_lowslot_info(td_host *host, bm_streaming_lowslot *out)
 {
     bm_streaming_lowslot s;
@@ -172,13 +232,13 @@ static int32_t TD_CALL bs_request_static(td_host *host, uint32_t bytes, uint32_t
     if (!host)
         return BM_STREAMING_BAD_ARG;
 #if MUT == 23
-    if (bytes > BM_STREAMING_STATIC_MAX)
-        bytes = BM_STREAMING_STATIC_MAX;        /* defect: clamped instead of refused */
+    if (bytes > BO3_ST_MAX)
+        bytes = BO3_ST_MAX;                     /* defect: clamped instead of refused */
 #endif
-    if (bytes <= BM_STREAMING_STATIC_SPLIT_GAME || bytes > BM_STREAMING_STATIC_MAX || (bytes % BM_STREAMING_PAGE)) {
+    if (bytes <= BM_STREAMING_STATIC_SPLIT_GAME || bytes > BO3_ST_MAX || (bytes % BM_STREAMING_PAGE)) {
         fprintf(stderr, "[ENGINE] bmashup.streaming: STATIC pool request 0x%X refused: out of range (above 0x%X, at most "
                 "0x%X, whole 4 KiB pages)\n", (unsigned)bytes, (unsigned)BM_STREAMING_STATIC_SPLIT_GAME,
-                (unsigned)BM_STREAMING_STATIC_MAX);
+                (unsigned)BO3_ST_MAX);
         return BM_STREAMING_OUT_OF_RANGE;
     }
 #if MUT != 22
@@ -282,6 +342,21 @@ void bo3_bm_streaming_close(void)
                 (unsigned)s_frozen, s_owner + 1, s_nreq);
     if (rc != BO3_US_OK)
         fprintf(stderr, "[ENGINE] ERROR: the slot extension did not take the size (%d)\n", rc);
+    /* patch 131: the full-detail slots */
+    s_ffrozen = s_fmerged;
+#if MUT == 17
+    rc = BO3_US_OK;                         /* defect: the size is not handed to the slot extension */
+#else
+    rc = bo3_us_set_full_bytes(&g_bo3_us, s_ffrozen == BO3_US_FULL_RETAIL ? 0 : s_ffrozen);
+#endif
+    if (s_fowner < 0)
+        fprintf(stderr, "[ENGINE] full-detail unit slot size frozen: 0x%X, the game's; %d mod%s asked\n",
+                (unsigned)s_ffrozen, s_nfreq, s_nfreq == 1 ? "" : "s");
+    else
+        fprintf(stderr, "[ENGINE] full-detail unit slot size frozen: 0x%X, requested by mod %d of %d that asked\n",
+                (unsigned)s_ffrozen, s_fowner + 1, s_nfreq);
+    if (rc != BO3_US_OK)
+        fprintf(stderr, "[ENGINE] ERROR: the slot extension did not take the full-detail size (%d)\n", rc);
     /* version 2: the STATIC pool */
     s_sfrozen = s_smerged;
 #if MUT == 24

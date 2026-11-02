@@ -26,6 +26,7 @@ pre { white-space:pre-wrap; word-break:break-word; background:var(--bg); border:
 #robanner { display:none; border:2px solid var(--warn); padding:6px 8px; margin:6px 0; border-radius:4px; font-weight:600; }
 label { display:block; }
 #mats div { cursor:pointer; padding:1px 4px; } #mats div:hover { background:var(--bg); }
+.tegrp{border-top:1px solid var(--line);margin-top:6px;padding-top:4px}.tegh{margin:2px 0 4px}.wtstep{margin:2px 0}.wtstep.done{opacity:.7}.wtstep.next b{text-decoration:underline}.fix{margin-left:12px}
 </style>
 </head>
 <body>
@@ -128,9 +129,98 @@ label { display:block; }
     <pre id="layout_out" style="display:none"></pre>
     <div id="xsec" style="display:none"></div>
   </div>
+  <details id="dsbox"><summary><b>Environment designer</b> <span class="note">(neighbourhoods along a route; build and prepare a test)</span></summary>
+    <div class="note">1 Data: <span id="dsdata">-</span><br>2 Route: the control points of <i>Retail-style authoring -> 3 Route</i>
+      (<span id="dspts">0</span> points). 3 Neighbourhoods below. 4 Quick preview (about a second, approximate) then Full preview
+      (exact; background, Cancel works). 5 Adjust categories. 6 Build / validate / stage + test plan. Nothing changes before Apply.</div>
+    <h3>3 Neighbourhoods</h3>
+    <div class="note">Each row covers part of the loop (fractions 0..1, contiguous). Road / wall / verge materials come from the road style.
+      Transitions blend neighbouring rows over the given length. Landmark = one taller building in the middle of the row; open space = no buildings, more trees.</div>
+    <table id="dsseg" style="font-size:12px"></table>
+    <div><button id="dsadd">Add row</button> <button id="dsdel">Remove last</button> road style <select id="dsroad"></select>
+      transition <input type="number" id="dstr" value="40" style="width:50px"> m, visual junction at <input type="text" id="dsjun" value="0.12" style="width:40px"> (empty = none)</div>
+    <details><summary class="note">Advanced</summary>
+      <div>seed <input type="number" id="dsseed" value="5" style="width:60px"> headroom <input type="number" id="dshead" value="10" style="width:45px"> %
+        <label><input type="checkbox" id="dsplinth" checked> plinths on slopes</label> <label><input type="checkbox" id="dsshell"> allow open-shell retail pieces</label><br>
+        lamps / signs / trees as <select id="dsobj" title="instances: the game's own retail instance models (see-through leaves, no collision, as retail; needs trackbuild 0.3.2). geometry: static copies (phase 2)"><option value="">default</option><option value="instances">retail instances</option><option value="geometry">geometry copies</option></select>
+        props <select id="dsprops" title="roadworks: retail traffic cones before bends - REAL props (solid, they break when hit); needs trackbuild 0.3.2"><option value="none">none</option><option value="roadworks">roadworks cones</option></select><br>
+        categories: <label><input type="checkbox" id="dsc_buildings" checked> buildings</label> <label><input type="checkbox" id="dsc_posts" checked> posts</label>
+        <label><input type="checkbox" id="dsc_signs" checked> signs</label> <label><input type="checkbox" id="dsc_trees" checked> trees</label>
+        <label><input type="checkbox" id="dsc_background" checked> background</label> <label><input type="checkbox" id="dsc_junction" checked> junction</label></div></details>
+    <div><button id="dsquick">Quick preview</button> <button id="dsfull">Full preview</button> <button id="dsapply" disabled>Apply (one undo step)</button></div>
+    <pre id="dsout" class="note" style="max-height:220px;overflow:auto;display:none"></pre>
+    <div id="dsskip" style="max-height:130px;overflow:auto;font-size:12px"></div>
+    <h3>5 Categories</h3>
+    <div><button id="dsparts">Refresh</button> <label><input type="checkbox" id="dsconf"> replace hand edits</label></div>
+    <div id="dspartlist" style="font-size:12px"></div>
+    <h3>6 Build and prepare a test</h3>
+    <div class="note">Save first. Runs Build -> Validate -> Stage (kit gates) -> Prepare test into a new folder beside the project. Nothing is launched.</div>
+    <div><button id="dsbuild">Save, build, validate, stage + test plan</button></div>
+    <pre id="dsbuildout" class="note" style="max-height:140px;overflow:auto;display:none"></pre>
+    <h3>Trusted asset library</h3>
+    <div>track <select id="tlt"></select> kind <select id="tlc"><option value="">any</option><option>intact building</option>
+      <option>building shell / facade</option><option>structure</option><option>scenery fragment</option><option>static mesh (instance model)</option>
+      <option>prop (smashable prop type)</option></select> min confidence <input type="number" id="tlm" value="0.6" step="0.1" style="width:45px">
+      <label><input type="checkbox" id="tlf"> favourites</label> <label><input type="checkbox" id="tlr"> faces its road</label> <button id="tls">Search</button></div>
+    <div id="tlres" style="max-height:140px;overflow:auto;font-size:12px"></div>
+    <div id="tldet" class="note"></div>
+  </details>
+  <details id="rtabox"><summary><b>Retail-style authoring</b> <span class="note">(asset library, styles, generation, retail extensions, sharing)</span></summary>
+    <div class="note" id="rtawalk">First use: <b>1</b> create the asset library from your game data -> <b>2</b> pick a style -> <b>3</b> draw a route ->
+      <b>4</b> preview and apply -> <b>5</b> adjust generated parts -> Save / Build. <b>6</b> extends a retail track instead; <b>7</b> shares a recipe.
+      Retail-derived results stay on your PC. Every step previews first; nothing changes until you apply.</div>
+    <h3>1 Asset library</h3>
+    <div class="note" id="rtacat">-</div>
+    <div><button id="rtacatb">Create / refresh asset library</button> <button id="rtacatx" disabled>Cancel</button>
+      <progress id="rtaprog" max="1" value="0" style="width:120px"></progress> <span id="rtajobmsg" class="note"></span></div>
+    <div>search <input type="text" id="rtaq" style="width:90px" placeholder="name / role"> <select id="rtakind"><option value="">any kind</option>
+      <option>building</option><option>structure</option><option>instance model</option><option>smashable prop type</option><option>texture</option></select> <select id="rtatrk"><option value="">all tracks</option></select>
+      <button id="rtasearch">Search</button></div>
+    <div id="rtares" style="max-height:150px;overflow:auto;font-size:12px"></div>
+    <div id="rtaasset" class="note"></div>
+    <h3>2 Style</h3>
+    <div><select id="rtasty"></select> <button id="rtastyshow">Show</button> | derive from <select id="rtadtrk"></select> as <input type="text" id="rtadid" style="width:90px" placeholder="my_style"> <button id="rtaderive">Derive</button></div>
+    <div id="rtastyout" class="note" style="max-height:170px;overflow:auto"></div>
+    <h3>3 Route</h3>
+    <div class="note">Click the sketch to add control points (closed loop; metres, north up). Right-click removes the last point. Or type x y z per line.</div>
+    <canvas id="rtasketch" width="300" height="220" style="border:1px solid #999;cursor:crosshair;background:#fbfbf8"></canvas>
+    <div><button id="rtacur">Use current route</button> <button id="rtaclear">Clear</button> elevation y <input type="number" id="rtay" value="20" style="width:55px"> grid <select id="rtascale"><option>400</option><option>800</option><option>1600</option></select> m</div>
+    <textarea id="rtapts" rows="3" style="width:95%" placeholder="x y z per line"></textarea>
+    <h3>4 Generate</h3>
+    <div>seed <input type="number" id="rtaseed" value="1" style="width:60px"> road width <input type="number" id="rtaw" value="14" style="width:45px"> m
+      buildings <input type="range" id="rtabd" min="0" max="2" step="0.1" value="1" style="width:60px"> trees <input type="range" id="rtatd" min="0" max="2" step="0.1" value="1" style="width:60px">
+      posts <input type="range" id="rtald" min="0" max="2" step="0.1" value="1" style="width:60px"></div>
+    <div><label><input type="checkbox" id="rtapl" checked> posts</label> <label><input type="checkbox" id="rtapb" checked> buildings</label>
+      <label><input type="checkbox" id="rtapt" checked> trees</label><br>posts <input type="text" id="rtaposts" style="width:230px"
+      placeholder="empty = the style's; or TRACK MODEL SIDE [spacing]; ..."> <button id="rtaptypes">Post types...</button>
+      <div id="rtaptlist" style="max-height:120px;overflow:auto;font-size:11px"></div> exclude rects <input type="text" id="rtaex" style="width:150px" placeholder="x0 z0 x1 z1; ..."></div>
+    <div><button id="rtagen">Preview generation</button> <button id="rtaapply" disabled>Apply (one undo step)</button></div>
+    <pre id="rtagenout" class="note" style="max-height:200px;overflow:auto;display:none"></pre>
+    <div id="rtaskip" style="max-height:110px;overflow:auto;font-size:12px"></div>
+    <h3>5 Generated parts</h3>
+    <div><button id="rtaparts">Refresh</button> <label><input type="checkbox" id="rtaconf"> replace hand edits</label></div>
+    <div id="rtapartlist" style="font-size:12px"></div>
+    <h3>6 Extend a retail track</h3>
+    <div><select id="rtaxtrk"></select> <button id="rtart">Round-trip check</button> project folder <input type="text" id="rtaxdir" style="width:180px"> <button id="rtaxnew">Create</button> <button id="rtaxopen">Open</button></div>
+    <div>unit <input type="number" id="rtaxu" value="19" style="width:45px"> <button id="rtaxunit">Unit materials</button> side <select id="rtaxside"><option value="-1">right</option><option value="1">left</option></select>
+      setback <input type="number" id="rtaxsb" value="14" style="width:45px"> along <input type="number" id="rtaxal" value="0.3" step="0.1" style="width:45px">
+      w/d/h <input type="text" id="rtaxsz" value="12 9 10" style="width:60px"></div>
+    <div>facade <select id="rtaxtex"></select> roof <select id="rtaxroof"></select> <button id="rtaxfind">Find a clear spot</button> <button id="rtaxpv">Preview attachment</button> <button id="rtaxadd" disabled>Add to project</button> <button id="rtaxundo">Undo last edit</button></div>
+    <div>build into <input type="text" id="rtaxout" style="width:200px" placeholder="new folder (LOCAL ONLY)"> <button id="rtaxbuild">Build extension</button></div>
+    <div id="rtaxsvg"></div><pre id="rtaxout2" class="note" style="max-height:180px;overflow:auto;display:none"></pre>
+    <h3>7 Share (recipe only)</h3>
+    <div><select id="rtashk"><option value="generation">this project's generation</option><option value="extension">the extension project above</option></select>
+      author <input type="text" id="rtaauth" style="width:80px"> licence <input type="text" id="rtalic" style="width:80px" value="CC-BY-4.0"></div>
+    <div>save as <input type="text" id="rtashout" style="width:200px" placeholder="...\my_recipe.zip"> <button id="rtashpv">Preview</button> <button id="rtashex">Export</button></div>
+    <div>open recipe <input type="text" id="rtarin" style="width:200px"> <button id="rtarchk">Check</button> <button id="rtarreb">Rebuild</button></div>
+    <pre id="rtashout2" class="note" style="max-height:160px;overflow:auto;display:none"></pre>
+  </details>
   <div id="tebox">
-    <h2>Authoring tools (TE queue)</h2>
-    <div class="note">Each tool previews first (nothing changes), then applies with that preview (one undo step); refusals change nothing. Search: <input type="text" id="tesearch" style="width:150px" placeholder="filter tools"></div>
+    <h2>Authoring tools</h2>
+    <details id="wtbox" open><summary><b>First track walkthrough</b> <span id="wtsum" class="note"></span></summary>
+      <div class="note">Steps to your first track; done steps are ticked from the project itself. <button id="wtref">Refresh</button> <button id="wtguide">Guide: your first track</button></div>
+      <div id="wtlist"></div></details>
+    <div class="note">Tools grouped by task. Each tool previews first (nothing changes), then applies with that preview (one undo step); refusals change nothing. Presets fill sensible values. Search: <input type="text" id="tesearch" style="width:150px" placeholder="filter tools"></div>
     <div id="tetools"></div>
   </div>
   <div id="editmsg" class="note"></div>
@@ -203,6 +293,7 @@ function loadTex(key, url) {
       if (p2) { gl.generateMipmap(gl.TEXTURE_2D); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR_MIPMAP_LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.REPEAT); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.REPEAT); }
       else { gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE); gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE); }
       ST.texLoaded++; draw(); };
+    im.onerror = () => { (ST.texErrors = ST.texErrors || []).push(key); };     // rta2: an explicit resource error, never a silent wait
     im.src = url + '&t=' + TOKEN;
   }
   return t;
@@ -218,10 +309,19 @@ function buildMeshesAuthored() {
   freeMeshes();
   for (const [name, m] of Object.entries(ST.scene.mesh.materials || {})) {
     const arr = new Float32Array(m.pos.length); for (let i = 0; i < arr.length; i++) arr[i] = m.pos[i] - ST.origin[i % 3];
-    ST.meshes[name] = {n: m.pos.length / 3, arr, grp: m.grp, nrm: m.nrm || null, p: buf(arr), uv: buf(m.uv), c: buf(m.col), mat: name};
     const mi = ST.scene.materials[name], v = mi ? mi.tex_v : '';                       // live preview: reload when the texture reference changed
+    ST.meshes[name] = {n: m.pos.length / 3, arr, grp: m.grp, nrm: m.nrm || null, p: buf(arr), uv: buf(m.uv), c: buf(m.col), mat: name,
+      render: mi && mi.render || 'opaque', depth_write: !mi || mi.depth_write !== false};   // RTA3: retail_material render class (flags)
     if (ST.tex[name] && ST.texSrc[name] !== v) { gl.deleteTexture(ST.tex[name]); delete ST.tex[name]; }
     if (!ST.tex[name]) { ST.texSrc[name] = v; ST.tex[name] = loadTex(name, mi && mi.texture_ok ? '/tex?m=' + encodeURIComponent(name) + '&v=' + v : null); }
+  }
+  // RTA3: retail objects (instance models / props; kit matrix rule) - drawn, never picked; textures RGBA (cut-outs keep alpha)
+  for (const o of ((ST.scene.objects || {}).meshes || [])) {
+    const arr = new Float32Array(o.pos.length); for (let i = 0; i < arr.length; i++) arr[i] = o.pos[i] - ST.origin[i % 3];
+    const k = 'obj:' + o.key;
+    if (!ST.tex[k]) ST.tex[k] = loadTex(k, '/tex?m=' + encodeURIComponent(k));
+    ST.meshes[k] = {n: o.pos.length / 3, arr, p: buf(arr), uv: buf(o.uv), c: buf(o.col), obj: true, family: o.family,
+      render: o.render, depth_write: o.depth_write, centre: o.centre, tex: ST.tex[k]};
   }
 }
 function buildMeshesRetail() {
@@ -238,6 +338,15 @@ function buildMeshesRetail() {
   for (const c of ST.scene.collision) {
     const a = new Float32Array(ST.bin.coll, c.off, c.vertices * 3).slice(); for (let i = 0; i < a.length; i++) a[i] -= ST.origin[i % 3];
     ST.coll.push({b: buf(a), n: c.vertices, surface: parseInt(c.surface, 16)});
+  }
+  // RTA4: objects a restyle wrote into this retail folder (preview of the written placements; same drawing as authored mode)
+  for (const o of ((ST.scene.objects || {}).meshes || [])) {
+    const arr = new Float32Array(o.pos.length); for (let i = 0; i < arr.length; i++) arr[i] = o.pos[i] - ST.origin[i % 3];
+    const k = 'obj:' + o.key;
+    if (!ST.tex[k]) ST.tex[k] = loadTex(k, '/tex?m=' + encodeURIComponent(k));
+    ST.meshes[k] = {n: o.pos.length / 3, arr, p: buf(arr), uv: buf(o.uv), c: buf(o.col), obj: true, family: o.family,
+      render: o.render, depth_write: o.depth_write, centre: o.centre, tex: ST.tex[k],
+      retail: {render: o.render, depth_write: o.depth_write, centre: o.centre}};       // the retail draw loop reads m.retail
   }
 }
 function build() {
@@ -292,21 +401,67 @@ function build() {
     for (const g of LY.lines || []) seg(L.ll, up(g[0], .3), up(g[1], .3));
     for (const q of LY.points || []) marker(L.ll, up(q, .3), .6);
     for (const v of bridgeChains().flat()) { const p = ST.bv.get(v); if (p) marker(L.bc, up(p, .05), .25); }
-    // TE stage 8: wireframe + stored normals (capped for responsiveness on large projects; the counts go to the HUD)
-    ST.ovl = {wire: 0, normals: 0, bad: 0, capped: false};
-    const wireOn = $('L_wire').checked, nOn = $('L_normals').checked, CAP = 60000;
-    if (wireOn || nOn) for (const m of Object.values(ST.meshes)) { const A = m.arr;
-      for (let t = 0; t < m.grp.length; t++) { const o = 9 * t, a = [A[o], A[o+1], A[o+2]], b = [A[o+3], A[o+4], A[o+5]], c = [A[o+6], A[o+7], A[o+8]];
-        if (wireOn && ST.ovl.wire < CAP) { seg(L.wire, a, b); seg(L.wire, b, c); seg(L.wire, c, a); ST.ovl.wire++; }
-        if (nOn && m.nrm && ST.ovl.normals < CAP && t % 2 === 0) { const n = [m.nrm[3*t], m.nrm[3*t+1], m.nrm[3*t+2]], g = norm(cross(sub(b, a), sub(c, a)));
-          const ce = [0,1,2].map(i => (a[i] + b[i] + c[i]) / 3), ok = dot(n, g) >= 0.9; if (!ok) ST.ovl.bad++;
-          seg(ok ? L.nok : L.nbad, ce, [ce[0] + n[0] * 1.5, ce[1] + n[1] * 1.5, ce[2] + n[2] * 1.5]); ST.ovl.normals++; } } }
-    ST.ovl.capped = ST.ovl.wire >= CAP || ST.ovl.normals >= CAP;
+    // v0.33: wireframe + stored normals in spatial chunks (built once per mesh / layer change, culled per frame: ovlDraw)
+    ovlBuild($('L_wire').checked, $('L_normals').checked);
   }
   ST.pick.forEach(o => { if (isHl(o.kind, o.index)) marker(L.hl, o.p, 2.5); });
   if (ST.sel && ST.sel.p) marker(L.sel, ST.sel.p, 3);
   for (const k in ST.lines) gl.deleteBuffer(ST.lines[k].b);
   ST.lines = {}; for (const k in L) ST.lines[k] = {b: buf(L[k].length ? L[k] : [0,0,0]), n: L[k].length / 3};
+}
+// ---------------------------------------------------------------- v0.33 overlay chunks (replaces the 60000-triangle cutoff)
+// Triangles are binned by centroid into OVL_CELL x OVL_CELL m plan cells; each cell gets its own line buffers (built once per
+// mesh / layer change, not per selection). Per frame: chunks outside the view frustum are skipped, the rest are drawn nearest
+// first until OVL_BUDGET triangles (only then is anything left out, and the HUD says so). Counts: ST.ovl.
+const OVL_CELL = 64, OVL_BUDGET = 400000;
+function ovlFree() { if (ST.ovlC) for (const c of ST.ovlC.chunks) for (const k of ['w', 'ok', 'bad']) if (c[k]) gl.deleteBuffer(c[k].b); ST.ovlC = null; }
+function ovlBuild(wireOn, nOn) {
+  const key = wireOn + '|' + nOn;
+  if (ST.ovlC && ST.ovlC.meshes === ST.meshes && ST.ovlC.key === key) return;
+  ovlFree(); const t0 = performance.now();
+  const cells = new Map(), list = Object.values(ST.meshes).filter(m => m.arr && m.grp);
+  const cellOf = (A, o) => Math.floor((A[o] + A[o + 3] + A[o + 6]) / 3 / OVL_CELL) + ',' + Math.floor((A[o + 2] + A[o + 5] + A[o + 8]) / 3 / OVL_CELL);
+  let total = 0, normals = 0, bad = 0;
+  if (wireOn || nOn) {
+    for (const m of list) for (let t = 0; t < m.grp.length; t++) { const k = cellOf(m.arr, 9 * t); let c = cells.get(k);
+      if (!c) { c = {tris: 0, nrm: 0, lo: [Infinity, Infinity, Infinity], hi: [-Infinity, -Infinity, -Infinity]}; cells.set(k, c); }
+      c.tris++; if (nOn && m.nrm && t % 2 === 0) c.nrm++; }                              // pass 1: sizes
+    for (const c of cells.values()) { c.w = wireOn ? new Float32Array(c.tris * 18) : null; c.wi = 0; c.okA = new Float32Array(c.nrm * 6); c.oi = 0; c.badA = new Float32Array(c.nrm * 6); c.bi = 0; }
+    for (const m of list) { const A = m.arr;
+      for (let t = 0; t < m.grp.length; t++) { const o = 9 * t, c = cells.get(cellOf(A, o));
+        for (let j = 0; j < 9; j++) { const i = j % 3; if (A[o + j] < c.lo[i]) c.lo[i] = A[o + j]; if (A[o + j] > c.hi[i]) c.hi[i] = A[o + j]; }
+        if (wireOn) { const W = c.w; let q = c.wi; for (const [x, y] of [[0, 1], [1, 2], [2, 0]]) { for (let i = 0; i < 3; i++) W[q++] = A[o + 3 * x + i]; for (let i = 0; i < 3; i++) W[q++] = A[o + 3 * y + i]; } c.wi = q; }
+        if (nOn && m.nrm && t % 2 === 0) { const a = [A[o], A[o+1], A[o+2]], b = [A[o+3], A[o+4], A[o+5]], cc = [A[o+6], A[o+7], A[o+8]];
+          const n = [m.nrm[3*t], m.nrm[3*t+1], m.nrm[3*t+2]], g = norm(cross(sub(b, a), sub(cc, a))), ok = dot(n, g) >= 0.9; if (!ok) bad++;
+          const ce = [0,1,2].map(i => (a[i] + b[i] + cc[i]) / 3), seg6 = [ce[0], ce[1], ce[2], ce[0] + n[0] * 1.5, ce[1] + n[1] * 1.5, ce[2] + n[2] * 1.5];
+          if (ok) { c.okA.set(seg6, c.oi); c.oi += 6; } else { c.badA.set(seg6, c.bi); c.bi += 6; } normals++; }
+        total++; } }
+  }
+  const chunks = [];
+  for (const c of cells.values()) chunks.push({lo: c.lo, hi: c.hi, tris: c.tris,
+    w: c.w && c.wi ? {b: buf(c.w), n: c.wi / 3} : null, ok: c.oi ? {b: buf(c.okA.subarray(0, c.oi)), n: c.oi / 3} : null,
+    bad: c.bi ? {b: buf(c.badA.subarray(0, c.bi)), n: c.bi / 3} : null});
+  ST.ovlC = {meshes: ST.meshes, key, chunks, total, normals, bad, build_ms: Math.round(performance.now() - t0)};
+}
+function ovlVisible(P, lo, hi) {                         // false only when all 8 box corners lie outside the same clip plane
+  const out = [0, 0, 0, 0, 0, 0];
+  for (let k = 0; k < 8; k++) { const x = k & 1 ? hi[0] : lo[0], y = k & 2 ? hi[1] : lo[1], z = k & 4 ? hi[2] : lo[2];
+    const cx = P[0]*x + P[4]*y + P[8]*z + P[12], cy = P[1]*x + P[5]*y + P[9]*z + P[13], cz = P[2]*x + P[6]*y + P[10]*z + P[14], cw = P[3]*x + P[7]*y + P[11]*z + P[15];
+    if (cx < -cw) out[0]++; if (cx > cw) out[1]++; if (cy < -cw) out[2]++; if (cy > cw) out[3]++; if (cz < -cw) out[4]++; if (cz > cw) out[5]++; }
+  return !out.some(v => v === 8); }
+function ovlDraw(P, aL) {
+  const C = ST.ovlC; ST.ovl = {total: 0, chunks: 0, visible: 0, drawn: 0, drawn_tris: 0, normals: 0, bad: 0, wire: 0, budget_hit: false, draw_ms: 0, build_ms: 0};
+  if (!C || !C.total) return;
+  const t0 = performance.now(), E = eye();
+  const vis = C.chunks.filter(c => ovlVisible(P, c.lo, c.hi)).map(c => [c, Math.hypot((c.lo[0] + c.hi[0]) / 2 - E[0], (c.lo[1] + c.hi[1]) / 2 - E[1], (c.lo[2] + c.hi[2]) / 2 - E[2])]).sort((a, b) => a[1] - b[1]);
+  let tris = 0, drawn = 0; const draws = [];
+  for (const [c] of vis) { if (tris + c.tris > OVL_BUDGET && drawn) { ST.ovl.budget_hit = true; break; } tris += c.tris; drawn++; draws.push(c); }
+  const pass = (k, col, depth) => { if (!depth) gl.disable(gl.DEPTH_TEST); gl.uniform4fv(gl.getUniformLocation(PL, 'col'), col);
+    for (const c of draws) if (c[k]) { gl.bindBuffer(gl.ARRAY_BUFFER, c[k].b); gl.enableVertexAttribArray(aL); gl.vertexAttribPointer(aL, 3, gl.FLOAT, false, 0, 0); gl.drawArrays(gl.LINES, 0, c[k].n); }
+    gl.enable(gl.DEPTH_TEST); };
+  pass('w', [.1,.1,.12,.8], true); pass('ok', [.1,.9,.3,1], true); pass('bad', [1,.1,.1,1], false);
+  Object.assign(ST.ovl, {total: C.total, chunks: C.chunks.length, visible: vis.length, drawn, drawn_tris: tris, normals: C.normals, bad: C.bad,
+    wire: C.key.startsWith('true') ? C.total : 0, draw_ms: Math.round((performance.now() - t0) * 100) / 100, build_ms: C.build_ms});
 }
 function isHl(kind, index) { return ST.hl.has(kind + ':' + index) || ST.hlKinds.has(kind) || (ST.hlKinds.has('starts') && ['grid','checkpoint','start_line'].includes(kind)); }
 // ---------------------------------------------------------------- draw
@@ -335,17 +490,19 @@ function draw() {
     gl.uniform1f(gl.getUniformLocation(PT, 'aref'), AREF);
     // retail: opaque + cut-out first (stored order), then blended sections far to near; authored materials are opaque (trackbuild 0.2)
     let list = Object.entries(ST.meshes);
-    if (ST.retail) { const E = eye(), dist = m => { const c = m.retail.centre || [0,0,0]; return Math.hypot(c[0] - ST.origin[0] - E[0], c[1] - ST.origin[1] - E[1], c[2] - ST.origin[2] - E[2]); };
-      const bl = list.filter(([, m]) => MODE[m.retail.render] >= 2).sort((a, b) => dist(b[1]) - dist(a[1]));
-      list = list.filter(([, m]) => MODE[m.retail.render] < 2).concat(bl); }
+    const rnd = m => (ST.retail ? m.retail.render : m.render) || 'opaque';               // RTA3: authored retail materials / objects too
+    { const E = eye(), dist = m => { const c = (ST.retail ? m.retail.centre : m.centre) || [0,0,0]; return Math.hypot(c[0] - ST.origin[0] - E[0], c[1] - ST.origin[1] - E[1], c[2] - ST.origin[2] - E[2]); };
+      const bl = list.filter(([, m]) => MODE[rnd(m)] >= 2).sort((a, b) => dist(b[1]) - dist(a[1]));
+      list = list.filter(([, m]) => MODE[rnd(m)] < 2).concat(bl); }
     for (const [name, m] of list) {
-      const md = ST.retail && !ST.forceOpaque ? MODE[m.retail.render] || 0 : 0;
+      if (m.obj && !$('L_mesh').checked) continue;
+      const md = !ST.forceOpaque ? MODE[rnd(m)] || 0 : 0;
       gl.uniform1f(gl.getUniformLocation(PT, 'mode'), md);
-      if (md >= 2) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(!!m.retail.depth_write);
+      if (md >= 2) { gl.enable(gl.BLEND); gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA); gl.depthMask(!!(ST.retail ? m.retail.depth_write : m.depth_write));
         gl.enable(gl.POLYGON_OFFSET_FILL); gl.polygonOffset(-1, -2); }
       else { gl.disable(gl.BLEND); gl.depthMask(true); gl.disable(gl.POLYGON_OFFSET_FILL); }
       let tint = [0,0,0,0];
-      if (!ST.retail) {
+      if (!ST.retail && !m.obj) {
         const mat = ST.scene.materials[name];
         if ($('L_collision').checked) tint = collisionTint(mat);
         if (!$('L_mesh').checked) tint = [tint[0], tint[1], tint[2], 1];
@@ -380,10 +537,11 @@ function draw() {
   lines('hl', [1,0,0,1], false); lines('nb', [1,.45,0,1], false); lines('sel', [1,.9,0,1], false); lines('cb', [1,0,1,1], false); lines('clip', [1,0,.2,1], false); lines('tf', [0,1,1,1], false); lines('pv', [1,1,1,1], false);
   lines('oe', [1,.55,0,1], false); lines('wf', [.3,.6,1,1], false); lines('wg', [0,1,.4,1], false); lines('wv', [1,.4,.8,1], false);
   lines('bf', [.65,.3,1,1], false); lines('bp', [0,1,.4,1], false); lines('bc', [1,.4,.8,1], false);
-  lines('wire', [.1,.1,.12,.8], true); lines('nok', [.1,.9,.3,1], true); lines('nbad', [1,.1,.1,1], false);
+  ovlDraw(P, aL);
   lines('lu', [.2,.6,.7,1], false); lines('lr', [0,1,1,1], false); lines('lf', [1,0,.2,1], false); lines('ln', [.65,.3,1,1], false); lines('ll', [1,1,.2,1], false);
   $('hud').textContent = (ST.retail ? 'RETAIL VIEW (read only) - ' : '') + `${Object.keys(ST.meshes).length} material groups, ${ST.texLoaded} textures, ${ST.pick.length} selectable objects` + (ST.scene.state.dirty ? ' - UNSAVED EDITS' : '') +
-    (ST.ovl && (ST.ovl.wire || ST.ovl.normals) ? ` - overlay: ${ST.ovl.wire} wire / ${ST.ovl.normals} normals (${ST.ovl.bad} disagree)${ST.ovl.capped ? ' CAPPED at 60000' : ''}` : '');
+    (ST.ovl && ST.ovl.total ? ` - overlay: ${ST.ovl.drawn_tris} of ${ST.ovl.total} triangles drawn (${ST.ovl.drawn}/${ST.ovl.chunks} chunks in view` +
+     `${ST.ovl.budget_hit ? ', nearest first within ' + OVL_BUDGET + ' per frame' : ''}), ${ST.ovl.normals} normals (${ST.ovl.bad} disagree)` : '');
 }
 // ---------------------------------------------------------------- navigation + picking
 let drag = null;
@@ -662,6 +820,7 @@ function fmtLayout(r) { const L = [];
   if (r.units_after !== undefined) { L.push(`units: ${r.units_before} -> ${r.units_after} (changed ${r.changed_units.join(', ') || 'none'})`);
     const C = r.coverage; L.push(`coverage: ${C.faces} faces, none losing area, ${C.faces_gaining_area} gaining; kept ${C.kept_m2[0]} -> ${C.kept_m2[1]} m2; ${C.drivable_samples_in_one_unit} drivable samples and ${C.grid_slots_in_one_unit} grid slots each in exactly one unit`);
     L.push(`capacity: worst ${r.capacity_worst_pct} % of a slot / vertex / record limit; per changed unit: ` + r.changed_units.slice(0, 6).map(k => { const c = r.capacity[k]; return c ? `u${k} mesh ${c.mesh_slot_pct} %, LOD ${c.lod_slot_pct} %, ${c.vertices} verts` : ''; }).join('; '));
+    for (const n of (r.capacity_info || [])) L.push('  INFO: ' + n);
     for (const k of r.changed_units.slice(0, 6)) { const u = r.units[k]; if (u) L.push(`  unit ${k}: stations ${u.cut_from} -> ${u.cut_to}, lateral [${u.lateral.join(', ')}]`); } }
   if (r.summary_lines) L.push(...r.summary_lines);
   if (r.structural) for (const c of r.structural) L.push(`  ${c.ok ? 'ok    ' : 'FAILED'} ${c.check}: ${JSON.stringify(c.detail).slice(0, 220)}`);
@@ -826,11 +985,12 @@ teTool({id: 'pscat', title: '6 Repeat a prefab along a path', op: 'prefab_scatte
 teTool({id: 'pref', title: '6 Refresh copies of a changed prefab', op: 'prefab_refresh', fields: [['name', 'prefab', 'text', '']],
   note: 'Lists the blocks made from an older version (sha256) of the prefab; Apply re-generates them in place (one undo step).'});
 teTool({id: 'srep', title: '7 Streaming / LOD / visibility report (read only)', op: 'streaming_report', preview: false, fields: [],
-  note: 'Per section (streamed unit): stations, lateral bounds, region area, drivable samples, polygons, mesh / LOD bytes vs slots. Limits are labelled FORMAT / HOST / TOOL / EDITOR with their evidence; HOST ceilings need host work (separate checkpoint), never an editor change.'});
+  note: 'Per section (streamed unit): stations, lateral bounds, region area, drivable samples, polygons, mesh / LOD bytes against the game\u2019s slot AND the host ceiling. Limits are labelled FORMAT / HOST / TOOL / EDITOR with their evidence; HOST limits come from the kit\u2019s capacity table: under capacity auto a block above the game\u2019s slot is INFO (declared in mod.toml, with the host it needs), refused only above the host ceiling.'});
 teTool({id: 'lodp', title: '7 LOD preview of one section', op: 'lod_preview', preview: false, fields: [['unit', 'unit', 'num', 0]]});
-teTool({id: 'sset', title: '7 LOD / visibility settings', op: 'streaming_settings', fields: [
-  ['lod_mode', 'LOD', 'sel:identity|decimate', 'decimate'], ['e_max', 'decimation bound e_max (m, <= 0.3)', 'num', 0.3], ['pvs_mode', 'visibility', 'sel:all|computed', 'all']],
-  note: 'Checked by the kit build_units dry run; other lod / pvs keys are kept. The kit gates (V8_lod, V3 / V9) decide at Build -> Validate.'});
+teTool({id: 'sset', title: '7 LOD / visibility / capacity settings', op: 'streaming_settings', fields: [
+  ['lod_mode', 'LOD', 'sel:identity|decimate', 'decimate'], ['e_max', 'decimation bound e_max (m, <= 0.3)', 'num', 0.3], ['pvs_mode', 'visibility', 'sel:all|computed', 'all'],
+  ['capacity', 'Capacity (project setting)', 'sel:keep|auto|game', 'keep']],
+  note: 'Checked by the kit build_units dry run; other lod / pvs keys are kept. The kit gates (V8_lod, V3 / V9) decide at Build -> Validate. Capacity: auto (default) = blocks / static.dat / route data / lanes may exceed the game\u2019s defaults up to the Burnout Mashup host ceilings; the package declares exactly what the track needs in mod.toml [bmashup.capacity] (some values need host patch 131+: shown in the Streaming report). game = refuse anything above the game\u2019s defaults (tracks for hosts without capacity declarations). keep = unchanged.'});
 teTool({id: 'diag', title: '8 Diagnostics: click an item to show its faces', op: 'diagnostics', preview: false, fields: [],
   note: 'Open / non-manifold edges, stored normals against their face plane, faces outside the unit regions, overlapping collision floors, route structural checks, input problems. Red = the faces of the clicked item.'});
 teTool({id: 'bk', title: '9 Backups of this project (read only)', op: 'backups', preview: false, fields: [],
@@ -844,9 +1004,88 @@ teTool({id: 'imp', title: '9 Import a source zip as a NEW project', op: 'import_
   note: 'Verified against its manifest; only its listed relative paths; the open project is not touched.'});
 teTool({id: 'prep', title: '9 Prepare test (after Build -> Validate -> Stage)', op: 'prepare_test', preview: false, fields: [['dest', 'new folder for the test plan (absolute)', 'text', '']],
   note: 'Writes TEST_PLAN.md (checks for the content of this track) and PACKAGE_RECORD.json (sha256 of every staged file, versions). Nothing is launched; a run needs the owner present and the runner token.'});
+// ---------------------------------------------------------------- v0.33 tools: buildings / scenery, project health, sharing, test chain
+teTool({id: 'bldg', title: 'Building generator (footprint, height, roof, openings)', op: 'building', fields: [
+  ['id', 'existing building (re-generate)', 'cons:building', ''], ['footprint', 'footprint corners (click; plan x z, y ignored)', 'pts2', ''],
+  ['ground', 'sit on the floor below the corners', 'bool', true], ['base_y', 'base height (m) when not on the ground', 'num', ''],
+  ['height', 'wall height (m)', 'num', 6], ['roof', 'roof', 'sel:flat|gable|none', 'flat'], ['roof_height', 'gable rise (m)', 'num', 2],
+  ['thickness', 'wall thickness (m; 0 = single-sided)', 'num', 0.3], ['openings', 'openings JSON [{edge, offset (empty = centred), width, height}] (m)', 'json', '[]'],
+  ['wall_material', 'walls', 'mat', 'wall'], ['roof_material', 'roof', 'mat', 'asphalt'], ['collision', 'collision', 'sel:keep|none', 'keep'], ['uv_len', 'uv m per repeat', 'num', 4]],
+  presets: [['Garage, 6 m door', {height: 6, roof: 'flat', thickness: 0.3, openings: [{edge: 0, width: 6, height: 4.5}]}],
+            ['House, gable roof', {height: 4, roof: 'gable', roof_height: 2.5, thickness: 0, openings: []}],
+            ['Barn, 4 m door', {height: 4, roof: 'gable', roof_height: 3, thickness: 0.3, openings: [{edge: 0, width: 4, height: 3.2}]}],
+            ['Tower block', {height: 24, roof: 'flat', thickness: 0, openings: []}],
+            ['Walled yard (no roof)', {height: 3, roof: 'none', thickness: 0.5, openings: [{edge: 0, width: 6, height: 2.9}]}]],
+  note: 'Edge i runs from corner i to i+1. Openings are real gaps in the walls AND their collision; no floor is added (drive-through needs ground inside). Collision "none" uses the <name>_nc twins. Static geometry (not a prop instance). Windows / glass: not possible (opaque materials).'});
+teTool({id: 'tree', title: 'Low-poly tree (opaque)', op: 'tree', fields: [
+  ['id', 'existing tree (re-generate)', 'cons:tree', ''], ['position', 'position (click)', 'pts', ''], ['ground', 'on the floor below', 'bool', true],
+  ['height', 'height (m)', 'num', 8], ['radius', 'crown radius (m)', 'num', 2.5], ['sides', 'sides 3..12', 'num', 6],
+  ['trunk_material', 'trunk', 'mat', 'wall'], ['foliage_material', 'foliage (its collision decides)', 'mat', 'grass']],
+  presets: [['Small tree', {height: 5, radius: 1.8, sides: 6}], ['Large tree', {height: 10, radius: 3.5, sides: 8}], ['Bush', {height: 2, radius: 1.5, sides: 5}]],
+  note: 'Trunk prism + foliage cone. Cut-out (transparent) foliage needs alpha materials, which trackbuild cannot write.'});
+teTool({id: 'cmp', title: 'Compact the OBJ (remove unused records)', op: 'compact', fields: [],
+  note: 'Removes v / vt / vn lines no face uses (left by re-generated blocks, terrain strokes, mesh edits) and renumbers faces. Apply backs up first and proves equivalence (same corners, same other lines, identical kit unit blocks). One undo step; Save writes it.'});
+teTool({id: 'bkp', title: 'Backup retention (optional, deletes old backups)', op: 'backup_prune', fields: [
+  ['keep_last', 'keep the newest N', 'num', 10], ['older_than_days', 'and only those older than D days (empty = any age)', 'num', ''], ['confirm', 'I understand: deletion cannot be undone', 'bool', false]],
+  confirm: b => b.confirm === true || (alert('Tick the confirmation box first (deletion cannot be undone).'), false),
+  note: 'Nothing is deleted unless you preview a rule and confirm it. The newest backup is always kept; folders the editor did not write are never touched; a log is written.'});
+teTool({id: 'shr', title: 'Shareable export (provenance, licences, donor needs)', op: 'share_export', fields: [
+  ['dest', 'new .zip path (absolute)', 'text', ''], ['include_unknown', 'include files of unknown origin (needs author + licence)', 'bool', false],
+  ['unknown_author', 'author of those files', 'text', ''], ['unknown_licence', 'licence of those files', 'text', '']],
+  note: 'Preview lists every file with its provenance and what is excluded (game / build data always; unknown files by default). The zip has SHARING.md (licences, donor requirements, how to rebuild) and MANIFEST.json; the same saved project gives the same zip bytes.'});
+teTool({id: 'start', title: 'Starter project (original example)', op: 'starter_apply', fields: [['name', 'starter', 'sel:town_circuit|hill_country|us_town', 'town_circuit']],
+  confirm: b => confirm('Replace ALL geometry of this project with the starter "' + b.name + '"? (one undo step)'),
+  note: 'town_circuit: flat circuit, infield terrain, garage with a drive-through door, gable houses, trees. hill_country: sloped variable-width circuit, brushed hill, barn. Built with the normal tools in one undo step; everything stays editable.'});
+teTool({id: 'chain', title: 'Build, validate, stage + prepare test', op: 'test_chain', preview: false, fields: [['dest', 'new folder (empty = "test builds" beside the project)', 'text', '']],
+  note: 'Save first. Runs the Workbench build job with every kit gate, then writes TEST_PLAN.md + PACKAGE_RECORD.json. Each run uses a NEW folder; the last successful output is kept when a run fails. Nothing is launched or approved.'});
+teTool({id: 'rtl', title: 'Retail textures of a track (read only)', op: 'retail_textures', preview: false, fields: [['track', 'retail track (e.g. US/C1_V1)', 'text', 'US/C1_V1'], ['query', 'search', 'text', '']],
+  note: 'Reads YOUR game data (never writes it). Opaque textures can be copied; cut-out / blended ones cannot (trackbuild materials are opaque).'});
+teTool({id: 'rtx', title: 'Retail texture -> material (LOCAL ONLY)', op: 'retail_texture', fields: [['track', 'retail track', 'text', 'US/C1_V1'], ['texture', 'retail texture name', 'text', 'WF_Road2'],
+  ['name', 'new material name', 'text', 'us_road'], ['like', 'surface / collision like', 'mat', 'asphalt']],
+  note: 'Copies one texture from your own game data into this project (provenance: retail, local only) and makes a material. The project can then no longer be exported for sharing. Never upload it.'});
+teTool({id: 'rrg', title: 'Copy retail geometry region (LOCAL ONLY)', op: 'retail_region', fields: [['track', 'retail track', 'text', 'US/C1_V1'],
+  ['rect', 'retail rect x0 z0 x1 z1 (retail coordinates)', 'nums', '960, 840, 1020, 900'], ['target', 'target x y z here (street level lands at y)', 'nums', ''],
+  ['angle', 'turn (deg)', 'num', 0], ['max_tris', 'max triangles', 'num', 20000], ['id', 'existing copy (re-generate)', 'cons:retail_copy', '']],
+  note: 'Copies the opaque render triangles (buildings, sidewalks, signs...) with their textures and baked light. Skipped: cut-out / blended parts and props (lampposts are props: not decoded yet). All checks apply: unit regions, floor overlaps, per-unit memory (set LOD to identity for detailed retail geometry). LOCAL ONLY.'});
+teTool({id: 'walk', title: 'Walkthrough status (read only)', op: 'walkthrough', preview: false, fields: []});
+teTool({id: 'env', title: 'Donor environment: sky / sun / light (read only)', op: 'environment_view', preview: false, fields: [],
+  note: 'Decoded from the donor track\u2019s enviro.dat with a verified reader (byte-identical round trip). The build copies it unchanged; nothing here is editable yet (no writer, fog fields are hypotheses). The 3D view has no sky / fog / lighting.'});
+// task groups (display order), the tool ids in each, and the guide topic of each group
+const TE_GROUPS = [['Race layout', 'race', ['rprof', 'routing', 'xs']], ['Roads', 'roads', ['proad', 'ends', 'junc', 'join']],
+  ['Terrain', 'terrain', ['hterr', 'brush']], ['Buildings / scenery', 'buildings', ['bldg', 'tree', 'plib', 'pplace', 'pscat', 'pref']],
+  ['Materials', 'materials', ['timp', 'mnew', 'uvx', 'paint']], ['Mesh', 'mesh', ['minfo', 'mxf', 'mdel', 'mtri', 'msub', 'mext', 'mfill']],
+  ['Streaming', 'streaming', ['srep', 'lodp', 'sset']], ['Inspect', 'problems', ['diag', 'env']], ['Retail copy (local only)', 'limits', ['rtl', 'rtx', 'rrg']],
+  ['Project / test', 'project', ['chain', 'prep', 'start', 'cmp', 'bk', 'bkr', 'bkp', 'ver', 'exp', 'shr', 'imp', 'walk']]];
+const TE_PRESETS = {
+  proad: [['Two-lane country road', {widths: [10, 10], banks: [0, 0], step: 4}], ['Wide boulevard', {widths: [18, 18], banks: [0, 0]}],
+          ['Banked curve (off-route)', {widths: [12, 12, 12], banks: [0, 6, 0]}], ['Narrowing lane', {widths: [12, 8], banks: [0, 0]}]],
+  rprof: [['Flat circuit', {profile: {sloped: false, widths: null, banks: null, outer_gaps: []}}], ['Hilly circuit', {profile: {sloped: true, widths: null, banks: null, outer_gaps: []}}]],
+  junc: [['T junction', {arms: [{angle: 0, width: 8, length: 14}, {angle: 90, width: 8, length: 14}, {angle: 270, width: 8, length: 14}]}],
+         ['Crossroads', {arms: [{angle: 0, width: 8, length: 14}, {angle: 90, width: 8, length: 14}, {angle: 180, width: 8, length: 14}, {angle: 270, width: 8, length: 14}]}],
+         ['Y fork', {arms: [{angle: 0, width: 8, length: 14}, {angle: 150, width: 8, length: 14}, {angle: 210, width: 8, length: 14}]}]],
+  hterr: [['Flat infield (5 m cells)', {cell: 5, height: 19.9}], ['Coarse field (10 m cells)', {cell: 10, height: 19.9}]],
+  brush: [['Gentle hill', {mode: 'raise', radius: 30, strength: 3}], ['Smooth', {mode: 'smooth', radius: 20, strength: 0.8}],
+          ['Dig a dip', {mode: 'lower', radius: 15, strength: 1.5}], ['Flatten to 20 m', {mode: 'flatten', radius: 15, strength: 1, target: 20}]],
+  sset: [['Default (decimated LOD, all visible)', {lod_mode: 'decimate', e_max: 0.3, pvs_mode: 'all'}]]};
+for (const [id, p] of Object.entries(TE_PRESETS)) { const t = TE_TOOLS.find(x => x.id === id); if (t) t.presets = p; }
+function tePreset(t, vals) { for (const [key, v] of Object.entries(vals)) { const f = t.fields.find(x => x[0] === key), el = $(`te_${t.id}_${key}`); if (!f || !el) continue;
+    const kind = f[2];
+    if (kind === 'bool') el.checked = !!v;
+    else if (kind === 'json') el.value = JSON.stringify(v);
+    else if (kind === 'nums') el.value = (v || []).join(', ');
+    else el.value = v === null || v === undefined ? '' : v; } }
+async function teGuide(topic) { const r = await api('/api/layout', {op: 'guide_section', topic}); const b = $('helpbox'); b.style.display = 'block';
+  b.textContent = r.ok ? r.text : ('guide: ' + r.error); return r; }
+function teOpen(id) { const d = $('tet_' + id); if (!d) return null; d.open = true; d.scrollIntoView({block: 'nearest'}); return d; }
+async function wtRefresh() { const r = await api('/api/layout', {op: 'walkthrough'}), box = $('wtlist'); if (!r.ok) { box.textContent = r.error; return r; }
+  box.innerHTML = ''; for (const s of r.steps) { const d = document.createElement('div'); d.className = 'wtstep' + (s.done ? ' done' : '') + (r.next === s.step ? ' next' : '');
+    d.innerHTML = `<span>${s.done ? '&#10003;' : '&#9675;'}</span> <b>${s.title}</b> <span class="note">${s.help}</span> `;
+    if (s.tool) { const b = document.createElement('button'); b.textContent = 'Open tool'; b.onclick = () => teOpen(s.tool); d.appendChild(b); }
+    const g = document.createElement('button'); g.textContent = 'Guide'; g.onclick = () => teGuide(s.guide); d.appendChild(g); box.appendChild(d); }
+  $('wtsum').textContent = r.summary_lines[0]; return r; }
 function teCons(kind) { return Object.entries((ST.scene && ST.scene.constructs) || {}).filter(([k, v]) => v.meta.kind === kind || (kind === '*')).map(([k]) => k); }
 function teInput(t, f) { const [key, label, kind, def] = f, id = `te_${t.id}_${key}`; let h;
-  if (kind === 'pts') h = `<div>${label} <button data-pick="${id}">Click points</button></div><textarea id="${id}" rows="3" style="width:95%">${def}</textarea>`;
+  if (kind === 'pts' || kind === 'pts2') h = `<div>${label} <button data-pick="${id}">Click points</button></div><textarea id="${id}" rows="3" style="width:95%">${def}</textarea>`;
   else if (kind === 'faces' || kind === 'verts') h = `<div>${label} <button data-fpick="${id}" data-mode="${kind}">Pick on the mesh</button></div><textarea id="${id}" rows="1" style="width:95%">${def}</textarea>`;
   else if (kind === 'xz') h = `<div>${label} <button data-pick="${id}">Click</button></div><textarea id="${id}" rows="1" style="width:95%">${def}</textarea>`;
   else if (kind === 'bool') h = `<label><input type="checkbox" id="${id}" ${def ? 'checked' : ''}> ${label}</label>`;
@@ -855,7 +1094,7 @@ function teInput(t, f) { const [key, label, kind, def] = f, id = `te_${t.id}_${k
   else if (kind === 'groups') h = `<div class="note">${label}: the current selection (Ctrl-click face groups)</div>`;
   else h = `<div>${label} <input type="${kind === 'num' ? 'number' : 'text'}" id="${id}" value="${def}" style="width:${kind === 'num' ? 70 : 200}px"></div>`;
   return h; }
-function teFill() { for (const s of document.querySelectorAll('#tetools select')) { const k = s.dataset.kind, cur = s.value || s.dataset.def; let opts;
+function teFill() { for (const s of document.querySelectorAll('#tetools select[data-kind]')) { const k = s.dataset.kind, cur = s.value || s.dataset.def; let opts;
     if (k === 'mat') opts = (ST.scene && ST.scene.assignable) || [];
     else if (k.startsWith('cons:')) opts = [''].concat(teCons(k.slice(5)));
     else opts = k.slice(4).split('|');
@@ -864,6 +1103,7 @@ function teBody(t) { const b = {op: t.op}; if (t.mop) b.mesh_op = t.mop;
   for (const [key, label, kind] of t.fields) { const el = $(`te_${t.id}_${key}`); if (kind === 'groups') { b[key] = ST.multi.slice(); continue; } if (!el) continue;
     let v;
     if (kind === 'pts') { v = parsePts(el.value); if (key === 'position' || key === 'centre') v = v.length ? v[v.length - 1] : undefined; }
+    else if (kind === 'pts2') { v = parsePts(el.value).map(q => q.length === 3 ? [q[0], q[2]] : q); if (!v.length) v = undefined; }
     else if (kind === 'faces' || kind === 'verts') { const q = el.value.split(/[\s,;]+/).filter(t => t).map(Number); v = q.length ? q : undefined; }
     else if (kind === 'xz') { const q = parsePts(el.value).filter(p => p.length >= 2); v = q.length ? (q[q.length - 1].length === 3 ? [q[q.length - 1][0], q[q.length - 1][2]] : q[q.length - 1]) : undefined; }
     else if (kind === 'bool') v = el.checked;
@@ -884,36 +1124,51 @@ function teXsec(r) { const box = $('xsec'), xs = r && r.cross_sections || r && r
 async function teRun(t, apply) { let b; try { b = teBody(t); } catch (e) { layoutShow({}, ['NOT STARTED: ' + e.message], 'bad'); return null; }
   ST.ppick = null; ST.fpick = null; let r;
   if (t.preview === false) { r = await api('/api/layout', b); layoutOverlay(r); layoutShow(r, r.ok ? [t.title + ' (read only):'].concat(fmtLayout(r), [JSON.stringify(teBrief(r), null, 1).slice(0, 4000)]) : ['REFUSED: ' + r.error], r.ok ? '' : 'bad'); }
-  else if (apply) { if (t.confirm && !t.confirm(b)) return null; r = await layoutApply(b); if (r && r.ok) teFill(); }
+  else if (apply) { if (t.confirm && !t.confirm(b)) return null; r = await layoutApply(b); if (r && r.ok) { teFill(); if ($('wtbox').open) wtRefresh(); } }
   else r = await layoutPreview(b);
   if (t.xsec) teXsec(r);
   if (r && r.items) { const box = $('xsec'); box.style.display = 'block'; box.innerHTML = '';
     r.items.forEach((it, i) => { const d = document.createElement('div'); d.className = it.ok ? 'flag' : 'vitem'; d.textContent = (it.ok ? 'ok  ' : 'CHECK  ') + it.check + ': ' + it.text;
+      if (!it.ok && it.fix) { const f = document.createElement('div'); f.className = 'note fix'; f.textContent = 'How to fix: ' + it.fix; d.appendChild(f);
+        if (it.tool) { const ob = document.createElement('button'); ob.textContent = 'Open tool'; ob.onclick = ev => { ev.stopPropagation(); teOpen(it.tool); }; f.appendChild(ob); } }
       d.onclick = () => { ST.lay = {lost: (it.faces || []).map(c => ({corners: c})), points: it.focus ? [it.focus] : null}; if (it.focus) { const o = O(it.focus); ST.cam.tgt = [o[0], o[1], o[2]]; } build(); draw(); };
       box.appendChild(d); }); }
   if (r && r.prefabs) { const box = $('xsec'); box.style.display = 'block'; box.innerHTML = r.prefabs.map(x => `<div style="display:inline-block;margin:3px;text-align:center;font-size:11px"><img alt="${x.name}" src="data:image/svg+xml;utf8,${encodeURIComponent(x.preview_svg || '')}"><br>${x.name} (${x.faces || 0})</div>`).join(''); }
   return r; }
 function teBrief(r) { const o = {}; for (const [k, v] of Object.entries(r)) if (!['new_faces', 'state', 'cross_sections', 'sections', 'markers', 'route_lines', 'regions'].includes(k)) o[k] = v; return o; }
-function teRender() { const box = $('tetools'); box.innerHTML = '';
-  for (const t of TE_TOOLS) { const d = document.createElement('details'); d.id = 'tet_' + t.id; d.dataset.search = (t.title + ' ' + (t.note || '') + ' ' + t.op).toLowerCase();
-    d.innerHTML = `<summary><b>${t.title}</b></summary>` + t.fields.map(f => teInput(t, f)).join('') +
-      (t.preview === false ? `<div><button data-run="1">Run</button></div>` : `<div><button data-prev="1">Preview</button> <button data-apply="1">Apply</button></div>`) +
-      (t.note ? `<div class="note">${t.note}</div>` : '');
-    d.querySelector('[data-run]') && (d.querySelector('[data-run]').onclick = () => teRun(t, false));
-    d.querySelector('[data-prev]') && (d.querySelector('[data-prev]').onclick = () => teRun(t, false));
-    d.querySelector('[data-apply]') && (d.querySelector('[data-apply]').onclick = () => teRun(t, true));
-    for (const b of d.querySelectorAll('[data-fpick]')) b.onclick = () => { const on = !(ST.fpick && ST.fpick.id === b.dataset.fpick); ST.fpick = on ? {id: b.dataset.fpick, mode: b.dataset.mode} : null; ST.ppick = null; b.textContent = on ? 'Stop picking' : 'Pick on the mesh'; };
-    for (const b of d.querySelectorAll('[data-pick]')) b.onclick = () => { ST.ppick = ST.ppick === b.dataset.pick ? null : b.dataset.pick; ST.wpick = null; ST.bpick = null; b.textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
-    box.appendChild(d); }
+function teToolEl(t) { const d = document.createElement('details'); d.id = 'tet_' + t.id; d.className = 'tet';
+  d.dataset.search = (t.title + ' ' + (t.note || '') + ' ' + t.op + ' ' + (t.group || '')).toLowerCase();
+  const pre = t.presets && t.presets.length ? `<div>Preset <select data-preset="1"><option value="">(choose)</option>${t.presets.map((x, i) => `<option value="${i}">${x[0]}</option>`).join('')}</select></div>` : '';
+  d.innerHTML = `<summary><b>${t.title.replace(/^\d+ /, '')}</b></summary>` + pre + t.fields.map(f => teInput(t, f)).join('') +
+    (t.preview === false ? `<div><button data-run="1">Run</button></div>` : `<div><button data-prev="1">Preview</button> <button data-apply="1">Apply</button></div>`) +
+    (t.note ? `<div class="note">${t.note}</div>` : '');
+  const ps = d.querySelector('[data-preset]'); if (ps) ps.onchange = () => { if (ps.value !== '') tePreset(t, t.presets[+ps.value][1]); };
+  d.querySelector('[data-run]') && (d.querySelector('[data-run]').onclick = () => teRun(t, false));
+  d.querySelector('[data-prev]') && (d.querySelector('[data-prev]').onclick = () => teRun(t, false));
+  d.querySelector('[data-apply]') && (d.querySelector('[data-apply]').onclick = () => teRun(t, true));
+  for (const b of d.querySelectorAll('[data-fpick]')) b.onclick = () => { const on = !(ST.fpick && ST.fpick.id === b.dataset.fpick); ST.fpick = on ? {id: b.dataset.fpick, mode: b.dataset.mode} : null; ST.ppick = null; b.textContent = on ? 'Stop picking' : 'Pick on the mesh'; };
+  for (const b of d.querySelectorAll('[data-pick]')) b.onclick = () => { ST.ppick = ST.ppick === b.dataset.pick ? null : b.dataset.pick; ST.wpick = null; ST.bpick = null; b.textContent = ST.ppick ? 'Stop picking' : 'Click points'; };
+  return d; }
+function teRender() { const box = $('tetools'); box.innerHTML = ''; const placed = new Set();
+  const groups = TE_GROUPS.map(([name, topic, ids]) => [name, topic, ids.map(i => TE_TOOLS.find(t => t.id === i)).filter(Boolean)]);
+  const rest = TE_TOOLS.filter(t => !TE_GROUPS.some(g => g[2].includes(t.id))); if (rest.length) groups.push(['Other', 'limits', rest]);
+  for (const [name, topic, tools] of groups) { const g = document.createElement('div'); g.className = 'tegrp'; g.dataset.group = name;
+    g.innerHTML = `<div class="tegh"><b>${name}</b> <span class="note">${tools.length} tool(s)</span> <button data-guide="${topic}">Guide</button></div>`;
+    g.querySelector('[data-guide]').onclick = () => teGuide(topic);
+    for (const t of tools) { if (placed.has(t.id)) continue; placed.add(t.id); t.group = name; g.appendChild(teToolEl(t)); }
+    box.appendChild(g); }
   teFill(); }
 for (const id of ['L_wire', 'L_normals']) $(id).onchange = () => { build(); draw(); };
+$('wtref').onclick = () => wtRefresh(); $('wtguide').onclick = () => teGuide('first');
 const HELP = ['Shortcuts (not while typing in a field):', '  drag: orbit   right-drag / shift-drag: pan   wheel: zoom   W A S D Q E: fly',
   '  click: select   Ctrl-click: add / remove a face group   F: focus the selection   G: wireframe   N: stored normals',
   '  Ctrl+Z / Ctrl+Y: undo / redo (one step per operation)   Ctrl+S: save   Esc: stop picking   ?: this help', '',
   'Every tool: Preview (nothing changes) -> Apply (with that preview). Refusals change nothing. Save is all-or-nothing and keeps a',
   'backup of the previous save (Workbench state). Build -> Validate -> Stage uses the kit gates; "Prepare test" writes a test plan',
   'and package record only - nothing is launched. Snapping / axis locks: in the move, mesh and placement tools.',
-  'Click filter: restrict clicks to one material or one construction block kind (roads, terrain, ...).'];
+  'Click filter: restrict clicks to one material or one construction block kind (roads, terrain, ...).',
+  'Tools are grouped by task (Race layout, Roads, Terrain, Buildings / scenery, Materials, Mesh, Streaming, Inspect, Project / test);',
+  'each group has a Guide button, many tools a Preset list. The walkthrough at the top shows the next step. Units: metres, degrees.'];
 $('helpbtn').onclick = () => { const b = $('helpbox'); b.style.display = b.style.display === 'none' ? 'block' : 'none'; b.textContent = HELP.join('\n'); };
 function pickFilterFill() { const sel = $('pickfilter'), cur = sel.value; const S = ST.scene || {}; let h = '<option value="">any face group</option>';
   for (const n of Object.keys(S.materials || {})) h += `<option value="mat:${n}">material ${n}</option>`;
@@ -922,7 +1177,9 @@ function pickFilterFill() { const sel = $('pickfilter'), cur = sel.value; const 
 function pickFilterApply() { const v = $('pickfilter').value; ST.pickMat = v.startsWith('mat:') ? v.slice(4) : null;
   ST.pickGroups = v.startsWith('kind:') ? new Set(Object.values((ST.scene && ST.scene.constructs) || {}).filter(c => c.meta.kind === v.slice(5)).flatMap(c => c.groups)) : null; }
 $('pickfilter').onchange = pickFilterApply;
-$('tesearch').oninput = () => { const q = $('tesearch').value.toLowerCase(); for (const d of $('tetools').children) d.style.display = !q || d.dataset.search.includes(q) ? '' : 'none'; };
+$('tesearch').oninput = () => { const q = $('tesearch').value.toLowerCase();
+  for (const d of document.querySelectorAll('#tetools details.tet')) d.style.display = !q || d.dataset.search.includes(q) || d.closest('.tegrp').dataset.group.toLowerCase().includes(q) ? '' : 'none';
+  for (const g of document.querySelectorAll('#tetools .tegrp')) g.style.display = [...g.querySelectorAll('details.tet')].some(d => d.style.display !== 'none') ? '' : 'none'; };
 async function doUndo() { const r = await api('/api/undo', {}); shown(r, 'undone: ' + r.undone); if (r.ok) await refresh(true); return r; }
 async function doRedo() { const r = await api('/api/redo', {}); shown(r, 'redone: ' + r.redone); if (r.ok) await refresh(true); return r; }
 $('apply').onclick = () => ST.sel && doEdit(ST.sel.kind, ST.sel.index, [+$('dx').value, +$('dy').value, +$('dz').value]);
@@ -1000,7 +1257,10 @@ function setupRetailUi() {
   $('flagsh').textContent = 'Not decoded / unsupported data';
 }
 // ---------------------------------------------------------------- start + scripted self tests (?selftest=1)
-async function waitTex() { for (let i = 0; i < 150 && ST.texLoaded < ST.texWanted; i++) await new Promise(r => setTimeout(r, 100)); }
+async function waitTex() { for (let i = 0; i < 150 && ST.texLoaded + (ST.texErrors || []).length < ST.texWanted; i++) await new Promise(r => setTimeout(r, 100)); }
+// rta2: variation over the WHOLE view (a 64 x 64 sample grid), for views whose centre may be empty (the infield of a loop)
+function pixelsVaryView() { draw(); const w = cv.width, h = cv.height, px = new Uint8Array(4 * w * h); gl.readPixels(0, 0, w, h, gl.RGBA, gl.UNSIGNED_BYTE, px);
+  const colours = new Set(); for (let y = 0; y < 64; y++) for (let x = 0; x < 64; x++) { const i = 4 * (Math.floor(y * h / 64) * w + Math.floor(x * w / 64)); colours.add(px[i] << 16 | px[i + 1] << 8 | px[i + 2]); } return colours.size; }
 function pixelsVary() { draw(); const px = new Uint8Array(4 * 64 * 64); gl.readPixels(Math.floor(cv.width / 2) - 32, Math.floor(cv.height / 2) - 32, 64, 64, gl.RGBA, gl.UNSIGNED_BYTE, px);
   const colours = new Set(); for (let i = 0; i < px.length; i += 4) colours.add(px[i] << 16 | px[i + 1] << 8 | px[i + 2]); return colours.size; }
 // v0.18: Ctrl-click multi-selection, count / highlight, snapping, isolate vs keep-connected (preview first), clear
@@ -1230,8 +1490,8 @@ async function selftestScenery(ok, C0) {
   ST.lay = null; $('layout_out').style.display = 'none'; build(); draw(); }
 // TE queue: the authoring panel (generic tools over the real ops), a profiled road through it, diagnostics, overlays, help, filter
 async function selftestTE(ok, C0) {
-  const n = TE_TOOLS.length, shown = () => [...$('tetools').children].filter(d => d.style.display !== 'none').length;
-  ok('TE panel: every tool rendered as a form', n >= 30 && $('tetools').children.length === n, n + ' tools');
+  const n = TE_TOOLS.length, shown = () => [...document.querySelectorAll('#tetools details.tet')].filter(d => d.style.display !== 'none').length;
+  ok('TE panel: every tool rendered as a form, grouped by task', n >= 38 && document.querySelectorAll('#tetools details.tet').length === n && document.querySelectorAll('#tetools .tegrp').length === TE_GROUPS.length, n + ' tools in ' + document.querySelectorAll('#tetools .tegrp').length + ' groups');
   $('tesearch').value = 'junction'; $('tesearch').oninput(); const nj = shown(); $('tesearch').value = ''; $('tesearch').oninput();
   ok('tool search filters the list', nj >= 1 && nj < n && shown() === n, nj + ' matching "junction"');
   const t = TE_TOOLS.find(x => x.id === 'proad');
@@ -1249,19 +1509,61 @@ async function selftestTE(ok, C0) {
   const it = dg.items.findIndex(x => x.faces && x.faces.length); if (it >= 0) items[it].onclick();
   ok('clicking an item highlights its faces', it < 0 || (ST.lines.lf.n > 0), it < 0 ? 'no item with faces' : dg.items[it].check);
   $('L_wire').checked = true; $('L_normals').checked = true; build(); draw();
-  ok('wireframe + stored normals overlays drawn', ST.lines.wire.n > 0 && ST.lines.nok.n > 0, `${ST.ovl.wire} triangles, ${ST.ovl.normals} normals, ${ST.ovl.bad} disagree`);
+  ok('wireframe + stored normals overlays drawn (chunked)', ST.ovl.drawn_tris > 0 && ST.ovl.normals > 0 && ST.ovlC.chunks.some(c => c.w && c.ok), `${ST.ovl.drawn_tris} of ${ST.ovl.total} triangles in ${ST.ovl.drawn}/${ST.ovl.chunks} chunks, ${ST.ovl.normals} normals, ${ST.ovl.bad} disagree, build ${ST.ovl.build_ms} ms`);
   $('L_wire').checked = false; $('L_normals').checked = false; build(); draw();
   $('helpbtn').onclick(); ok('help / shortcuts shown', $('helpbox').style.display === 'block' && /Ctrl\+S/.test($('helpbox').textContent), ''); $('helpbtn').onclick();
   ok('click filter offers materials and block kinds', [...$('pickfilter').options].some(o => o.value === 'mat:asphalt') && [...$('pickfilter').options].some(o => o.value === 'kind:road'), $('pickfilter').options.length + ' options');
   await doUndo(); ok('undo back to the opened bytes', ST.scene.state.content_sha256 === C0, '');
+  await selftestTE33(ok, C0);
   ST.lay = null; $('layout_out').style.display = 'none'; $('xsec').style.display = 'none'; build(); draw(); }
+// v0.33: presets, guide sections, walkthrough, building through the panel, fix hints, compaction preview, overlay benchmark
+async function selftestTE33(ok, C0) {
+  const tb = TE_TOOLS.find(x => x.id === 'bldg'), ps = $('tet_bldg').querySelector('[data-preset]');
+  ps.value = '0'; ps.onchange(); ok('preset fills the form (garage)', $('te_bldg_height').value === '6' && JSON.parse($('te_bldg_openings').value)[0].width === 6, $('te_bldg_openings').value);
+  const g = await teGuide('buildings'); ok('group guide section shown', g.ok && /Building/.test($('helpbox').textContent), g.sections ? g.sections.join(', ') : g.error); $('helpbox').style.display = 'none';
+  const w = await wtRefresh(); ok('walkthrough lists the steps with done / next', w.ok && $('wtlist').children.length === w.steps.length && w.steps.length >= 8, w.summary_lines[0]);
+  $('te_bldg_footprint').value = '-6040 20 -6015\n-6020 20 -6015\n-6020 20 -6003\n-6040 20 -6003';
+  const u0 = ST.scene.state.undo.length, bp = await teRun(tb, false);
+  ok('building preview through the panel (nothing changed)', bp && bp.ok && ST.scene.state.undo.length === u0 && bp.openings === 1, bp && (bp.ok ? bp.summary_lines[0] : bp.error));
+  const ba = await teRun(tb, true);
+  ok('building applied (one undo step)', ba && ba.ok && ST.scene.state.undo.length === u0 + 1, ba && (ba.ok ? ba.label : ba.error));
+  const dg = await teRun(TE_TOOLS.find(x => x.id === 'diag'), false);
+  const bad = dg.items.filter(x => !x.ok), fixes = document.querySelectorAll('#xsec .fix').length;
+  ok('failing problems carry how-to-fix text', fixes === bad.filter(x => x.fix).length && bad.every(x => x.fix), `${bad.length} to look at, ${fixes} fix line(s)`);
+  const cp = await teRun(TE_TOOLS.find(x => x.id === 'cmp'), false); ok('compaction preview (nothing changed)', cp && cp.ok && ST.scene.state.undo.length === u0 + 1, cp && (cp.ok ? cp.summary_lines[0] : cp.error));
+  $('L_wire').checked = true; $('L_normals').checked = true; ST.ovlC && ovlFree(); build(); const t0 = performance.now(); draw(); const d1 = performance.now() - t0;
+  ST.cam.dist = 30; draw(); const near = ST.ovl.drawn; ST.cam.dist = 1500; ST.cam.pitch = 1.4; draw(); const far = ST.ovl.drawn;
+  window.BENCH = {total_tris: ST.ovl.total, chunks: ST.ovl.chunks, build_ms: ST.ovl.build_ms, first_frame_ms: Math.round(d1), draw_ms: ST.ovl.draw_ms, drawn_near: near, drawn_far: far};
+  ok('overlay chunks culled by view (close view draws fewer chunks than the overview)', near <= far && ST.ovl.total > 0, JSON.stringify(window.BENCH));
+  $('L_wire').checked = false; $('L_normals').checked = false; build(); draw();
+  await doUndo(); ok('undo the building', ST.scene.state.undo.length === u0, ''); }
+// v0.33 overlay benchmark (sections=bench): chunk build, a selection change (cache), frames near / far, with gl.finish()
+async function selftestBench(ok) {
+  const frame = () => { const t = performance.now(); draw(); gl.finish(); return performance.now() - t; };
+  const avg = (f, n) => { let s = 0; for (let i = 0; i < n; i++) s += f(); return Math.round(s / n * 100) / 100; };
+  const tris = Object.values(ST.meshes).reduce((s, m) => s + (m.grp ? m.grp.length : 0), 0);
+  ST.cam.pitch = 1.4; ST.cam.dist = 2500; $('L_wire').checked = false; $('L_normals').checked = false; build();
+  const base = avg(frame, 10);
+  $('L_wire').checked = true; $('L_normals').checked = true; ovlFree();
+  let t = performance.now(); build(); const tBuild = performance.now() - t;
+  t = performance.now(); build(); const tSel = performance.now() - t;
+  const far = avg(frame, 10), farDrawn = ST.ovl.drawn_tris, farChunks = ST.ovl.drawn, budget = ST.ovl.budget_hit;
+  ST.cam.dist = 40; ST.cam.pitch = 0.5; const near = avg(frame, 10), nearDrawn = ST.ovl.drawn_tris, nearChunks = ST.ovl.drawn;
+  window.BENCH = {triangles: tris, chunks: ST.ovl.chunks, build_with_overlay_ms: Math.round(tBuild), rebuild_after_selection_ms: Math.round(tSel),
+    frame_no_overlay_ms: base, frame_overview_ms: far, overview_drawn_tris: farDrawn, overview_chunks: farChunks, overview_budget_hit: budget,
+    frame_close_ms: near, close_drawn_tris: nearDrawn, close_chunks: nearChunks, old_cap: 60000};
+  ok('overlay benchmark', ST.ovl.total === tris && farDrawn >= Math.min(tris, 60000) && nearDrawn < farDrawn, JSON.stringify(window.BENCH));
+  $('L_wire').checked = false; $('L_normals').checked = false; build(); draw(); }
 async function selftestAuthored(ok) {
   const S0 = ST.scene.state.sha256, C0 = ST.scene.state.content_sha256;
   ok('webgl context', !!gl, gl && gl.getParameter(gl.VERSION));
-  const want = Object.values(ST.scene.materials).filter(m => m.texture_ok).length;
-  await waitTex(); ok('textures loaded', ST.texLoaded === want && want > 0, `${ST.texLoaded} / ${want}`);
+  // rta2: the page loads a texture for every material that HAS faces (meshes); materials without faces are listed, not counted
+  const used = Object.keys(ST.scene.mesh.materials).filter(m => ST.scene.materials[m] && ST.scene.materials[m].texture_ok);
+  const unused = Object.keys(ST.scene.materials).filter(m => !(m in ST.scene.mesh.materials));
+  await waitTex(); ok('textures loaded', ST.texLoaded === used.length && used.length > 0 && !(ST.texErrors || []).length,
+    `${ST.texLoaded} / ${used.length} used materials; errors ${JSON.stringify(ST.texErrors || [])}; materials without faces: ${unused.join(', ') || 'none'}`);
   ok('meshes', Object.keys(ST.meshes).length === Object.keys(ST.scene.mesh.materials).length, Object.keys(ST.meshes).length);
-  const nc = pixelsVary(); ok('rendered pixels vary (not a blank canvas)', nc > 8, nc);
+  const nc = pixelsVaryView(); ok('rendered pixels vary (not a blank canvas)', nc > 8, `${nc} colours in a 64 x 64 grid over the whole view`);
   for (const id of ['L_mesh','L_collision','L_units','L_route','L_starts']) { $(id).click(); draw(); $(id).click(); draw(); }
   ok('layer toggles', true, 'each layer toggled off / on');
   ST.cam.pitch = 1.4; ST.cam.dist = 900; ST.cam.tgt = [0,0,0]; draw();
@@ -1316,6 +1618,9 @@ async function selftestAuthored(ok) {
   if (inSec('race')) { await selftestRace(ok, C0); select('group', grp); }
   if (inSec('scenery')) { await prefabList(); await selftestScenery(ok, C0); select('group', grp); }
   if (inSec('te')) { await selftestTE(ok, C0); select('group', grp); }
+  if (SECTIONS && SECTIONS.has('rta')) await selftestRta(ok, C0);
+  if (SECTIONS && SECTIONS.has('design')) await selftestDesign(ok, C0);       // rta2: only when asked       // rta: only when asked (needs game data + catalogue)
+  if (SECTIONS && SECTIONS.has('bench')) await selftestBench(ok);       // v0.33: only when asked for (large-project benchmark)
   if (inSec('props')) {
   // v0.16 material property edits
   $('mprops').onclick(); ok('group -> its material\'s property box', ST.sel && ST.sel.kind === 'material' && ST.sel.index === 'grass' && $('propbox').style.display === 'block', $('propinfo').textContent);
@@ -1366,7 +1671,8 @@ async function alphaProbe(ti, mode) {
 }
 async function selftestRetail(ok) {
   ok('webgl context + 32-bit indices', !!gl && !!U32, gl && gl.getParameter(gl.VERSION));
-  ok('mesh groups uploaded', Object.keys(ST.meshes).length === ST.scene.mesh.length && ST.scene.mesh.length > 0, Object.keys(ST.meshes).length);
+  { const nSec = Object.values(ST.meshes).filter(m => !m.obj).length;                               // RTA4: object-layer groups (m.obj) are not sections
+    ok('mesh groups uploaded', nSec === ST.scene.mesh.length && ST.scene.mesh.length > 0, nSec + ' sections + ' + (Object.keys(ST.meshes).length - nSec) + ' object groups'); }
   await waitTex(); ok('textures loaded', ST.texLoaded === ST.texWanted && ST.texWanted > 0, `${ST.texLoaded} / ${ST.texWanted}`);
   const nc = pixelsVary(); ok('rendered pixels vary (not a blank canvas)', nc > 8, nc);
   // v0.16 transparency: representative materials (picked by texture name for the TEST only; the class comes from +0x24)
@@ -1396,6 +1702,294 @@ async function selftestRetail(ok) {
   const refused = []; for (const [p, b] of tries) { const r = await api(p, b); refused.push(!r.ok && /READ ONLY/.test(r.error || '')); }
   ok('every write path refused (edit, assign, colour, move group, preview, undo, save, stage)', refused.every(Boolean), JSON.stringify(refused));
 }
+// ---------------------------------------------------------------- rta: Retail-style authoring panel (Workbench 0.33 retail-style authoring, 2026-11-02)
+const RTA = {job: null, pv: null, pts: [], ctr: [-6000, 20, -6000], ax: null};
+const rL = (r, op) => (r.summary_lines || []).join('\n') || (r.ok ? 'ok' : 'REFUSED (nothing changed): ' + r.error);
+async function rtaOp(body) { return api('/api/layout', body); }
+function rtaOut(id, txt, cls) { const o = $(id); o.style.display = 'block'; o.textContent = txt; o.className = 'note ' + (cls || ''); }
+async function rtaWait(r, outId) {          // poll a background job: progress bar, message, cancel button
+  if (!r.ok) { rtaOut(outId, 'REFUSED (nothing changed): ' + r.error, 'bad'); return null; }
+  RTA.job = r.job; $('rtacatx').disabled = false;
+  for (;;) {
+    const s = await rtaOp({op: 'rta_job_status', job: r.job, wait: 2});
+    $('rtaprog').value = s.progress || 0; $('rtajobmsg').textContent = `${s.kind}: ${s.message || ''}`;
+    if (s.job_state !== 'running') { $('rtacatx').disabled = true; RTA.job = null;
+      if (s.job_state !== 'done') { rtaOut(outId, `${s.job_state.toUpperCase()} (nothing changed): ${s.error}`, 'bad'); return null; }
+      $('rtajobmsg').textContent = `${s.kind}: done in ${s.seconds} s`; return s; }
+  }
+}
+async function rtaCatStatus() {
+  const r = await rtaOp({op: 'rta_catalogue_status'}); if (!r.ok) { $('rtacat').textContent = r.error; return r; }
+  const done = r.tracks.filter(t => t.catalogued).map(t => t.track);
+  $('rtacat').textContent = rL(r) + (r.not_supported.length ? `; not supported: ${r.not_supported.map(x => x.track + ' (' + x.why + ')').join('; ')}` : '')
+    + (done.length ? '' : ' - press "Create" (about 5 minutes the first time, seconds afterwards; your game data is only read)');
+  for (const id of ['rtatrk', 'rtadtrk', 'rtaxtrk']) { const s = $(id), keep = s.value, first = id === 'rtatrk' ? '<option value="">all tracks</option>' : '';
+    s.innerHTML = first + (id === 'rtaxtrk' ? r.tracks : r.tracks.filter(t => t.catalogued)).map(t => `<option>${t.track}</option>`).join(''); if (keep) s.value = keep; }
+  return r;
+}
+async function rtaStyles() {
+  const r = await rtaOp({op: 'rta_styles'}); if (!r.ok) return r;
+  $('rtasty').innerHTML = r.styles.map(s => `<option value="${s.id}"${s.usable ? '' : ' disabled'}>${s.title}${s.usable ? '' : ' (' + (s.why_not || s.problems.join('; ')) + ')'}</option>`).join('');
+  return r;
+}
+function rtaTable(o) { return '<table style="font-size:11px">' + Object.entries(o).map(([k, v]) => `<tr><td>${k}</td><td>${typeof v === 'object' ? JSON.stringify(v).slice(0, 220) : v}</td></tr>`).join('') + '</table>'; }
+async function rtaStyleShow() {
+  const r = await rtaOp({op: 'rta_style_show', style: $('rtasty').value}); if (!r.ok) { $('rtastyout').textContent = r.error; return r; }
+  const s = r.style; $('rtaw').value = s.defaults.road_width_m;
+  $('rtastyout').innerHTML = `<b>${s.title}</b> - kind <b>${s.kind}</b>: ${s.kind_evidence}${s.name_note ? '<br>' + s.name_note : ''}`
+    + `<br><b>Measured</b> (read only, from ${s.source.track || 'no game data'}):` + rtaTable(s.measured)
+    + `<b>Palette</b> (why: ${Object.values(s.palette_why).join('; ').slice(0, 300)}):` + rtaTable(s.palette)
+    + '<b>Artistic defaults</b> (editable, not measured):' + rtaTable(s.defaults) + '<b>Builder limits</b><br>' + s.builder_limits.map(x => '- ' + x).join('<br>');
+  return r;
+}
+// route sketch: x right, z down (plan view), centred on the current route / template origin
+function rtaSk() { const c = $('rtasketch'), g = c.getContext('2d'), S = +$('rtascale').value, k = c.width / S;
+  g.clearRect(0, 0, c.width, c.height); g.strokeStyle = '#e2e2dc'; g.lineWidth = 1;
+  for (let m = -S; m <= S; m += 50) { const x = c.width / 2 + m * k, y = c.height / 2 + m * k; g.beginPath(); g.moveTo(x, 0); g.lineTo(x, c.height); g.stroke(); g.beginPath(); g.moveTo(0, y); g.lineTo(c.width, y); g.stroke(); }
+  const P = RTA.pts.map(p => [c.width / 2 + (p[0] - RTA.ctr[0]) * k, c.height / 2 + (p[2] - RTA.ctr[2]) * k]);
+  if (P.length) { g.strokeStyle = '#3a6ea5'; g.lineWidth = 2; g.beginPath(); P.forEach((p, i) => i ? g.lineTo(...p) : g.moveTo(...p)); if (P.length > 2) g.closePath(); g.stroke();
+    P.forEach((p, i) => { g.fillStyle = i ? '#3a6ea5' : '#c0392b'; g.beginPath(); g.arc(p[0], p[1], 4, 0, 7); g.fill(); }); }
+  g.fillStyle = '#555'; g.font = '10px sans-serif'; g.fillText(`grid 50 m; ${RTA.pts.length} point(s); red = point 0 (start, keep it on a straight)`, 4, c.height - 4);
+  $('rtapts').value = RTA.pts.map(p => p.map(v => +v.toFixed(1)).join(' ')).join('\n'); }
+function rtaPtsFromText() { RTA.pts = $('rtapts').value.split('\n').map(l => l.trim().split(/[\s,;]+/).map(Number)).filter(a => a.length >= 2 && a.every(isFinite))
+  .map(a => a.length === 2 ? [a[0], +$('rtay').value, a[1]] : a); rtaSk(); }
+async function rtaCurrent() { const r = await rtaOp({op: 'rta_route_current'}); if (r.ok) { RTA.ctr = r.centre; if (r.points) RTA.pts = r.points.map(p => p.slice()); rtaSk(); } return r; }
+function rtaBody() {
+  const ex = $('rtaex').value.split(';').map(s => s.trim().split(/[\s,]+/).map(Number)).filter(a => a.length === 4 && a.every(isFinite));
+  const posts = $('rtaposts').value.split(';').map(s => s.trim().split(/\s+/)).filter(a => a.length >= 2 && a[0])
+    .map(a => Object.assign({track: a[0], model: a[1], side: a[2] || 'both'}, a[3] ? {spacing_m: +a[3]} : {}, a[4] ? {start: +a[4]} : {}));
+  const prm = {road_width_m: +$('rtaw').value, building_density: +$('rtabd').value, tree_density: +$('rtatd').value, lamp_density: +$('rtald').value};
+  if (posts.length) prm.posts = posts;
+  return {op: 'rta_generate_preview', style: $('rtasty').value, points: RTA.pts, seed: +$('rtaseed').value, exclude: ex, params: prm,
+    parts: {lamps: $('rtapl').checked, buildings: $('rtapb').checked, trees: $('rtapt').checked}};
+}
+function rtaShowGen(s) {
+  const R = s.result, L = ['PREVIEW (the project is unchanged):', ...R.summary_lines, 'steps: ' + R.steps.join(' -> '),
+    `capacity: worst unit mesh ${R.worst_mesh_slot_pct} % / LOD ${R.worst_lod_slot_pct} % of the game's slot (capacity ${R.capacity_mode || 'game'}); ${R.rows} material rows (<= 83)`];
+  for (const p of R.problems) L.push('PROBLEM: ' + p);
+  for (const n of (R.capacity_info || [])) L.push('INFO: ' + n);
+  if (R.capacity_declare && Object.keys(R.capacity_declare).length) L.push('INFO: the package will declare ' + Object.entries(R.capacity_declare).map(([k, v]) => `${k} = ${v}`).join(', ') + ' in mod.toml [bmashup.capacity]: ' + (R.capacity_requires || []).join('; '));
+  rtaOut('rtagenout', L.join('\n'), R.problems.length ? 'bad' : 'warn');
+  const all = R.skipped || [], sk = all.filter(x => x.at), notes = all.filter(x => !x.at); const by = {}; sk.forEach(x => { by[x.skipped] = (by[x.skipped] || 0) + 1; });
+  $('rtaskip').innerHTML = notes.map(x => `<div class="warn">${x.part}: ${x.skipped}</div>`).join('') + (sk.length ? `<b>${sk.length} placement(s) skipped</b> (click a reason to see where): ` + Object.entries(by).map(([w, n], i) =>
+    `<div><a href="#" data-i="${i}">${n} x ${w}</a></div>`).join('') : 'no placement skipped');
+  $('rtaskip').querySelectorAll('a').forEach(a => a.onclick = e => { e.preventDefault(); const w = Object.keys(by)[+a.dataset.i];
+    const pts = sk.filter(x => x.skipped === w && x.at).map(x => x.at.length === 2 ? [x.at[0], (RTA.pts[0] || [0, 20])[1] + 1, x.at[1]] : x.at);
+    layoutOverlay({markers: pts}); $('editmsg').textContent = `${pts.length} marker(s): ${w}`; });
+}
+async function rtaGenerate() {
+  RTA.pv = null; $('rtaapply').disabled = true; rtaOut('rtagenout', 'generation preview running in the background (cancel with "Cancel")...', 'warn');
+  const s = await rtaWait(await rtaOp(rtaBody()), 'rtagenout'); if (!s) return null;
+  RTA.pv = {job: s.id, key: s.result.preview_key}; rtaShowGen(s); $('rtaapply').disabled = !!s.result.problems.length; return s;
+}
+async function rtaApply() { if (!RTA.pv) return null; const r = await rtaOp({op: 'rta_generate', job: RTA.pv.job, preview_key: RTA.pv.key});
+  rtaOut('rtagenout', rL(r), r.ok ? 'ok' : 'bad'); if (r.ok) { RTA.pv = null; $('rtaapply').disabled = true; layoutOverlay({}); await refresh(false); await rtaParts(); } return r; }
+async function rtaParts() {
+  const r = await rtaOp({op: 'rta_parts'}); if (!r.ok) { $('rtapartlist').textContent = r.error; return r; }
+  $('rtapartlist').innerHTML = r.parts.length ? r.parts.map(p => `<div><b>${p.id}</b> ${p.items} item(s), seed ${p.seed}${p.locked ? ' LOCKED' : ''}${p.manually_edited ? ' <span class="warn">edited by hand</span>' : ''}
+    <button data-a="lock" data-p="${p.id}">${p.locked ? 'Unlock' : 'Lock'}</button> new seed <input type="number" value="${p.seed + 1}" style="width:55px" id="rtaps_${p.id}">
+    <button data-a="regen" data-p="${p.id}">Regenerate this part only</button></div>`).join('') : 'no generated parts in this project';
+  $('rtapartlist').querySelectorAll('button').forEach(b => b.onclick = async () => { const p = r.parts.find(x => x.id === b.dataset.p);
+    const q = b.dataset.a === 'lock' ? await rtaOp({op: 'rta_part_lock', part: p.id, locked: !p.locked})
+      : await rtaOp({op: 'rta_part_regenerate', part: p.id, seed: +$('rtaps_' + p.id).value, confirm: $('rtaconf').checked});
+    $('editmsg').textContent = rL(q); $('editmsg').className = q.ok ? 'note' : 'bad'; if (q.ok) { await refresh(false); await rtaParts(); } });
+  return r;
+}
+function rtaAttachBody(op) { const [w, d, h] = $('rtaxsz').value.split(/\s+/).map(Number);
+  return {op, dest: $('rtaxdir').value, unit: +$('rtaxu').value, side: +$('rtaxside').value, setback: +$('rtaxsb').value, along: +$('rtaxal').value,
+    width: w, depth: d, height: h, texture: $('rtaxtex').value, roof_texture: $('rtaxroof').value}; }
+async function rtaUnit() { const r = await rtaOp({op: 'rta_ext_unit', dest: $('rtaxdir').value, unit: +$('rtaxu').value});
+  if (!r.ok) { rtaOut('rtaxout2', r.error, 'bad'); return r; }
+  for (const id of ['rtaxtex', 'rtaxroof']) $(id).innerHTML = r.textures.map(t => `<option>${t}</option>`).join('');
+  rtaOut('rtaxout2', `unit ${r.unit.unit}: ${r.unit.records} records (${r.unit.records_free} free), ${r.unit.vertices} vertices, mesh block ${r.unit.mesh_size} B (${r.unit.mesh_free_bytes} B free to the slot); materials it draws: ${r.textures.length}`, ''); return r; }
+async function rtaAttachPreview() { RTA.ax = null; $('rtaxadd').disabled = true; const r = await rtaOp(rtaAttachBody('rta_ext_attach_preview'));
+  if (!r.ok) { rtaOut('rtaxout2', 'REFUSED (nothing changed): ' + r.error, 'bad'); $('rtaxsvg').innerHTML = ''; return r; }
+  RTA.ax = r.preview_key; $('rtaxsvg').innerHTML = r.svg; const R = r.report;
+  rtaOut('rtaxout2', [rL(r), `size ${R.width_m} x ${R.depth_m} x ${R.height_m} m at base y ${R.base_y} (route ${R.route_y_here}); ground ${R.ground.map(g => g.y + ' ' + g.surface).join(', ')}`,
+    `budget: ~${R.estimated_bytes} B of ${R.mesh_free_bytes} B free`, 'LOD: ' + R.lod, 'visibility: ' + R.visibility, 'collision: ' + R.collision, 'changes: ' + R.changes.join('; ')].join('\n'), R.fits ? 'warn' : 'bad');
+  $('rtaxadd').disabled = !R.fits; return r; }
+async function rtaExtJob(op, body) { rtaOut('rtaxout2', `${op} running...`, 'warn'); const s = await rtaWait(await rtaOp(Object.assign({op}, body)), 'rtaxout2');
+  if (s) rtaOut('rtaxout2', [rL(s.result), JSON.stringify(s.result.files ? Object.fromEntries(Object.entries(s.result.files).map(([k, v]) => [k, v.identical !== undefined ? v.identical : (v.changed ? 'CHANGED' : 'unchanged')])) : {})].join('\n'), 'ok'); return s; }
+function rtaShareBody(op) { return {op, kind: $('rtashk').value, dest: $('rtaxdir').value, author: $('rtaauth').value, licence: $('rtalic').value, out: $('rtashout').value}; }
+function rtaSetup() {
+  $('rtacatb').onclick = async () => { const s = await rtaWait(await rtaOp({op: 'rta_catalogue_build'}), 'rtagenout'); if (s) { $('rtacat').textContent = rL(s.result); await rtaCatStatus(); await rtaStyles(); } };
+  $('rtacatx').onclick = () => RTA.job && rtaOp({op: 'rta_job_cancel', job: RTA.job});
+  $('rtasearch').onclick = async () => { const r = await rtaOp({op: 'rta_catalogue_search', query: $('rtaq').value, kind: $('rtakind').value || null, track: $('rtatrk').value || null, limit: 150});
+    if (!r.ok) { $('rtares').textContent = r.error; return; }
+    $('rtares').innerHTML = r.rows.map((a, i) => `<div><a href="#" data-i="${i}">${a.track} ${a.id}</a> ${a.role || ''} ${a.area_m2 ? a.area_m2 + ' m2' : ''}${a.placements ? ' x' + a.placements : ''}</div>`).join('') || 'nothing found';
+    $('rtares').querySelectorAll('a').forEach(el => el.onclick = async e => { e.preventDefault(); const a = r.rows[+el.dataset.i];
+      const d = await rtaOp({op: 'rta_asset', track: a.track, id: a.id}); if (!d.ok) { $('rtaasset').textContent = d.error; return; }
+      const A = d.asset; $('rtaasset').innerHTML = (d.thumbnail ? `<img src="${d.thumbnail}" style="float:left;margin:0 6px 4px 0;image-rendering:pixelated">` : '')
+        + `<b>${a.track} ${A.id}</b> ${A.texture || ''} - ${A.role || A.kind}<br>` + rtaTable(Object.fromEntries(Object.entries(A).filter(([k]) => !['thumbnail', 'id', 'role'].includes(k))))
+        + `<div class="note">${d.thumbnail_note}; LOCAL ONLY</div><div style="clear:both"></div>`
+        + (/^[BSIP]/.test(A.id) ? `<div>Place in this project at x z <input type="text" id="rtaplpos" style="width:110px" value="${RTA.pts.length ? (RTA.pts[0][0] + 30).toFixed(0) + ' ' + (RTA.pts[0][2] + 30).toFixed(0) : ''}">
+           turn <input type="number" id="rtaplang" value="0" style="width:50px"> collision <select id="rtaplcol"><option>keep</option><option>none</option></select>
+           <button id="rtaplpv">Preview</button> <button id="rtaplgo" disabled>Place (one undo step)</button></div><div id="rtaplmsg" class="note"></div>` : '');
+      const body = () => ({track: a.track, id: A.id, position: $('rtaplpos').value.trim().split(/\s+/).map(Number), angle: +$('rtaplang').value, collision: $('rtaplcol').value});
+      if ($('rtaplpv')) { $('rtaplpv').onclick = async () => { const r = await rtaOp(Object.assign({op: 'rta_place_preview'}, body()));
+          $('rtaplmsg').textContent = rL(r); RTA.plk = r.ok ? r.preview_key : null; $('rtaplgo').disabled = !r.ok; if (r.ok) layoutOverlay({new_faces: r.new_faces}); };
+        $('rtaplgo').onclick = async () => { const r = await rtaOp(Object.assign({op: 'rta_place', preview_key: RTA.plk}, body()));
+          $('rtaplmsg').textContent = rL(r); $('rtaplgo').disabled = true; if (r.ok) { layoutOverlay({}); await refresh(false); } }; }
+    }); };
+  $('rtastyshow').onclick = rtaStyleShow; $('rtasty').onchange = rtaStyleShow;
+  $('rtaderive').onclick = async () => { const r = await rtaOp({op: 'rta_style_derive', track: $('rtadtrk').value, id: $('rtadid').value}); $('rtastyout').textContent = rL(r); if (r.ok) { await rtaStyles(); $('rtasty').value = r.style; } };
+  const c = $('rtasketch');
+  c.onclick = e => { const S = +$('rtascale').value, k = c.width / S, b = c.getBoundingClientRect();
+    RTA.pts.push([RTA.ctr[0] + (e.clientX - b.left - c.width / 2) / k, +$('rtay').value, RTA.ctr[2] + (e.clientY - b.top - c.height / 2) / k]); rtaSk(); };
+  c.oncontextmenu = e => { e.preventDefault(); RTA.pts.pop(); rtaSk(); };
+  $('rtaclear').onclick = () => { RTA.pts = []; rtaSk(); }; $('rtacur').onclick = rtaCurrent; $('rtascale').onchange = rtaSk; $('rtapts').onchange = rtaPtsFromText;
+  $('rtaptypes').onclick = async () => { const r = await rtaOp({op: 'rta_post_types'}); if (!r.ok) { $('rtaptlist').textContent = r.error; return; }
+    $('rtaptlist').innerHTML = `<div class="note">${r.note}</div>` + r.posts.map((p, i) => `<div><a href="#" data-i="${i}">add</a> ${p.track} ${p.model} ${p.texture} ${p.size_m[1]} m tall, every ${p.spacing_m} m, setback ${p.setback_m} m (x${p.placements})</div>`).join('');
+    $('rtaptlist').querySelectorAll('a').forEach(a => a.onclick = e => { e.preventDefault(); const p = r.posts[+a.dataset.i];
+      $('rtaposts').value = ($('rtaposts').value.trim() ? $('rtaposts').value.trim() + '; ' : '') + `${p.track} ${p.model} both`; }); };
+  $('rtagen').onclick = rtaGenerate; $('rtaapply').onclick = rtaApply; $('rtaparts').onclick = rtaParts;
+  $('rtart').onclick = () => rtaExtJob('rta_ext_roundtrip', {track: $('rtaxtrk').value});
+  $('rtaxnew').onclick = async () => { const r = await rtaOp({op: 'rta_ext_create', track: $('rtaxtrk').value, dest: $('rtaxdir').value}); rtaOut('rtaxout2', rL(r), r.ok ? 'ok' : 'bad'); if (r.ok) await rtaUnit(); };
+  $('rtaxopen').onclick = async () => { const r = await rtaOp({op: 'rta_ext_open', dest: $('rtaxdir').value}); rtaOut('rtaxout2', rL(r), r.ok && !r.source_problem ? 'ok' : 'bad'); if (r.ok) await rtaUnit(); };
+  $('rtaxunit').onclick = rtaUnit; $('rtaxpv').onclick = rtaAttachPreview;
+  $('rtaxfind').onclick = async () => { const b = rtaAttachBody('rta_ext_attach_find'); delete b.setback; const r = await rtaOp(b);
+    if (!r.ok) { rtaOut('rtaxout2', 'NOT FOUND: ' + r.error, 'bad'); return; }
+    $('rtaxside').value = String(r.side); $('rtaxsb').value = r.report.setback_m; $('rtaxal').value = r.report.along; await rtaAttachPreview(); };
+  $('rtaxadd').onclick = async () => { const r = await rtaOp(Object.assign(rtaAttachBody('rta_ext_attach_add'), {preview_key: RTA.ax})); rtaOut('rtaxout2', rL(r), r.ok ? 'ok' : 'bad'); $('rtaxadd').disabled = true; };
+  $('rtaxundo').onclick = async () => { const r = await rtaOp({op: 'rta_ext_undo', dest: $('rtaxdir').value}); rtaOut('rtaxout2', rL(r), r.ok ? 'ok' : 'bad'); };
+  $('rtaxbuild').onclick = () => rtaExtJob('rta_ext_build', {dest: $('rtaxdir').value, out: $('rtaxout').value});
+  $('rtashpv').onclick = async () => { const r = await rtaOp(rtaShareBody('rta_recipe_preview')); rtaOut('rtashout2', r.ok ? [rL(r), 'excluded: ' + r.excluded.join(', '), r.sharing_md || ''].join('\n') : r.error, r.ok && !r.problems.length ? 'ok' : 'bad'); };
+  $('rtashex').onclick = async () => { const r = await rtaOp(rtaShareBody('rta_recipe_export')); rtaOut('rtashout2', rL(r), r.ok ? 'ok' : 'bad'); };
+  $('rtarchk').onclick = async () => { const r = await rtaOp({op: 'rta_recipe_check', path: $('rtarin').value}); rtaOut('rtashout2', rL(r), r.ok && r.can_rebuild ? 'ok' : 'bad'); };
+  $('rtarreb').onclick = async () => { const r = await rtaOp({op: 'rta_recipe_rebuild', path: $('rtarin').value, dest: $('rtaxdir').value});
+    if (r.ok && r.job) { const s = await rtaWait(r, 'rtagenout'); if (s) { RTA.pv = {job: s.id, key: s.result.preview_key}; rtaShowGen(s); $('rtaapply').disabled = !!s.result.problems.length; } }
+    else rtaOut('rtashout2', rL(r), r.ok ? 'ok' : 'bad'); };
+}
+async function rtaInit() { if (ST.retail) { $('rtabox').style.display = 'none'; return; } rtaSetup(); await rtaCatStatus(); await rtaStyles(); await rtaCurrent();
+  if (Q.get('panel') === 'rta') { $('rtabox').open = true; $('rtabox').scrollIntoView(); } }
+// self test section 'rta' (only when asked: needs your game data + catalogue; ~1 minute)
+async function selftestRta(ok, C0) {
+  $('rtabox').open = true;
+  const st = await rtaCatStatus(); ok('rta: catalogue status', st.ok && st.tracks.some(t => t.catalogued), $('rtacat').textContent.slice(0, 160));
+  const sy = await rtaStyles(); ok('rta: styles listed, waterfront usable', sy.ok && sy.styles.some(s => s.id === 'waterfront_us_c1' && s.usable), sy.summary_lines && sy.summary_lines[0]);
+  $('rtasty').value = 'waterfront_us_c1'; const ss = await rtaStyleShow(); ok('rta: style shows measured / palette / defaults separately', ss.ok && /Measured/.test($('rtastyout').innerHTML) && /Artistic defaults/.test($('rtastyout').innerHTML), '');
+  $('rtaq').value = 'WF_Road2'; $('rtatrk').value = 'US/C1_V1'; await $('rtasearch').onclick(); const a = $('rtares').querySelector('a');
+  ok('rta: asset search', !!a, $('rtares').textContent.slice(0, 120)); if (a) { await a.onclick({preventDefault() {}}); }
+  ok('rta: asset detail with thumbnail', /<img/.test($('rtaasset').innerHTML), $('rtaasset').textContent.slice(0, 120));
+  await rtaCurrent(); ok('rta: route from the current race layout', RTA.pts.length >= 4, RTA.pts.length);
+  $('rtatd').value = 0.5; $('rtabd').value = 0.6; const g = await rtaGenerate();
+  ok('rta: generation preview job (project unchanged)', g && g.job_state === 'done' && (await api('/api/state')).content_sha256 === C0, g ? g.result.summary_lines[0] : $('rtagenout').textContent);
+  const sk = $('rtaskip').querySelector('a'); if (sk) sk.onclick({preventDefault() {}});
+  ok('rta: skipped placements clickable (markers)', !sk || (ST.lay && ST.lay.points && ST.lay.points.length > 0), sk ? sk.textContent : 'none skipped');
+  const ap = await rtaApply(); ok('rta: apply = one undo step', ap && ap.ok, ap && rL(ap));
+  const pr = await rtaParts(); ok('rta: parts listed', pr.ok && pr.parts.length >= 1, $('rtapartlist').textContent.slice(0, 160));
+  const u = await api('/api/undo', {}); const s2 = await api('/api/state'); ok('rta: one undo restores the project', u.ok && s2.content_sha256 === C0, u.undone);
+  await refresh(false);
+}
+// ---------------------------------------------------------------- rta2: Environment designer + trusted asset library
+const DSN = {rows: [], pv: null, styles: []};
+function dsStyleOpts(sel) { return DSN.styles.map(s => `<option value="${s.id}"${s.id === sel ? ' selected' : ''}${s.usable ? '' : ' disabled'}>${s.title}</option>`).join(''); }
+function dsRender() {
+  $('dsseg').innerHTML = '<tr><th>from</th><th>to</th><th>style</th><th>landmark</th><th>open space</th><th>buildings</th></tr>' + DSN.rows.map((r, i) =>
+    `<tr><td><input type="number" step="0.05" value="${r.from}" data-i="${i}" data-k="from" style="width:50px"></td>
+     <td><input type="number" step="0.05" value="${r.to}" data-i="${i}" data-k="to" style="width:50px"></td>
+     <td><select data-i="${i}" data-k="style">${dsStyleOpts(r.style)}</select></td>
+     <td><input type="checkbox" data-i="${i}" data-k="landmark"${r.landmark ? ' checked' : ''}></td>
+     <td><input type="checkbox" data-i="${i}" data-k="open_space"${r.open_space ? ' checked' : ''}></td>
+     <td><select data-i="${i}" data-k="buildings"><option${r.buildings === 'generated' ? ' selected' : ''}>generated</option><option${r.buildings === 'retail' ? ' selected' : ''}>retail</option></select></td></tr>`).join('');
+  $('dsseg').querySelectorAll('input,select').forEach(el => el.onchange = () => { const r = DSN.rows[+el.dataset.i], k = el.dataset.k;
+    r[k] = el.type === 'checkbox' ? el.checked : (k === 'from' || k === 'to') ? +el.value : el.value; });
+  $('dspts').textContent = RTA.pts.length; }
+function dsBody(op) {
+  const parts = {}; for (const c of ['buildings', 'posts', 'signs', 'trees', 'background', 'junction']) parts[c] = $('dsc_' + c).checked;
+  return {op, points: RTA.pts, road_style: $('dsroad').value, segments: DSN.rows, seed: +$('dsseed').value, transition_m: +$('dstr').value,
+    junction_at: $('dsjun').value.trim() === '' ? null : +$('dsjun').value, parts,
+    params: Object.assign({headroom_pct: +$('dshead').value, plinths: $('dsplinth').checked, allow_open_shells: $('dsshell').checked},
+      $('dsobj') && $('dsobj').value ? {objects: $('dsobj').value} : {}, $('dsprops') && $('dsprops').value !== 'none' ? {props: $('dsprops').value} : {})}; }
+function dsSkips(list) { const by = {}; (list || []).forEach(x => { const k = x.part + ': ' + x.skipped.split('(')[0].trim(); (by[k] = by[k] || []).push(x); });
+  $('dsskip').innerHTML = Object.keys(by).length ? '<b>Not placed (click to see where; remedy after the arrow)</b>' + Object.entries(by).map(([k, xs], i) =>
+    `<div><a href="#" data-i="${i}">${xs.length} x ${k}</a> -> ${xs[0].remedy || ''}</div>`).join('') : 'everything planned was placed';
+  $('dsskip').querySelectorAll('a').forEach(a => a.onclick = e => { e.preventDefault(); const xs = Object.values(by)[+a.dataset.i].filter(x => x.at);
+    layoutOverlay({markers: xs.map(x => x.at.length === 2 ? [x.at[0], (RTA.pts[0] || [0, 20])[1] + 1, x.at[1]] : x.at)}); }); }
+async function dsQuick() { const r = await rtaOp(dsBody('rta_design_quick'));
+  if (!r.ok) { rtaOut('dsout', 'REFUSED (nothing changed): ' + r.error, 'bad'); return r; }
+  const y = (RTA.pts[0] || [0, 20])[1] + 1, pts = [];
+  for (const [c, ms] of Object.entries(r.markers)) for (const m of ms) if (m) pts.push([m[0], y, m[1]]);
+  layoutOverlay({markers: pts});
+  rtaOut('dsout', [...r.summary_lines, 'per neighbourhood: ' + JSON.stringify(r.per_segment), 'verges: outer ' + r.verges.outer_m + ' m / inner ' + r.verges.inner_m + ' m' +
+    (r.verges.refused.length ? ' (stepped down: ' + r.verges.refused.join('; ') + ')' : ''), ...r.completeness_gaps.map(g => 'GAP: ' + g)].join('\n'), r.completeness_gaps.length ? 'warn' : '');
+  dsSkips(r.skipped); return r; }
+async function dsFull() { DSN.pv = null; $('dsapply').disabled = true; rtaOut('dsout', 'full preview running in the background (Cancel: Retail-style -> 1)...', 'warn');
+  const s = await rtaWait(await rtaOp(dsBody('rta_design_preview')), 'dsout'); if (!s) return null; const R = s.result;
+  DSN.pv = {job: s.id, key: R.preview_key};
+  rtaOut('dsout', [...R.summary_lines, ...R.capacity_warnings.map(w => 'CAPACITY: ' + w), 'per neighbourhood: ' + JSON.stringify(R.per_segment)].join('\n'),
+    R.problems.length ? 'bad' : R.capacity_warnings.length ? 'warn' : 'ok');
+  dsSkips(R.skipped); $('dsapply').disabled = !!R.problems.length; return s; }
+async function dsApply() { if (!DSN.pv) return null; const r = await rtaOp({op: 'rta_design_apply', job: DSN.pv.job, preview_key: DSN.pv.key});
+  rtaOut('dsout', rL(r), r.ok ? 'ok' : 'bad'); if (r.ok) { DSN.pv = null; $('dsapply').disabled = true; layoutOverlay({}); await refresh(false); await dsParts(); } return r; }
+async function dsParts() { const r = await rtaOp({op: 'rta_design_parts'}); if (!r.ok) return r;
+  $('dspartlist').innerHTML = r.parts.length ? r.parts.map(p => `<div><b>${p.id}</b> ${p.items} item(s)${p.locked ? ' LOCKED' : ''}${p.manually_edited ? ' <span class="warn">edited by hand</span>' : ''}
+    <button data-a="lock" data-p="${p.id}" data-l="${p.locked}">${p.locked ? 'Unlock' : 'Lock'}</button>
+    ${['buildings', 'trees', 'posts', 'signs'].includes(p.category.replace(/[0-9]+$/, '')) ? `seed <input type="number" value="${(p.seed || 1) + 1}" style="width:55px" id="dsps_${p.id}"> <button data-a="regen" data-p="${p.id}" data-c="${p.category.replace(/[0-9]+$/, '')}">Regenerate this category</button>` : ''}</div>`).join('') : 'no design parts yet';
+  $('dspartlist').querySelectorAll('button').forEach(b => b.onclick = async () => {
+    const q = b.dataset.a === 'lock' ? await rtaOp({op: 'rta_design_lock', part: b.dataset.p, locked: b.dataset.l !== 'true'})
+      : await rtaOp({op: 'rta_design_regenerate', category: b.dataset.c, seed: +$('dsps_' + b.dataset.p).value, confirm: $('dsconf').checked});
+    $('editmsg').textContent = rL(q); $('editmsg').className = q.ok ? 'note' : 'bad'; if (q.ok) { await refresh(false); await dsParts(); } });
+  return r; }
+async function dsBuild() { let r = await api('/api/save', {}); if (!r.ok) { rtaOut('dsbuildout', 'SAVE REFUSED: ' + r.error, 'bad'); return r; }
+  rtaOut('dsbuildout', 'building / validating / staging (kit gates)...', 'warn');
+  r = await rtaOp({op: 'test_chain'}); rtaOut('dsbuildout', r.ok ? (r.summary_lines || []).join('\n') : 'FAILED: ' + r.error, r.ok && r.passed ? 'ok' : 'bad'); return r; }
+async function tlSearch() { const r = await rtaOp({op: 'rta_trust_search', track: $('tlt').value || null, category: $('tlc').value || null, favourites: $('tlf').checked,
+    min_confidence: +$('tlm').value, facing_road: $('tlr').checked, limit: 150});
+  if (!r.ok) { $('tlres').textContent = r.error; return r; }
+  $('tlres').innerHTML = `<div class="note">${rL(r)}</div>` + r.rows.map((a, i) => `<div><a href="#" data-i="${i}">${a.track} ${a.id}</a> ${a.category}
+    (confidence ${a.category_confidence}${a.front_confidence !== undefined && a.front_confidence !== null ? ', front ' + a.front_confidence : ''})${a.favourite ? ' &#9733;' : ''}${(a.warnings || []).length ? ' <span class="warn">!</span>' : ''}</div>`).join('');
+  $('tlres').querySelectorAll('a').forEach(el => el.onclick = e => { e.preventDefault(); return tlShow(r.rows[+el.dataset.i], 35); }); return r; }
+async function tlShow(a, yaw) { const d = await rtaOp({op: 'rta_trust_asset', track: a.track, id: a.id, yaw}); if (!d.ok) { $('tldet').textContent = d.error; return d; }
+  const A = d.asset, ov = A.override || {};
+  $('tldet').innerHTML = (d.thumbnail ? `<img src="${d.thumbnail}" style="float:left;margin:0 6px 4px 0">` : '') +
+    `<b>${a.track} ${A.id}</b> ${A.category} (confidence ${A.category_confidence})<br>front ${A.front_deg !== undefined ? A.front_deg + ' deg' : '-'} (${A.front_confidence !== undefined ? 'confidence ' + A.front_confidence : 'n/a'})
+     ${A.original_road ? '- vs its original road ' + A.original_road.front_vs_road_deg + ' deg' : ''}<br>${(A.confidence_reasons || []).join('; ')}<br>
+     ${(A.warnings || []).map(w => '<span class="warn">' + w + '</span>').join('<br>')}<br>
+     view <button id="tlyl">&lt; 45</button> ${d.yaw} deg <button id="tlyr">45 &gt;</button><br>
+     override: front <input type="number" id="tlof" value="${ov.front_deg !== undefined ? ov.front_deg : (A.front_deg || 0)}" style="width:55px"> deg,
+     kind <select id="tloc"><option></option><option>intact building</option><option>building shell / facade</option><option>structure</option><option>scenery fragment</option><option>exclude</option></select>
+     <label><input type="checkbox" id="tlofav"${ov.favourite ? ' checked' : ''}> favourite</label> <button id="tlsave">Save override</button> <button id="tlclr">Clear</button>
+     <div class="note">${d.labels.verified}; ${d.labels.override}</div><div style="clear:both"></div>`;
+  $('tlyl').onclick = () => tlShow(a, (d.yaw + 315) % 360); $('tlyr').onclick = () => tlShow(a, (d.yaw + 45) % 360);
+  $('tlsave').onclick = async () => { const r = await rtaOp({op: 'rta_trust_override', track: a.track, id: A.id, front_deg: +$('tlof').value,
+      category: $('tloc').value || null, favourite: $('tlofav').checked}); $('editmsg').textContent = rL(r); if (r.ok) tlShow(a, d.yaw); };
+  $('tlclr').onclick = async () => { const r = await rtaOp({op: 'rta_trust_override', track: a.track, id: A.id, clear: true}); $('editmsg').textContent = rL(r); if (r.ok) tlShow(a, d.yaw); };
+  return d; }
+async function dsInit() {
+  if (ST.retail) { $('dsbox').style.display = 'none'; return; }
+  const st = await rtaOp({op: 'rta_styles'}); DSN.styles = st.ok ? st.styles : [];
+  $('dsroad').innerHTML = dsStyleOpts('waterfront_us_c1');
+  DSN.rows = [{from: 0, to: 0.45, style: 'waterfront_us_c1', landmark: true, open_space: false, buildings: 'generated'},
+              {from: 0.45, to: 0.6, style: 'waterfront_us_c1', landmark: false, open_space: true, buildings: 'generated'},
+              {from: 0.6, to: 1, style: 'city_us_c2', landmark: true, open_space: false, buildings: 'generated'}];
+  dsRender();
+  const cs = await rtaOp({op: 'rta_catalogue_status'});
+  if (cs.ok) { $('dsdata').textContent = rL(cs); $('tlt').innerHTML = '<option value="">all</option>' + cs.tracks.filter(t => t.catalogued).map(t => `<option>${t.track}</option>`).join(''); }
+  $('dsadd').onclick = () => { const last = DSN.rows[DSN.rows.length - 1]; const mid = +((last.from + last.to) / 2).toFixed(2);
+    DSN.rows.push({from: mid, to: last.to, style: last.style, landmark: false, open_space: false, buildings: 'generated'}); last.to = mid; dsRender(); };
+  $('dsdel').onclick = () => { if (DSN.rows.length > 1) { const r = DSN.rows.pop(); DSN.rows[DSN.rows.length - 1].to = r.to; dsRender(); } };
+  $('dsquick').onclick = () => { dsRender(); return dsQuick(); }; $('dsfull').onclick = dsFull; $('dsapply').onclick = dsApply;
+  $('dsparts').onclick = dsParts; $('dsbuild').onclick = dsBuild; $('tls').onclick = tlSearch;
+  if (Q.get('panel') === 'design') { $('dsbox').open = true; $('dsbox').scrollIntoView(); }
+}
+async function selftestDesign(ok, C0) {
+  $('dsbox').open = true; await rtaCurrent(); dsRender();
+  ok('design: route available', RTA.pts.length >= 4, RTA.pts.length);
+  const q = await dsQuick(); ok('design: quick preview (< 2 s, markers)', q.ok && q.seconds < 2 && ST.lay && ST.lay.points && ST.lay.points.length > 10, q.ok ? q.summary_lines[0] : q.error);
+  const t = await tlSearch(); const a = $('tlres').querySelector('a'); ok('design: trusted search', t.ok && !!a, t.ok ? t.summary_lines[0] : t.error);
+  if (a) { await a.onclick({preventDefault() {}}); }
+  ok('design: asset detail with rotatable preview and override controls', /<img/.test($('tldet').innerHTML) && !!$('tlyr') && !!$('tlsave'), $('tldet').textContent.slice(0, 120));
+  if ($('tlyr')) { const v0 = +($('tldet').textContent.match(/view\s*<\s*45\s+(\d+) deg/) || [0, -1])[1]; await $('tlyr').onclick(); const v1 = +($('tldet').textContent.match(/view\s*<\s*45\s+(\d+) deg/) || [0, -1])[1]; ok('design: preview rotated', v0 >= 0 && v1 === (v0 + 45) % 360 && /<img/.test($('tldet').innerHTML), v0 + ' -> ' + v1 + ' deg'); }
+  const f = await dsFull(); ok('design: full preview job (project unchanged)', f && f.job_state === 'done' && (await api('/api/state')).content_sha256 === C0, f ? f.result.summary_lines[0] : $('dsout').textContent);
+  const ap = await dsApply(); ok('design: apply = one undo step', ap && ap.ok, ap && rL(ap));
+  const pr = await dsParts(); ok('design: categories listed', pr.ok && pr.parts.length >= 3, $('dspartlist').textContent.slice(0, 160));
+  await refresh(false); const OB = (ST.scene.objects || {}).meshes || [];                    // RTA3: real retail instances (kit 0.3.2)
+  ok('design: retail instances drawn (objects layer, cut-out class from the flags)', OB.length > 0 && Object.values(ST.meshes).some(m => m.obj && m.render === 'cutout'),
+     JSON.stringify((ST.scene.objects || {}).counts || {}));
+  const u = await api('/api/undo', {}); const s2 = await api('/api/state'); ok('design: one undo restores the project', u.ok && s2.content_sha256 === C0, u.undone);
+  await refresh(false);
+}
 async function selftest() {
   const steps = [], ok = (n, c, d) => steps.push({step: n, ok: !!c, detail: d});
   const C0 = ST.scene.state.content_sha256;
@@ -1417,13 +2011,14 @@ async function selftest() {
     } else {
       const st = ST.scene.stations, N = st.length;
       if (N) { const c = [0,0,0]; st.forEach(s => { c[0] += s.p[0]; c[1] += s.p[1]; c[2] += s.p[2]; }); ST.origin = c.map(v => v / N); }
-      await refresh(false); teRender(); pickFilterFill();
+      await refresh(false); teRender(); pickFilterFill(); await rtaInit(); await dsInit();
     }
-    if (ST.retail) $('tebox').style.display = 'none';      // TE tools edit authored projects only
+    if (ST.retail) { $('tebox').style.display = 'none'; $('rtabox').style.display = 'none'; $('dsbox').style.display = 'none'; }      // TE tools edit authored projects only
     const xs = ST.pick.map(o => o.p[0]), zs = ST.pick.map(o => o.p[2]);
     ST.cam.dist = Math.max(200, (Math.max(...xs) - Math.min(...xs) + Math.max(...zs) - Math.min(...zs)) * 0.8);
     // v0.27: optional view for documentation screenshots (read only): view=pitch,yaw,dist (radians, m), layers=collision,units,...
-    if (Q.get('view')) { const [vp, vy, vd] = Q.get('view').split(',').map(Number); if (isFinite(vp)) ST.cam.pitch = Math.max(-1.45, Math.min(1.45, vp)); if (isFinite(vy)) ST.cam.yaw = vy; if (isFinite(vd)) ST.cam.dist = Math.max(5, Math.min(8000, vd)); }
+    if (Q.get('view')) { const [vp, vy, vd] = Q.get('view').split(',').map(Number); if (isFinite(vp)) ST.cam.pitch = Math.max(-1.45, Math.min(1.45, vp)); if (isFinite(vy)) ST.cam.yaw = vy; if (isFinite(vd)) ST.cam.dist = Math.max(5, Math.min(8000, vd));
+      const vt = Q.get('view').split(',').slice(3, 6).map(Number); if (vt.length === 3 && vt.every(isFinite)) ST.cam.tgt = O(vt); }   // v0.33: optional aim point x,y,z
     for (const l of (Q.get('layers') || '').split(',')) { const b = ['mesh','collision','units','route','starts','wire','normals'].includes(l) && $('L_' + l); if (b) b.checked = true; }
     if (/wire|normals/.test(Q.get('layers') || '')) build();      // TE: overlays are line sets built from the layers
     draw(); addEventListener('resize', draw);

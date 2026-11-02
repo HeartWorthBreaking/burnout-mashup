@@ -1,0 +1,15 @@
+{
+ "title": "Hill country (sloped, variable width)",
+ "about": "A sloped circuit (20 .. 26 m) that widens to 18 m on the hill with a gentle 0.2 deg bank inside the kit's limit, an infield hill shaped with the terrain brush and a farm building. Needs trackbuild 0.3.0 or later (the Workbench default). Original content; every piece stays editable.",
+ "template": "testloop",
+ "licence": "original Burnout Mashup Workbench starter (same licence as the Workbench)",
+ "ops": [
+  {"op": "race_layout", "points": [[-6100, 20, -6060], [-6040, 20, -6062], [-5980, 20, -6060], [-5910, 22, -6030], [-5890, 24, -5970], [-5930, 26, -5925], [-6010, 26, -5920], [-6090, 20, -5935], [-6140, 20, -5975]], "replace": "all", "checkpoints": 4,
+   "profile": {"sloped": true, "widths": [14, 14, 14, 16, 18, 18, 16, 14, 14], "banks": [0, 0, 0, 0, 0.2, 0.2, 0, 0, 0], "outer_gaps": []}},
+  {"op": "units", "unit_op": "include", "unit": 0, "rect": [-6062, -6034, -5952, -5958]},
+  {"op": "hterrain", "rect": [-6055, -6028, -5960, -5965], "cell": 5.0, "height": 19.8, "material": "grass"},
+  {"op": "terrain_brush", "id": "hterrain1", "mode": "raise", "centre": [-6005, -5995], "radius": 30, "strength": 3.0},
+  {"op": "terrain_brush", "id": "hterrain1", "mode": "smooth", "centre": [-6005, -5995], "radius": 20, "strength": 0.8},
+  {"op": "building", "footprint": [[-6045, -6020], [-6030, -6020], [-6030, -6010], [-6045, -6010]], "ground": true, "height": 4.0, "wall_material": "wall", "roof_material": "wall", "roof": "gable", "roof_height": 3.0, "openings": [{"edge": 0, "width": 4.0, "height": 3.2}]}
+ ]
+}

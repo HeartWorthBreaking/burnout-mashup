@@ -16,6 +16,7 @@ from .. import bmpack_min as _bmpack   # vendored: bmpack 1.2 rename / verify (p
 
 FILES = ("static.dat", "streamed.dat", "Gamedata.bgd", "enviro.dat", "SOUND.AWD", "CRASH1.RWS", "CRASH2.RWS", "CRASH3.RWS",
          "E_DJRACE.xwb", "MUSIC.RWS")
+CAPACITY_KEYS = ("lanes", "low_unit_bytes", "full_unit_bytes", "static_bytes", "gamedata_bytes")   # mod.toml order (trackbuild 0.3.4)
 GAMEDATA_RULE = ("per-event records 0x3000 .. 0x3800 + 0x800 * 64 (8-byte aligned): the donor track ID and race IDs "
                  "ending in the donor compact ID renamed; every other byte the donor's")
 
@@ -42,6 +43,9 @@ def check_decisions(p):
     need(len(p.get("description", "")) <= 1024, "description longer than 1024 characters")
     lanes = p.get("lanes")
     need(lanes is None or 64 < lanes <= 255, "lanes: omit for <= 64 route lanes, else 65..255")
+    for k, v in (p.get("capacity_decl") or {}).items():          # trackbuild 0.3.4: the merged [bmashup.capacity] keys
+        need(k in CAPACITY_KEYS and isinstance(v, int) and 0 < v, "[bmashup.capacity] %s = %r: not a key / value the host reads" % (k, v))
+        need(k == "lanes" or v % 0x1000 == 0, "[bmashup.capacity] %s = 0x%X is not a page multiple (0x1000)" % (k, v))
 
 
 def mod_toml(p):
@@ -61,9 +65,13 @@ def mod_toml(p):
         q(t), q("%s = %s" % (t, p["track_name"])), q("%s = %s" % (t, p["track_location"])))
     if p.get("point_to_point"):
         s += "point_to_point = [%s]\n" % q(t)
-    if p.get("lanes"):
+    cap = p.get("capacity_decl") or ({"lanes": p["lanes"]} if p.get("lanes") else None)
+    if cap:
         s += "\n" + c.get("capacity", "")
-        s += "[bmashup.capacity]\nversion = 1\nlanes = %d\n" % p["lanes"]
+        s += "[bmashup.capacity]\nversion = 1\n"
+        for k in CAPACITY_KEYS:
+            if k in cap:
+                s += ("%s = %d\n" if k == "lanes" else "%s = 0x%X\n") % (k, cap[k])
     need(all(ord(ch) < 128 for ch in s), "mod.toml must be ASCII")
     return s
 

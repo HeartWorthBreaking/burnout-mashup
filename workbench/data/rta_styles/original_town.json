@@ -1,0 +1,102 @@
+{
+ "builder_limits": [
+  "route road width: 14 m default - an 18 m road (2 x 6 m lanes + 2 x 3 m edges) failed the kit walls-hold check on the test loop (earlier retail-look tests): wider retail carriageways are NOT reproduced",
+  "route banking <= ~0.3 deg (kit gate V2); start stretch level (grid written level)",
+  "closed circuits only (trackbuild); one AI route with 5 cyclic lanes; junctions / side roads are geometry only",
+  "materials opaque only: retail cut-out foliage / fences / signs cannot be used; trees are generated low-poly opaque shapes",
+  "scenery = geometry copies (no prop / instance writer): every lamp / building / tree counts in the unit slots (mesh 0x28000, LOD 0x18000 incl. full collision)",
+  "83 material rows per track; sky / fog / lighting = the donor track's enviro.dat unchanged"
+ ],
+ "defaults": {
+  "band_m": 45.0,
+  "building_density": 0.8,
+  "building_depth_m": [
+   10.0,
+   18.0
+  ],
+  "building_gap_m": [
+   4.0,
+   14.0
+  ],
+  "building_height_scale": 0.35,
+  "building_width_m": [
+   12.0,
+   26.0
+  ],
+  "curve_clearance_m": 6.0,
+  "doorways": true,
+  "edge_width_m": 3.0,
+  "lamp_density": 1.0,
+  "road_width_m": 14.0,
+  "seed": 1,
+  "tree_density": 1.0,
+  "variation": 0.25,
+  "verge_in_m": 20.0,
+  "verge_out_m": 10.0,
+  "wall_height_m": 1.5
+ },
+ "id": "original_town",
+ "kind": "original",
+ "kind_evidence": "not measured: an original look made from the Workbench template materials",
+ "licence": "original Burnout Mashup Workbench preset (same licence as the Workbench); no third-party or game assets",
+ "local_only_when_applied": false,
+ "measured": {
+  "borrowed_from": "numbers copied from the waterfront_us_c1 measurement (US/C1_V1); no asset of any game is referenced",
+  "building_height_p90_m": 47.09,
+  "building_setback_m": {
+   "median": 31.18,
+   "p10": 9.52
+  },
+  "tree_models_per_km": 12.0,
+  "tree_note": "tree density lowered from the measured 125.5 per km to 12 (artistic: low-poly trees are larger)",
+  "tree_setback_m": 13.9
+ },
+ "measured_sha256": "a3dfa369e2b5b72e93298f01b9cc57e09f95841016d5e246abb89d1e8a963e0a",
+ "original_only": true,
+ "palette": {
+  "edge": {
+   "across_m": 3.0,
+   "along_m": 6.2,
+   "material": "asphalt"
+  },
+  "facades": [
+   {
+    "material": "wall"
+   }
+  ],
+  "ground": {
+   "material": "grass"
+  },
+  "posts": [],
+  "road": {
+   "across_m": 6.0,
+   "along_m": 6.2,
+   "material": "asphalt"
+  },
+  "roof": {
+   "material": "asphalt"
+  },
+  "verge": {
+   "material": "grass"
+  },
+  "wall": {
+   "material": "wall"
+  },
+  "wallback": {
+   "material": "wallback"
+  }
+ },
+ "palette_why": {
+  "all": "the testloop template materials (original Burnout Mashup textures, same licence as the Workbench)"
+ },
+ "schema": "bm-rta-style/1",
+ "source": {
+  "note": "no game data needed",
+  "track": null
+ },
+ "title": "Original town (original assets only, shareable)",
+ "trees": {
+  "approximation": true,
+  "how": "generated low-poly opaque trees"
+ }
+}

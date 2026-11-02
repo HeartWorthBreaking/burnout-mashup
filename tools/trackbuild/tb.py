@@ -1,11 +1,13 @@
 """trackbuild 0.3.0 - build an ORIGINAL Burnout 3 track (OBJ + PNG + track description) into a Burnout Mashup data mod.
 
-  py -3 -B tb.py gen-testloop SRC_DIR [--variant crash|bright_b|zeroed|lod_tint|canyon|hill]   the ORIGINAL procedural demo sources
+  py -3 -B tb.py gen-testloop SRC_DIR [--variant crash|bright_b|zeroed|lod_tint|canyon|hill|branch|fig8]   the ORIGINAL procedural demo sources
   py -3 -B tb.py check-game-data --game-data DIR [--host RR/NN_VN]          check the donor files (hashes) and stop
   py -3 -B tb.py build SRC_DIR DESC.json OUT_DIR --game-data DIR [--host RR/NN_VN] [--unpinned-donor]
   py -3 -B tb.py validate OUT_DIR [DESC.json]                               independent gates -> VALIDATION.json
   py -3 -B tb.py inspect OUT_DIR                                            per-unit summary of a build
   py -3 -B tb.py package OUT_DIR PACKAGE.toml SET_ROOT [--bmpack FILE]      the mod set (needs a passing validate)
+  py -3 -B tb.py capacity [OUT_DIR]                                         0.3.4: game defaults / host ceilings; with OUT_DIR the
+                                                                            build's need and its mod.toml [bmashup.capacity]
   py -3 -B tb.py selfcheck                                                  Python version + package completeness
   py -3 -B tb.py version
 
@@ -101,7 +103,7 @@ def _parser():
     sp = ap.add_subparsers(dest="cmd")
     g = sp.add_parser("gen-testloop")
     g.add_argument("src_dir")
-    g.add_argument("--variant", choices=["crash", "bright_b", "zeroed", "lod_tint", "canyon", "hill"])
+    g.add_argument("--variant", choices=["crash", "bright_b", "zeroed", "lod_tint", "canyon", "hill", "branch", "fig8"])
     c = sp.add_parser("check-game-data")
     c.add_argument("--game-data")
     c.add_argument("--host", default=None)
@@ -123,6 +125,8 @@ def _parser():
     k.add_argument("toml")
     k.add_argument("set_root")
     k.add_argument("--bmpack")
+    cp = sp.add_parser("capacity")
+    cp.add_argument("out_dir", nargs="?")
     sp.add_parser("selfcheck")
     sp.add_parser("version")
     return ap
@@ -153,7 +157,26 @@ def run(argv):
         return EXIT_OK
     if a.cmd == "selfcheck":
         return selfcheck(tb)
+    if a.cmd == "capacity":                                       # 0.3.4: the capacity table / a build's declaration
+        from trackbuild import capacity as CAP
+        if not a.out_dir:
+            print(json.dumps(CAP.table_json(), indent=1))
+            return EXIT_OK
+        _need_build(a.out_dir)
+        rep = json.load(open(os.path.join(a.out_dir, "BUILD_REPORT.json")))
+        units = (rep.get("units") or {}).get("units") or []
+        print(json.dumps({"capacity": rep.get("capacity") or CAP.summary(CAP.needed_capacity(rep), "auto"),
+                          "units": [{"unit": r["unit"], "mesh": "0x%X" % r["mesh"], "lod": "0x%X" % r["lod"], "mesh_state": r["mesh_state"],
+                                     "lod_state": r["lod_state"], "notes": r["notes"]}
+                                    for r in CAP.unit_usage(units, (rep.get("capacity") or {}).get("mode", "auto"))
+                                    if r["notes"]]}, indent=1))
+        return EXIT_OK
     from trackbuild import donor
+    if a.cmd == "gen-testloop" and a.variant == "fig8":
+        from trackbuild import fig8
+        _fresh(a.src_dir, "source folder")
+        print(json.dumps(fig8.build(a.src_dir)))
+        return EXIT_OK
     if a.cmd == "gen-testloop":
         from trackbuild import testloop
         _fresh(a.src_dir, "source folder")
@@ -161,7 +184,8 @@ def run(argv):
         if a.variant:
             p.update({"crash": testloop.CRASH_VARIANT, "bright_b": testloop.BRIGHT_B_VARIANT,
                       "zeroed": testloop.ZEROED_HEADER_VARIANT, "lod_tint": testloop.LOD_TINT_VARIANT,
-                      "canyon": testloop.CANYON_VARIANT, "hill": testloop.HILL_VARIANT}[a.variant])
+                      "canyon": testloop.CANYON_VARIANT, "hill": testloop.HILL_VARIANT,
+                      "branch": testloop.BRANCH_VARIANT}[a.variant])
         print(json.dumps(testloop.build(a.src_dir, p)))
         return EXIT_OK
     if a.cmd == "check-game-data":

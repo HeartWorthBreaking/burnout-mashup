@@ -15,7 +15,8 @@ Takedawn runs Burnout 3: Takedown natively on Windows. Burnout Mashup adds a lay
 - **Native plugins** written in C against a versioned SDK. Each plugin runs only after you approve it in the game.
 - **Tools** to build and check content: trackbuild, carimport, bmpack, fetex, vehtool and more.
 - **A launcher** that walks you through setup, builds the game on your PC ("Build Mashup"), manages your mods and starts the game.
-- **A Workbench** for mod authors: create a project from a template, tune values, then build, validate and stage it.
+- **A Workbench** for mod authors: create a project from a template, tune values, then build, validate and stage it. It
+  includes a 3D track editor (step by step: `workbench/TRACK_EDITOR_GUIDE.md`).
 
 ## What you need
 - Windows 10 or 11 (64-bit), a graphics driver with Vulkan 1.3, and Python 3.11 or newer.

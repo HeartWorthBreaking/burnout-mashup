@@ -26,6 +26,15 @@
  Every page ends with rows that stay in view below the page's own rows (the
 --- a/toolkit/src/d3d/nv2a_pb_d3d11.c
 +++ b/toolkit/src/d3d/nv2a_pb_d3d11.c
+@@ -1518,7 +1518,7 @@
+ static RenderTarget *s_stage_rt[4];
+ 
+ #define TEX_MAX_TEXELS (2048u * 2048u)
+-#define TEX_CACHE 512   /* a demo frame binds ~100; 64 thrashed */
++#define TEX_CACHE 1024  /* a demo frame binds ~100; 64 thrashed; Burnout Mashup main21 patch 131: was 512 */
+ typedef struct {
+     uint32_t offset, color, width, height, pitch, palette, levels;
+     uint32_t gen, used;
 @@ -2053,8 +2053,8 @@
          return NULL;
      for (i = 0; i < RT_MAX; i++) {
@@ -90,6 +99,15 @@
          }
 --- a/toolkit/src/d3d/nv2a_pb_vulkan.c
 +++ b/toolkit/src/d3d/nv2a_pb_vulkan.c
+@@ -2429,7 +2429,7 @@
+ /* ---- textures: Metal's cache, key and invalidation ------------------------- */
+ 
+ #define TEX_MAX_TEXELS (2048u * 2048u)
+-#define TEX_CACHE 256
++#define TEX_CACHE 512   /* Burnout Mashup main21 patch 131: was 256 (a plain LRU; s_tc_hint holds uint16 entry + 1) */
+ typedef struct {
+     uint32_t         offset, color, width, height, pitch, palette, levels;
+     uint32_t         sign;          /* nv2a_tex_signed_mask the bytes carry */
 @@ -4413,10 +4413,10 @@
      /* A render target over the bytes is written back first (Metal's decode
       * sync). */
@@ -103,6 +121,15 @@
              if (rt->im.img && rt->dirty && rt->pitch
                      && lo < rlo + rt->pitch * rt->h && rlo < hi) {
                  if (rt_drop_if_stale(rt, "sync"))
+@@ -4445,7 +4445,7 @@
+         return s_magenta.view;
+     }
+     /* BO-277: the entry this stage's key found last, checked, before the
+-     * walk over all 256 (a texture bind is ~5 a draw, ~6000 a frame: the
++     * walk over all TEX_CACHE (a texture bind is ~5 a draw, ~6000 a frame: the
+      * walk was ~0.25 ms a frame of the render thread). A miss walks as
+      * before, for the entry or the victim. */
+     hk = tc_hint_key(t);
 @@ -4764,7 +4764,7 @@
          return NULL;
      for (i = 0; i < RT_MAX; i++) {

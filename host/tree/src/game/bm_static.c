@@ -8,7 +8,12 @@
 #define MUT 0
 #endif
 
-_Static_assert(BO3_ST_MAX == 0x20C4000u, "the derived ceiling (STATIC_ANALYSIS.md s5)");
+_Static_assert(BO3_ST_MAX_W64 == 0x20C4000u, "the derived ceiling (STATIC_ANALYSIS.md s5)");
+#if defined(XBOX_CONTIG_WINDOW_MB) && XBOX_CONTIG_WINDOW_MB != 64
+_Static_assert(BO3_ST_MAX == 0x4000000u, "patch 131: the 256 MiB build's ceiling (high zone)");
+#else
+_Static_assert(BO3_ST_MAX == BO3_ST_MAX_W64, "the 64 MiB build");
+#endif
 _Static_assert(BO3_ST_DESC_L1 == 0x003F9CC4u + 16u * 23u && BO3_ST_DESC_L2 == 0x003F9CC4u + 16u * 73u &&
                BO3_ST_DESC_L0 == 0x003F9CC4u + 16u * 147u, "descriptor indices 23 / 73 / 147");
 

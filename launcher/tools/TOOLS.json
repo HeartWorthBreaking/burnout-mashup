@@ -3,7 +3,7 @@
  "tools": {
   "carimport": {
    "available": true,
-   "dir": "tools/kit/carimport",
+   "dir": "../tools/carimport",
    "entry": "carimport.py",
    "version": "0.1.1",
    "from": "kit 0.7.0 (d54957de3263)",
@@ -11,7 +11,7 @@
   },
   "trackbuild": {
    "available": true,
-   "dir": "tools/kit/trackbuild",
+   "dir": "../tools/trackbuild",
    "entry": "tb.py",
    "version": "0.3.0",
    "from": "kit 0.7.0 (d54957de3263)",
@@ -21,8 +21,8 @@
  "demos": {
   "coupe": {
    "folder": "bm-coupes-series",
-   "source": "sources/carimport/coupe",
-   "series_source": "sources/bm-coupes/series",
+   "source": "../examples/authored/carimport/coupe",
+   "series_source": "../examples/authored/bm-coupes/p43-coupe-series",
    "validate": [
     "validate",
     "{car}",
@@ -44,7 +44,7 @@
   },
   "loop": {
    "folder": "bm-test-loop",
-   "package_toml": "tools/kit/trackbuild/examples/test_loop_package.toml",
+   "package_toml": "../tools/trackbuild/examples/test_loop_package.toml",
    "gen": [
     "gen-testloop",
     "{src}"
@@ -84,7 +84,7 @@
   },
   "canyon": {
    "folder": "bm-canyon-ring",
-   "package_toml": "tools/kit/trackbuild/examples/canyon_package.toml",
+   "package_toml": "../tools/trackbuild/examples/canyon_package.toml",
    "gen": [
     "gen-testloop",
     "{src}",

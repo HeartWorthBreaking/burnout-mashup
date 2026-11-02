@@ -177,7 +177,7 @@
    "file": "_vendor/trackconv/package.py",
    "source": "<dev-tree>/PC/research/native_gameplay_api/platform/gp/tools/trackconv/trackconv/package.py",
    "source_sha256": "efde6890ecef1b452331733f79166d9189be9fdfe215b307fb03830114e7d749",
-   "vendored_sha256": "a8a328f54c60a91c3d9f675c4a0fab5f0840abd2fa8389ce7c411afe6cd110d9",
+   "vendored_sha256": "524849c95a19c8a8d7df05cd8843e00040064b7d7b3a3f4834818a3de9996883",
    "edits": [
     {
      "why": "trackconv.deps.bmpack (workspace bmpack + C checker) replaced by the vendored pure-Python subset",
@@ -193,6 +193,11 @@
      "why": "comment only",
      "old": "    if validate:\n        rep = BP.validate([out_root.path(*set_rel.split(\"/\"))])\n",
      "new": "    if validate:   # host-reader validation is an explicit, optional step in trackbuild 0.2.0 (tb.py package --bmpack)\n        rep = BP.validate([out_root.path(*set_rel.split(\"/\"))])\n"
+    },
+    {
+     "why": "trackbuild 0.3.4 (trackbuild 0.3.4): mod.toml [bmashup.capacity] writes the merged capacity declaration (capacity_decl: lanes / low_unit_bytes / full_unit_bytes / static_bytes / gamedata_bytes; lanes-only output unchanged); not yet in the dev-tree trackconv",
+     "old": "trackbuild 0.3.3 vendored package.py sha256 a8a328f54c60a91c3d9f675c4a0fab5f0840abd2fa8389ce7c411afe6cd110d9",
+     "new": "CAPACITY_KEYS + capacity_decl in check_decisions / mod_toml"
     }
    ],
    "comment_sanitised": 0,

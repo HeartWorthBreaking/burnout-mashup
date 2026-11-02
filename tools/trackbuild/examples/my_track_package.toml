@@ -13,6 +13,9 @@ version = "0.1.0"
 author = "your name"
 description = "An original track built with trackbuild 0.2.0. Gamedata header, enviro and audio are borrowed from EU_M1_V1 (donor, local only)."
 platform = ">=0.1"
+# capacity = "auto"                    # 0.3.4 default: mod.toml [bmashup.capacity] declares what the build needs above the game's
+                                       # defaults (some values need a Burnout Mashup host with patch 131+; see LABELS.json);
+                                       # "game" = refuse a build that needs more than the game's defaults
 
 [package.comments]
 header = "# My first track - ORIGINAL geometry authored with trackbuild 0.2.0. Donor parts (Gamedata header, enviro, audio) come from EU_M1_V1: LOCAL ONLY.\n"

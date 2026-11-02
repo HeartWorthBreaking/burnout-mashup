@@ -1,0 +1,50 @@
+  <details id="rtabox"><summary><b>Retail-style authoring</b> <span class="note">(asset library, styles, generation, retail extensions, sharing)</span></summary>
+    <div class="note" id="rtawalk">First use: <b>1</b> create the asset library from your game data -> <b>2</b> pick a style -> <b>3</b> draw a route ->
+      <b>4</b> preview and apply -> <b>5</b> adjust generated parts -> Save / Build. <b>6</b> extends a retail track instead; <b>7</b> shares a recipe.
+      Retail-derived results stay on your PC. Every step previews first; nothing changes until you apply.</div>
+    <h3>1 Asset library</h3>
+    <div class="note" id="rtacat">-</div>
+    <div><button id="rtacatb">Create / refresh asset library</button> <button id="rtacatx" disabled>Cancel</button>
+      <progress id="rtaprog" max="1" value="0" style="width:120px"></progress> <span id="rtajobmsg" class="note"></span></div>
+    <div>search <input type="text" id="rtaq" style="width:90px" placeholder="name / role"> <select id="rtakind"><option value="">any kind</option>
+      <option>building</option><option>structure</option><option>instance model</option><option>smashable prop type</option><option>texture</option></select> <select id="rtatrk"><option value="">all tracks</option></select>
+      <button id="rtasearch">Search</button></div>
+    <div id="rtares" style="max-height:150px;overflow:auto;font-size:12px"></div>
+    <div id="rtaasset" class="note"></div>
+    <h3>2 Style</h3>
+    <div><select id="rtasty"></select> <button id="rtastyshow">Show</button> | derive from <select id="rtadtrk"></select> as <input type="text" id="rtadid" style="width:90px" placeholder="my_style"> <button id="rtaderive">Derive</button></div>
+    <div id="rtastyout" class="note" style="max-height:170px;overflow:auto"></div>
+    <h3>3 Route</h3>
+    <div class="note">Click the sketch to add control points (closed loop; metres, north up). Right-click removes the last point. Or type x y z per line.</div>
+    <canvas id="rtasketch" width="300" height="220" style="border:1px solid #999;cursor:crosshair;background:#fbfbf8"></canvas>
+    <div><button id="rtacur">Use current route</button> <button id="rtaclear">Clear</button> elevation y <input type="number" id="rtay" value="20" style="width:55px"> grid <select id="rtascale"><option>400</option><option>800</option><option>1600</option></select> m</div>
+    <textarea id="rtapts" rows="3" style="width:95%" placeholder="x y z per line"></textarea>
+    <h3>4 Generate</h3>
+    <div>seed <input type="number" id="rtaseed" value="1" style="width:60px"> road width <input type="number" id="rtaw" value="14" style="width:45px"> m
+      buildings <input type="range" id="rtabd" min="0" max="2" step="0.1" value="1" style="width:60px"> trees <input type="range" id="rtatd" min="0" max="2" step="0.1" value="1" style="width:60px">
+      posts <input type="range" id="rtald" min="0" max="2" step="0.1" value="1" style="width:60px"></div>
+    <div><label><input type="checkbox" id="rtapl" checked> posts</label> <label><input type="checkbox" id="rtapb" checked> buildings</label>
+      <label><input type="checkbox" id="rtapt" checked> trees</label><br>posts <input type="text" id="rtaposts" style="width:230px"
+      placeholder="empty = the style's; or TRACK MODEL SIDE [spacing]; ..."> <button id="rtaptypes">Post types...</button>
+      <div id="rtaptlist" style="max-height:120px;overflow:auto;font-size:11px"></div> exclude rects <input type="text" id="rtaex" style="width:150px" placeholder="x0 z0 x1 z1; ..."></div>
+    <div><button id="rtagen">Preview generation</button> <button id="rtaapply" disabled>Apply (one undo step)</button></div>
+    <pre id="rtagenout" class="note" style="max-height:200px;overflow:auto;display:none"></pre>
+    <div id="rtaskip" style="max-height:110px;overflow:auto;font-size:12px"></div>
+    <h3>5 Generated parts</h3>
+    <div><button id="rtaparts">Refresh</button> <label><input type="checkbox" id="rtaconf"> replace hand edits</label></div>
+    <div id="rtapartlist" style="font-size:12px"></div>
+    <h3>6 Extend a retail track</h3>
+    <div><select id="rtaxtrk"></select> <button id="rtart">Round-trip check</button> project folder <input type="text" id="rtaxdir" style="width:180px"> <button id="rtaxnew">Create</button> <button id="rtaxopen">Open</button></div>
+    <div>unit <input type="number" id="rtaxu" value="19" style="width:45px"> <button id="rtaxunit">Unit materials</button> side <select id="rtaxside"><option value="-1">right</option><option value="1">left</option></select>
+      setback <input type="number" id="rtaxsb" value="14" style="width:45px"> along <input type="number" id="rtaxal" value="0.3" step="0.1" style="width:45px">
+      w/d/h <input type="text" id="rtaxsz" value="12 9 10" style="width:60px"></div>
+    <div>facade <select id="rtaxtex"></select> roof <select id="rtaxroof"></select> <button id="rtaxfind">Find a clear spot</button> <button id="rtaxpv">Preview attachment</button> <button id="rtaxadd" disabled>Add to project</button> <button id="rtaxundo">Undo last edit</button></div>
+    <div>build into <input type="text" id="rtaxout" style="width:200px" placeholder="new folder (LOCAL ONLY)"> <button id="rtaxbuild">Build extension</button></div>
+    <div id="rtaxsvg"></div><pre id="rtaxout2" class="note" style="max-height:180px;overflow:auto;display:none"></pre>
+    <h3>7 Share (recipe only)</h3>
+    <div><select id="rtashk"><option value="generation">this project's generation</option><option value="extension">the extension project above</option></select>
+      author <input type="text" id="rtaauth" style="width:80px"> licence <input type="text" id="rtalic" style="width:80px" value="CC-BY-4.0"></div>
+    <div>save as <input type="text" id="rtashout" style="width:200px" placeholder="...\my_recipe.zip"> <button id="rtashpv">Preview</button> <button id="rtashex">Export</button></div>
+    <div>open recipe <input type="text" id="rtarin" style="width:200px"> <button id="rtarchk">Check</button> <button id="rtarreb">Rebuild</button></div>
+    <pre id="rtashout2" class="note" style="max-height:160px;overflow:auto;display:none"></pre>
+  </details>
