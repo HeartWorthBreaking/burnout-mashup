@@ -639,6 +639,10 @@ int bo3_mmov_start(void)
     xbox_OverlaySetPortPages(PG_N, &k_ops);
     bo3_modsmenu_set_overlay(mmov_open);
     {
+        extern void bo3_modsmenu_set_overlay_live(int (*live)(void));
+        bo3_modsmenu_set_overlay_live(xbox_OverlayAvailable);   /* main21 patch 134: no MODS line while the overlay has the page */
+    }
+    {
         extern void bo3_menu_set_pause_open(int (*open_settings)(void));
         bo3_menu_set_pause_open(mmov_open_settings);   /* main21 patch 93: the pause menu's MOD SETTINGS row */
     }

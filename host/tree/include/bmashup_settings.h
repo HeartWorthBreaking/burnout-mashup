@@ -4,7 +4,7 @@
  * export as Takedawn's (takedawn_services.h); it may change or go away.
  *
  * A plugin declares a few BOUNDED settings while Takedawn starts the plugins. The player sees and changes them on the
- * MODS page (Driver Details > Settings > MODS > MOD SETTINGS), in the title's own menu, with A; nothing else edits
+ * MOD SETTINGS page (MASHUP SETTINGS; without the overlay Driver Details > Settings > MODS > MOD SETTINGS); nothing else edits
  * them. Each change is saved at once to the player's plugin-settings file and handed to the plugin's callback on the
  * game's thread. The plugin decides what a value does; the host only keeps it inside the declared bounds.
  *

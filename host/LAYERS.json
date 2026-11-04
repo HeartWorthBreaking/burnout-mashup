@@ -2,6 +2,9 @@
  "format": "pf-host-layers 1",
  "note": "result_sha256 values are those of the private reference tree (pfid1 RESULT); 3 added test fixtures are not part of this tree",
  "toolkit": {
+  "added": {
+   "src/d3d/nv2a_rt_shrink.h": "033b580bf743f8c339c1c71337e6976ec0bac57fe2709eb441647cdd4f64ad5c"
+  },
   "lgpl_file": "src/apu/apu_core.c",
   "modified": {
    "docs/runtime/overlay.md": {
@@ -26,8 +29,8 @@
    },
    "src/d3d/nv2a_pb_vulkan.c": {
     "base_sha256": "e298ec98646a926e11b95d23d1ea65f637138f8b2cff941cbbbf8afec33a9479",
-    "hunks": 7,
-    "result_sha256": "12e9cb689bcb8907440d0ab99b7f871d7792f09faf7e36063aa8037a50d8f650"
+    "hunks": 10,
+    "result_sha256": "2452ab2cfb55d1ba3114156e4944cfd2804759571ab8793b188990744f857ad5"
    },
    "src/kernel/kernel.h": {
     "base_sha256": "5e27f2239d8cb184663dd9d6895a1dff8b5901d63056f520259cd8bf16d9323e",
@@ -64,6 +67,21 @@
     "hunks": 1,
     "result_sha256": "d90434ff3bdeeddd9512f45e050950f0b7df1482c7b736d5ccb76ec0a870116a"
    },
+   "src/platform/recomp_env.h": {
+    "base_sha256": "6806288d6bfcdd510d50c236038803f53249ec039b0b2ed6578a28e7797bf4d0",
+    "hunks": 1,
+    "result_sha256": "5a3e9232ea17d0154e8919e3b0adf6362f21ba73c8faa4edd69caeb62970d26b"
+   },
+   "src/soundtrack/xbox_soundtrack.h": {
+    "base_sha256": "4958d7608c65895c1e1fe5dbd74b735b928d167acd094ec560a9d429e612524e",
+    "hunks": 1,
+    "result_sha256": "3bd81ed9eb365eac5892c46761056b686090fe4e90149f99a00e390b16508e11"
+   },
+   "src/soundtrack/xst_decode.c": {
+    "base_sha256": "27b1f17e943989a2565adc22dfb7d7ffa848ce2812c322fc2d4f3374833c1f8e",
+    "hunks": 1,
+    "result_sha256": "74b7860869a729251489491224939317acdb2c827ee2dda50896a362097302d6"
+   },
    "src/usb/ohci.c": {
     "base_sha256": "23b2bdfe803ddb926a852901ebf87455fd26c71fe7178e8f499acb33c2cd4bdf",
     "hunks": 2,
@@ -72,7 +90,7 @@
   }
  },
  "tree": {
-  "added": 266,
+  "added": 267,
   "excluded_added": [
    "tests/bm_chevron/gen_capfix1.c",
    "tests/bm_chevron/gen_clean1.c",
@@ -82,12 +100,17 @@
    "CMakeLists.txt": {
     "base_sha256": "5ffeab2ab1c24c45cc07842e361c60bdb2d2b73bf53cadd63c9d54fa7540b522",
     "hunks": 3,
-    "result_sha256": "32284e73896aeb5bc23e0985dbda481fcbeb1f13ce96ec636b974af94d584f4d"
+    "result_sha256": "f64ad16922842a488f0c4fbb80d9f9c3d950848f9302190c5527c31916cce301"
    },
    "config/patches.json": {
     "base_sha256": "e32c3975ab95c91d00e849d264d325d9b3b01049caa4a1872edc99d7d6736c07",
     "hunks": 1,
     "result_sha256": "43017022a6e113430cc8f1c2b26b0aa1757837e870606d0f1b83f8af0673f822"
+   },
+   "docs/custom-music.md": {
+    "base_sha256": "10f0d98da5f74b6673edffea4777d9349f26c03568d877c0fd6d551ac16d8295",
+    "hunks": 1,
+    "result_sha256": "ff376a1b66c4d57fca11873f98ddc662b7459c63d3e1905e426d884579a790e2"
    },
    "docs/mod-folders.md": {
     "base_sha256": "2e022c63456e08ef1f293a331eaf219fc93006baa3261818c11581ca15c18ac8",
@@ -132,7 +155,7 @@
    "src/game/main.c": {
     "base_sha256": "6fcc397a1c45c52066f9238e5a447fa6fb81cd79a337a89794e13c0f9b452ab4",
     "hunks": 17,
-    "result_sha256": "47576b69020b0074b03a00c0979da53ddf39f7eba9a3a078b09a13c758fccc86"
+    "result_sha256": "4a0cb95e5b3e556df2ae41d4c5275d3256247e73206ecf4db6e547bdb1a4e567"
    },
    "src/game/menuentry.c": {
     "base_sha256": "8d5c27faae570e2c5818335a8ec58995243b792b8346b13574a085a31a6866e1",
@@ -146,8 +169,13 @@
    },
    "src/game/soundtrack.c": {
     "base_sha256": "edc9913ae212905f752617ba03751825b9cd1049d78cf4a5c59fac73109e3564",
-    "hunks": 4,
-    "result_sha256": "212f52bf116e6d7f5204975dda17cd9ffb895b76d436494ed975b5be1c967d59"
+    "hunks": 6,
+    "result_sha256": "9ec97907c37745778275670b1151047ea88afede32291c95fe9c997adfecc337"
+   },
+   "src/game/soundtrack_start.h": {
+    "base_sha256": "77ba1a299bae3000f5ba3a6cc8d06f3359ce973e0e46fa59723e41cc9512c08d",
+    "hunks": 1,
+    "result_sha256": "5a4e759f53f5fba482f6444fdb93ecfc7d80f357709956c94fd8fa835f92e473"
    },
    "tests/modfs/CMakeLists.txt": {
     "base_sha256": "7fc4d742fb626a7ffc6b19784d65b78874dd422640f034a83bee59f4bbc098f5",

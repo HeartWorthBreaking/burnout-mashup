@@ -1164,7 +1164,7 @@ def main(argv=None, out=None):
     def result(rc, cls, msg, rec=None, **kw):
         rec = RECOVERY.get(cls, "") if rec is None else rec
         pr(json.dumps(dict(kw, ok=rc == RC_OK, rc=rc, cls=cls, message=msg, recovery=rec), sort_keys=True))
-        u.ev(ev="result", rc=rc, cls=cls, message=msg, recovery=rec)
+        u.ev(ev="result", rc=rc, cls=cls, message=msg, recovery=rec, restart=bool(kw.get("restart")))
         return rc
     NET["allowed"] = cmd in NETWORK_COMMANDS          # the one place network use is allowed: a command the user gave
     try:

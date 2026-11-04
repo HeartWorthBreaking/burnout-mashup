@@ -123,6 +123,17 @@ class Bundle:
             if r["id"] and ids.count(r["id"]) > 1:
                 r["level"] = bmcompat.BLOCKED
                 r["reasons"].append("the id %s is in more than one mod folder: remove one copy" % r["id"])
+        # mods that clash with each other: the one the game would refuse is BLOCKED, so Play asks before the start. The host's order: folder kind, then id.
+        order = sorted(range(len(rows)), key=lambda i: (MOD_DIRS.index(rows[i]["source"]), rows[i]["id"]))
+        by = [dict(rows[i], manifest=bmcompat.read_mod(rows[i]["folder"])[0]) for i in order]
+        for k, notes in bmcompat.find_clashes(by).items():
+            r = rows[order[k]]
+            for refused, text in notes:
+                r["reasons"].append(text)
+                if refused:
+                    r["level"] = bmcompat.BLOCKED
+                elif r["level"] == bmcompat.OK:
+                    r["level"] = bmcompat.WARN
         return rows
 
     # ---- import ----

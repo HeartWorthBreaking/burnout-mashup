@@ -17,7 +17,7 @@ import sys
 import threading
 import time
 
-VERSION = '0.33'          # the Workbench version: window title (workbench.py) and README heading; bump once per milestone
+VERSION = '0.34'          # the Workbench version: window title (workbench.py) and README heading; bump once per milestone
 WB = os.path.dirname(os.path.abspath(__file__))
 # v0.4: no built-in developer paths. Every tool / data path comes from (highest first) a command-line option, the saved
 # workbench.json (Settings tab "Save", or `wb_core.py config ... --save`), or the lookup the kit documents (BMKIT_* environment,

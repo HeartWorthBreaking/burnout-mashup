@@ -83,7 +83,9 @@ class App:
         root.geometry('%dx%d' % (max(mw, min(int(1000 * s), int(sw * 0.92))), max(mh, min(int(720 * s), int(sh * 0.85)))))
         root.protocol('WM_DELETE_WINDOW', self.on_close)
         wb_theme.apply(root, compact=True)                       # v0.29 polish: the launcher's look, compact
-        nb = ttk.Notebook(root)
+        self.hdr = wb_theme.header(root, 'Burnout Mashup', 'Workbench %s' % VERSION)
+        self.hdr.pack(side='top', fill='x')
+        nb = ttk.Notebook(root, style='Menu.TNotebook')
         self.nb = nb
         nb.pack(fill='both', expand=True, pady=(2, 0))            # v0.29: grows with the window
         self.tab_set = ttk.Frame(nb, padding=8)
@@ -125,6 +127,11 @@ class App:
         root.bind('<Escape>', lambda e: self.do_cancel() if str(self.btn_cancel['state']) != 'disabled' else None)
         for i in range(9):
             root.bind('<Control-Key-%d>' % (i + 1), lambda e, i=i: nb.select(i) if i < len(nb.tabs()) else None)
+        def page(name):
+            self.hdr.page = name
+            if self.hdr.winfo_width() > 1:
+                self.hdr.redraw()
+        wb_theme.menu_tabs(root, nb, [nb.tab(t, 'text') for t in nb.tabs()], page).pack(side='top', fill='x', before=nb)
         wb_theme.finish(root)
         self.live.configure(foreground=wb_theme.MUTED)               # the live tail stays quieter than the result
         if cfg.get('_config_error'):

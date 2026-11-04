@@ -10,6 +10,7 @@ guess and no fuzz. Hunk position numbers in the patch are informational only.
     host/tree/**            -> added to the Takedawn checkout at the same relative paths (a file that exists already is a collision)
     host/tree.patch         -> modifies Takedawn files (paths 'tree/<file>')
     host/toolkit/toolkit.patch + host/toolkit/lgpl/apu_core.patch -> modify xboxrecomp files (paths 'toolkit/<file>')
+    host/toolkit/added/**   -> added to the xboxrecomp checkout at the same relative paths (a file that exists already is a collision)
 Run it ONCE per fresh checkout; a second run is refused (pre-image differs). Original code (MIT); the logic is a port of the
 unique-anchor rule of the project's layer tool, so this tree is self-contained.
 """
@@ -163,6 +164,11 @@ def run(argv):
     if len(added_man) != exp["tree_added_files"] or C.digest(added_man) != exp["tree_added_digest"]:
         raise C.Refused("host/tree is not the published one (%d files, digest %s; expected %d, %s): edited, or a checkout that "
                         "converted line ends" % (len(added_man), C.digest(added_man)[:12], exp["tree_added_files"], exp["tree_added_digest"][:12]))
+    x_added_dir = os.path.join(host, "toolkit", "added")
+    x_added = C.dir_manifest(x_added_dir)
+    if len(x_added) != exp["toolkit_added_files"] or C.digest(x_added) != exp["toolkit_added_digest"]:
+        raise C.Refused("host/toolkit/added is not the published one (%d files, digest %s; expected %d, %s): edited, or a checkout that "
+                        "converted line ends" % (len(x_added), C.digest(x_added)[:12], exp["toolkit_added_files"], exp["toolkit_added_digest"][:12]))
     t_files = load_patch(os.path.join(host, "tree.patch"), "tree.patch")
     x_files = load_patch(os.path.join(host, "toolkit", "toolkit.patch"), "toolkit.patch")
     l_files = load_patch(os.path.join(host, "toolkit", "lgpl", "apu_core.patch"), "apu_core.patch")
@@ -184,6 +190,11 @@ def run(argv):
             raise C.Refused("COLLISION: upstream already has host/tree/%s" % rel)
         if rel in st_t:
             raise C.Refused("host/tree/%s is added and patched at once" % rel)
+    for rel in x_added:
+        if os.path.exists(os.path.join(xr, *rel.split("/"))):
+            raise C.Refused("COLLISION: upstream already has host/toolkit/added/%s" % rel)
+        if rel in st_x:
+            raise C.Refused("host/toolkit/added/%s is added and patched at once" % rel)
     # ---- results must be the pinned ones (in memory)
     res = {}
     for root, st in (("tree", st_t), ("toolkit", st_x)):
@@ -203,9 +214,14 @@ def run(argv):
         os.makedirs(os.path.dirname(dst), exist_ok=True)
         with open(dst, "wb") as f:
             f.write(open(os.path.join(tree_dir, *rel.split("/")), "rb").read())
-    C.say("host layers applied: %d Takedawn files patched (%d hunks), %d added, %d xboxrecomp files patched"
-          % (len(st_t), sum(len(f["hunks"]) for f in t_files), len(added_man), len(st_x)))
-    return {"ok": True, "tree_patched": len(st_t), "tree_added": len(added_man), "toolkit_patched": len(st_x),
+    for rel in x_added:
+        dst = os.path.join(xr, *rel.split("/"))
+        os.makedirs(os.path.dirname(dst), exist_ok=True)
+        with open(dst, "wb") as f:
+            f.write(open(os.path.join(x_added_dir, *rel.split("/")), "rb").read())
+    C.say("host layers applied: %d Takedawn files patched (%d hunks), %d added, %d xboxrecomp files patched, %d added"
+          % (len(st_t), sum(len(f["hunks"]) for f in t_files), len(added_man), len(st_x), len(x_added)))
+    return {"ok": True, "tree_patched": len(st_t), "tree_added": len(added_man), "toolkit_patched": len(st_x), "toolkit_added": len(x_added),
             "hunks": sum(len(f["hunks"]) for f in t_files + x_files + l_files),
             "results_equal_private_reference_sha": same_as_private, "results_checked": len(res)}
 

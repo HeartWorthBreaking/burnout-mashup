@@ -6,6 +6,13 @@ repository's own build scripts (`build\fetch_upstream.py`, `apply_layers.py`, `r
 `host_info.py`; `docs\BUILDING.md` at the top of the repository) - there is no second build system. Nothing here starts the game.
 A local build is a technical route, not a legal conclusion (`docs/PUBLIC_STATUS.md`).
 
+## One click
+
+Setup tab -> **Build Mashup**. That one button does everything: it finds your game (in `gamedata\`, or from your last build; only if it cannot, it asks for the folder),
+asks ONCE for all the tools that are missing (name, source, size, licence of each), downloads them, builds, verifies the result and installs it.
+With everything already there it asks nothing. It stops at the first thing that fails and says what to do; pressing it again reuses what is done.
+**Build options...** opens the same window without starting; there, **Advanced options** has the upstream source, the tools (one tool at a time, or a folder that already holds them) and the build folder.
+
 ## 1. What you need
 
 | | |

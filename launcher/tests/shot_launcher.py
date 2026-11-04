@@ -63,7 +63,7 @@ def capture(hwnd, path, step=3):
 
 def demo_bundle():
     root = os.path.join(tempfile.mkdtemp(prefix="bm shots "), "Burnout Mashup")
-    for d in ("tools", "docs"):
+    for d in ("tools", "docs", "art", "fonts"):
         shutil.copytree(os.path.join(SRC, d), os.path.join(root, d))
     shutil.copytree(pubfix.DEMO, os.path.join(root, "mods", "demo"))
     open(os.path.join(root, "BUNDLE.json"), "w").write('{"bundle": "test"}')

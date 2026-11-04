@@ -7,7 +7,7 @@ written). Python 3.8+, standard library only; the build step is PowerShell 5.1. 
 | # | script | does |
 |---|---|---|
 | 1 | `fetch_upstream.py` | upstream Takedawn and xboxrecomp at the pinned commits (git URL or a local clone), tree id and archive digest checked, line-end mode explicit |
-| 2 | `apply_layers.py host` | `host/tree`, `host/tree.patch`, `host/toolkit/*.patch` onto them; a hunk applies only if its old block occurs exactly once |
+| 2 | `apply_layers.py host` | `host/tree`, `host/tree.patch`, `host/toolkit/*.patch`, `host/toolkit/added` onto them; a hunk applies only if its old block occurs exactly once |
 | 3 | `regen.py` | upstream's recompiler on **your** `default.xbe` (retail NTSC-U only); result checked against the pinned generated tree hash |
 | 4 | `apply_marks.py` | `host/marks/anchors.json` onto your generated files with exact-anchor refusal (`--release`: the stamp names the marked tree, for the release build) |
 | 5 | `build.ps1` | configure + build in a NEW folder with the pinned toolchain (given by path), `BO3_REPRODUCIBLE=ON`, `BMASHUP_IDENTITY=ON` (`-Release`: the release-named `bin/BurnoutMashup.exe`, `BO3_RELEASE=ON`) |

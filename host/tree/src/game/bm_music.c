@@ -380,6 +380,14 @@ void bo3_music_game_apply(void)
     int nm = 0, map[BO3_MODFS_MAX_MODS], dropped = 0;
     unsigned long long all = 0;
     xbox_host_char hs[1100];
+    {
+        /* main21 patch 135: first, so that the player's own folder has the banner too, with or without a mod's music */
+        static const bo3_music_guest g = {g_read, g_write, g_alloc, NULL};
+        int ok = bo3_music_banner_configure(&g);
+        fprintf(stderr, "[MUSIC] track banner: %s\n", ok ? "the title's banner code verified (0x153149, 0x153869): the songs' "
+                "title / artist / album are shown when they start" : "the title's banner code does NOT match this build: no "
+                "banner (the music still plays)");
+    }
     s_decl = (bo3_music_decl *)calloc(BO3_MODFS_MAX_MODS, sizeof *s_decl);
     if (!s_decl)
         return;
@@ -536,13 +544,6 @@ void bo3_music_game_apply(void)
                 "as the custom-music folder (EA GAMES TRAX, X)\n", nst, nst == 1 ? "" : "s", ntr, ntr == 1 ? "" : "s", nm,
                 nm == 1 ? "" : "s", s_stage, dropped, dropped == 1 ? "'s" : "s'");
     }
-    {
-        static const bo3_music_guest g = {g_read, g_write, g_alloc, NULL};
-        int ok = bo3_music_banner_configure(&g);
-        fprintf(stderr, "[MUSIC] track banner: %s\n", ok ? "the title's banner code verified (0x153149, 0x153869): the songs' "
-                "title / artist / album are shown when they start" : "the title's banner code does NOT match this build: no "
-                "banner (the music still plays)");
-    }
     bo3_soundtrack_use_mod_music(s_stage);
 }
 
@@ -554,7 +555,7 @@ static _Atomic uint32_t s_note_next;
 void bo3_music_note_open(uint32_t handle, uint32_t song)
 {
     uint32_t i;
-    if (!s_on || !handle || handle == 0xFFFFFFFFu)
+    if (!handle || handle == 0xFFFFFFFFu)         /* main21 patch 135: the player's own folder too */
         return;
     i = atomic_fetch_add(&s_note_next, 1u) % NOTE_SLOTS;
     atomic_store(&s_note[i].handle, 0u);
@@ -575,6 +576,48 @@ static const char *leaf(const char *p, const char **parent, size_t *plen)
     return l;
 }
 
+/* main21 patch 135: a text for the banner: Latin-1 as far as the title's font goes, cut at its 31 characters */
+static void banner_text(char out[BO3_MUSIC_TEXT_MAX + 1], const char *utf8)
+{
+    uint16_t w[XST_NAME_UNITS];
+    int i;
+    xst_name_from_utf8(w, utf8);
+    for (i = 0; i < (int)BO3_MUSIC_TEXT_MAX && w[i]; i++)
+        out[i] = w[i] < 256 ? (char)w[i] : '?';
+    out[i] = 0;
+}
+
+static void units_text(char out[BO3_MUSIC_TEXT_MAX + 1], const uint16_t *w)
+{
+    int i;
+    for (i = 0; i < (int)BO3_MUSIC_TEXT_MAX && w[i]; i++)
+        out[i] = w[i] < 256 ? (char)w[i] : '?';
+    out[i] = 0;
+}
+
+/* A song of the player's folder: its tags; no title tag: the song's name in the list; no artist tag: its soundtrack's name. */
+static void folder_song_banner(const xst_library *lib, const xst_song *s)
+{
+    char tt[256], ta[256], tl[256], title[BO3_MUSIC_TEXT_MAX + 1], artist[BO3_MUSIC_TEXT_MAX + 1], album[BO3_MUSIC_TEXT_MAX + 1];
+    int tags = xst_read_tags(s->path, tt, ta, tl, sizeof tt), shown;
+    if (tt[0])
+        banner_text(title, tt);
+    else
+        units_text(title, s->name);
+    artist[0] = 0;
+    if (ta[0]) {
+        banner_text(artist, ta);
+    } else {
+        for (int i = 0; i < lib->n_st; i++)
+            if (lib->st[i].id == s->id >> 16)
+                units_text(artist, lib->st[i].name);
+    }
+    banner_text(album, tl);
+    shown = bo3_music_banner_show(title, artist, album);
+    fprintf(stderr, "[MUSIC] song started: \"%s\" by %s%s%s (%s): banner %s\n", title, artist, album[0] ? ", " : "", album,
+            tags ? "tags" : "no tags", shown ? "written" : "not written (not verified, music volume 0, or no guest memory)");
+}
+
 void bo3_music_song_started(uint32_t handle)
 {
     const xst_library *lib;
@@ -583,9 +626,7 @@ void bo3_music_song_started(uint32_t handle)
     char folder[64];
     size_t pl;
     uint32_t song = 0;
-    int t, found = 0;
-    if (!s_on)
-        return;
+    int t = -1, found = 0;
     for (uint32_t i = 0; i < NOTE_SLOTS && !found; i++)
         if (atomic_load(&s_note[i].handle) == handle) {
             song = atomic_load(&s_note[i].song);
@@ -595,13 +636,15 @@ void bo3_music_song_started(uint32_t handle)
     if (!found || !lib || !(s = xst_song_by_id(lib, song)) || !s->path)
         return;
     file = leaf(s->path, &par, &pl);
-    if (!par || pl >= sizeof folder)
+    if (s_on && par && pl < sizeof folder) {
+        memcpy(folder, par, pl);
+        folder[pl] = 0;
+        t = bo3_music_plan_find(&s_plan, s_decl, folder, file);
+    }
+    if (t < 0) {
+        folder_song_banner(lib, s);
         return;
-    memcpy(folder, par, pl);
-    folder[pl] = 0;
-    t = bo3_music_plan_find(&s_plan, s_decl, folder, file);
-    if (t < 0)
-        return;
+    }
     {
         const bo3_music_entry *e = &s_decl[s_plan.tr[t].mod].e[s_plan.tr[t].entry];
         int shown = bo3_music_banner_show(e->title, e->artist, e->album);

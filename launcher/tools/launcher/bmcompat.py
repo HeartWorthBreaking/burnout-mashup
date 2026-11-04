@@ -161,6 +161,53 @@ def check_mod(info, folder, installed=None):
     return res
 
 
+def _declared(man):
+    """what a manifest claims for itself alone: track ids {id}, regions {letter: text and bank}"""
+    bm = man.get("bmashup", {}) if isinstance(man, dict) and isinstance(man.get("bmashup", {}), dict) else {}
+    tr = bm.get("tracks", {}) if isinstance(bm.get("tracks", {}), dict) else {}
+    rg = bm.get("regions", {}) if isinstance(bm.get("regions", {}), dict) else {}
+    tracks = [str(x).strip() for x in tr.get("add", [])] if isinstance(tr.get("add", []), list) else []
+
+    def pairs(key):
+        out = {}
+        for x in rg.get(key, []) if isinstance(rg.get(key, []), list) else []:
+            k, _, v = str(x).partition("=")
+            if v:
+                out[k.strip()] = v.strip()
+        return out
+    names, banks = pairs("add"), pairs("dj")
+    return tracks, {k: (names[k], banks.get(k, "")) for k in names}
+
+
+def find_clashes(rows):
+    """Mods that clash with each other, as the host's admission does it at start (bm_admit.c): in load order (rows as given), the first mod to claim a track id or
+    a region keeps it, a later one is refused and "the game starts without it". rows: dict(id, name, enabled, level, manifest). An early warning: the host stays the final word.
+    Only mods that would load count. -> {row index: [(True when this mod is the refused one, text)]}"""
+    tracks, regions, out = {}, {}, {}
+    for i, r in enumerate(rows):
+        if not r.get("enabled") or r.get("level") == BLOCKED or not r.get("manifest"):
+            continue
+        who = r.get("name") or r.get("id")
+        tr, rg = _declared(r["manifest"])
+        texts = []
+        for t in tr:
+            if t in tracks:
+                texts.append((tracks[t], "both add the track %s" % t))
+        for k, v in rg.items():
+            if k in regions and regions[k][1] != v:
+                texts.append((regions[k][0], "they declare the region %s differently (%s / %s)" % (k, regions[k][1][0], v[0])))
+        if texts:
+            for owner, what in texts:
+                out.setdefault(i, []).append((True, "clashes with %s: %s. The game starts without this mod: turn one of them off" % (rows[owner].get("name") or rows[owner].get("id"), what)))
+                out.setdefault(owner, []).append((False, "clashes with %s: %s. The game keeps this one and refuses the other: turn one of them off" % (who, what)))
+            continue                     # refused: it claims nothing
+        for t in tr:
+            tracks[t] = i
+        for k, v in rg.items():
+            regions.setdefault(k, (i, v))
+    return out
+
+
 def main(argv):
     if len(argv) < 2:
         print(__doc__)

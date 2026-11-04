@@ -1,5 +1,33 @@
 # Changelog
 
+## 0.2.0-alpha.3 - one-click Update and Build, a new look, custom music on the banner and in the mix, bloom fix (experimental alpha)
+- **Update now:** Help and the Updates window have one button: check, download, prepare, install, restart (and build when one is
+  needed). The click is the consent; Cancel stops, Switch back undoes. The single steps stay under Advanced options. There is still no
+  automatic check. Fixed: the Updates window never restarted the launcher after an install or a switch back. That fix is in this
+  version, so an update FROM 0.2.0-alpha.1 / alpha.2 does not restart by itself: start the launcher again by hand once.
+- **Build Mashup:** one button: it takes the game from the last build or `gamedata\`, asks one question for all missing tools (names,
+  sources, sizes, licences), downloads, builds, verifies and installs. Upstream source, tools table and build folder are under Advanced
+  options. **The update from 0.2.0-alpha.2 needs one Build Mashup rebuild** (the host sources and the icon changed).
+- **New look** for the launcher and the Workbench 0.34: near-black palette, Roboto Condensed Medium (`launcher/fonts`, SIL OFL 1.1), a new
+  title picture and a new BM icon for the host and both starter programs. The title and icon are fixed pictures (`launcher/art`,
+  `host/tree/assets/icon/bmashup.ico`); no game art is in them and no font they were drawn with ships. They are project artwork, not MIT or CC0 (`LICENSES/LicenseRef-BurnoutMashup-Artwork.txt`).
+- **Warning before a game about clashing mods:** two enabled mods adding one track id, or declaring a region differently: the one the
+  host would refuse is marked BLOCKED, so Play asks first and names the reason. The host stays the final word; other clash kinds
+  (events, tune keys, music replaces) are not covered.
+- **Host: bloom at a render scale (Vulkan only; takedawn issue 78):** a scaled frame read by a smaller target goes through a copy reduced
+  to the game's size, so a small bright spot no longer glows or misses by where it falls. 1x and the Metal / D3D11 backends are unchanged.
+  Switches: CMake `BO3_RT_SHRINK_NATIVE=OFF`, at run time `RECOMP_DEBUG=rt_shrink=0`.
+- **Host: redundant Mods rows removed** (the pause menu's MOD SETTINGS and Settings > MODS while the overlay is there; the overlay pages
+  stay; without an overlay the MODS line stays). `BO3_HOOKREQ_P22M=ON` restores both.
+- **Host: custom music.** The EA GAMES TRAX banner shows the tags of a song from your folder (title, artist, album from ID3 / flac / ogg
+  tags; m4a and wav are not read). New setting **MIX WITH EA TRAX** (MOD SETTINGS, BURNOUT MASHUP; **default off**): every
+  song of the folder and the 44 EA tracks in one pool. A change of source is a stop + start, no crossfade. `docs/custom-music.md`.
+- `host/marks`: 521 marks (3 new). `build/EXPECTED.json`: new reference builds. `build/apply_layers.py`: a new file for xboxrecomp goes
+  to `host/toolkit/added/` (byte copy, digest pinned, an existing file is a collision).
+- **Tried in the game, briefly, on one PC only:** the banner and the mix were used by a person in short sessions (the mix on a private build with the same
+  music code); the bloom fix and the removed rows ran in one session, without a side-by-side check of the picture. Update now and Build Mashup are tested
+  offline with a mock channel and stand-ins; no real network install and no person has pressed them. Linux and macOS: not built.
+
 ## 0.2.0-alpha.2 - bigger track limits, retail-style track authoring, an easier track editor, Build demos fixed (experimental alpha)
 - **Host: much larger limits for detailed tracks.** A track mod can ask for bigger full-detail sections with the new mod.toml key
   `[bmashup.capacity] full_unit_bytes` (up to 2 MiB a section; the game has 160 KB), and the existing keys go higher:

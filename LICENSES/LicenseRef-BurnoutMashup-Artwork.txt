@@ -1,0 +1,13 @@
+Burnout Mashup project artwork
+Copyright 2026 the Burnout Mashup contributors. All rights reserved except as stated below.
+
+This covers launcher/art/*.png and host/tree/assets/icon/bmashup.ico, and the same pictures inside the
+programs built from this source (the title, the BM icon). They are not under the MIT, CC-BY-4.0 or CC0-1.0
+licences that apply to other parts of this repository.
+
+You may copy and redistribute these pictures, unmodified, as part of Burnout Mashup: its source, its packages,
+programs built from its source, and forks of it that keep them in place. Any other use needs permission from
+the copyright holders, including use as the logo or icon of something else, or in a changed form.
+
+The pictures come without warranty of any kind. This text grants nothing over names, marks or other material
+that belong to third parties.

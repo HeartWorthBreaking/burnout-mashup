@@ -16,7 +16,7 @@ counsel or upstream; a decision of the project does not close it.
 | Q8 | reverse-engineering notes and hand-edited generated lines | hooks as address anchors + own text; no generated code published; provenance kept visible; the RE research notes are held back | **unresolved** (counsel) |
 | Q9 | outputs built from retail data | local only; the tools say so | implemented in tool texts; exchange of derived outputs **unresolved** |
 
-Defaults chosen while assembling (to be confirmed by the owner): D1 copyright line wording; D2 research notes excluded; D3 icon CC0;
+Defaults chosen while assembling (to be confirmed by the owner): D1 copyright line wording; D2 research notes excluded; D3 icon CC0 (the earlier icon; since 0.2.0-alpha.3 the icon is project artwork, `LICENSES/LicenseRef-BurnoutMashup-Artwork.txt`);
 D4 names BurnoutMashup / Burnout Mashup; D5 update check off; D6 migration by the copy-only tool; D7 hook marks in the macro form;
 D8 the three generated test fixtures excluded; D9 ps2look included as a tool (no outputs); D10 game-container demo files excluded;
 D11 Windows-only scope; D12 no courtesy message to upstream has been sent.

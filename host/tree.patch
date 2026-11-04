@@ -1,4 +1,4 @@
-# um layer tree: 16 modified file(s); position-free hunks, each old block unique in its file
+# um layer tree: 18 modified file(s); position-free hunks, each old block unique in its file
 #
 --- a/tree/CMakeLists.txt
 +++ b/tree/CMakeLists.txt
@@ -52,9 +52,19 @@
  
  # Off Windows the kernel links OpenSSL::Crypto but finds it in its own
  # subdirectory, where the imported target is invisible to the executable;
-@@ -93,6 +135,401 @@
+@@ -92,7 +134,420 @@
+     endif()
  endif()
  
++# main21 patch 133 (takedawn issue 78): BO3_RT_SHRINK_NATIVE=OFF compiles out the Vulkan backend's guest-size copy of a scaled
++# render target read by a smaller one (nv2a_rt_shrink.h): the bloom reads the scaled frame directly, as before. Above the toolkit:
++# add_compile_definitions reaches only directories added after it.
++option(BO3_RT_SHRINK_NATIVE "main21: bloom at render.scale reads a guest-size copy of the frame" ON)
++if(NOT BO3_RT_SHRINK_NATIVE)
++    add_compile_definitions(NV2A_RT_SHRINK_NATIVE=0)
++    message(STATUS "Burnout Mashup: guest-size copy for shrinking reads compiled out (BO3_RT_SHRINK_NATIVE=OFF)")
++endif()
++
  add_subdirectory(${XBOXRECOMP_DIR} ${CMAKE_BINARY_DIR}/xboxrecomp)
 +
 +# CLEAN1 (distribution clearance, 2026-10-27): no build-machine path in the executable. The toolkit compiles the
@@ -193,8 +203,10 @@
 +# ON (default): "*" = every retail race car (one palette mod = a colour picker in the car-select paint cycle).
 +option(BO3_HOOKREQ_P18C "main21: [bmashup.paints] car * = every retail race car" ON)
 +# main21 (patch 93, open-list item 18): BO3_HOOKREQ_P22M=OFF compiles the pause menu's MOD SETTINGS marks (loc_0008621E /
-+# loc_000864D4) out. ON (default): a MOD SETTINGS row in the single-player pause menu opens the overlay's MOD SETTINGS page.
-+option(BO3_HOOKREQ_P22M "main21: MOD SETTINGS in the single-player pause menu" ON)
++# loc_000864D4) out. ON: a MOD SETTINGS row in the single-player pause menu opens the overlay's MOD SETTINGS page.
++# main21 patch 134 (owner 2026-11-04): default OFF, and OFF also drops Settings > MODS while the overlay is there: both are
++# redundant, the pages are in MASHUP SETTINGS. ON restores both.
++option(BO3_HOOKREQ_P22M "main21: MOD SETTINGS in the pause menu and MODS in the title's Settings" OFF)
 +# main21 (patch 94, hook request zackypoo 14): BO3_HOOKREQ_P25D=OFF: no DEBUG MENU setting / line. ON (default): the host setting
 +# DEBUG MENU (default OFF) lists the game's leftover debug page in Settings (no generated-code mark of its own).
 +option(BO3_HOOKREQ_P25D "main21: the game's debug page behind the DEBUG MENU host setting" ON)
@@ -364,6 +376,13 @@
 +else()
 +    add_compile_definitions(BO3_HOOKREQ_P25D=0)
 +endif()
++# main21 patch 136: BO3_HOOKREQ_ZMIX=OFF compiles out MIX CUSTOM MUSIC WITH EA TRAX (three marks in recomp_0003.c + the host setting).
++option(BO3_HOOKREQ_ZMIX "main21: the host setting that mixes the custom music with EA GAMES TRAX" ON)
++if(BO3_HOOKREQ_ZMIX)
++    add_compile_definitions(BO3_HOOKREQ_ZMIX=1)
++else()
++    add_compile_definitions(BO3_HOOKREQ_ZMIX=0)
++endif()
 +if(BO3_HOOKREQ_P22M)
 +    add_compile_definitions(BO3_HOOKREQ_P22M=1)
 +else()
@@ -454,7 +473,7 @@
  
  add_subdirectory(src/game)
  
-@@ -109,6 +546,20 @@
+@@ -109,6 +564,20 @@
      add_subdirectory(tests/fatal)
      # The mod folders' lookup (src/game/modfs.c, docs/mod-folders.md).
      add_subdirectory(tests/modfs)
@@ -496,6 +515,30 @@
        "va": "0x0001BFC4",
        "kind": "mark",
        "name": "ua_eval",
+--- a/tree/docs/custom-music.md
++++ b/tree/docs/custom-music.md
+@@ -291,6 +291,21 @@
+ that is where such libraries are. Windows (Media Foundation) and Android
+ (MediaCodec) could do the same; Linux has none to rely on.
+ 
++## Song names on the banner (main21 patch 135)
++
++A song of your folder gets the EA GAMES TRAX banner when it starts: title, artist and album from its tags (`xst_read_tags`: ID3v2 and ID3v1 in
++mp3, Vorbis comments in flac and ogg). No title tag: the name in the list. No artist tag: the soundtrack's (folder's) name. m4a and wav tags are not read. The font shows Latin-1,
++other characters as `?`, and each text is cut at 31 characters. A mod's song keeps the texts its mod declares.
++
++## Mixing with EA GAMES TRAX (main21 patch 136)
++
++MASHUP SETTINGS > MOD SETTINGS > BURNOUT MASHUP > **MIX WITH EA TRAX** (default off; needs a music folder). While on, the next song comes from all the folder's
++songs and the 44 EA GAMES TRAX tracks, each song as likely. This is its own option, separate from the screen's random order (Y): while the mix is on the order inside each
++source is random whatever Y says; Y is not changed, and applies again with the mix off. EA GAMES TRAX tracks switched off in the screen stay off (none left: custom music only).
++The title has one source at a time, so a change of source is a stop and a start: no crossfade, and a song can come back sooner than in one source's shuffle, whose list is
++made anew at each change. Skip stays inside the source. The soundtrack remembered for the next start stays your own choice in the screen. Offline, the logic is tested with a
++stand-in title; `BO3_HOOKREQ_ZMIX=OFF` compiles it out.
++
+ ## A soundtrack longer than EA GAMES TRAX (BO-120)
+ 
+ EA GAMES TRAX has 44 tracks, in a table at 0x3EC450 (24 bytes a track: the
 --- a/tree/docs/mod-folders.md
 +++ b/tree/docs/mod-folders.md
 @@ -103,6 +103,199 @@
@@ -1556,7 +1599,7 @@
  #endif
      /* BO-108: the user's music folder as the title's custom soundtracks.
       * Nothing unless audio.custom_music_dir (--music-dir) names one. */
-@@ -2000,8 +2030,328 @@
+@@ -2000,8 +2030,335 @@
       * Android: or the app's mods folder exists). After the soundtrack, whose
       * path hook it chains to. */
      {
@@ -1758,6 +1801,13 @@
 +                            extern void bo3_modsmenu_debug_init(void);
 +                            bo3_modsmenu_debug_init();
 +                        }
++#if BO3_HOOKREQ_ZMIX
++                        {
++                            /* main21 patch 136: the host setting MIX CUSTOM MUSIC WITH EA TRAX (soundtrack.c) */
++                            extern void bo3_soundtrack_mix_init(void);
++                            bo3_soundtrack_mix_init();
++                        }
++#endif
 +                        {
 +                            /* main21 patch 130: the data mods' [bmashup.tune] sliders (bm_tune.c, applied with the declarations
 +                             * above) on MOD SETTINGS under each mod, a saved value applied (plugin-settings.toml); exit 93 when
@@ -1885,7 +1935,7 @@
      }
      /* BO-114: the host mixer's buses, wave table and preset file. Names
       * only unless audio.mixer (RECOMP_AUDIO_MIXER) is on. */
-@@ -2175,9 +2525,16 @@
+@@ -2175,9 +2532,16 @@
      return a > s_base_aspect + 0.01 ? a : 0.0;
  }
  
@@ -1903,7 +1953,7 @@
      if (s_uw_log && a != s_uw_stage)
          fprintf(stderr, "UW: stage set-up, aspect %.4f (flip %u)\n", a, s_uw_flips);
      s_uw_stage = a;
-@@ -2185,6 +2542,8 @@
+@@ -2185,6 +2549,8 @@
  
  static void uw_fe_setup(void)
  {
@@ -1912,7 +1962,7 @@
      if (s_uw_log && s_uw_stage != 0.0)
          fprintf(stderr, "UW: front-end set-up (flip %u)\n", s_uw_flips);
      s_uw_stage = 0.0;
-@@ -2195,8 +2554,15 @@
+@@ -2195,8 +2561,15 @@
  {
      s_uw_frame = s_uw_stage;
      s_stage_drew = 1;
@@ -1930,7 +1980,7 @@
  }
  
  /* BO-110 (HDR prototype, RECOMP_DEBUG=hdr): the start and the end of a
-@@ -2300,8 +2666,24 @@
+@@ -2300,8 +2673,24 @@
      s_uw_ring[n % UW_RING] = a;
      s_uw_flips = n;
      texup_loading_flip();
@@ -1955,7 +2005,7 @@
      /* The simulation steps this frame ran (the stepper's count, +0x2E20C:
       * see BO3_PACE_LOG), for the overlay's frame-time graph: a frame of two
       * steps moves the world twice as far (present_cadence.h, BO-115). */
-@@ -2698,9 +3080,15 @@
+@@ -2698,9 +3087,15 @@
      xbox_bug_report_opts o;
  
      memset(&o, 0, sizeof o);
@@ -1973,7 +2023,7 @@
      o.save_dir = s_save_dir;
      o.out_dir = s_report_out;
      o.env_prefixes = prefixes;
-@@ -2788,7 +3176,11 @@
+@@ -2788,7 +3183,11 @@
   * spells it. */
  #define BO3_TITLE_ID      "4541005b"
  /* In the player's home folder. */
@@ -1985,7 +2035,7 @@
  
  static char s_import_report[2600];
  
-@@ -2847,7 +3239,7 @@
+@@ -2847,7 +3246,7 @@
      }
      recomp_fs_mkdir_p(root);
      if (recomp_instance_lock(root, 0) == 0) {
@@ -1994,7 +2044,7 @@
          return 1;
      }
      if (!xbox_SaveImportPrepare(path, BO3_TITLE_ID, root, root, out, sizeof out, info, sizeof info,
-@@ -2870,7 +3262,7 @@
+@@ -2870,7 +3269,7 @@
          fprintf(stderr, "Import failed: %s\n", report[0] ? report : "nothing was imported.");
          return 1;
      }
@@ -2003,7 +2053,7 @@
      return 0;
  #else
      (void)path;
-@@ -2938,15 +3330,15 @@
+@@ -2938,15 +3337,15 @@
       * would hold the profile in memory too and write over the first one's
       * progress when it saves. */
      if (recomp_instance_lock(s_save_dir, 5000) == 0) {
@@ -2022,7 +2072,7 @@
  #endif
          }
          exit(3);
-@@ -2993,8 +3385,8 @@
+@@ -2993,8 +3392,8 @@
          snprintf(cwd, sizeof cwd, "?");
  #endif
      n += snprintf(settings + n, sizeof settings - (size_t)n,
@@ -2033,7 +2083,7 @@
      for (i = 0; i < argc && n < (int)sizeof settings - 256; i++)
          n += snprintf(settings + n, sizeof settings - (size_t)n, " %s", argv[i]);
      n += snprintf(settings + n, sizeof settings - (size_t)n,
-@@ -3438,8 +3830,19 @@
+@@ -3438,8 +3837,19 @@
       * TAKEDAWN_UPDATE_REPO points it at another repository, for the tests of
       * the "a newer version is out" answer. Not on Android: no row there. */
      {
@@ -2053,7 +2103,7 @@
      }
  #if defined(__linux__) && !defined(__ANDROID__)
      /* "Add Steam library art" (BO-143): for a player who updated and never sees
-@@ -3566,6 +3969,11 @@
+@@ -3566,6 +3976,11 @@
      bo3_autopilot_start(bo3_flips);
      /* BO-133: interface.menu_entry (menuentry.c). */
      bo3_menu_entry_start();
@@ -3953,7 +4003,12 @@
  }
 --- a/tree/src/game/soundtrack.c
 +++ b/tree/src/game/soundtrack.c
-@@ -32,6 +32,9 @@
+@@ -28,10 +28,14 @@
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
++#include <time.h>
+ 
  #include "recomp_types.h"
  #include "platform/recomp_env.h"
  #include "soundtrack/xbox_soundtrack.h"
@@ -3963,10 +4018,13 @@
  #ifdef XBOXRECOMP_HAVE_OVERLAY
  #include "xbox_settings.h"
  #endif
-@@ -337,6 +340,33 @@
+@@ -334,6 +338,33 @@
  #endif
- }
- 
+ #ifdef XBOXRECOMP_HAVE_OVERLAY
+     xbox_OverlaySetMusicFolder(&k_folder_ops);
++#endif
++}
++
 +/* GP-MUSIC1 (bm_music.c): the player's own folder is set (it wins over the mods' music) */
 +int bo3_soundtrack_player_folder(void)
 +{
@@ -3991,13 +4049,169 @@
 +    }
 +#ifdef XBOXRECOMP_HAVE_OVERLAY
 +    s_start.pending = xbox_SettingValue(XS_AUDIO_CUSTOM_AT_START) != 0.0;
-+#endif
+ #endif
+ }
+ 
+@@ -649,6 +680,130 @@
+ }
+ #endif
+ 
++/* -- main21 patch 136: MIX CUSTOM MUSIC WITH EA TRAX (host setting, default OFF; switch BO3_HOOKREQ_ZMIX) ------------------------
++ * A pool of the folder's songs and the 44 of EA GAMES TRAX, each song as likely. An option of its own, NOT the title's random order (Y in
++ * the EA GAMES TRAX screen, the profile byte 0x4AE1DA): owner 2026-11-04: while the mix is on the order inside a source is random as well,
++ * through the manager's play mode (+0x548 = 2), whatever that byte says; the byte is put back around each start, so the profile keeps
++ * the player's choice and it applies again with the mix off.
++ * The title has one source at a time, so the next song of another source goes the way the screen's exit does it (s9 of
++ * docs/custom-music.md): manager+0x568 = source, then sub_00155420. Marks in recomp_0003.c: at the two places a finished song asks for
++ * the next (EA GAMES TRAX 0x153074, a soundtrack 0x155AF9) the source is picked; another source skips the title's next, and at the
++ * manager's next frames (once a soundtrack's last buffers have played: the player idle, +0xC8 = 6) the switch is made. A start of the
++ * music (the wrap below: a race, a menu) picks too, unless it is the player's own confirm in the screen, which plays first. Skip
++ * stays inside the source. The remembered soundtrack (BO-230) is the player's choice only: s_start.seen follows every switch made here,
++ * so a mix switch is not taken for a confirm. */
++#if BO3_HOOKREQ_ZMIX
++#include "bm_settings.h"
++#include "bo3_mix_gen.h"
++#define MIX_EA_TRACKS     44
++#define MIX_PLAYER_STATE  0xC8u           /* manager + 8 + 0xC0 */
++#define MIX_PLAYER_IDLE   6u
++#define MIX_WAIT_FRAMES   1200
++#define MIX_PLAY_MODE     0x548u          /* 1 in order, 2 random (sub_00155420: the byte below + 1) */
++#define MIX_MODE_RANDOM   2u
++#define MIX_RANDOM_BYTE   0x004AE1DAu
++extern void sub_00155420_gen(void);
++static int s_mix_setting = -1, s_mix_wait, s_mix_no_ea, s_mix_census = -1, s_mix_said;
++static int32_t s_mix_pending = -1;
++static uint32_t s_mix_rng;
++
++void bo3_soundtrack_mix_init(void)
++{
++    bm_setting_decl d;
++    int32_t v = 0;
++    memset(&d, 0, sizeof d);
++    d.struct_size = (uint32_t)sizeof d;
++    d.kind = BM_SETTING_BOOL;
++    d.key = "music_mix";
++    d.label = "MIX WITH EA TRAX";                       /* 16 = BM_SETTINGS_LABEL_MAX */
++    d.def = 0;
++    s_mix_setting = bo3_ps_host_declare(&d, &v) == BM_SETTINGS_OK ? v : -1;
++    fprintf(stderr, "[SOUNDTRACK] mix of the custom music and EA GAMES TRAX: %s\n", s_mix_setting < 0 ? "setting not available" : v ? "ON" : "OFF");
 +}
 +
- /* ── a folder held back (BO-243) ───────────────────────────────────── */
- 
- /*
-@@ -697,6 +727,7 @@
++static int mix_census(void)
++{
++    if (s_mix_census < 0)
++        s_mix_census = !memcmp((const void *)XBOX_PTR(0x00152F30u), "\x53\x56\x57\x8B\xF8", 5) && !memcmp((const void *)XBOX_PTR(0x00153074u), "\x8B\xC7\xE8", 3) &&
++                       !memcmp((const void *)XBOX_PTR(0x00155AF9u), "\xB8\xE8\x15\x41\x00", 5);
++    return s_mix_census;
++}
++
++static int mix_on(void)
++{
++    int32_t v = 0;
++    return s_mix_setting >= 0 && s_on && manager_set_up() && bo3_ps_host_get("music_mix", &v) == BM_SETTINGS_OK && v && mix_census();
++}
++
++static int32_t mix_pick(void)
++{
++    const xst_library *lib = xbox_SoundtrackLibrary();
++    int counts[XST_MAX_SOUNDTRACKS], n = 0, i;
++    if (!s_mix_rng)
++        s_mix_rng = (uint32_t)time(NULL) | 1u;
++    s_mix_rng ^= s_mix_rng << 13;
++    s_mix_rng ^= s_mix_rng >> 17;
++    s_mix_rng ^= s_mix_rng << 5;
++    if (lib)
++        for (i = n = 0; i < lib->n_st && i < XST_MAX_SOUNDTRACKS && i + 1 < (int)MEM32(MGR_SOURCES); i++)
++            counts[n++] = lib->st[i].count;
++    return bo3_mix_pick(counts, n, s_mix_no_ea ? 0 : MIX_EA_TRACKS, s_mix_rng >> 3);
++}
++
++int bo3_mix_gen_song_end(uint32_t mgr)
++{
++    int32_t want;
++    if (!mix_on())
++        return 0;
++    MEM32(mgr + MIX_PLAY_MODE) = MIX_MODE_RANDOM;
++    want = mix_pick();
++    if (want < 0 || want == (int32_t)MEM32(mgr + MGR_SOURCE_CHOSEN))
++        return 0;
++    s_mix_pending = want;
++    s_mix_wait = 0;
++    return 1;
++}
++
++static void mix_start(uint32_t mgr, int32_t source)
++{
++    uint32_t a = g_eax, b = g_ebx, c = g_ecx, d = g_edx, si = g_esi, di = g_edi, sp = g_esp, bp = g_ebp, seh = g_seh_ebp;
++    uint8_t order = MEM8(MIX_RANDOM_BYTE);
++    MEM8(MIX_RANDOM_BYTE) = 1;
++    MEM32(mgr + MGR_SOURCE_CHOSEN) = (uint32_t)source;
++    s_start.seen = source;
++    PUSH32(g_esp, mgr);
++    PUSH32(g_esp, 0);                     /* the return address its ret 4 takes */
++    sub_00155420_gen();
++    MEM8(MIX_RANDOM_BYTE) = order;
++    g_eax = a; g_ebx = b; g_ecx = c; g_edx = d; g_esi = si; g_edi = di; g_esp = sp; g_ebp = bp; g_seh_ebp = seh;
++}
++
++void bo3_mix_gen_frame(uint32_t mgr)
++{
++    int32_t want = s_mix_pending, cur;
++    if (want < 0)
++        return;
++    cur = (int32_t)MEM32(mgr + MGR_SOURCE_CHOSEN);
++    if (cur >= 1 && MEM32(mgr + MIX_PLAYER_STATE) != MIX_PLAYER_IDLE && ++s_mix_wait < MIX_WAIT_FRAMES)
++        return;
++    s_mix_pending = -1;
++    if (s_mix_said < 8) {
++        s_mix_said++;
++        fprintf(stderr, "[SOUNDTRACK] mix: next song from source %d (was %d)\n", (int)want, (int)cur);
++    }
++    mix_start(mgr, want);
++    if (want == 0 && MEM8(mgr + 0x566u)) {
++        /* every EA GAMES TRAX track switched off in the screen: the title found none, and stops. Out of the pool for this run. */
++        int32_t other;
++        s_mix_no_ea = 1;
++        other = mix_pick();
++        fprintf(stderr, "[SOUNDTRACK] mix: EA GAMES TRAX has no track to play here: custom music only\n");
++        if (other >= 1)
++            mix_start(mgr, other);
++    }
++}
++#endif
++
+ void bo3_soundtrack_start_source(bo3_guest_fn title_fn)
+ {
+     held_folder_in(0);
+@@ -677,8 +832,27 @@
+             remember_source(source);
+             break;
+         default:
++#if BO3_HOOKREQ_ZMIX
++            if (mix_on()) {                /* main21 patch 136; not on a confirm: the player's choice plays first */
++                int32_t want = mix_pick();
++                if (want >= 0) {
++                    MEM32(mgr + MGR_SOURCE_CHOSEN) = (uint32_t)want;
++                    s_start.seen = want;
++                }
++            }
++#endif
+             break;
+         }
++#if BO3_HOOKREQ_ZMIX
++        s_mix_pending = -1;                /* this start is the next song */
++        if (mix_on()) {
++            uint8_t order = MEM8(MIX_RANDOM_BYTE);
++            MEM8(MIX_RANDOM_BYTE) = 1;
++            title_fn();
++            MEM8(MIX_RANDOM_BYTE) = order;
++            return;
++        }
++#endif
+     }
+ #endif
+     title_fn();
+@@ -697,6 +871,7 @@
      song = MEM32(g_esp + 4);
      title_fn();
      xbox_SoundtrackNoteOpen(g_eax, song);
@@ -4005,13 +4219,48 @@
  }
  
  void bo3_soundtrack_create_decoder(bo3_guest_fn title_fn)
-@@ -744,5 +775,6 @@
+@@ -744,5 +919,6 @@
          MEM32(obj + OBJ_VTABLE + (uint32_t)k * 4) = BO3_SOUNDTRACK_VA_BASE + (uint32_t)k * 4;
      if (out)
          MEM32(out) = obj;
 +    bo3_music_song_started(MEM32(desc + 4));   /* GP-MUSIC1: a mod's song starts: the title's track banner */
      ret(S_OK, 8);
  }
+--- a/tree/src/game/soundtrack_start.h
++++ b/tree/src/game/soundtrack_start.h
+@@ -38,6 +38,32 @@
+     return bo3_start_target(n, 1, "-", found);
+ }
+ 
++/* main21 patch 136: which source the next song of the mix comes from: 0 EA GAMES TRAX, n soundtrack n - 1, each weighted by its songs, so
++ * every song of the pool is as likely. counts[i]: soundtrack i's songs; n_ea: EA GAMES TRAX's (0: not in the pool). -1: an empty pool. */
++static inline int32_t bo3_mix_pick(const int *counts, int n_st, int n_ea, uint32_t rnd)
++{
++    uint32_t total = n_ea > 0 ? (uint32_t)n_ea : 0u, r;
++    int i;
++    for (i = 0; i < n_st; i++)
++        if (counts[i] > 0)
++            total += (uint32_t)counts[i];
++    if (!total)
++        return -1;
++    r = rnd % total;
++    if (n_ea > 0) {
++        if (r < (uint32_t)n_ea)
++            return 0;
++        r -= (uint32_t)n_ea;
++    }
++    for (i = 0; i < n_st; i++)
++        if (counts[i] > 0) {
++            if (r < (uint32_t)counts[i])
++                return i + 1;
++            r -= (uint32_t)counts[i];
++        }
++    return -1;
++}
++
+ typedef struct bo3_start_state {
+     int     pending;                  /* the start switch is still to be done */
+     int32_t seen;                     /* the chosen source as the last start saw it */
 --- a/tree/tests/modfs/CMakeLists.txt
 +++ b/tree/tests/modfs/CMakeLists.txt
 @@ -1,12 +1,18 @@

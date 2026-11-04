@@ -1,4 +1,4 @@
-# um layer toolkit (MIT files): 12 modified file(s); position-free hunks, each old block unique in its file
+# um layer toolkit (MIT files): 15 modified file(s); position-free hunks, each old block unique in its file
 #
 --- a/toolkit/docs/runtime/overlay.md
 +++ b/toolkit/docs/runtime/overlay.md
@@ -99,7 +99,15 @@
          }
 --- a/toolkit/src/d3d/nv2a_pb_vulkan.c
 +++ b/toolkit/src/d3d/nv2a_pb_vulkan.c
-@@ -2429,7 +2429,7 @@
+@@ -69,6 +69,7 @@
+ #include "../video/hdr_shaders.h"   /* BO-244: the HDR maths shared with Metal */
+ #include "d3d8_swizzle.h"
+ #include "nv2a_texrep.h"
++#include "nv2a_rt_shrink.h"
+ #include "nv2a_texscale.h"
+ #include "nv2a_texmip.h"
+ #include "kernel_pause.h"
+@@ -2429,7 +2430,7 @@
  /* ---- textures: Metal's cache, key and invalidation ------------------------- */
  
  #define TEX_MAX_TEXELS (2048u * 2048u)
@@ -108,7 +116,7 @@
  typedef struct {
      uint32_t         offset, color, width, height, pitch, palette, levels;
      uint32_t         sign;          /* nv2a_tex_signed_mask the bytes carry */
-@@ -4413,10 +4413,10 @@
+@@ -4413,10 +4414,10 @@
      /* A render target over the bytes is written back first (Metal's decode
       * sync). */
      if (bytes) {
@@ -121,7 +129,7 @@
              if (rt->im.img && rt->dirty && rt->pitch
                      && lo < rlo + rt->pitch * rt->h && rlo < hi) {
                  if (rt_drop_if_stale(rt, "sync"))
-@@ -4445,7 +4445,7 @@
+@@ -4445,7 +4446,7 @@
          return s_magenta.view;
      }
      /* BO-277: the entry this stage's key found last, checked, before the
@@ -130,7 +138,127 @@
       * walk was ~0.25 ms a frame of the render thread). A miss walks as
       * before, for the entry or the victim. */
      hk = tc_hint_key(t);
-@@ -4764,7 +4764,7 @@
+@@ -4748,6 +4749,119 @@
+     nvk_image_to(s_cmd, im, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
+ }
+ 
++/* main21 patch 133 (takedawn issue 78): a scaled target read by a smaller one goes through a copy reduced to its guest size
++ * (nv2a_rt_shrink.h), remade when the target was drawn since. NV2A_RT_SHRINK_NATIVE=0 (CMake BO3_RT_SHRINK_NATIVE=OFF) compiles
++ * this out; RECOMP_DEBUG=rt_shrink=0 turns it off at the start. */
++#ifndef NV2A_RT_SHRINK_NATIVE
++#define NV2A_RT_SHRINK_NATIVE 1
++#endif
++#if NV2A_RT_SHRINK_NATIVE
++typedef struct {
++    int              n;
++    uint64_t         gen;       /* the target's gen when copied */
++    uint32_t         hw, hh;
++    uint32_t         w, h;
++    VkFormat         format;
++    struct nvk_image step[NV2A_RT_SHRINK_STEPS];
++} RtShrink;
++static RtShrink s_rts[RT_MAX];
++static uint64_t s_rts_copies;
++
++static int rts_format_ok(VkFormat f)
++{
++    const VkFormatFeatureFlags need = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT
++                                      | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
++    VkFormatProperties fp;
++    vkGetPhysicalDeviceFormatProperties(nvk_core_get()->phys, f, &fp);
++    return (fp.optimalTilingFeatures & need) == need;
++}
++
++static void rts_drop(RtShrink *c)
++{
++    int i;
++    for (i = 0; i < c->n; i++)
++        garbage_push(&c->step[i], VK_NULL_HANDLE, NULL);
++    c->n = 0;
++}
++
++/* The reduced copy of rt, up to date and readable; VK_NULL_HANDLE: read rt itself, as before. */
++static VkImageView rt_shrink_view(RenderTarget *rt)
++{
++    static int off = -1, said;
++    RtShrink *c = &s_rts[rt - s_rt];
++    const struct nvk_image *prev;
++    uint32_t sz_w[NV2A_RT_SHRINK_STEPS], sz_h[NV2A_RT_SHRINK_STEPS];
++    int32_t pw, ph;
++    int i, n;
++
++    if (off < 0) {
++        const char *e = recomp_env(RENV_RT_SHRINK);
++        off = e && *e == '0';
++    }
++    if (off)
++        return VK_NULL_HANDLE;
++    n = nv2a_rt_shrink_plan(rt->w, rt->h, rt->hw, rt->hh, sz_w, sz_h);
++    if (!n)
++        return VK_NULL_HANDLE;
++    if (c->n && c->w == rt->w && c->h == rt->h && c->hw == rt->hw && c->hh == rt->hh && c->format == rt->im.format) {
++        if (c->gen == rt->gen)
++            return c->step[c->n - 1].view;
++    } else {
++        rts_drop(c);
++        if (!rts_format_ok(rt->im.format))
++            return VK_NULL_HANDLE;
++        for (i = 0; i < n; i++)
++            if (!nvk_image_new(&c->step[i], rt->im.format, sz_w[i], sz_h[i], 1,
++                               VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
++                               VK_IMAGE_ASPECT_COLOR_BIT)) {
++                memset(&c->step[i], 0, sizeof c->step[i]);
++                c->n = i;
++                rts_drop(c);
++                return VK_NULL_HANDLE;
++            }
++        c->n = n;
++        c->w = rt->w;
++        c->h = rt->h;
++        c->hw = rt->hw;
++        c->hh = rt->hh;
++        c->format = rt->im.format;
++    }
++    end_encoder();
++    ensure_cmd();
++    nvk_image_to(s_cmd, &rt->im, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
++    prev = &rt->im;
++    pw = (int32_t)rt->hw;
++    ph = (int32_t)rt->hh;
++    for (i = 0; i < c->n; i++) {
++        VkImageBlit b;
++        nvk_image_to(s_cmd, &c->step[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
++        memset(&b, 0, sizeof b);
++        b.srcSubresource.aspectMask = b.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
++        b.srcSubresource.layerCount = b.dstSubresource.layerCount = 1;
++        b.srcOffsets[1].x = pw;
++        b.srcOffsets[1].y = ph;
++        b.srcOffsets[1].z = 1;
++        b.dstOffsets[1].x = (int32_t)sz_w[i];
++        b.dstOffsets[1].y = (int32_t)sz_h[i];
++        b.dstOffsets[1].z = 1;
++        vkCmdBlitImage(s_cmd, prev->img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, c->step[i].img,
++                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &b, VK_FILTER_LINEAR);
++        nvk_image_to(s_cmd, &c->step[i], i + 1 < c->n ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
++                                                      : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
++        prev = &c->step[i];
++        pw = (int32_t)sz_w[i];
++        ph = (int32_t)sz_h[i];
++    }
++    rt_to_sampled(&rt->im);
++    c->gen = rt->gen;
++    s_rts_copies++;
++    if (!said++)
++        fprintf(stderr, LOGP "surface 0x%08X (%ux%u, host %ux%u) read by a smaller target: through its guest-size copy,"
++                " %d blit(s)\n", rt->offset, rt->w, rt->h, rt->hw, rt->hh, c->n);
++    return c->step[c->n - 1].view;
++}
++#endif
++
+ static RenderTarget *rt_texture(const Stage *t, RenderTarget *cur, VkImageView *view,
+                                 uint32_t *sw, uint32_t *sh)
+ {
+@@ -4764,7 +4878,7 @@
          return NULL;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -139,7 +267,21 @@
              continue;
          if (r565 && (rt->pitch / rt->w != 2u || rt->w != t->width || rt->h != t->height
                       || (t->color == 0x11 ? rt->swz || t->pitch != rt->pitch : !rt->swz)))
-@@ -4878,7 +4878,7 @@
+@@ -4784,6 +4898,13 @@
+         } else {
+             *view = rt->im.view;
+         }
++#if NV2A_RT_SHRINK_NATIVE
++        if (!r565 && cur && nv2a_rt_shrink_wanted(rt->w, rt->h, rt->hw, rt->hh, cur->w, cur->h)) {
++            VkImageView sv = rt_shrink_view(rt);
++            if (sv)
++                *view = sv;
++        }
++#endif
+         rt_to_sampled(&rt->im);
+         *sw = rt->w;
+         *sh = rt->h;
+@@ -4878,7 +4999,7 @@
      int i;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -148,7 +290,7 @@
              continue;
          if (rt_drop_if_stale(rt, "bind"))
              continue;
-@@ -6397,7 +6397,7 @@
+@@ -6397,7 +6518,7 @@
  static void vk_sync_guest(uint32_t offset, uint32_t pitch, uint32_t w, uint32_t h)
  {
      RenderTarget *rt = NULL;
@@ -157,7 +299,7 @@
      int i;
  
      if (s_failed)
-@@ -6408,7 +6408,7 @@
+@@ -6408,7 +6529,7 @@
      if (!rt) {
          for (i = 0; i < RT_MAX; i++) {
              RenderTarget *c = &s_rt[i];
@@ -1453,6 +1595,185 @@
  #ifdef __cplusplus
  }
  #endif
+--- a/toolkit/src/platform/recomp_env.h
++++ b/toolkit/src/platform/recomp_env.h
+@@ -345,7 +345,8 @@
+     X(HDR_AB,            DEBUG, "hdr_ab",          NULL,                       "=n: with hdr, HDR on for n flips, then off for n, and so on (A/B in one run)") \
+     X(HDR_HI,            DEBUG, "hdr_hi",          NULL,                       "=x: with hdr, the upper bound of a scene draw's combiner values (default 64)") \
+     X(HDR_TEXLOG,        DEBUG, "hdr_texlog",      NULL,                       "with hdr: one line per texture (texrep_dump hash), blend and stream tag a draw uses, for finding the title's light sprites") \
+-    X(HDR_RT8,           DEBUG, "hdr_rt8",         NULL,                       "=0: with HDR on Vulkan, every colour target is half float (default: the small 2D targets, bloom levels and the like, stay BGRA8)") \
++    X(RT_SHRINK,         DEBUG, "rt_shrink",       NULL,                       "=0: on Vulkan, a scaled render target read by a smaller one is read directly (default: through a copy reduced to its guest size, so a title's bloom sees at render.scale what it sees at 1x)") \
++    X(HDR_RT8,           DEBUG, "hdr_rt8",        NULL,                       "=0: with HDR on Vulkan, every colour target is half float (default: the small 2D targets, bloom levels and the like, stay BGRA8)") \
+     X(HDR_GAINS,         DEBUG, "hdr_gains",       NULL,                       "=0: with HDR on Vulkan, the per-texture light gains a title registers (nv2a_texrep_register_hdr_gain) are not applied; =only:<hash>[+<hash>...] only those entries are (texrep_dump hashes)") \
+     X(HDR_LODFADE,       DEBUG, "hdr_lodfade",     NULL,                       "=n: with HDR on Vulkan, the per-texture light gains fade out over the first n mip levels of the gained texture (BO-195: no sparkle on small, far sprites; default 2); =0 the gain is the same at every distance") \
+     X(HDR_IMAGE,         DEBUG, "hdr_image",       NULL,                       "=0: the pictures a title registers for HDR (nv2a_texrep_register_hdr_image; BO-203: the sun's disc) are not used, the title's own texels in HDR too (a before/after comparison in one build)") \
+--- a/toolkit/src/soundtrack/xbox_soundtrack.h
++++ b/toolkit/src/soundtrack/xbox_soundtrack.h
+@@ -135,6 +135,9 @@
+ /* The same, and for a file that is not: why, in a few words for a log or a
+  * settings screen (a constant string). */
+ int xst_probe_why(const char *path, uint32_t *ms, char *title, size_t title_cap, const char **why);
++/* A file's title, artist and album tags as UTF-8 ("" for one it has not; each buffer cap bytes): ID3v2 / ID3v1 (mp3), Vorbis comments
++ * (flac, ogg); other kinds have none here. 1 when any was found. Reads the file's head only, so a song's start can ask. */
++int xst_read_tags(const char *path, char *title, char *artist, char *album, size_t cap);
+ 
+ typedef struct xst_stream xst_stream;
+ 
+--- a/toolkit/src/soundtrack/xst_decode.c
++++ b/toolkit/src/soundtrack/xst_decode.c
+@@ -941,5 +941,152 @@
+         n++;
+         s->pos += s->step;
+     }
+     return n;
+ }
++
++/* -- xst_read_tags (main21 patch 135): the title, artist and album a song's banner shows -------------------------------- */
++typedef struct { char *title, *artist, *album; size_t cap; } tag_out;
++
++static void id3v2_tags(FILE *f, const tag_out *o)
++{
++    uint8_t h[10], *tag;
++    uint32_t size, pos = 0;
++    int ver;
++
++    if (fseek(f, 0, SEEK_SET) != 0 || fread(h, 1, 10, f) != 10 || memcmp(h, "ID3", 3))
++        return;
++    ver = h[3];
++    size = syncsafe(h + 6);
++    if (ver < 2 || ver > 4 || size == 0 || (h[5] & 0x80))
++        return;
++    if (size > 65536)                             /* the text frames come first (id3v2_title) */
++        size = 65536;
++    tag = (uint8_t *)malloc(size);
++    if (!tag)
++        return;
++    if (fread(tag, 1, size, f) != size) {
++        free(tag);
++        return;
++    }
++    if (ver >= 3 && (h[5] & 0x40) && size >= 4)
++        pos = ver == 4 ? syncsafe(tag) : be32(tag) + 4;
++    for (;;) {
++        uint32_t fsize, hdr = ver == 2 ? 6 : 10;
++        char *to = NULL;
++        if (pos > size || hdr > size - pos || tag[pos] == 0)
++            break;
++        if (ver == 2) {
++            fsize = (uint32_t)tag[pos + 3] << 16 | (uint32_t)tag[pos + 4] << 8 | tag[pos + 5];
++            to = !memcmp(tag + pos, "TT2", 3) ? o->title : !memcmp(tag + pos, "TP1", 3) ? o->artist : !memcmp(tag + pos, "TAL", 3) ? o->album : NULL;
++        } else {
++            fsize = ver == 4 ? syncsafe(tag + pos + 4) : be32(tag + pos + 4);
++            to = !memcmp(tag + pos, "TIT2", 4) ? o->title : !memcmp(tag + pos, "TPE1", 4) ? o->artist : !memcmp(tag + pos, "TALB", 4) ? o->album : NULL;
++        }
++        if (fsize > size - pos - hdr)
++            break;
++        if (to && !to[0])
++            id3_text(tag + pos + hdr, fsize, to, o->cap);
++        pos += hdr + fsize;
++    }
++    free(tag);
++}
++
++/* ISO 8859-1, space or NUL padded */
++static void id3v1_field(const uint8_t *b, size_t len, char *out, size_t cap)
++{
++    size_t i, n = 0;
++    while (len > 0 && (b[len - 1] == ' ' || b[len - 1] == 0))
++        len--;
++    if (out[0] || !cap)
++        return;
++    for (i = 0; i < len && b[i] && n + 3 < cap; i++)
++        n = utf8_put(out, n, cap, b[i]);
++    out[n] = 0;
++}
++
++static void id3v1_tags(FILE *f, const tag_out *o)
++{
++    uint8_t t[128];
++    if (fseek(f, -128, SEEK_END) != 0 || fread(t, 1, 128, f) != 128 || memcmp(t, "TAG", 3))
++        return;
++    id3v1_field(t + 3, 30, o->title, o->cap);
++    id3v1_field(t + 33, 30, o->artist, o->cap);
++    id3v1_field(t + 63, 30, o->album, o->cap);
++}
++
++/* "NAME=value": the value into its slot, if the slot is still empty */
++static void comment_tag(const char *c, size_t n, const tag_out *o)
++{
++    static const char *const names[3] = {"TITLE=", "ARTIST=", "ALBUM="};
++    char *const to[3] = {o->title, o->artist, o->album};
++    int i;
++    for (i = 0; i < 3; i++) {
++        size_t k = strlen(names[i]), j;
++        if (n < k || to[i][0])
++            continue;
++        for (j = 0; j < k; j++)
++            if (toupper((unsigned char)c[j]) != (unsigned char)names[i][j])
++                break;
++        if (j == k) {
++            copy_text(to[i], o->cap, c + k, n - k);
++            return;
++        }
++    }
++}
++
++static void flac_tags(void *user, drflac_metadata *m)
++{
++    drflac_vorbis_comment_iterator it;
++    const char *c;
++    drflac_uint32 n;
++    if (m->type != DRFLAC_METADATA_BLOCK_TYPE_VORBIS_COMMENT)
++        return;
++    drflac_init_vorbis_comment_iterator(&it, m->data.vorbis_comment.commentCount, m->data.vorbis_comment.pComments);
++    while ((c = drflac_next_vorbis_comment(&it, &n)) != NULL)
++        comment_tag(c, n, (const tag_out *)user);
++}
++
++int xst_read_tags(const char *path, char *title, char *artist, char *album, size_t cap)
++{
++    tag_out o = {title, artist, album, cap};
++    if (!cap)
++        return 0;
++    title[0] = artist[0] = album[0] = 0;
++    switch (kind_of(path)) {
++    case K_MP3: {
++        FILE *f = open_file(path);
++        if (f) {
++            id3v2_tags(f, &o);
++            id3v1_tags(f, &o);
++            fclose(f);
++        }
++        break;
++    }
++    case K_FLAC: {
++        drflac *fl;
++#ifdef _WIN32
++        wchar_t w[1024];
++        fl = wide_path(path, w, 1024) ? drflac_open_file_with_metadata_w(w, flac_tags, &o, NULL) : NULL;
++#else
++        fl = drflac_open_file_with_metadata(path, flac_tags, &o, NULL);
++#endif
++        if (fl)
++            drflac_close(fl);
++        break;
++    }
++    case K_OGG: {
++        stb_vorbis *v = ogg_open(path);
++        if (v) {
++            stb_vorbis_comment c = stb_vorbis_get_comment(v);
++            int i;
++            for (i = 0; i < c.comment_list_length; i++)
++                comment_tag(c.comment_list[i], strlen(c.comment_list[i]), &o);
++            stb_vorbis_close(v);
++        }
++        break;
++    }
++    default:
++        break;
++    }
++    return title[0] || artist[0] || album[0];
++}
 --- a/toolkit/src/usb/ohci.c
 +++ b/toolkit/src/usb/ohci.c
 @@ -460,7 +460,11 @@

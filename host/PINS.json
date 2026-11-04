@@ -7,15 +7,15 @@
   "release_exe": "BurnoutMashup.exe"
  },
  "marks": {
-  "anchors_sha256": "2fbe98197d15ab3d67b60f61f3fb1c788358b4aa084c57f6a74ce2b864a1c0cd",
-  "count": 518,
+  "anchors_sha256": "10bf662b832de91fde6c58fd3adf050b7e10f830a0bf0c005910f8464b649304",
+  "count": 521,
   "form": "macro",
   "format": "bm-anchors 1",
   "header_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985"
  },
  "pristine_gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
  "reference_build_private": {
-  "exe_sha256_identity_on": "4dd498991003db3a12f15f58f64363b4de0994d7fae2842c4a004b5aecbfe9da",
+  "exe_sha256_identity_on": "906e52bf77bfbc2fce81221bcadad0ff48abcd07ccd1d733dc932bdabbfacb2e",
   "note": "private reference of the layers (pfid1 + marks in the original form); the macro form differs in the source digest and the linker build id only"
  },
  "takedawn": {

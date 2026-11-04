@@ -1,4 +1,4 @@
-# Burnout Mashup Workbench v0.33 (2026-11-01; track editor: TRACK_EDITOR_GUIDE.md)
+# Burnout Mashup Workbench v0.34 (2026-11-04; track editor: TRACK_EDITOR_GUIDE.md)
 
 A small Windows window over existing tools. It decides nothing itself:
 - **release pipeline** `gp\release\release.py` (`plan` = preflight + cache decision per node; `run`; `run --resume`)
@@ -1134,6 +1134,10 @@ it, and when the editor stops with an error the window stays open with the reaso
 **TRACK_EDITOR_GUIDE.md**, a step-by-step guide for new users (the reference stays TRACK_EDITOR_AUTHORING.md). The editor itself
 is unchanged. Test: rel021 `tests\test_wb_button.py` (command line and quoting, the cmd.exe wrapper and its error pause, the real
 editor serving a project, the window's button, the guide).
+
+## v0.34 (2026-11-04, Burnout Mashup 0.2.0-alpha.3): the launcher's look
+The launcher's band, BM window icon, ticked tab row (wraps when narrow), page name, font and palette (`wb_theme.py` = the launcher's
+`bmtheme.py`); the buttons are `MenuButton` widgets. No other Workbench behaviour changed. The browser track editor is not themed.
 
 ## v0.33 (2026-11-02, Burnout Mashup 0.2.0-alpha.2): an easier track editor, buildings, project health, sharing
 User documentation: `TRACK_EDITOR_GUIDE.md` (new users) and `TRACK_EDITOR_AUTHORING.md` (reference, capability matrix, limits).

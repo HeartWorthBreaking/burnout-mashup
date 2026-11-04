@@ -160,6 +160,10 @@ static int s_confirm = -1;                              /* the mod whose approva
 extern int bo3_modsmenu_gen_marks(void);
 static int s_flow;                         /* both marks generated and reaching this file's functions */
 static int (*s_ov_open)(void);             /* main20m patch 63: opens the overlay's MODS page (modsmenu_ov.c), 1 done */
+static int (*s_ov_live)(void);             /* main21 patch 134: is the overlay there (xbox_OverlayAvailable)? */
+#ifndef BO3_HOOKREQ_P22M
+#define BO3_HOOKREQ_P22M 0                 /* CMake option (default OFF since patch 134) */
+#endif
 static int s_probing, s_probed;            /* bo3_modsmenu_start calls each mark once: bits 1, 2 */
 
 static int mm_on(void)
@@ -882,23 +886,29 @@ static void mm_items(void)
         MM32(s_blk + i * 8) = MM32(g_eax + i * 8);
         MM32(s_blk + i * 8 + 4) = 0;
     }
-    s_mods_line = (int)n;
-    put_label(label_va((int)n), "MODS");
-    MM32(s_blk + n * 8) = label_va((int)n);
-    MM32(s_blk + n * 8 + 4) = 0;
-    MM16(SP_COUNT) = (uint16_t)(n + 1);
-    if (dbg_on() && n + 2 <= MAX_LINES) {        /* main21 patch 94: DEBUG MENU after MODS */
+    /* main21 patch 134: with a working overlay MODS and MOD SETTINGS are its pages (the game's MASHUP SETTINGS row opens it): no
+     * line here. Without one (headless, RECOMP_OVERLAY=0, BMASHUP_MODS_UI=native) this line is the only way to the mods: kept.
+     * BO3_HOOKREQ_P22M=ON brings the line back with the pause menu's row. */
+    if (BO3_HOOKREQ_P22M || !s_ov_open || !s_ov_live || !s_ov_live()) {
+        s_mods_line = (int)n;
+        put_label(label_va((int)n), "MODS");
+        MM32(s_blk + n * 8) = label_va((int)n);
+        MM32(s_blk + n * 8 + 4) = 0;
+        n++;
+        MM16(SP_COUNT) = (uint16_t)n;
+        fprintf(stderr, "[MODS] Settings: MODS listed (line %d)\n", s_mods_line);
+    }
+    if (dbg_on() && n + 1 <= MAX_LINES) {        /* main21 patch 94: DEBUG MENU after MODS */
         uint32_t lo, hi;
         if (dbg_hash(&lo, &hi)) {
-            s_dbg_line = (int)n + 1;
+            s_dbg_line = (int)n;
             put_label(label_va(s_dbg_line), "DEBUG MENU");
             MM32(s_blk + (uint32_t)s_dbg_line * 8) = label_va(s_dbg_line);
             MM32(s_blk + (uint32_t)s_dbg_line * 8 + 4) = 0;
-            MM16(SP_COUNT) = (uint16_t)(n + 2);
+            MM16(SP_COUNT) = (uint16_t)(n + 1);
         }
     }
     g_eax = s_blk;
-    fprintf(stderr, "[MODS] Settings: MODS listed (line %d)\n", s_mods_line);
 }
 
 /* mark "mm_flow_sel": event 5, a line chosen, after `push 0x65857D40` (eax
@@ -1146,6 +1156,7 @@ static void mm_select(void)
 
 int bo3_modsmenu_mode(void) { return s_mode; }
 void bo3_modsmenu_set_overlay(int (*open)(void)) { s_ov_open = open; }   /* main20m patch 63 (modsmenu_ov.c) */
+void bo3_modsmenu_set_overlay_live(int (*live)(void)) { s_ov_live = live; }   /* main21 patch 134 (modsmenu_ov.c) */
 void bo3_modsmenu_items(void) { mm_items(); }
 void bo3_modsmenu_select(void) { mm_select(); }
 

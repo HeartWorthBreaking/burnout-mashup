@@ -102,19 +102,27 @@ class Launcher(tk.Tk):
         self.step = None
         self.step_tail = []
         st = bmtheme.apply(self)                                        # dark theme; Treeview rows follow the font size
-        st.configure("Play.Accent.TButton", font=self.fonts["h2"], padding=(36, 12))
+        st.configure("Play.Accent.TButton", font=(self.fonts["h2"][0], 15, "bold"), padding=(44, 12))
         self.wraps = []                                                 # labels whose wrap width follows the window
         bar = ttk.Frame(self, style="Header.TFrame", padding=(18, 4, 18, 8))
         bar.pack(side="bottom", fill="x")                               # first: never pushed out of a small window
         self.status = ttk.Label(bar, anchor="w", text="Bundle: " + ROOT, style="Status.TLabel")
         self.status.pack(fill="x")
-        bmtheme.header(self, TITLE, "launcher").pack(side="top", fill="x")
-        self.nb = ttk.Notebook(self)
+        self.bm_art_dir = os.path.join(ROOT, "art")                     # the header's title (tools make_title.py at the release; a picture, no font inside)
+        self.hdr = bmtheme.header(self, TITLE, "launcher")
+        self.hdr.pack(side="top", fill="x")
+        self.nb = ttk.Notebook(self, style="Menu.TNotebook")
         self.nb.pack(fill="both", expand=True)
         self._setup_tab()
         self._mods_tab()
         self._play_tab()
         self._help_tab()
+
+        def page(name):
+            self.hdr.page = name
+            if hasattr(self.hdr, "redraw") and self.hdr.winfo_width() > 1:
+                self.hdr.redraw()
+        bmtheme.menu_tabs(self, self.nb, [self.nb.tab(t, "text") for t in self.nb.tabs()], page).pack(side="top", fill="x", before=self.nb)
         for w in self.wraps:                                            # until the first resize: never wider than the minimum
             w.configure(wraplength=int(560 * self.scale))
         for i in range(4):
@@ -139,7 +147,7 @@ class Launcher(tk.Tk):
                                                "image / folder. It is copied (read only) into gamedata\\."),
                  ("preflight", "2. Check this PC", "Windows, Vulkan driver, host, game data, mods - every problem with its fix."),
                  ("demos", "3. Demo mods", "Builds the demo car / tracks from YOUR data into mods\\generated (stays on this PC).")]
-        buttons = {"host": (("Build Mashup...", 0, self.open_build), ("Previous build", 0, self.switch_back_build)),
+        buttons = {"host": (("Build Mashup", 0, self.build_now), ("Build options...", 6, self.open_build), ("Previous build", 0, self.switch_back_build)),
                    "data": (("Browse folder...", 7, self.browse_folder), ("Browse disc image...", 7, self.browse_image)),
                    "preflight": (("Check now", 0, lambda: self.run_step("preflight")),),
                    "demos": (("Build demos", 6, lambda: self.run_step("demos")),)}
@@ -150,15 +158,15 @@ class Launcher(tk.Tk):
             row.pack(fill="x")
             for text, ul, cmd in reversed(buttons.get(key, ())):   # packed first: a long state text never pushes a button out
                 ttk.Button(row, text=text, underline=ul, command=cmd,
-                           style="Accent.TButton" if key == "preflight" else "TButton").pack(side="right", padx=(6, 0))
-            ttk.Label(row, text=label, style="CardTitle.TLabel").pack(side="left")
+                           style="Accent.TButton" if key == "host" and text == "Build Mashup" else "TButton").pack(side="right", padx=(6, 0))
+            bmtheme.menu_title(row, label).pack(side="left")
             s = ttk.Label(row, text="...", style="Card.TLabel", font=self.fonts["bold"])
             s.pack(side="left", padx=(12, 0))
             self.setup_rows[key] = s
             h = ttk.Label(card, text=help_text, style="CardMuted.TLabel", justify="left")
             h.pack(fill="x", pady=(2, 0))
             self.wraps.append(h)
-        self.bind("<Alt-b>", lambda e: self.open_build())
+        self.bind("<Alt-b>", lambda e: self.build_now())
         self.bind("<Alt-f>", lambda e: self.browse_folder())
         self.bind("<Alt-d>", lambda e: self.browse_image())
         self.bind("<Alt-c>", lambda e: self.run_step("preflight"))
@@ -263,6 +271,10 @@ class Launcher(tk.Tk):
         self.log["state"] = "normal"
         self.log.delete("1.0", "end")
         self.log["state"] = "disabled"
+
+    def build_now(self):
+        """one click: the Build Mashup window opens and does everything (bmbuild_gui.BuildWindow.build_all)"""
+        return self.open_build().build_all()
 
     def open_build(self):
         """the Build Mashup window (tools/launcher/bmbuild_gui.py; the same build as build-mashup.cmd)"""
@@ -425,7 +437,7 @@ class Launcher(tk.Tk):
         side.bind("<Configure>", lambda e: keep.configure(wraplength=max(150, e.width - 4)))
         head = ttk.Frame(f)
         head.pack(fill="x", pady=(14, 6))
-        ttk.Label(head, text="Last game", style="Title.TLabel").pack(side="left")
+        bmtheme.menu_title(head, "Last game").pack(side="left")
         ttk.Button(head, text="Show last results", underline=5, command=self.show_results).pack(side="right")
         self.results = tk.Text(f, height=6, wrap="word", state="disabled")
         bmtheme.text_style(self.results, pad=12)
@@ -439,7 +451,7 @@ class Launcher(tk.Tk):
             return
         blocked = [r for r in self.bundle.mods() if r["enabled"] and r["level"] == bmcompat.BLOCKED]
         if blocked and not messagebox.askyesno(TITLE, "These mods will be refused by the game:\n%s\n\nPlay anyway?" %
-                                               "\n".join("- " + (r["id"] or r["name"]) for r in blocked)):
+                                               "\n".join("- %s: %s" % (r["id"] or r["name"], r["reasons"][-1] if r["reasons"] else "see the Mods tab") for r in blocked)):
             return
         self.status["text"] = "Game running... (results appear here after it ends)"
         flags = getattr(subprocess, "CREATE_NEW_CONSOLE", 0)
@@ -485,7 +497,7 @@ class Launcher(tk.Tk):
         def card(title, note=""):
             c = ttk.Frame(f, style="Card.TFrame", padding=(14, 8))
             c.pack(fill="x", pady=(0, 6))
-            ttk.Label(c, text=title, style="CardTitle.TLabel").pack(anchor="w")
+            bmtheme.menu_title(c, title).pack(anchor="w")
             if note:
                 n = ttk.Label(c, text=note, style="CardMuted.TLabel", justify="left")
                 n.pack(fill="x")
@@ -503,7 +515,8 @@ class Launcher(tk.Tk):
         ttk.Button(row, text="Back up my profile...", command=self.backup).pack(side="left")
         c, row = card("Update / repair / remove")
         row.destroy()
-        for text, cmd in (("Check for updates...", self.open_updates),
+        for text, cmd in (("Update now", self.update_now),
+                          ("Check for updates...", self.open_updates),
                           ("Bring my data from an older Burnout Mashup folder...", self.upgrade),
                           ("Verify the shipped files", lambda: self._run_in_setup("verify")),
                           ("Repair from a fresh copy of this version...", self.repair),
@@ -514,6 +527,16 @@ class Launcher(tk.Tk):
         """the Updates window (tools/launcher/bmupdate_gui.py): opening it contacts nothing; each step runs only when pressed there"""
         import bmupdate_gui
         return bmupdate_gui.open_window(self, launcher=ROOT, on_change=self.refresh)
+
+    def update_now(self):
+        """one click: the Updates window opens and runs every step (bmupdate_gui.UpdateWindow.update_now)"""
+        return self.open_updates().update_now()
+
+    def resume_update(self):
+        """started again by an Update now install: finish what is left (nothing unless the mark is there; contacts nothing itself)"""
+        if os.path.isfile(os.path.join(ROOT, "update-state", "UPDATE_NOW.json")):
+            return self.open_updates().resume()
+        return False
 
     def _run_in_setup(self, name, extra=()):
         self.nb.select(0)
@@ -637,6 +660,7 @@ def main(argv):
     app = Launcher(dropped=[a for a in argv if os.path.exists(a)] or None)
     if note:
         app.after(300, lambda: (messagebox.showerror if note[2] else messagebox.showinfo)(note[0], note[1], parent=app))
+    app.after(500, app.resume_update)
     app.mainloop()
     return 0
 

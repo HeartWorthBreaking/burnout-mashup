@@ -29,6 +29,15 @@ from the command line as `app\launcher\update.cmd` (`update.cmd help`).
 moves to the same place in the new version - also anything you added. Shipped files you changed are not carried over (the new
 version brings its own); they stay with the kept version and the install result names them.
 
+## Update now
+
+Help tab -> **Update now** (also the first button of the Updates window) runs every step below on one click: check, download, prepare,
+install, the launcher starting again, and Build Mashup when the new release needs one. Close the game and the Workbench first.
+If you are up to date it says so and stops. No question on the way: the click is your go; **Cancel** stops it and **Switch back to
+previous version** undoes it. It stops at the first step that fails and says why; pressing it again goes on from there (a finished
+download is not fetched again). It runs only when you press it. When a build is needed and the launcher does not know your game
+yet, it asks for it in the Updates window.
+
 ## The steps
 
 | button / command | what happens | if it fails |

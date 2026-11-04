@@ -1,6 +1,6 @@
 # host/marks - hook marks as address anchors ("bm-anchors 1")
 
-`anchors.json` holds, for each of the 518 marks: the guest address of the generated function, the anchor (a label or function
+`anchors.json` holds, for each of the 521 marks: the guest address of the generated function, the anchor (a label or function
 address and the sha256 of its line), the sha256 of every generated line the mark deletes, the sha256 of the neighbouring
 lines, and **our own inserted text**. It contains no generated code. It is a representation of the Mashup's changes to the
 user's locally generated code (the xboxrecomp output of the user's own game) and does **not** decide any copyright question.

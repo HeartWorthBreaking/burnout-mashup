@@ -274,7 +274,6 @@ path = [
   "examples/authored/carimport/wedge/wedge.bin",
   "examples/authored/carimport/wedge/wedge.gltf",
   "examples/demo-mods/bm-veh-retail-paints/files/paints/chrome.bmpal",
-  "host/tree/assets/icon/bmashup.ico",
   "launcher/docs/images/1_setup.png",
   "launcher/docs/images/2_mods.png",
   "launcher/docs/images/3_play.png",
@@ -307,6 +306,25 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2012 espes; 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson (xemu); 2026 the Burnout Mashup contributors (modification notice in host/toolkit/lgpl/NOTICE)"
 SPDX-License-Identifier = "LGPL-2.1-or-later"
+
+[[annotations]]
+path = [
+  "host/tree/assets/icon/bmashup.ico",
+  "launcher/art/icon_16.png",
+  "launcher/art/icon_32.png",
+  "launcher/art/icon_48.png",
+  "launcher/art/logo_128.png",
+  "launcher/art/logo_160.png",
+  "launcher/art/logo_192.png",
+  "launcher/art/logo_32.png",
+  "launcher/art/logo_48.png",
+  "launcher/art/logo_64.png",
+  "launcher/art/logo_80.png",
+  "launcher/art/logo_96.png",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "2026 the Burnout Mashup contributors (the respective authors; see AUTHORS)"
+SPDX-License-Identifier = "LicenseRef-BurnoutMashup-Artwork"
 
 [[annotations]]
 path = [
@@ -397,6 +415,7 @@ path = [
   "host/marks/tools/anchors.py",
   "host/marks/tools/bm_rewrite.py",
   "host/marks/tools/demacro.py",
+  "host/toolkit/added/src/d3d/nv2a_rt_shrink.h",
   "host/tree/BUILD_COMMIT",
   "host/tree/assets/icon/make_bmashup_ico.py",
   "host/tree/cmake/bo3_source_id.cmake",
@@ -583,6 +602,7 @@ path = [
   "host/tree/src/game/bo3_lifecycle_gen.h",
   "host/tree/src/game/bo3_mbars_gen.h",
   "host/tree/src/game/bo3_menu_gen.h",
+  "host/tree/src/game/bo3_mix_gen.h",
   "host/tree/src/game/bo3_names_gen.h",
   "host/tree/src/game/bo3_paints_gen.h",
   "host/tree/src/game/bo3_racers_gen.h",
@@ -651,17 +671,22 @@ path = [
   "launcher/tests/test_alias.py",
   "launcher/tests/test_build.py",
   "launcher/tests/test_build_isolation.py",
+  "launcher/tests/test_build_now.py",
   "launcher/tests/test_build_real.py",
   "launcher/tests/test_diag.py",
   "launcher/tests/test_exe.py",
   "launcher/tests/test_isolation.py",
   "launcher/tests/test_launcher.py",
   "launcher/tests/test_lifecycle.py",
+  "launcher/tests/test_menu_button.py",
+  "launcher/tests/test_mod_clash.py",
   "launcher/tests/test_nobuild.py",
   "launcher/tests/test_onboarding.py",
   "launcher/tests/test_prepare_recovery.py",
   "launcher/tests/test_resolutions.py",
+  "launcher/tests/test_title_art.py",
   "launcher/tests/test_update.py",
+  "launcher/tests/test_update_now.py",
   "launcher/tests/test_update_real.py",
   "launcher/tests/upd_testkit.py",
   "launcher/tools/TOOLS.json",
@@ -1115,3 +1140,13 @@ path = [
 precedence = "aggregate"
 SPDX-FileCopyrightText = "2026 the Burnout Mashup contributors (the respective authors; see AUTHORS); first proposed for Takedawn by HeartWorthBreaking (upstream PRs #67, #80, #81, #82, #96)"
 SPDX-License-Identifier = "MIT"
+
+[[annotations]]
+path = [
+  "launcher/fonts/OFL.txt",
+  "launcher/fonts/RobotoCondensed-Medium.ttf",
+  "launcher/fonts/VENDORED.txt",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "Copyright 2011 The Roboto Project Authors"
+SPDX-License-Identifier = "OFL-1.1"

@@ -22,5 +22,6 @@ SOFTWARE.
 
 ---
 This MIT licence covers the original Burnout Mashup code, SDK and tools. It does not relicense anything else:
-original documentation is CC-BY-4.0, original example assets are CC0-1.0, and upstream / third-party material keeps its own
+original documentation is CC-BY-4.0, original example assets are CC0-1.0, the project artwork (the title pictures and the icon) is under
+LICENSES/LicenseRef-BurnoutMashup-Artwork.txt, and upstream / third-party material keeps its own
 licence (see REUSE.toml, LICENSES/ and NOTICE.md). The copyright line wording is an owner decision to be confirmed (D1).

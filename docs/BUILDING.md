@@ -109,8 +109,9 @@ and is not changed. Result: `C:\bm\work\takedawn`, `C:\bm\work\xboxrecomp`.
 ```powershell
 & $py -B build\apply_layers.py host --takedawn C:\bm\work\takedawn --xboxrecomp C:\bm\work\xboxrecomp
 ```
-`host/tree/**` is added to Takedawn; `host/tree.patch` modifies 16 Takedawn files; `host/toolkit/toolkit.patch` and
-`host/toolkit/lgpl/apu_core.patch` modify 13 xboxrecomp files (the LGPL file has its own patch). A hunk applies only if its old
+`host/tree/**` is added to Takedawn; `host/tree.patch` modifies 18 Takedawn files; `host/toolkit/toolkit.patch` and
+`host/toolkit/lgpl/apu_core.patch` modify 16 xboxrecomp files (the LGPL file has its own patch); `host/toolkit/added/**` is added
+to xboxrecomp. A hunk applies only if its old
 block occurs **exactly once** in the file; a missing block, an ambiguous block, a pre-image that is not the pinned base, a file
 that already exists, an edited layer file or a result that is not the pinned result is a refusal (exit 2) and nothing is written.
 
@@ -165,8 +166,8 @@ identity string, toolchain versions, objects). The executable contains a build i
 of every source file that was built, so any different input (another upstream revision, edited layer, other line ends, other
 `default.xbe`-derived code) changes it. Hashes of objects are not game data. Release profile: `verify.py --build-dir ... --profile
 release` checks `bin\BurnoutMashup.exe` against `build_release` (without `--profile` the build folder decides). Reference hashes:
-development `burnout3.exe` `cbc2c2a24e73...` (identity `bmp-0.1.9+136ebbf6a46f`), release `BurnoutMashup.exe` `0be676e24ae2...`
-(identity `bmp-0.1.9+2a00e1f6856f`); the development build rebuilt from clean checkouts in two different folders with identical results.
+development `burnout3.exe` `f7a7fe3efcea...` (identity `bmp-0.1.9+34a18b872584`), release `BurnoutMashup.exe` `bc1e3f172105...`
+(identity `bmp-0.1.9+4544b99039f4`); the development build rebuilt from clean checkouts in two different folders with identical results.
 
 **Step 7 - write `HOST_INFO.json` (the host describes itself).** The launcher's compatibility gate and the Workbench check a mod
 against the host you built, and they read that description from `HOST_INFO.json`. It is made from your build only:

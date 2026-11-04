@@ -55,6 +55,8 @@ fonts, upscale shaders, derived algorithms). The ADPCM-XQ BSD-3-Clause text is `
 | `LICENSES/CC-BY-4.0.txt` | `d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744` | SPDX license-list-data `text/CC-BY-4.0.txt` (31846481de7e) |
 | `LICENSES/CC0-1.0.txt` | `a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499` | SPDX license-list-data `text/CC0-1.0.txt` (31846481de7e) |
 | `LICENSES/LGPL-2.1-or-later.txt` | `20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95` | GNU, <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt> (the LGPL version 2.1 text; also xboxrecomp `LICENSES/LGPL-2.1.txt`) |
+| `LICENSES/OFL-1.1.txt` | `e794b23d9e437659ce254bd516111d75b580a75352c4446e103b72b78561f838` | Roboto Condensed `OFL.txt` at google/fonts `69d0549` (same bytes as `launcher/fonts/OFL.txt`) |
+| `LICENSES/LicenseRef-BurnoutMashup-Artwork.txt` | `06853491ecaae3dbc2237e261c1c72899f3160c601037449b1fcce51be1d43c0` | written for this project |
 | `LICENSES/MIT.txt` | `b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5` | SPDX license-list-data `text/MIT.txt` (31846481de7e) |
 | `LICENSES/Takedawn-MIT.txt` | `0de8327ee50d7638222c6590a40aed91f2d2565557a72f134061b65fe918da99` | Takedawn `LICENSE` at `4f074e211822` |
 | `LICENSES/xboxrecomp-MIT.txt` | `de6601cea3a6bf2d821b6b89f59b9d6e719cc017e530bcb4bbe2fcf7306e6dda` | xboxrecomp `LICENSE` at `e3756d1b2fef` |
@@ -65,6 +67,9 @@ fonts, upscale shaders, derived algorithms). The ADPCM-XQ BSD-3-Clause text is `
 Texts that only a binary would need (Dear ImGui, SMAA, Super-xBR, FidelityFX CAS, dr_libs, stb_vorbis, DejaVu, Roboto Condensed,
 SDL2, the toolchain runtimes, the upscale shaders) are not conveyed by this tree and are not in `LICENSES/`; the xboxrecomp NOTICE
 below names them.
+
+The launcher and the Workbench ship one font file: `launcher/fonts/RobotoCondensed-Medium.ttf`, Roboto Condensed Medium (a subset; Copyright 2011 The Roboto Project Authors), SIL Open Font License 1.1, with its licence beside it (`launcher/fonts/OFL.txt`, `launcher/fonts/VENDORED.txt`).
+The title pictures and icons (`launcher/art/*.png`, `host/tree/assets/icon/bmashup.ico`) are finished, fixed pictures made for Burnout Mashup; the lettering was rendered once from a commercial font (Kenyan Coffee, Typodermic) whose font software is not part of this repository, and no game art is in them. They are project artwork, not under MIT or CC0: `LICENSES/LicenseRef-BurnoutMashup-Artwork.txt` (`launcher/art/*.png`, `host/tree/assets/icon/bmashup.ico`). The earlier icon published up to 0.2.0-alpha.2 stays CC0-1.0 in those releases.
 
 ## 6. SDL2, toolchain
 SDL2 (zlib licence), llvm-mingw, CMake, Ninja, glslang and the Vulkan headers are pulled by the user's own build and are not

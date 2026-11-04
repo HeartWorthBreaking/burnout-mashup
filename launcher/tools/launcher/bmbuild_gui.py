@@ -1,7 +1,9 @@
 """bmbuild_gui.py - the launcher's "Build Mashup" window (tkinter). Everything it does runs through bmbuild.py (the same CLI as
 build-mashup.cmd) as a child process: progress per step, a live log, Cancel (the build stops its own child processes; if it does not
-answer within 20 s the whole process tree is ended), and nothing is downloaded without a confirmation per tool that shows the licence
-notice, URL, size and sha256 first. Play (in the main window) is enabled only after a verified build is installed. Original code (MIT)."""
+answer within 20 s the whole process tree is ended), and nothing is downloaded without a confirmation that shows the licence notice,
+URL and size first. The Build Mashup button does everything on one click: finds your game (asks only when it cannot), asks once for
+the missing tools, downloads them, builds and installs; the settings are under Advanced options. Play (in the main window) is enabled
+only after a verified build is installed. Original code (MIT)."""
 import json
 import os
 import sys
@@ -15,6 +17,7 @@ import bmbuild  # noqa: E402
 import bmhost  # noqa: E402
 import bmimage  # noqa: E402
 import bmops  # noqa: E402
+import bmpaths  # noqa: E402
 import bmtools  # noqa: E402
 
 bmops.STEPS.setdefault("build_mashup", (os.path.join("launcher", "bmbuild.py"), []))
@@ -33,6 +36,41 @@ def _try(fn, default=None):
         return default
 
 
+def find_game(launcher, xbe_sha=None):
+    """the game copy this installation already holds (gamedata\\, or a folder inside it), or None; read only"""
+    gd = bmpaths.gamedata(launcher)
+    for p in [gd] + [os.path.join(gd, n) for n in bmpaths.game_entries(gd)]:
+        if os.path.isdir(p) and _try(lambda: bmimage.inspect(p, xbe_sha)["supported"], False):
+            return p
+    return None
+
+
+def missing_tools(res, S):
+    """the tools a build still needs, each after the ones it needs"""
+    order = []
+
+    def add(t):
+        for n in S[t]["needs"]:
+            if not (res.get(n) or {}).get("ok"):
+                add(n)
+        if t not in order:
+            order.append(t)
+    for k, v in res.items():
+        if not v["ok"] and k in S:
+            add(k)
+    return order
+
+
+def tools_notice(plans):
+    """the one question before the downloads: each tool's source, size and licence"""
+    lines = ["Building needs %d tool(s) that are not on this PC yet. They go into your tools folder; nothing is installed system-wide, and "
+             "each file is checked before it is used." % len(plans)]
+    for p in plans:
+        lines += ["", "%s %s (%s)" % (p["name"], p["version"], ("%.1f MB" % (p["size"] / 1e6)) if p["size"] else "size decided by pip"),
+                  "  from %s" % p["url"], "  licence %s: %s" % (p["licence"], p["licence_note"]), "  licence text: %s" % p["licence_url"]]
+    return "\n".join(lines + ["", "Download them and build?"])
+
+
 class BuildWindow(tk.Toplevel):
     def __init__(self, master, launcher=None, on_change=None, step_factory=None, ask=None):
         super().__init__(master)
@@ -46,6 +84,9 @@ class BuildWindow(tk.Toplevel):
         self.cancel_at = None
         self.last_result = None
         self.tool_rows = {}
+        self.auto = False
+        self.ask_game = lambda: filedialog.askdirectory(parent=self, title="Your game: the installed game data or extracted disc folder "
+                                                                           "(a disc image: Cancel, then Disc image...)")
         sc = getattr(master, "scale", 1.0)
         self.geometry("%dx%d" % (int(900 * sc), int(760 * sc)))
         self.minsize(int(640 * sc), int(560 * sc))
@@ -63,6 +104,7 @@ class BuildWindow(tk.Toplevel):
         if self.v_input.get():
             self.check_input()
         self.protocol("WM_DELETE_WINDOW", self.on_close)
+        _try(lambda: __import__("bmtheme").dark_titlebar(self))
 
     # ---------------------------------------------------------------- layout
     def _row(self, parent, label):
@@ -82,6 +124,8 @@ class BuildWindow(tk.Toplevel):
         self.input_lbl = ttk.Label(f, text="Supported: the retail North American (NTSC-U) Burnout 3: Takedown (installed game data folder, "
                                            "extracted disc folder or disc image). It is read in place.", wraplength=820, justify="left")
         self.input_lbl.pack(fill="x", pady=(2, 4))
+        self.adv = ttk.Frame(f)          # Advanced options: shown on the button's click; the defaults build
+        outer, f = f, self.adv
         r = self._row(f, "Upstream source")
         self.src_box = ttk.Combobox(r, state="readonly", values=[t for k, t in SOURCES], width=56)
         self.src_box.current([k for k, t in SOURCES].index(self.v_src.get()) if self.v_src.get() in [k for k, t in SOURCES] else 0)
@@ -109,17 +153,22 @@ class BuildWindow(tk.Toplevel):
         r = self._row(f, "Build folder")
         ttk.Entry(r, textvariable=self.v_bd).pack(side="left", fill="x", expand=True)
         ttk.Button(r, text="Browse...", command=self.pick_build_dir).pack(side="left", padx=(6, 0))
+        f = outer
         self.est_lbl = ttk.Label(f, text="", wraplength=820, justify="left")
         self.est_lbl.pack(fill="x", pady=(2, 4))
         bb = ttk.Frame(f)
         bb.pack(fill="x", pady=(4, 4))
-        self.build_btn = ttk.Button(bb, text="Build Mashup", command=self.start_build, style="Accent.TButton")
+        self.build_btn = ttk.Button(bb, text="Build Mashup", command=self.build_all, style="Accent.TButton")
         self.build_btn.pack(side="left")
         self.cancel_btn = ttk.Button(bb, text="Cancel", command=self.cancel, state="disabled")
         self.cancel_btn.pack(side="left", padx=(6, 0))
         self.back_btn = ttk.Button(bb, text="Switch back to previous build", command=self.switch_back)
         self.back_btn.pack(side="left", padx=(6, 0))
         ttk.Button(bb, text="Open build folder", command=lambda: _try(lambda: os.startfile(self.v_bd.get()))).pack(side="left", padx=(6, 0))
+        self.adv_btn = ttk.Button(bb, text="Advanced options", command=self.toggle_advanced)
+        self.adv_btn.pack(side="left", padx=(6, 0))
+        if self.v_src.get() != "github":
+            self.toggle_advanced()       # a build set up by hand keeps its settings in view
         self.progress = ttk.Progressbar(f, mode="determinate", maximum=len(bmbuild.STEPS))
         self.progress.pack(fill="x", pady=(2, 2))
         cols = ("step", "status", "seconds", "disk")
@@ -140,6 +189,12 @@ class BuildWindow(tk.Toplevel):
         self.log.pack(side="left", fill="both", expand=True)
         self.log["yscrollcommand"] = sb.set
         self.back_btn["state"] = "normal" if os.path.isdir(os.path.join(self.launcher, "host-local.prev")) else "disabled"
+
+    def toggle_advanced(self):
+        if self.adv.winfo_manager():
+            self.adv.pack_forget()
+        else:
+            self.adv.pack(fill="x", after=self.input_lbl)
 
     # ---------------------------------------------------------------- inputs
     def pick_folder(self):
@@ -243,6 +298,34 @@ class BuildWindow(tk.Toplevel):
             a += ["--takedawn-src", self.v_td.get(), "--xboxrecomp-src", self.v_xr.get()]
         return a
 
+    def build_all(self):
+        """one click: the game, the missing tools (one question), the build. Stops at the first thing that fails and says why."""
+        if self.job and self.job.running():
+            return False
+        if not self.v_input.get():
+            exp = bmbuild.jload(os.path.join(bmhost.active_source(self.launcher) or "", "build", "EXPECTED.json"), {}) or {}
+            self.v_input.set(find_game(self.launcher, (exp.get("regen") or {}).get("xbe_sha256")) or "")
+        if not self.v_input.get():
+            p = self.ask_game()
+            if not p:
+                self.result.configure(text="Choose your game to build: Game folder... or Disc image... above, then press Build Mashup.", foreground="#d29922")
+                return False
+            self.v_input.set(os.path.normpath(p))
+        if not self.check_input():
+            self.result.configure(text="This game cannot be used: see the line under Your game.", foreground="#d9534f")
+            return False
+        self.recheck_tools()
+        need = missing_tools(self.tools_res, bmtools.spec())
+        if need:
+            if not self.ask(TITLE, tools_notice([bmtools.plan_download(t, self.v_tools.get()) for t in need]), parent=self):
+                self.result.configure(text="Not downloaded, so no build. Press Build Mashup to be asked again, or give a folder that holds the "
+                                           "tools under Advanced options.", foreground="#d29922")
+                return False
+            self.auto = True
+            self._start(["download"] + need + ["--yes", "--events"] + self.tool_args(), "download")
+            return True
+        return self.start_build()
+
     def start_build(self):
         if self.job and self.job.running():
             messagebox.showinfo(TITLE, "A build is running: wait for it or press Cancel.", parent=self)
@@ -314,12 +397,16 @@ class BuildWindow(tk.Toplevel):
         self._log(ln)
 
     def _finished(self, rc):
+        auto, self.auto = self.auto, False
         self.build_btn["state"] = "normal"
         self.cancel_btn["state"] = "disabled"
         r = self.last_result or {}
         if self.job_kind == "download":
             msg = "Downloads finished." if rc == 0 else "A download did not complete (see the log); nothing unverified was kept."
             self.recheck_tools()
+            if auto and rc == 0 and not missing_tools(self.tools_res, bmtools.spec()):
+                self.start_build()
+                return
         elif rc == bmbuild.RC_OK:
             msg = "DONE: the verified build is installed in host-local (the previous one is kept). Play is enabled when your game data is prepared."
         elif rc == bmbuild.RC_CANCELLED or self.job.cancelled:
@@ -333,6 +420,7 @@ class BuildWindow(tk.Toplevel):
     def cancel(self):
         if not (self.job and self.job.running()):
             return
+        self.auto = False
         self._log("... cancelling (the build stops its child processes)")
         if self.job_kind == "build":
             _try(lambda: open(os.path.join(self.v_bd.get(), "CANCEL"), "w").close())
