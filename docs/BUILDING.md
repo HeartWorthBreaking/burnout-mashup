@@ -110,7 +110,7 @@ and is not changed. Result: `C:\bm\work\takedawn`, `C:\bm\work\xboxrecomp`.
 & $py -B build\apply_layers.py host --takedawn C:\bm\work\takedawn --xboxrecomp C:\bm\work\xboxrecomp
 ```
 `host/tree/**` is added to Takedawn; `host/tree.patch` modifies 18 Takedawn files; `host/toolkit/toolkit.patch` and
-`host/toolkit/lgpl/apu_core.patch` modify 16 xboxrecomp files (the LGPL file has its own patch); `host/toolkit/added/**` is added
+`host/toolkit/lgpl/apu_core.patch` modify 21 xboxrecomp files (the LGPL files have their own patch); `host/toolkit/added/**` is added
 to xboxrecomp. A hunk applies only if its old
 block occurs **exactly once** in the file; a missing block, an ambiguous block, a pre-image that is not the pinned base, a file
 that already exists, an edited layer file or a result that is not the pinned result is a refusal (exit 2) and nothing is written.
@@ -166,8 +166,8 @@ identity string, toolchain versions, objects). The executable contains a build i
 of every source file that was built, so any different input (another upstream revision, edited layer, other line ends, other
 `default.xbe`-derived code) changes it. Hashes of objects are not game data. Release profile: `verify.py --build-dir ... --profile
 release` checks `bin\BurnoutMashup.exe` against `build_release` (without `--profile` the build folder decides). Reference hashes:
-development `burnout3.exe` `f7a7fe3efcea...` (identity `bmp-0.1.9+34a18b872584`), release `BurnoutMashup.exe` `bc1e3f172105...`
-(identity `bmp-0.1.9+4544b99039f4`); the development build rebuilt from clean checkouts in two different folders with identical results.
+development `burnout3.exe` `c557ec1020df...` (identity `bmp-0.1.9+b6784d11ba26`), release `BurnoutMashup.exe` `6d80e9f66f22...`
+(identity `bmp-0.1.9+7820e9206c1b`); the development build rebuilt from clean checkouts in two different folders with identical results.
 
 **Step 7 - write `HOST_INFO.json` (the host describes itself).** The launcher's compatibility gate and the Workbench check a mod
 against the host you built, and they read that description from `HOST_INFO.json`. It is made from your build only:
@@ -222,16 +222,16 @@ They do not download the game, anything of the game, a prebuilt host, or generat
 installation, your Takedawn profile, `%APPDATA%`, or this repository (except the optional `__pycache__` you disabled with `-B`).
 They do not change any git configuration. `build/EXPECTED.json` holds pins and hashes only.
 
-## 7. LGPL component: `src/apu/apu_core.c`
+## 7. LGPL components: `src/apu/apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c`
 
-One file of the build is licensed under the **GNU Lesser General Public License** and is modified by this fork: `src/apu/apu_core.c`
-of xboxrecomp (the audio processor code that xboxrecomp took from xemu; its header says "either version 2 of the License, or (at
+Four files of the build are licensed under the **GNU Lesser General Public License** and are modified by this fork: `src/apu/apu_core.c` (since 0.2.0-alpha.1),
+`apu.h`, `apu_state.h` and `apu_vp.c` (the setting PS2 SOUND, since 0.2.0-alpha.4) of xboxrecomp (the audio processor code that xboxrecomp took from xemu; the header of `apu_core.c` says "either version 2 of the License, or (at
 your option) any later version"; xboxrecomp distributes it as `LGPL-2.1-or-later`, the terms this tree's hunks follow; the
 evidence is in `host/toolkit/lgpl/NOTICE`). This section is about the **source** only.
 
 - **Where the modified source is.** This repository holds the modification, not the whole file: `host/toolkit/lgpl/apu_core.patch`
-  (4 hunks; the "MEM256" window, dated 2026-10-28 in the file itself) against the pinned upstream file (xboxrecomp `e3756d1b2fef`,
-  blob `45c3334f4e33`). After step 2 above the complete modified file is `C:\bm\work\xboxrecomp\src\apu\apu_core.c`. The licence
+  (the name is kept; 4 hunks in `apu_core.c`, the "MEM256" window, dated 2026-10-28 in the file itself, and the hunks of the other three files, each dated 2026-11-05 in the file) against the pinned upstream file (xboxrecomp `e3756d1b2fef`,
+  blob `45c3334f4e33`). After step 2 above the complete modified files are in `C:\bm\work\xboxrecomp\src\apu\` (`apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c`). The licence
   text, the header of the file, the change notice and the blob / sha256 pins of the twelve LGPL-marked files are in
   `host/toolkit/lgpl/NOTICE` and `LICENSES/LGPL-2.1-or-later.txt`.
 - **The window define.** The patched file reads `XBOX_CONTIG_WINDOW_MB`: with it absent or equal to 64 the file behaves like

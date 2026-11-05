@@ -1,16 +1,16 @@
 {
  "exe_file": "burnout3.exe (staged copy: stage/BurnoutMashup.exe)",
- "exe_sha256": "f7a7fe3efceafce9c6143d70dd6a46f8a0c9a683aee492257318bd25edc79ae9",
- "exe_size": 28106240,
+ "exe_sha256": "c557ec1020dfd701bbbcc813a035fa76be501a70abdc30b2b6215c0e872d9778",
+ "exe_size": 28110336,
  "format": 1,
  "generator": "build/host_info.py 1",
- "host_name": "bmp-0.1.9+34a18b872584",
- "identity": "bmp-0.1.9+34a18b872584",
+ "host_name": "bmp-0.1.9+b6784d11ba26",
+ "identity": "bmp-0.1.9+b6784d11ba26",
  "inputs": {
-  "anchors_json_sha256": "10bf662b832de91fde6c58fd3adf050b7e10f830a0bf0c005910f8464b649304",
+  "anchors_json_sha256": "ef1b2ba1f95a313eec0462aa21796e7719be90aacba7210d8a4c6476470870d4",
   "bm_gen_access_h_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985",
   "gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
-  "marks": 521,
+  "marks": 524,
   "takedawn_commit": "4f074e211822eaf43d4a3902c744d5ed0e9c9adf",
   "takedawn_tree_id": "26cdbea6f8c4a0f6092900c5715ac18393aeb41f",
   "xboxrecomp_commit": "e3756d1b2fefdae6888038384c748cbdd37a41ba",
@@ -45,10 +45,10 @@
   "bmashup.vphysics": 3,
   "takedawn.race": 1
  },
- "source_digest_sha256": "34a18b872584cecb7ceaa07d647e0faa30b2635f39b60fbe71ca01cd83e43fb8",
+ "source_digest_sha256": "b6784d11ba266ec4e8e3526aa39e015677837239604e9935e9161389f80d1765",
  "source_files": {
   "bmp_files": 339,
-  "toolkit_files": 395
+  "toolkit_files": 398
  },
  "sources": {
   "exe_file": "the build output name; stage/BurnoutMashup.exe compared byte for byte when present",
@@ -194,12 +194,12 @@
   "ninja": "1.13.2",
   "sdl2": "2.32.10"
  },
- "toolkit_digest_sha256": "58e28ee42de494bd525adca30bb963cf3ca5dd42d7666cc1929e7fca6abdbbca",
- "toolkit_identity": "xr+58e28ee42de4",
+ "toolkit_digest_sha256": "cba58c2b1fa6ee31d997b5f84c395b2aa46fff37f4e350c4b483aee3fbf0e9ea",
+ "toolkit_identity": "xr+cba58c2b1fa6",
  "verification": {
   "exe": "identical to the reference in EXPECTED.json",
-  "expected_exe_sha256": "f7a7fe3efceafce9c6143d70dd6a46f8a0c9a683aee492257318bd25edc79ae9",
-  "expected_json_sha256": "54266966a1ef6795bd269bd151b58f4a2f572514ffc76df0a45bf0736f9d2aed",
+  "expected_exe_sha256": "c557ec1020dfd701bbbcc813a035fa76be501a70abdc30b2b6215c0e872d9778",
+  "expected_json_sha256": "3f22b101e711904d0d3b1c9a81d0fb7164ebb67ef2c6793be5a3038fcf6ff91c",
   "generated_objects": "27/27 identical"
  }
 }

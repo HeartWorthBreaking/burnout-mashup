@@ -48,21 +48,22 @@
  "result": {
   "recomp_0000.c": "68cf5f2e900cf31aad3a2b396a0f080e0f02cbf4a178bb0eebcd0e10e103a8f8",
   "recomp_0001.c": "d4393088ea6da5e4d53d9af0b08af5ffa4b87031af41a2bc6048c5e8c5aaf3b1",
-  "recomp_0002.c": "662793237468b9aeebdd1a4521abd813d88c18f39a948ef625ccdf931b1ca0b4",
+  "recomp_0002.c": "28e0fd8612ee5620ff5942bade98b9a627dda9d9babfae3664a926f0c7d79e82",
   "recomp_0003.c": "e8b79bce066a49197e71ed67cf1c4d1011220b7ac373469185ae05e3adbd7301",
   "recomp_0004.c": "a39e9a0c9101f7e266a4e02c06bdc913db2ca0d197f70c6de5b309579ff0510a",
+  "recomp_0005.c": "66f565fa7b6534df6f77370b62aa4b361db7f3f883911c3d6ad034bdf31c6a14",
   "recomp_types.h": "77caca67daecf91801942c1998d7c713abfd0d6d1524636a1135d181b7d6bfb2"
  },
  "form": "macro",
  "stats": {
-  "marks": 521,
-  "macro": 224,
-  "original": 297,
-  "lines_rewritten": 247,
+  "marks": 524,
+  "macro": 225,
+  "original": 299,
+  "lines_rewritten": 248,
   "rules": {
    "R3": 113,
    "R8": 1,
-   "R1": 25,
+   "R1": 26,
    "R2": 108,
    "R5": 25,
    "R6": 10,
@@ -7479,6 +7480,62 @@
   {
    "id": "m298",
    "file": "recomp_0002.c",
+   "function_addr": "0x0013EA20",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x0013F103",
+    "line_sha256": "d5b6d7adec8fa7d9c827e11cc31aab1a7e87771e81812387515f6b8b005a44d2",
+    "offset": 3,
+    "span_sha256": "3f8f850d1e331770f44551b3ed046c5d05ba2a64739993ef4aa95a5e2f2987a6",
+    "line": 230209
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "8614ad191f17fa188bbc6aa96fcaca98103a8637a53e0a77ce7f5a82151ae84e",
+    "after": "d8134b5c572b0e7223c9ea5756aae713495d04993c3be49c0cd49456961fb8a0"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZPS2\r\n",
+    "    { extern int bo3_ps2_sound_on(void); if (bo3_ps2_sound_on()) ebx = 0xFFFFF8F8u; }   /* main21 patch 141: room level -1800 in the open, the PS2 version's */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZPS2"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m299",
+   "file": "recomp_0002.c",
+   "function_addr": "0x0013EA20",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x0013F139",
+    "line_sha256": "293c4816c0dd6cdbed07a5d705ade3a42e3db3c4f6a9d14096efc94a0db0e003",
+    "offset": 2,
+    "span_sha256": "06f73037563e61770cfa3133ce393338917e914ebc1c261ef6fbbc882ef92957",
+    "line": 230244
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "b0111e46a22b735f7806d7462317fc23d43637704c18ab65b8dbe84e0febff36",
+    "after": "7eb70257593da06f682a3ddda54a9d260d4fc514f645237f5ca74b08f8da61a6"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_P23 && BO3_HOOKREQ_ZPS2\r\n",
+    "    { extern int bo3_ps2_sound_on(void); if (bo3_ps2_sound_on()) BM_ST32(esp + 0x18, 0xFFFFFE3Eu); }   /* main21 patch 141: room level -450 under cover, the PS2 version's */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_P23",
+    "BO3_HOOKREQ_ZPS2"
+   ],
+   "form": "macro"
+  },
+  {
+   "id": "m300",
+   "file": "recomp_0002.c",
    "function_addr": "0x001407B0",
    "anchor": {
     "kind": "label",
@@ -7504,7 +7561,7 @@
    "form": "original"
   },
   {
-   "id": "m299",
+   "id": "m301",
    "file": "recomp_0002.c",
    "function_addr": "0x001407B0",
    "anchor": {
@@ -7531,7 +7588,7 @@
    "form": "original"
   },
   {
-   "id": "m300",
+   "id": "m302",
    "file": "recomp_0002.c",
    "function_addr": "0x00140D30",
    "anchor": {
@@ -7559,7 +7616,7 @@
    "form": "original"
   },
   {
-   "id": "m301",
+   "id": "m303",
    "file": "recomp_0002.c",
    "function_addr": "0x00141150",
    "anchor": {
@@ -7587,7 +7644,7 @@
    "form": "original"
   },
   {
-   "id": "m302",
+   "id": "m304",
    "file": "recomp_0003.c",
    "function_addr": "0x001490E0",
    "anchor": {
@@ -7612,7 +7669,7 @@
    "form": "original"
   },
   {
-   "id": "m303",
+   "id": "m305",
    "file": "recomp_0003.c",
    "function_addr": "0x001490E0",
    "anchor": {
@@ -7639,7 +7696,7 @@
    "form": "macro"
   },
   {
-   "id": "m304",
+   "id": "m306",
    "file": "recomp_0003.c",
    "function_addr": "0x00152F30",
    "anchor": {
@@ -7667,7 +7724,7 @@
    "form": "original"
   },
   {
-   "id": "m305",
+   "id": "m307",
    "file": "recomp_0003.c",
    "function_addr": "0x00152F30",
    "anchor": {
@@ -7695,7 +7752,7 @@
    "form": "original"
   },
   {
-   "id": "m306",
+   "id": "m308",
    "file": "recomp_0003.c",
    "function_addr": "0x001544C0",
    "anchor": {
@@ -7723,7 +7780,7 @@
    "form": "original"
   },
   {
-   "id": "m307",
+   "id": "m309",
    "file": "recomp_0003.c",
    "function_addr": "0x00154800",
    "anchor": {
@@ -7751,7 +7808,7 @@
    "form": "original"
   },
   {
-   "id": "m308",
+   "id": "m310",
    "file": "recomp_0003.c",
    "function_addr": "0x00154800",
    "anchor": {
@@ -7779,7 +7836,7 @@
    "form": "original"
   },
   {
-   "id": "m309",
+   "id": "m311",
    "file": "recomp_0003.c",
    "function_addr": "0x00154A70",
    "anchor": {
@@ -7807,7 +7864,7 @@
    "form": "original"
   },
   {
-   "id": "m310",
+   "id": "m312",
    "file": "recomp_0003.c",
    "function_addr": "0x00155060",
    "anchor": {
@@ -7833,7 +7890,7 @@
    "form": "macro"
   },
   {
-   "id": "m311",
+   "id": "m313",
    "file": "recomp_0003.c",
    "function_addr": "0x00155900",
    "anchor": {
@@ -7861,7 +7918,7 @@
    "form": "original"
   },
   {
-   "id": "m312",
+   "id": "m314",
    "file": "recomp_0003.c",
    "function_addr": "0x001571C0",
    "anchor": {
@@ -7886,7 +7943,7 @@
    "form": "original"
   },
   {
-   "id": "m313",
+   "id": "m315",
    "file": "recomp_0003.c",
    "function_addr": "0x00157210",
    "anchor": {
@@ -7909,7 +7966,7 @@
    "form": "macro"
   },
   {
-   "id": "m314",
+   "id": "m316",
    "file": "recomp_0003.c",
    "function_addr": "0x001572C0",
    "anchor": {
@@ -7934,7 +7991,7 @@
    "form": "original"
   },
   {
-   "id": "m315",
+   "id": "m317",
    "file": "recomp_0003.c",
    "function_addr": "0x00157300",
    "anchor": {
@@ -7957,7 +8014,7 @@
    "form": "macro"
   },
   {
-   "id": "m316",
+   "id": "m318",
    "file": "recomp_0003.c",
    "function_addr": "0x00157440",
    "anchor": {
@@ -7982,7 +8039,7 @@
    "form": "original"
   },
   {
-   "id": "m317",
+   "id": "m319",
    "file": "recomp_0003.c",
    "function_addr": "0x001574A0",
    "anchor": {
@@ -8007,7 +8064,7 @@
    "form": "original"
   },
   {
-   "id": "m318",
+   "id": "m320",
    "file": "recomp_0003.c",
    "function_addr": "0x001575A0",
    "anchor": {
@@ -8032,7 +8089,7 @@
    "form": "original"
   },
   {
-   "id": "m319",
+   "id": "m321",
    "file": "recomp_0003.c",
    "function_addr": "0x001575A0",
    "anchor": {
@@ -8057,7 +8114,7 @@
    "form": "original"
   },
   {
-   "id": "m320",
+   "id": "m322",
    "file": "recomp_0003.c",
    "function_addr": "0x00157630",
    "anchor": {
@@ -8080,7 +8137,7 @@
    "form": "macro"
   },
   {
-   "id": "m321",
+   "id": "m323",
    "file": "recomp_0003.c",
    "function_addr": "0x00158920",
    "anchor": {
@@ -8103,7 +8160,7 @@
    "form": "macro"
   },
   {
-   "id": "m322",
+   "id": "m324",
    "file": "recomp_0003.c",
    "function_addr": "0x0015F5E0",
    "anchor": {
@@ -8128,7 +8185,7 @@
    "form": "original"
   },
   {
-   "id": "m323",
+   "id": "m325",
    "file": "recomp_0003.c",
    "function_addr": "0x0015F5E0",
    "anchor": {
@@ -8153,7 +8210,7 @@
    "form": "original"
   },
   {
-   "id": "m324",
+   "id": "m326",
    "file": "recomp_0003.c",
    "function_addr": "0x0015F5E0",
    "anchor": {
@@ -8178,7 +8235,7 @@
    "form": "original"
   },
   {
-   "id": "m325",
+   "id": "m327",
    "file": "recomp_0003.c",
    "function_addr": "0x001634A0",
    "anchor": {
@@ -8203,7 +8260,7 @@
    "form": "original"
   },
   {
-   "id": "m326",
+   "id": "m328",
    "file": "recomp_0003.c",
    "function_addr": "0x001634A0",
    "anchor": {
@@ -8228,7 +8285,7 @@
    "form": "original"
   },
   {
-   "id": "m327",
+   "id": "m329",
    "file": "recomp_0003.c",
    "function_addr": "0x00167220",
    "anchor": {
@@ -8256,7 +8313,7 @@
    "form": "original"
   },
   {
-   "id": "m328",
+   "id": "m330",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8281,7 +8338,7 @@
    "form": "macro"
   },
   {
-   "id": "m329",
+   "id": "m331",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8306,7 +8363,7 @@
    "form": "macro"
   },
   {
-   "id": "m330",
+   "id": "m332",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8331,7 +8388,7 @@
    "form": "original"
   },
   {
-   "id": "m331",
+   "id": "m333",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8356,7 +8413,7 @@
    "form": "macro"
   },
   {
-   "id": "m332",
+   "id": "m334",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8381,7 +8438,7 @@
    "form": "original"
   },
   {
-   "id": "m333",
+   "id": "m335",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8406,7 +8463,7 @@
    "form": "macro"
   },
   {
-   "id": "m334",
+   "id": "m336",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8431,7 +8488,7 @@
    "form": "original"
   },
   {
-   "id": "m335",
+   "id": "m337",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8456,7 +8513,7 @@
    "form": "macro"
   },
   {
-   "id": "m336",
+   "id": "m338",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8481,7 +8538,7 @@
    "form": "macro"
   },
   {
-   "id": "m337",
+   "id": "m339",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8506,7 +8563,7 @@
    "form": "original"
   },
   {
-   "id": "m338",
+   "id": "m340",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8531,7 +8588,7 @@
    "form": "macro"
   },
   {
-   "id": "m339",
+   "id": "m341",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8556,7 +8613,7 @@
    "form": "macro"
   },
   {
-   "id": "m340",
+   "id": "m342",
    "file": "recomp_0003.c",
    "function_addr": "0x0016D420",
    "anchor": {
@@ -8581,7 +8638,7 @@
    "form": "original"
   },
   {
-   "id": "m341",
+   "id": "m343",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8606,7 +8663,7 @@
    "form": "macro"
   },
   {
-   "id": "m342",
+   "id": "m344",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8631,7 +8688,7 @@
    "form": "original"
   },
   {
-   "id": "m343",
+   "id": "m345",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8656,7 +8713,7 @@
    "form": "macro"
   },
   {
-   "id": "m344",
+   "id": "m346",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8681,7 +8738,7 @@
    "form": "original"
   },
   {
-   "id": "m345",
+   "id": "m347",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8706,7 +8763,7 @@
    "form": "macro"
   },
   {
-   "id": "m346",
+   "id": "m348",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8731,7 +8788,7 @@
    "form": "macro"
   },
   {
-   "id": "m347",
+   "id": "m349",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8756,7 +8813,7 @@
    "form": "original"
   },
   {
-   "id": "m348",
+   "id": "m350",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8781,7 +8838,7 @@
    "form": "macro"
   },
   {
-   "id": "m349",
+   "id": "m351",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8806,7 +8863,7 @@
    "form": "macro"
   },
   {
-   "id": "m350",
+   "id": "m352",
    "file": "recomp_0003.c",
    "function_addr": "0x0016F6C0",
    "anchor": {
@@ -8831,7 +8888,7 @@
    "form": "original"
   },
   {
-   "id": "m351",
+   "id": "m353",
    "file": "recomp_0003.c",
    "function_addr": "0x00170260",
    "anchor": {
@@ -8856,7 +8913,7 @@
    "form": "original"
   },
   {
-   "id": "m352",
+   "id": "m354",
    "file": "recomp_0003.c",
    "function_addr": "0x00170260",
    "anchor": {
@@ -8881,7 +8938,7 @@
    "form": "original"
   },
   {
-   "id": "m353",
+   "id": "m355",
    "file": "recomp_0003.c",
    "function_addr": "0x001709F0",
    "anchor": {
@@ -8906,7 +8963,7 @@
    "form": "macro"
   },
   {
-   "id": "m354",
+   "id": "m356",
    "file": "recomp_0003.c",
    "function_addr": "0x001709F0",
    "anchor": {
@@ -8931,7 +8988,7 @@
    "form": "original"
   },
   {
-   "id": "m355",
+   "id": "m357",
    "file": "recomp_0003.c",
    "function_addr": "0x00170B30",
    "anchor": {
@@ -8956,7 +9013,7 @@
    "form": "macro"
   },
   {
-   "id": "m356",
+   "id": "m358",
    "file": "recomp_0003.c",
    "function_addr": "0x00170B30",
    "anchor": {
@@ -8981,7 +9038,7 @@
    "form": "macro"
   },
   {
-   "id": "m357",
+   "id": "m359",
    "file": "recomp_0003.c",
    "function_addr": "0x001714F0",
    "anchor": {
@@ -9006,7 +9063,7 @@
    "form": "macro"
   },
   {
-   "id": "m358",
+   "id": "m360",
    "file": "recomp_0003.c",
    "function_addr": "0x001714F0",
    "anchor": {
@@ -9031,7 +9088,7 @@
    "form": "original"
   },
   {
-   "id": "m359",
+   "id": "m361",
    "file": "recomp_0003.c",
    "function_addr": "0x00171A10",
    "anchor": {
@@ -9054,7 +9111,7 @@
    "form": "original"
   },
   {
-   "id": "m360",
+   "id": "m362",
    "file": "recomp_0003.c",
    "function_addr": "0x00173C40",
    "anchor": {
@@ -9079,7 +9136,7 @@
    "form": "macro"
   },
   {
-   "id": "m361",
+   "id": "m363",
    "file": "recomp_0003.c",
    "function_addr": "0x00173CB0",
    "anchor": {
@@ -9104,7 +9161,7 @@
    "form": "original"
   },
   {
-   "id": "m362",
+   "id": "m364",
    "file": "recomp_0003.c",
    "function_addr": "0x00173CB0",
    "anchor": {
@@ -9129,7 +9186,7 @@
    "form": "original"
   },
   {
-   "id": "m363",
+   "id": "m365",
    "file": "recomp_0003.c",
    "function_addr": "0x001742F0",
    "anchor": {
@@ -9154,7 +9211,7 @@
    "form": "macro"
   },
   {
-   "id": "m364",
+   "id": "m366",
    "file": "recomp_0003.c",
    "function_addr": "0x001742F0",
    "anchor": {
@@ -9179,7 +9236,7 @@
    "form": "macro"
   },
   {
-   "id": "m365",
+   "id": "m367",
    "file": "recomp_0003.c",
    "function_addr": "0x001742F0",
    "anchor": {
@@ -9204,7 +9261,7 @@
    "form": "macro"
   },
   {
-   "id": "m366",
+   "id": "m368",
    "file": "recomp_0003.c",
    "function_addr": "0x001742F0",
    "anchor": {
@@ -9229,7 +9286,7 @@
    "form": "macro"
   },
   {
-   "id": "m367",
+   "id": "m369",
    "file": "recomp_0003.c",
    "function_addr": "0x001742F0",
    "anchor": {
@@ -9254,7 +9311,7 @@
    "form": "macro"
   },
   {
-   "id": "m368",
+   "id": "m370",
    "file": "recomp_0003.c",
    "function_addr": "0x00174CF0",
    "anchor": {
@@ -9279,7 +9336,7 @@
    "form": "original"
   },
   {
-   "id": "m369",
+   "id": "m371",
    "file": "recomp_0003.c",
    "function_addr": "0x00174CF0",
    "anchor": {
@@ -9304,7 +9361,7 @@
    "form": "original"
   },
   {
-   "id": "m370",
+   "id": "m372",
    "file": "recomp_0003.c",
    "function_addr": "0x00174EE0",
    "anchor": {
@@ -9329,7 +9386,7 @@
    "form": "original"
   },
   {
-   "id": "m371",
+   "id": "m373",
    "file": "recomp_0003.c",
    "function_addr": "0x00174FE0",
    "anchor": {
@@ -9354,7 +9411,7 @@
    "form": "original"
   },
   {
-   "id": "m372",
+   "id": "m374",
    "file": "recomp_0003.c",
    "function_addr": "0x00175020",
    "anchor": {
@@ -9379,7 +9436,7 @@
    "form": "original"
   },
   {
-   "id": "m373",
+   "id": "m375",
    "file": "recomp_0003.c",
    "function_addr": "0x001750C0",
    "anchor": {
@@ -9404,7 +9461,7 @@
    "form": "original"
   },
   {
-   "id": "m374",
+   "id": "m376",
    "file": "recomp_0003.c",
    "function_addr": "0x001750C0",
    "anchor": {
@@ -9429,7 +9486,7 @@
    "form": "original"
   },
   {
-   "id": "m375",
+   "id": "m377",
    "file": "recomp_0003.c",
    "function_addr": "0x00175190",
    "anchor": {
@@ -9454,7 +9511,7 @@
    "form": "macro"
   },
   {
-   "id": "m376",
+   "id": "m378",
    "file": "recomp_0003.c",
    "function_addr": "0x00175190",
    "anchor": {
@@ -9479,7 +9536,7 @@
    "form": "macro"
   },
   {
-   "id": "m377",
+   "id": "m379",
    "file": "recomp_0003.c",
    "function_addr": "0x00175190",
    "anchor": {
@@ -9504,7 +9561,7 @@
    "form": "macro"
   },
   {
-   "id": "m378",
+   "id": "m380",
    "file": "recomp_0003.c",
    "function_addr": "0x00175250",
    "anchor": {
@@ -9529,7 +9586,7 @@
    "form": "original"
   },
   {
-   "id": "m379",
+   "id": "m381",
    "file": "recomp_0003.c",
    "function_addr": "0x001752A0",
    "anchor": {
@@ -9554,7 +9611,7 @@
    "form": "original"
   },
   {
-   "id": "m380",
+   "id": "m382",
    "file": "recomp_0003.c",
    "function_addr": "0x00175360",
    "anchor": {
@@ -9579,7 +9636,7 @@
    "form": "original"
   },
   {
-   "id": "m381",
+   "id": "m383",
    "file": "recomp_0003.c",
    "function_addr": "0x00175390",
    "anchor": {
@@ -9604,7 +9661,7 @@
    "form": "macro"
   },
   {
-   "id": "m382",
+   "id": "m384",
    "file": "recomp_0003.c",
    "function_addr": "0x00175390",
    "anchor": {
@@ -9629,7 +9686,7 @@
    "form": "macro"
   },
   {
-   "id": "m383",
+   "id": "m385",
    "file": "recomp_0003.c",
    "function_addr": "0x00175390",
    "anchor": {
@@ -9654,7 +9711,7 @@
    "form": "macro"
   },
   {
-   "id": "m384",
+   "id": "m386",
    "file": "recomp_0003.c",
    "function_addr": "0x00175390",
    "anchor": {
@@ -9679,7 +9736,7 @@
    "form": "macro"
   },
   {
-   "id": "m385",
+   "id": "m387",
    "file": "recomp_0003.c",
    "function_addr": "0x00175570",
    "anchor": {
@@ -9704,7 +9761,7 @@
    "form": "original"
   },
   {
-   "id": "m386",
+   "id": "m388",
    "file": "recomp_0003.c",
    "function_addr": "0x00175570",
    "anchor": {
@@ -9729,7 +9786,7 @@
    "form": "original"
   },
   {
-   "id": "m387",
+   "id": "m389",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9754,7 +9811,7 @@
    "form": "original"
   },
   {
-   "id": "m388",
+   "id": "m390",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9779,7 +9836,7 @@
    "form": "original"
   },
   {
-   "id": "m389",
+   "id": "m391",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9804,7 +9861,7 @@
    "form": "macro"
   },
   {
-   "id": "m390",
+   "id": "m392",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9829,7 +9886,7 @@
    "form": "original"
   },
   {
-   "id": "m391",
+   "id": "m393",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9854,7 +9911,7 @@
    "form": "macro"
   },
   {
-   "id": "m392",
+   "id": "m394",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9879,7 +9936,7 @@
    "form": "original"
   },
   {
-   "id": "m393",
+   "id": "m395",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9904,7 +9961,7 @@
    "form": "original"
   },
   {
-   "id": "m394",
+   "id": "m396",
    "file": "recomp_0003.c",
    "function_addr": "0x00175B10",
    "anchor": {
@@ -9929,7 +9986,7 @@
    "form": "original"
   },
   {
-   "id": "m395",
+   "id": "m397",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -9954,7 +10011,7 @@
    "form": "macro"
   },
   {
-   "id": "m396",
+   "id": "m398",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -9979,7 +10036,7 @@
    "form": "macro"
   },
   {
-   "id": "m397",
+   "id": "m399",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10004,7 +10061,7 @@
    "form": "original"
   },
   {
-   "id": "m398",
+   "id": "m400",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10029,7 +10086,7 @@
    "form": "original"
   },
   {
-   "id": "m399",
+   "id": "m401",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10054,7 +10111,7 @@
    "form": "original"
   },
   {
-   "id": "m400",
+   "id": "m402",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10079,7 +10136,7 @@
    "form": "original"
   },
   {
-   "id": "m401",
+   "id": "m403",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10104,7 +10161,7 @@
    "form": "macro"
   },
   {
-   "id": "m402",
+   "id": "m404",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10129,7 +10186,7 @@
    "form": "macro"
   },
   {
-   "id": "m403",
+   "id": "m405",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10154,7 +10211,7 @@
    "form": "macro"
   },
   {
-   "id": "m404",
+   "id": "m406",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10179,7 +10236,7 @@
    "form": "macro"
   },
   {
-   "id": "m405",
+   "id": "m407",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10204,7 +10261,7 @@
    "form": "original"
   },
   {
-   "id": "m406",
+   "id": "m408",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10229,7 +10286,7 @@
    "form": "macro"
   },
   {
-   "id": "m407",
+   "id": "m409",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10254,7 +10311,7 @@
    "form": "original"
   },
   {
-   "id": "m408",
+   "id": "m410",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10279,7 +10336,7 @@
    "form": "macro"
   },
   {
-   "id": "m409",
+   "id": "m411",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10304,7 +10361,7 @@
    "form": "original"
   },
   {
-   "id": "m410",
+   "id": "m412",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10329,7 +10386,7 @@
    "form": "macro"
   },
   {
-   "id": "m411",
+   "id": "m413",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10354,7 +10411,7 @@
    "form": "original"
   },
   {
-   "id": "m412",
+   "id": "m414",
    "file": "recomp_0003.c",
    "function_addr": "0x00176290",
    "anchor": {
@@ -10379,7 +10436,7 @@
    "form": "original"
   },
   {
-   "id": "m413",
+   "id": "m415",
    "file": "recomp_0003.c",
    "function_addr": "0x001769E0",
    "anchor": {
@@ -10404,7 +10461,7 @@
    "form": "original"
   },
   {
-   "id": "m414",
+   "id": "m416",
    "file": "recomp_0003.c",
    "function_addr": "0x00176AF0",
    "anchor": {
@@ -10429,7 +10486,7 @@
    "form": "original"
   },
   {
-   "id": "m415",
+   "id": "m417",
    "file": "recomp_0003.c",
    "function_addr": "0x00176AF0",
    "anchor": {
@@ -10454,7 +10511,7 @@
    "form": "original"
   },
   {
-   "id": "m416",
+   "id": "m418",
    "file": "recomp_0003.c",
    "function_addr": "0x001778C0",
    "anchor": {
@@ -10479,7 +10536,7 @@
    "form": "original"
   },
   {
-   "id": "m417",
+   "id": "m419",
    "file": "recomp_0003.c",
    "function_addr": "0x001778C0",
    "anchor": {
@@ -10504,7 +10561,7 @@
    "form": "macro"
   },
   {
-   "id": "m418",
+   "id": "m420",
    "file": "recomp_0003.c",
    "function_addr": "0x001778C0",
    "anchor": {
@@ -10529,7 +10586,7 @@
    "form": "macro"
   },
   {
-   "id": "m419",
+   "id": "m421",
    "file": "recomp_0003.c",
    "function_addr": "0x001778C0",
    "anchor": {
@@ -10554,7 +10611,7 @@
    "form": "original"
   },
   {
-   "id": "m420",
+   "id": "m422",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10579,7 +10636,7 @@
    "form": "macro"
   },
   {
-   "id": "m421",
+   "id": "m423",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10604,7 +10661,7 @@
    "form": "macro"
   },
   {
-   "id": "m422",
+   "id": "m424",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10629,7 +10686,7 @@
    "form": "original"
   },
   {
-   "id": "m423",
+   "id": "m425",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10654,7 +10711,7 @@
    "form": "macro"
   },
   {
-   "id": "m424",
+   "id": "m426",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10679,7 +10736,7 @@
    "form": "macro"
   },
   {
-   "id": "m425",
+   "id": "m427",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10704,7 +10761,7 @@
    "form": "original"
   },
   {
-   "id": "m426",
+   "id": "m428",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10729,7 +10786,7 @@
    "form": "original"
   },
   {
-   "id": "m427",
+   "id": "m429",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10754,7 +10811,7 @@
    "form": "original"
   },
   {
-   "id": "m428",
+   "id": "m430",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10779,7 +10836,7 @@
    "form": "macro"
   },
   {
-   "id": "m429",
+   "id": "m431",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10804,7 +10861,7 @@
    "form": "macro"
   },
   {
-   "id": "m430",
+   "id": "m432",
    "file": "recomp_0003.c",
    "function_addr": "0x00177B90",
    "anchor": {
@@ -10829,7 +10886,7 @@
    "form": "original"
   },
   {
-   "id": "m431",
+   "id": "m433",
    "file": "recomp_0003.c",
    "function_addr": "0x001785C0",
    "anchor": {
@@ -10854,7 +10911,7 @@
    "form": "macro"
   },
   {
-   "id": "m432",
+   "id": "m434",
    "file": "recomp_0003.c",
    "function_addr": "0x001785C0",
    "anchor": {
@@ -10879,7 +10936,7 @@
    "form": "macro"
   },
   {
-   "id": "m433",
+   "id": "m435",
    "file": "recomp_0003.c",
    "function_addr": "0x001785C0",
    "anchor": {
@@ -10904,7 +10961,7 @@
    "form": "original"
   },
   {
-   "id": "m434",
+   "id": "m436",
    "file": "recomp_0003.c",
    "function_addr": "0x00178630",
    "anchor": {
@@ -10929,7 +10986,7 @@
    "form": "macro"
   },
   {
-   "id": "m435",
+   "id": "m437",
    "file": "recomp_0003.c",
    "function_addr": "0x00178630",
    "anchor": {
@@ -10954,7 +11011,7 @@
    "form": "original"
   },
   {
-   "id": "m436",
+   "id": "m438",
    "file": "recomp_0003.c",
    "function_addr": "0x00178630",
    "anchor": {
@@ -10979,7 +11036,7 @@
    "form": "macro"
   },
   {
-   "id": "m437",
+   "id": "m439",
    "file": "recomp_0003.c",
    "function_addr": "0x00178630",
    "anchor": {
@@ -11004,7 +11061,7 @@
    "form": "original"
   },
   {
-   "id": "m438",
+   "id": "m440",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11029,7 +11086,7 @@
    "form": "macro"
   },
   {
-   "id": "m439",
+   "id": "m441",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11054,7 +11111,7 @@
    "form": "original"
   },
   {
-   "id": "m440",
+   "id": "m442",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11079,7 +11136,7 @@
    "form": "macro"
   },
   {
-   "id": "m441",
+   "id": "m443",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11104,7 +11161,7 @@
    "form": "macro"
   },
   {
-   "id": "m442",
+   "id": "m444",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11129,7 +11186,7 @@
    "form": "macro"
   },
   {
-   "id": "m443",
+   "id": "m445",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11154,7 +11211,7 @@
    "form": "macro"
   },
   {
-   "id": "m444",
+   "id": "m446",
    "file": "recomp_0003.c",
    "function_addr": "0x00178B80",
    "anchor": {
@@ -11179,7 +11236,7 @@
    "form": "original"
   },
   {
-   "id": "m445",
+   "id": "m447",
    "file": "recomp_0003.c",
    "function_addr": "0x0017A530",
    "anchor": {
@@ -11202,7 +11259,7 @@
    "form": "macro"
   },
   {
-   "id": "m446",
+   "id": "m448",
    "file": "recomp_0003.c",
    "function_addr": "0x0017D980",
    "anchor": {
@@ -11227,7 +11284,7 @@
    "form": "macro"
   },
   {
-   "id": "m447",
+   "id": "m449",
    "file": "recomp_0003.c",
    "function_addr": "0x0017D980",
    "anchor": {
@@ -11252,7 +11309,7 @@
    "form": "macro"
   },
   {
-   "id": "m448",
+   "id": "m450",
    "file": "recomp_0003.c",
    "function_addr": "0x0017D980",
    "anchor": {
@@ -11277,7 +11334,7 @@
    "form": "macro"
   },
   {
-   "id": "m449",
+   "id": "m451",
    "file": "recomp_0003.c",
    "function_addr": "0x0017D980",
    "anchor": {
@@ -11302,7 +11359,7 @@
    "form": "macro"
   },
   {
-   "id": "m450",
+   "id": "m452",
    "file": "recomp_0003.c",
    "function_addr": "0x001871E0",
    "anchor": {
@@ -11330,7 +11387,7 @@
    "form": "original"
   },
   {
-   "id": "m451",
+   "id": "m453",
    "file": "recomp_0003.c",
    "function_addr": "0x00187C70",
    "anchor": {
@@ -11358,7 +11415,7 @@
    "form": "original"
   },
   {
-   "id": "m452",
+   "id": "m454",
    "file": "recomp_0003.c",
    "function_addr": "0x0018B250",
    "anchor": {
@@ -11382,7 +11439,7 @@
    "form": "original"
   },
   {
-   "id": "m453",
+   "id": "m455",
    "file": "recomp_0003.c",
    "function_addr": "0x0018B250",
    "anchor": {
@@ -11405,7 +11462,7 @@
    "form": "macro"
   },
   {
-   "id": "m454",
+   "id": "m456",
    "file": "recomp_0003.c",
    "function_addr": "0x0018B250",
    "anchor": {
@@ -11428,7 +11485,7 @@
    "form": "original"
   },
   {
-   "id": "m455",
+   "id": "m457",
    "file": "recomp_0003.c",
    "function_addr": "0x0018B250",
    "anchor": {
@@ -11451,7 +11508,7 @@
    "form": "macro"
   },
   {
-   "id": "m456",
+   "id": "m458",
    "file": "recomp_0003.c",
    "function_addr": "0x0018B250",
    "anchor": {
@@ -11476,7 +11533,7 @@
    "form": "macro"
   },
   {
-   "id": "m457",
+   "id": "m459",
    "file": "recomp_0003.c",
    "function_addr": "0x0018BD60",
    "anchor": {
@@ -11499,7 +11556,7 @@
    "form": "original"
   },
   {
-   "id": "m458",
+   "id": "m460",
    "file": "recomp_0003.c",
    "function_addr": "0x0018C7D0",
    "anchor": {
@@ -11522,7 +11579,7 @@
    "form": "original"
   },
   {
-   "id": "m459",
+   "id": "m461",
    "file": "recomp_0003.c",
    "function_addr": "0x0018C940",
    "anchor": {
@@ -11547,7 +11604,7 @@
    "form": "macro"
   },
   {
-   "id": "m460",
+   "id": "m462",
    "file": "recomp_0003.c",
    "function_addr": "0x0018C940",
    "anchor": {
@@ -11572,7 +11629,7 @@
    "form": "original"
   },
   {
-   "id": "m461",
+   "id": "m463",
    "file": "recomp_0003.c",
    "function_addr": "0x0018D0E0",
    "anchor": {
@@ -11597,7 +11654,7 @@
    "form": "original"
   },
   {
-   "id": "m462",
+   "id": "m464",
    "file": "recomp_0003.c",
    "function_addr": "0x0018D0E0",
    "anchor": {
@@ -11624,7 +11681,7 @@
    "form": "macro"
   },
   {
-   "id": "m463",
+   "id": "m465",
    "file": "recomp_0003.c",
    "function_addr": "0x0018D0E0",
    "anchor": {
@@ -11647,7 +11704,7 @@
    "form": "original"
   },
   {
-   "id": "m464",
+   "id": "m466",
    "file": "recomp_0003.c",
    "function_addr": "0x0018E010",
    "anchor": {
@@ -11670,7 +11727,7 @@
    "form": "original"
   },
   {
-   "id": "m465",
+   "id": "m467",
    "file": "recomp_0003.c",
    "function_addr": "0x0018E2F0",
    "anchor": {
@@ -11695,7 +11752,7 @@
    "form": "macro"
   },
   {
-   "id": "m466",
+   "id": "m468",
    "file": "recomp_0003.c",
    "function_addr": "0x0018E2F0",
    "anchor": {
@@ -11720,7 +11777,7 @@
    "form": "original"
   },
   {
-   "id": "m467",
+   "id": "m469",
    "file": "recomp_0003.c",
    "function_addr": "0x0018E670",
    "anchor": {
@@ -11743,7 +11800,7 @@
    "form": "original"
   },
   {
-   "id": "m468",
+   "id": "m470",
    "file": "recomp_0003.c",
    "function_addr": "0x001935F0",
    "anchor": {
@@ -11771,7 +11828,7 @@
    "form": "original"
   },
   {
-   "id": "m469",
+   "id": "m471",
    "file": "recomp_0003.c",
    "function_addr": "0x00198E60",
    "anchor": {
@@ -11799,7 +11856,7 @@
    "form": "macro"
   },
   {
-   "id": "m470",
+   "id": "m472",
    "file": "recomp_0003.c",
    "function_addr": "0x00198E60",
    "anchor": {
@@ -11822,7 +11879,7 @@
    "form": "original"
   },
   {
-   "id": "m471",
+   "id": "m473",
    "file": "recomp_0003.c",
    "function_addr": "0x0019AE10",
    "anchor": {
@@ -11845,7 +11902,7 @@
    "form": "original"
   },
   {
-   "id": "m472",
+   "id": "m474",
    "file": "recomp_0003.c",
    "function_addr": "0x0019CBB0",
    "anchor": {
@@ -11868,7 +11925,7 @@
    "form": "original"
   },
   {
-   "id": "m473",
+   "id": "m475",
    "file": "recomp_0003.c",
    "function_addr": "0x0019CC60",
    "anchor": {
@@ -11891,7 +11948,7 @@
    "form": "original"
   },
   {
-   "id": "m474",
+   "id": "m476",
    "file": "recomp_0003.c",
    "function_addr": "0x001A13F0",
    "anchor": {
@@ -11914,7 +11971,7 @@
    "form": "original"
   },
   {
-   "id": "m475",
+   "id": "m477",
    "file": "recomp_0003.c",
    "function_addr": "0x001A13F0",
    "anchor": {
@@ -11941,7 +11998,7 @@
    "form": "original"
   },
   {
-   "id": "m476",
+   "id": "m478",
    "file": "recomp_0003.c",
    "function_addr": "0x001A20F0",
    "anchor": {
@@ -11970,7 +12027,7 @@
    "form": "macro"
   },
   {
-   "id": "m477",
+   "id": "m479",
    "file": "recomp_0003.c",
    "function_addr": "0x001A20F0",
    "anchor": {
@@ -11997,7 +12054,7 @@
    "form": "original"
   },
   {
-   "id": "m478",
+   "id": "m480",
    "file": "recomp_0003.c",
    "function_addr": "0x001A20F0",
    "anchor": {
@@ -12029,7 +12086,7 @@
    "form": "original"
   },
   {
-   "id": "m479",
+   "id": "m481",
    "file": "recomp_0003.c",
    "function_addr": "0x001A2860",
    "anchor": {
@@ -12054,7 +12111,7 @@
    "form": "macro"
   },
   {
-   "id": "m480",
+   "id": "m482",
    "file": "recomp_0003.c",
    "function_addr": "0x001A2860",
    "anchor": {
@@ -12079,7 +12136,7 @@
    "form": "macro"
   },
   {
-   "id": "m481",
+   "id": "m483",
    "file": "recomp_0003.c",
    "function_addr": "0x001A2860",
    "anchor": {
@@ -12104,7 +12161,7 @@
    "form": "macro"
   },
   {
-   "id": "m482",
+   "id": "m484",
    "file": "recomp_0003.c",
    "function_addr": "0x001A2860",
    "anchor": {
@@ -12129,7 +12186,7 @@
    "form": "macro"
   },
   {
-   "id": "m483",
+   "id": "m485",
    "file": "recomp_0003.c",
    "function_addr": "0x001A28B0",
    "anchor": {
@@ -12152,7 +12209,7 @@
    "form": "macro"
   },
   {
-   "id": "m484",
+   "id": "m486",
    "file": "recomp_0003.c",
    "function_addr": "0x001A3AE0",
    "anchor": {
@@ -12180,7 +12237,7 @@
    "form": "original"
   },
   {
-   "id": "m485",
+   "id": "m487",
    "file": "recomp_0003.c",
    "function_addr": "0x001A4260",
    "anchor": {
@@ -12205,7 +12262,7 @@
    "form": "original"
   },
   {
-   "id": "m486",
+   "id": "m488",
    "file": "recomp_0003.c",
    "function_addr": "0x001A4260",
    "anchor": {
@@ -12232,7 +12289,7 @@
    "form": "macro"
   },
   {
-   "id": "m487",
+   "id": "m489",
    "file": "recomp_0003.c",
    "function_addr": "0x001A6070",
    "anchor": {
@@ -12259,7 +12316,7 @@
    "form": "original"
   },
   {
-   "id": "m488",
+   "id": "m490",
    "file": "recomp_0003.c",
    "function_addr": "0x001A6070",
    "anchor": {
@@ -12286,7 +12343,7 @@
    "form": "macro"
   },
   {
-   "id": "m489",
+   "id": "m491",
    "file": "recomp_0003.c",
    "function_addr": "0x001AA100",
    "anchor": {
@@ -12309,7 +12366,7 @@
    "form": "original"
   },
   {
-   "id": "m490",
+   "id": "m492",
    "file": "recomp_0003.c",
    "function_addr": "0x001AA990",
    "anchor": {
@@ -12332,7 +12389,7 @@
    "form": "original"
   },
   {
-   "id": "m491",
+   "id": "m493",
    "file": "recomp_0003.c",
    "function_addr": "0x001AAE30",
    "anchor": {
@@ -12357,7 +12414,7 @@
    "form": "original"
   },
   {
-   "id": "m492",
+   "id": "m494",
    "file": "recomp_0003.c",
    "function_addr": "0x001AB820",
    "anchor": {
@@ -12382,7 +12439,7 @@
    "form": "macro"
   },
   {
-   "id": "m493",
+   "id": "m495",
    "file": "recomp_0003.c",
    "function_addr": "0x001AB820",
    "anchor": {
@@ -12407,7 +12464,7 @@
    "form": "original"
   },
   {
-   "id": "m494",
+   "id": "m496",
    "file": "recomp_0003.c",
    "function_addr": "0x001AB820",
    "anchor": {
@@ -12432,7 +12489,7 @@
    "form": "macro"
   },
   {
-   "id": "m495",
+   "id": "m497",
    "file": "recomp_0003.c",
    "function_addr": "0x001AB820",
    "anchor": {
@@ -12457,7 +12514,7 @@
    "form": "original"
   },
   {
-   "id": "m496",
+   "id": "m498",
    "file": "recomp_0003.c",
    "function_addr": "0x001AC430",
    "anchor": {
@@ -12482,7 +12539,7 @@
    "form": "macro"
   },
   {
-   "id": "m497",
+   "id": "m499",
    "file": "recomp_0003.c",
    "function_addr": "0x001AC430",
    "anchor": {
@@ -12507,7 +12564,7 @@
    "form": "original"
   },
   {
-   "id": "m498",
+   "id": "m500",
    "file": "recomp_0003.c",
    "function_addr": "0x001AC430",
    "anchor": {
@@ -12532,7 +12589,7 @@
    "form": "original"
   },
   {
-   "id": "m499",
+   "id": "m501",
    "file": "recomp_0003.c",
    "function_addr": "0x001ACE00",
    "anchor": {
@@ -12560,7 +12617,7 @@
    "form": "original"
   },
   {
-   "id": "m500",
+   "id": "m502",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD510",
    "anchor": {
@@ -12585,7 +12642,7 @@
    "form": "original"
   },
   {
-   "id": "m501",
+   "id": "m503",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD510",
    "anchor": {
@@ -12613,7 +12670,7 @@
    "form": "original"
   },
   {
-   "id": "m502",
+   "id": "m504",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD510",
    "anchor": {
@@ -12641,7 +12698,7 @@
    "form": "original"
   },
   {
-   "id": "m503",
+   "id": "m505",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD510",
    "anchor": {
@@ -12666,7 +12723,7 @@
    "form": "original"
   },
   {
-   "id": "m504",
+   "id": "m506",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD510",
    "anchor": {
@@ -12694,7 +12751,7 @@
    "form": "macro"
   },
   {
-   "id": "m505",
+   "id": "m507",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12719,7 +12776,7 @@
    "form": "original"
   },
   {
-   "id": "m506",
+   "id": "m508",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12747,7 +12804,7 @@
    "form": "original"
   },
   {
-   "id": "m507",
+   "id": "m509",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12775,7 +12832,7 @@
    "form": "original"
   },
   {
-   "id": "m508",
+   "id": "m510",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12800,7 +12857,7 @@
    "form": "original"
   },
   {
-   "id": "m509",
+   "id": "m511",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD5E0",
    "anchor": {
@@ -12828,7 +12885,7 @@
    "form": "macro"
   },
   {
-   "id": "m510",
+   "id": "m512",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD7A0",
    "anchor": {
@@ -12859,7 +12916,7 @@
    "form": "original"
   },
   {
-   "id": "m511",
+   "id": "m513",
    "file": "recomp_0003.c",
    "function_addr": "0x001AD7A0",
    "anchor": {
@@ -12884,7 +12941,7 @@
    "form": "original"
   },
   {
-   "id": "m512",
+   "id": "m514",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADA40",
    "anchor": {
@@ -12915,7 +12972,7 @@
    "form": "original"
   },
   {
-   "id": "m513",
+   "id": "m515",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADA40",
    "anchor": {
@@ -12940,7 +12997,7 @@
    "form": "original"
   },
   {
-   "id": "m514",
+   "id": "m516",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADD60",
    "anchor": {
@@ -12967,7 +13024,7 @@
    "form": "original"
   },
   {
-   "id": "m515",
+   "id": "m517",
    "file": "recomp_0003.c",
    "function_addr": "0x001ADD60",
    "anchor": {
@@ -12992,7 +13049,7 @@
    "form": "original"
   },
   {
-   "id": "m516",
+   "id": "m518",
    "file": "recomp_0003.c",
    "function_addr": "0x001AE200",
    "anchor": {
@@ -13015,7 +13072,7 @@
    "form": "original"
   },
   {
-   "id": "m517",
+   "id": "m519",
    "file": "recomp_0003.c",
    "function_addr": "0x001AF040",
    "anchor": {
@@ -13038,7 +13095,7 @@
    "form": "original"
   },
   {
-   "id": "m518",
+   "id": "m520",
    "file": "recomp_0004.c",
    "function_addr": "0x001C8A60",
    "anchor": {
@@ -13065,7 +13122,7 @@
    "form": "original"
   },
   {
-   "id": "m519",
+   "id": "m521",
    "file": "recomp_0004.c",
    "function_addr": "0x001C8A60",
    "anchor": {
@@ -13092,7 +13149,34 @@
    "form": "macro"
   },
   {
-   "id": "m520",
+   "id": "m522",
+   "file": "recomp_0005.c",
+   "function_addr": "0x001F7BC0",
+   "anchor": {
+    "kind": "label",
+    "addr": "0x001F7C0F",
+    "line_sha256": "1b794cb01d4a6f7e1860b283041ee3a40388f5fbd2f793c399ce09b7effe7351",
+    "offset": 1,
+    "span_sha256": "d45c1619547a5fc5e8ade46ccc261caa2865687f6200db341cbd4801f1689c86",
+    "line": 59801
+   },
+   "delete_sha256": [],
+   "context_sha256": {
+    "before": "55369d33c347dd021eb406d2d015a415e397170318abb63e68a091c9c0ea8136",
+    "after": "d15875af43eacc3910cb77a6718f04376fbc39f714224397808f2aa53dcd4b10"
+   },
+   "insert": [
+    "#if BO3_HOOKREQ_ZDOP\r\n",
+    "    { extern int bo3_doppler_gen_off(void); if (bo3_doppler_gen_off()) goto loc_001F7CAF; }   /* main21 patch 139: Doppler ratio 1.0, as the function's own no-distance path */\r\n",
+    "#endif\r\n"
+   ],
+   "switches": [
+    "BO3_HOOKREQ_ZDOP"
+   ],
+   "form": "original"
+  },
+  {
+   "id": "m523",
    "file": "recomp_types.h",
    "function_addr": null,
    "anchor": {
@@ -13121,7 +13205,7 @@
    "form": "original"
   },
   {
-   "id": "m521",
+   "id": "m524",
    "file": "recomp_types.h",
    "function_addr": null,
    "anchor": {

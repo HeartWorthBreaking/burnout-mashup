@@ -46,7 +46,7 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
    The xboxrecomp texture upscaler shaders (LGPL-3.0-or-later) are not in this tree; the build fetches them with xboxrecomp.
 
 3. Our hunks
-   host/toolkit/lgpl/apu_core.patch (sha256 dde28f7388dc950253310192aa800f84e3fbd0ed5dc93f3c0471485522b2d444; 4 hunks).
+   host/toolkit/lgpl/apu_core.patch (sha256 e9d91484f722f41c3b25e07a14714fcbadfbe056b6eeb8bfcd821dae5e5d3b68; 4 hunks in src/apu/apu_core.c, 15 hunks in all four files, see 6).
    Pre-image: the file as checked out by the pinned archive (git archive, core.autocrlf=true), sha256 ded1da83b903d0938b66bc957f592d1a78d8b26aa6efcbe0d61832c7f60a5a42.
    Post-image: sha256 55c0614aa55c9073aa94245a89b3c2fad570353a99424db31d0277f836f1185f (host/LAYERS.json; build/apply_layers.py refuses anything else).
 
@@ -128,5 +128,23 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
       header says: "2018-2025 Matt Borgerson) - LGPL v2+"
       copyright: 2012 espes, 2015 Jannik Vogel, 2018-2025 Matt Borgerson (adapted from xemu nv2a_int.h)
       here: unmodified
+
+6. Further LGPL files changed by Burnout Mashup (since 0.2.0-alpha.4, 2026-11-05; the setting PS2 SOUND)
+   host/toolkit/lgpl/apu_core.patch keeps its name (so that an installation of an earlier release is updated in place) and holds the hunks of
+   all four files below. host/toolkit/toolkit.patch (MIT) holds no hunk of a file that carries an xemu / LGPL header. Every change of ours in
+   these files has a dated comment "Burnout Mashup modification, 2026-11-05" at the changed code. The files named here are the xboxrecomp files
+   as pinned (see 5 for blob ids, sha256 and header wording); our files apu_gauss.h, apu_softmusic.h, apu_ps2mix.h (MIT, host/toolkit/added/)
+   are new files of ours and not changes to an LGPL file.
+   - src/apu/apu.h: 1 hunk(s); three declarations: the host's queries for the PS2 SOUND parts (mcpx_apu_set_gauss_query, mcpx_apu_set_soft_music_query, mcpx_apu_set_ps2_mix_query)
+     pre-image sha256 0aeedf7fb52a1058ab5e344460249262abe5832d0a9d54ad1fe70040e60d8af4
+     post-image sha256 94cacea25c7918ff5558ce5e536f84be2a82a1581be1713367ef99e256d2c266
+   - src/apu/apu_state.h: 2 hunk(s); the include of apu_softmusic.h and two fields of the voice filter state (rs_old: the two source samples before rs_last, for the interpolation; softmusic: the music low-pass state)
+     pre-image sha256 165acb6837411f8bbe2f8534f65eebdb0ae2264d20766f94c9a9cf2303de89a9
+     post-image sha256 16090273ada02d1b602ddf01430c15127c5732f1e7b4f1f17ed5b0749bc7c794
+   - src/apu/apu_vp.c: 8 hunk(s); the PS2 SOUND parts: interpolation of voices that are not streams (apu_gauss.h), the music bandwidth of streams (apu_softmusic.h), event-sound send levels in stereo (apu_ps2mix.h), the once-a-frame queries of the host, the reset of the filter state, and the call that lets the safety limiter pass while the setting is on (apu_limit_bypass)
+     pre-image sha256 6d2a586fda897d827bf4ed260fa531f2f768a746a07e1adc561a99dd8f62025f
+     post-image sha256 d1bda5e8bbdd99239f99b86f9da43232561c4252203a1be587dab8f7f619ccaf
+   Pre-image: the file as checked out by the pinned archive (core.autocrlf=true); post-image: sha256 in host/LAYERS.json; build/apply_layers.py
+   refuses anything else.
 
 This notice concerns source files only. No executable or object code is distributed by this repository (docs/PUBLIC_STATUS.md).

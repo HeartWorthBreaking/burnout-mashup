@@ -1,5 +1,24 @@
-# um layer toolkit (LGPL-2.1-or-later file): 1 modified file(s); position-free hunks, each old block unique in its file
+# um layer toolkit (LGPL-2.1-or-later files): 4 modified file(s); position-free hunks, each old block unique in its file
 #
+--- a/toolkit/src/apu/apu.h
++++ b/toolkit/src/apu/apu.h
+@@ -75,6 +75,16 @@
+  * dry; this keeps it down. Stereo does not use it. */
+ void mcpx_apu_set_fx_bins(uint32_t mask);
+ void mcpx_apu_set_fx_level(float level);
++
++/* Burnout Mashup modification, 2026-11-05: the host's question, once a VP frame, whether the voices that are not streams
++ * interpolate as apu_gauss.h does; NULL (the default) is no. */
++void mcpx_apu_set_gauss_query(int (*query)(void));
++
++/* Burnout Mashup modification, 2026-11-05: the host's question, once a VP frame, whether streams go through apu_softmusic.h; NULL (the default) is no. */
++void mcpx_apu_set_soft_music_query(int (*query)(void));
++
++/* Burnout Mashup modification, 2026-11-05: the host's question, once a VP frame, whether voices go through apu_ps2mix.h; NULL (the default) is no. */
++void mcpx_apu_set_ps2_mix_query(int (*query)(void));
+ 
+ /* A title whose GP effects image has been read wires it with apu_gp.h
+  * (apu_gp_direct, _eq, _drive, _export, before mcpx_apu_init_standalone):
 --- a/toolkit/src/apu/apu_core.c
 +++ b/toolkit/src/apu/apu_core.c
 @@ -113,6 +113,18 @@
@@ -53,3 +72,161 @@
      if (a >= (64u << 20))
          return a < apu_mapped_ram() ? "ram" : "wrap";
      if (xbox_ContiguousPageMap()[a >> 12])
+--- a/toolkit/src/apu/apu_state.h
++++ b/toolkit/src/apu/apu_state.h
+@@ -49,6 +49,7 @@
+  * ============================================================ */
+ 
+ #include "apu_lowpass.h"
++#include "apu_softmusic.h"   /* Burnout Mashup modification, 2026-11-05 */
+ 
+ /* ============================================================
+  * HRTF Filter - from vp/hrtf.h
+@@ -243,8 +244,10 @@
+      * samples the output sits between, the output's position in [0,1)
+      * between them, and whether they have been fetched yet. */
+     float rs_last[2], rs_next[2], rs_pos;
++    float rs_old[2][2];     /* Burnout Mashup modification, 2026-11-05: the two source samples before rs_last, for apu_gauss.h */
+     int   rs_have;
+     ApuLowpass lowpass[2];
++    ApuSoftMusic softmusic[2];   /* Burnout Mashup modification, 2026-11-05: apu_softmusic.h */
+     HrtfFilter hrtf;
+ } MCPXAPUVoiceFilter;
+ 
+--- a/toolkit/src/apu/apu_vp.c
++++ b/toolkit/src/apu/apu_vp.c
+@@ -23,6 +23,7 @@
+ #include "recomp_env.h"
+ #include "fpconv.h"
+ #include "../kernel/kernel_prof.h"
++#include "apu_gauss.h"   /* Burnout Mashup modification, 2026-11-05 */
+ 
+ /* #define DEBUG_MCPX */
+ 
+@@ -89,10 +90,33 @@
+  * Filter helpers
+  * ============================================================ */
+ 
++/* Burnout Mashup modification, 2026-11-05: the voices that are not streams interpolate as apu_gauss.h does, asked of the
++ * host once a VP frame. With no host asking, or the answer no, voice_resample's output is what it always was. */
++#include "apu_limit.h"   /* Burnout Mashup modification, 2026-11-05 */
++static int (*s_gauss_query)(void);
++static int s_gauss_on, s_gauss_ready;
++static float s_gauss_tab[APU_GAUSS_PHASES][4];
++
++void mcpx_apu_set_gauss_query(int (*query)(void)) { s_gauss_query = query; }
++
++/* Burnout Mashup modification, 2026-11-05: streams through apu_softmusic.h, asked of the host once a VP frame. No host, or no: no sample touched. */
++static int (*s_soft_music_query)(void);
++static int s_soft_music_on;
++
++void mcpx_apu_set_soft_music_query(int (*query)(void)) { s_soft_music_query = query; }
++
++/* Burnout Mashup modification, 2026-11-05: apu_ps2mix.h, asked of the host once a VP frame. No host, or no: no volume touched. */
++#include "apu_ps2mix.h"
++static int (*s_ps2_mix_query)(void);
++static int s_ps2_mix_on;
++
++void mcpx_apu_set_ps2_mix_query(int (*query)(void)) { s_ps2_mix_query = query; }
++
+ static void voice_reset_filters(MCPXAPUState *d, uint16_t v)
+ {
+     assert(v < MCPX_HW_MAX_VOICES);
+     memset(&d->vp.filters[v].lowpass, 0, sizeof(d->vp.filters[v].lowpass));
++    memset(&d->vp.filters[v].softmusic, 0, sizeof(d->vp.filters[v].softmusic));   /* Burnout Mashup modification, 2026-11-05 */
+     hrtf_filter_clear_history(&d->vp.filters[v].hrtf);
+     if (d->vp.filters[v].resampler) {
+         src_reset(d->vp.filters[v].resampler);
+@@ -1437,6 +1461,7 @@
+     float step;
+     int need, got, in, out;
+ 
++    const int gauss = s_gauss_on && !voice_get_mask(d, v, NV_PAVS_VOICE_CFG_FMT, NV_PAVS_VOICE_CFG_FMT_DATA_TYPE);   /* Burnout Mashup modification, 2026-11-05 */
+     if (!(rate > 0.0f)) rate = 1.0f;
+     step = 1.0f / rate;
+ 
+@@ -1445,6 +1470,7 @@
+         if (got < 2) return got < 0 ? got : 0;
+         f->rs_last[0] = src[0][0]; f->rs_last[1] = src[0][1];
+         f->rs_next[0] = src[1][0]; f->rs_next[1] = src[1][1];
++        f->rs_old[0][0] = f->rs_old[1][0] = src[0][0]; f->rs_old[0][1] = f->rs_old[1][1] = src[0][1];   /* Burnout Mashup modification, 2026-11-05 */
+         f->rs_pos = 0.0f;
+         f->rs_have = 1;
+     }
+@@ -1472,10 +1498,18 @@
+     for (in = 0, out = 0; out < requested_num; out++) {
+         while (f->rs_pos >= 1.0f) {
+             if (in >= got) goto done;
++            f->rs_old[0][0] = f->rs_old[1][0]; f->rs_old[0][1] = f->rs_old[1][1];   /* Burnout Mashup modification, 2026-11-05 */
++            f->rs_old[1][0] = f->rs_last[0]; f->rs_old[1][1] = f->rs_last[1];   /* Burnout Mashup modification, 2026-11-05 */
+             f->rs_last[0] = f->rs_next[0]; f->rs_last[1] = f->rs_next[1];
+             f->rs_next[0] = src[in][0];    f->rs_next[1] = src[in][1];
+             in++;
+             f->rs_pos -= 1.0f;
++        }
++        if (gauss) {   /* Burnout Mashup modification, 2026-11-05: between rs_old[1] and rs_last, one source sample later than the linear path */
++            samples[out][0] = apu_gauss_at((const float (*)[4])s_gauss_tab, f->rs_pos, f->rs_old[0][0], f->rs_old[1][0], f->rs_last[0], f->rs_next[0]);
++            samples[out][1] = apu_gauss_at((const float (*)[4])s_gauss_tab, f->rs_pos, f->rs_old[0][1], f->rs_old[1][1], f->rs_last[1], f->rs_next[1]);
++            f->rs_pos += step;
++            continue;
+         }
+         samples[out][0] = f->rs_last[0] + f->rs_pos * (f->rs_next[0] - f->rs_last[0]);
+         samples[out][1] = f->rs_last[1] + f->rs_pos * (f->rs_next[1] - f->rs_last[1]);
+@@ -2059,6 +2093,17 @@
+         }
+     }
+ 
++    /* Burnout Mashup modification, 2026-11-05: streams with the PS2's music bandwidth (apu_softmusic.h). */
++    if (s_soft_music_on && !multipass &&
++        voice_get_mask(d, v, NV_PAVS_VOICE_CFG_FMT, NV_PAVS_VOICE_CFG_FMT_DATA_TYPE)) {
++        for (unsigned int ch = 0; ch < channels; ch++) {
++            ApuSoftMusic *fx = &d->vp.filters[v].softmusic[ch];
++            apu_softmusic_tidy(fx);
++            for (int i = 0; i < NUM_SAMPLES_PER_FRAME; i++)
++                samples[i][ch] = apu_softmusic_step(fx, samples[i][ch]);
++        }
++    }
++
+     /* HRTF processing for 3D voices */
+     if (v < MCPX_HW_MAX_3D_VOICES && g_config.audio.hrtf) {
+         uint16_t hrtf_handle =
+@@ -2085,6 +2130,11 @@
+         struct bus_fill_ctx lc = { d, v, bin, 0, 0 };
+         apu_level_voice(v, s_von_serial[v], bus_fill, &lc, samples, channels);
+     }
++
++    /* Burnout Mashup modification, 2026-11-05: in stereo, centred event sounds without the fold's sum (apu_ps2mix.h). */
++    if (s_ps2_mix_on && !multipass && d->monitor.channels != APU_SPK_CHANNELS &&
++        !voice_get_mask(d, v, NV_PAVS_VOICE_CFG_FMT, NV_PAVS_VOICE_CFG_FMT_DATA_TYPE))
++        apu_ps2mix_vols(bin, vol);
+ 
+     /* Mix into bins */
+     if (s_bus_rt) {
+@@ -2275,6 +2325,27 @@
+ {
+     memset(d->vp.sample_buf, 0, sizeof(d->vp.sample_buf));
+ 
++    /* Burnout Mashup modification, 2026-11-05: apu_gauss.h, asked once a frame. */
++    {
++        int on = s_gauss_query ? s_gauss_query() != 0 : 0;
++        if (on && !s_gauss_ready) {
++            apu_gauss_fill(s_gauss_tab);
++            s_gauss_ready = 1;
++        }
++        s_gauss_on = on;
++        apu_limit_bypass(on);   /* Burnout Mashup modification, 2026-11-05: part of PS2 SOUND (apu_limit.h) */
++    }
++    /* Burnout Mashup modification, 2026-11-05: apu_softmusic.h, asked once a frame; the filters start clean when it comes on. */
++    {
++        int on = s_soft_music_query ? s_soft_music_query() != 0 : 0;
++        if (on && !s_soft_music_on)
++            for (int v = 0; v < MCPX_HW_MAX_VOICES; v++)
++                memset(&d->vp.filters[v].softmusic, 0, sizeof(d->vp.filters[v].softmusic));
++        s_soft_music_on = on;
++    }
++    /* Burnout Mashup modification, 2026-11-05: apu_ps2mix.h, asked once a frame. */
++    s_ps2_mix_on = s_ps2_mix_query ? s_ps2_mix_query() != 0 : 0;
++
+     /* The host mixer: off (the default) this is one branch. */
+     if (apu_bus_enabled()) {
+         static int8_t map[32];

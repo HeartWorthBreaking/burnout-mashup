@@ -9,7 +9,7 @@ REFUSAL: exit 2 and NOTHING is written (everything is computed in memory first, 
 guess and no fuzz. Hunk position numbers in the patch are informational only.
     host/tree/**            -> added to the Takedawn checkout at the same relative paths (a file that exists already is a collision)
     host/tree.patch         -> modifies Takedawn files (paths 'tree/<file>')
-    host/toolkit/toolkit.patch + host/toolkit/lgpl/apu_core.patch -> modify xboxrecomp files (paths 'toolkit/<file>')
+    host/toolkit/toolkit.patch + host/toolkit/lgpl/apu_core.patch (the hunks of the LGPL files) -> modify xboxrecomp files (paths 'toolkit/<file>')
     host/toolkit/added/**   -> added to the xboxrecomp checkout at the same relative paths (a file that exists already is a collision)
 Run it ONCE per fresh checkout; a second run is refused (pre-image differs). Original code (MIT); the logic is a port of the
 unique-anchor rule of the project's layer tool, so this tree is self-contained.
@@ -172,9 +172,10 @@ def run(argv):
     t_files = load_patch(os.path.join(host, "tree.patch"), "tree.patch")
     x_files = load_patch(os.path.join(host, "toolkit", "toolkit.patch"), "toolkit.patch")
     l_files = load_patch(os.path.join(host, "toolkit", "lgpl", "apu_core.patch"), "apu_core.patch")
-    lg = lay["toolkit"]["lgpl_file"]
-    if [f["path"] for f in l_files] != ["toolkit/" + lg] or any(f["path"] == "toolkit/" + lg for f in x_files):
-        raise C.Refused("the LGPL file's hunks must be only in host/toolkit/lgpl/apu_core.patch")
+    lg = lay["toolkit"].get("lgpl_files") or [lay["toolkit"]["lgpl_file"]]
+    want_l = sorted("toolkit/" + g for g in lg)
+    if sorted(f["path"] for f in l_files) != want_l or any(f["path"] in want_l for f in x_files):
+        raise C.Refused("the hunks of the LGPL files must be only in host/toolkit/lgpl/apu_core.patch (the name is kept), not in toolkit.patch")
     # ---- stage everything in memory
     st_t = stage_patch(t_files, "tree", td, lay["tree"]["modified"], True, "tree.patch")
     st_x = stage_patch(x_files, "toolkit", xr, lay["toolkit"]["modified"], True, "toolkit.patch")

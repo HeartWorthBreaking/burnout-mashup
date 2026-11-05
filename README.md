@@ -66,8 +66,8 @@ Nothing here is legal advice, and nothing here claims legal clearance.
 ## Licences
 Our own code, SDK and tools are MIT; our documentation is CC-BY-4.0; our original example assets are CC0-1.0; the title pictures and the icon are project artwork
 (`LICENSES/LicenseRef-BurnoutMashup-Artwork.txt`), not under those licences. Upstream and
-third-party material keeps its own licence. One upstream file, the audio code `src/apu/apu_core.c` from xemu, is under the
-GNU Lesser General Public License; our changes to it are offered under the same terms (LGPL-2.1-or-later, as xboxrecomp
+third-party material keeps its own licence. Four upstream files of the audio code from xemu (`src/apu/apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c`) are under the
+GNU Lesser General Public License; our changes to them are offered under the same terms (LGPL-2.1-or-later, as xboxrecomp
 distributes it; details in `host/toolkit/lgpl/NOTICE`). See `LICENSE`, `LICENSES/`, `REUSE.toml` and `NOTICE.md`.
 
 ## Credits

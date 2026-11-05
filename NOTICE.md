@@ -22,9 +22,10 @@ Takedawn's own third-party notices are in `docs/upstream/THIRD_PARTY_NOTICES.md`
 inherited source files of it. xboxrecomp is MIT licensed, `Copyright (c) 2026 sp00nz`; the licence text is
 `LICENSES/xboxrecomp-MIT.txt` (verbatim, commit `e3756d1b2fef`).
 
-## 3. GNU Lesser General Public License: the modified file `src/apu/apu_core.c` (from xemu)
-`host/toolkit/lgpl/apu_core.patch` is a set of modifications (a larger guest-memory window, "MEM256") of `src/apu/apu_core.c`,
-a file that xboxrecomp extracted from xemu (<https://github.com/xemu-project/xemu>). Copyright of that file: (c) 2012 espes;
+## 3. GNU Lesser General Public License: the modified files `src/apu/apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c` (from xemu)
+`host/toolkit/lgpl/apu_core.patch` (the name is kept) is a set of modifications of four files that xboxrecomp extracted from xemu
+(<https://github.com/xemu-project/xemu>): a larger guest-memory window ("MEM256") in `src/apu/apu_core.c`, and, since 0.2.0-alpha.4, the hooks of the setting
+PS2 SOUND in `apu.h`, `apu_state.h` and `apu_vp.c` (each change dated 2026-11-05 in the file; `host/toolkit/lgpl/NOTICE`, section 6). Copyright of `apu_core.c`: (c) 2012 espes;
 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson. Its own header says (verbatim, comment stars and line breaks joined): "This library is free software; you can
 redistribute it and/or modify it under the terms of the GNU Lesser General Public License as published by the Free Software
 Foundation; either version 2 of the License, or (at your option) any later version." and "WITHOUT ANY WARRANTY"; the whole header

@@ -1,4 +1,4 @@
-# um layer toolkit (MIT files): 15 modified file(s); position-free hunks, each old block unique in its file
+# um layer toolkit (MIT files): 17 modified file(s); position-free hunks, each old block unique in its file
 #
 --- a/toolkit/docs/runtime/overlay.md
 +++ b/toolkit/docs/runtime/overlay.md
@@ -24,6 +24,53 @@
  ### Restart now and Quit game (the foot of every page)
  
  Every page ends with rows that stay in view below the page's own rows (the
+--- a/toolkit/src/apu/apu_limit.c
++++ b/toolkit/src/apu/apu_limit.c
+@@ -4,6 +4,7 @@
+ #include <math.h>
+ 
+ static int   s_on = 1;
++static int   s_bypass;
+ static float s_gain = 1.0f;
+ static unsigned long s_engaged;
+ 
+@@ -13,6 +14,7 @@
+ 
+ void apu_limit_enable(int on) { s_on = on != 0; }
+ int  apu_limit_enabled(void) { return s_on; }
++void apu_limit_bypass(int on) { s_bypass = on != 0; }
+ 
+ static float s_fold_gain = 1.0f;
+ 
+@@ -22,7 +24,7 @@
+     float g = s_fold_gain, pk;
+     int32_t a, b;
+ 
+-    if (!s_on)
++    if (!s_on || s_bypass)
+         return;
+     a = *l < 0 ? -*l : *l;
+     b = *r < 0 ? -*r : *r;
+@@ -58,7 +60,7 @@
+ {
+     float g = s_gain;
+ 
+-    if (!s_on)
++    if (!s_on || s_bypass)
+         return;
+     if (n > APU_LIMIT_FRAME)
+         n = APU_LIMIT_FRAME;
+--- a/toolkit/src/apu/apu_limit.h
++++ b/toolkit/src/apu/apu_limit.h
+@@ -34,6 +34,8 @@
+ /* On by default. Off is the clamp alone, as before this stage (tests). */
+ void apu_limit_enable(int on);
+ int  apu_limit_enabled(void);
++/* Burnout Mashup modification, 2026-11-05: on, the limiter passes everything while the host's PS2 SOUND is on; the clamp stays. Does not change apu_limit_enable's state. */
++void apu_limit_bypass(int on);
+ /* Gain back to 1 and the counters to zero. */
+ void apu_limit_reset(void);
+ /* n samples (n <= 32) of nch planar feeds, in place. Frame thread. */
 --- a/toolkit/src/d3d/nv2a_pb_d3d11.c
 +++ b/toolkit/src/d3d/nv2a_pb_d3d11.c
 @@ -1518,7 +1518,7 @@

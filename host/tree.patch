@@ -52,7 +52,7 @@
  
  # Off Windows the kernel links OpenSSL::Crypto but finds it in its own
  # subdirectory, where the imported target is invisible to the executable;
-@@ -92,7 +134,420 @@
+@@ -92,7 +134,448 @@
      endif()
  endif()
  
@@ -383,6 +383,34 @@
 +else()
 +    add_compile_definitions(BO3_HOOKREQ_ZMIX=0)
 +endif()
++# main21 patch 139: BO3_HOOKREQ_ZDOP=OFF compiles out NO SOUND DOPPLER (one mark in recomp_0005.c, soundtrack.c).
++option(BO3_HOOKREQ_ZDOP "main21: the host setting that turns off RenderWare Audio's Doppler pitch" ON)
++if(BO3_HOOKREQ_ZDOP)
++    add_compile_definitions(BO3_HOOKREQ_ZDOP=1)
++else()
++    add_compile_definitions(BO3_HOOKREQ_ZDOP=0)
++endif()
++# main21 patch 140: BO3_HOOKREQ_ZPS2=OFF compiles out the host setting PS2 SOUND (soundtrack.c; the toolkit's interpolation then never runs).
++option(BO3_HOOKREQ_ZPS2 "main21: the host setting that plays the sound effects as the PS2 sound chip does" ON)
++if(BO3_HOOKREQ_ZPS2)
++    add_compile_definitions(BO3_HOOKREQ_ZPS2=1)
++else()
++    add_compile_definitions(BO3_HOOKREQ_ZPS2=0)
++endif()
++# main21 patch 142: BO3_HOOKREQ_ZPSM=OFF compiles out the host setting PS2 MUSIC (soundtrack.c; the toolkit's filter then never runs).
++option(BO3_HOOKREQ_ZPSM "main21: the host setting that gives streams the PS2 version's music bandwidth" ON)
++if(BO3_HOOKREQ_ZPSM)
++    add_compile_definitions(BO3_HOOKREQ_ZPSM=1)
++else()
++    add_compile_definitions(BO3_HOOKREQ_ZPSM=0)
++endif()
++# main21 patch 143: BO3_HOOKREQ_ZPSX=OFF compiles out the host setting PS2 MIX (soundtrack.c; the toolkit's change then never runs).
++option(BO3_HOOKREQ_ZPSX "main21: the host setting that keeps centred event sounds from adding up in the stereo fold" ON)
++if(BO3_HOOKREQ_ZPSX)
++    add_compile_definitions(BO3_HOOKREQ_ZPSX=1)
++else()
++    add_compile_definitions(BO3_HOOKREQ_ZPSX=0)
++endif()
 +if(BO3_HOOKREQ_P22M)
 +    add_compile_definitions(BO3_HOOKREQ_P22M=1)
 +else()
@@ -473,7 +501,7 @@
  
  add_subdirectory(src/game)
  
-@@ -109,6 +564,20 @@
+@@ -109,6 +592,20 @@
      add_subdirectory(tests/fatal)
      # The mod folders' lookup (src/game/modfs.c, docs/mod-folders.md).
      add_subdirectory(tests/modfs)
@@ -1599,7 +1627,7 @@
  #endif
      /* BO-108: the user's music folder as the title's custom soundtracks.
       * Nothing unless audio.custom_music_dir (--music-dir) names one. */
-@@ -2000,8 +2030,335 @@
+@@ -2000,8 +2030,363 @@
       * Android: or the app's mods folder exists). After the soundtrack, whose
       * path hook it chains to. */
      {
@@ -1808,6 +1836,34 @@
 +                            bo3_soundtrack_mix_init();
 +                        }
 +#endif
++#if BO3_HOOKREQ_ZDOP
++                        {
++                            /* main21 patch 139: the host setting NO SOUND DOPPLER (soundtrack.c). */
++                            extern void bo3_doppler_init(void);
++                            bo3_doppler_init();
++                        }
++#endif
++#if BO3_HOOKREQ_ZPS2
++                        {
++                            /* main21 patch 140: the host setting PS2 SOUND (soundtrack.c). */
++                            extern void bo3_ps2_sound_init(void);
++                            bo3_ps2_sound_init();
++                        }
++#endif
++#if BO3_HOOKREQ_ZPSM
++                        {
++                            /* main21 patch 142: the host setting PS2 MUSIC (soundtrack.c). */
++                            extern void bo3_ps2_music_init(void);
++                            bo3_ps2_music_init();
++                        }
++#endif
++#if BO3_HOOKREQ_ZPSX
++                        {
++                            /* main21 patch 143: the host setting PS2 MIX (soundtrack.c). */
++                            extern void bo3_ps2_mix_init(void);
++                            bo3_ps2_mix_init();
++                        }
++#endif
 +                        {
 +                            /* main21 patch 130: the data mods' [bmashup.tune] sliders (bm_tune.c, applied with the declarations
 +                             * above) on MOD SETTINGS under each mod, a saved value applied (plugin-settings.toml); exit 93 when
@@ -1935,7 +1991,7 @@
      }
      /* BO-114: the host mixer's buses, wave table and preset file. Names
       * only unless audio.mixer (RECOMP_AUDIO_MIXER) is on. */
-@@ -2175,9 +2532,16 @@
+@@ -2175,9 +2560,16 @@
      return a > s_base_aspect + 0.01 ? a : 0.0;
  }
  
@@ -1953,7 +2009,7 @@
      if (s_uw_log && a != s_uw_stage)
          fprintf(stderr, "UW: stage set-up, aspect %.4f (flip %u)\n", a, s_uw_flips);
      s_uw_stage = a;
-@@ -2185,6 +2549,8 @@
+@@ -2185,6 +2577,8 @@
  
  static void uw_fe_setup(void)
  {
@@ -1962,7 +2018,7 @@
      if (s_uw_log && s_uw_stage != 0.0)
          fprintf(stderr, "UW: front-end set-up (flip %u)\n", s_uw_flips);
      s_uw_stage = 0.0;
-@@ -2195,8 +2561,15 @@
+@@ -2195,8 +2589,15 @@
  {
      s_uw_frame = s_uw_stage;
      s_stage_drew = 1;
@@ -1980,7 +2036,7 @@
  }
  
  /* BO-110 (HDR prototype, RECOMP_DEBUG=hdr): the start and the end of a
-@@ -2300,8 +2673,24 @@
+@@ -2300,8 +2701,24 @@
      s_uw_ring[n % UW_RING] = a;
      s_uw_flips = n;
      texup_loading_flip();
@@ -2005,7 +2061,7 @@
      /* The simulation steps this frame ran (the stepper's count, +0x2E20C:
       * see BO3_PACE_LOG), for the overlay's frame-time graph: a frame of two
       * steps moves the world twice as far (present_cadence.h, BO-115). */
-@@ -2698,9 +3087,15 @@
+@@ -2698,9 +3115,15 @@
      xbox_bug_report_opts o;
  
      memset(&o, 0, sizeof o);
@@ -2023,7 +2079,7 @@
      o.save_dir = s_save_dir;
      o.out_dir = s_report_out;
      o.env_prefixes = prefixes;
-@@ -2788,7 +3183,11 @@
+@@ -2788,7 +3211,11 @@
   * spells it. */
  #define BO3_TITLE_ID      "4541005b"
  /* In the player's home folder. */
@@ -2035,7 +2091,7 @@
  
  static char s_import_report[2600];
  
-@@ -2847,7 +3246,7 @@
+@@ -2847,7 +3274,7 @@
      }
      recomp_fs_mkdir_p(root);
      if (recomp_instance_lock(root, 0) == 0) {
@@ -2044,7 +2100,7 @@
          return 1;
      }
      if (!xbox_SaveImportPrepare(path, BO3_TITLE_ID, root, root, out, sizeof out, info, sizeof info,
-@@ -2870,7 +3269,7 @@
+@@ -2870,7 +3297,7 @@
          fprintf(stderr, "Import failed: %s\n", report[0] ? report : "nothing was imported.");
          return 1;
      }
@@ -2053,7 +2109,7 @@
      return 0;
  #else
      (void)path;
-@@ -2938,15 +3337,15 @@
+@@ -2938,15 +3365,15 @@
       * would hold the profile in memory too and write over the first one's
       * progress when it saves. */
      if (recomp_instance_lock(s_save_dir, 5000) == 0) {
@@ -2072,7 +2128,7 @@
  #endif
          }
          exit(3);
-@@ -2993,8 +3392,8 @@
+@@ -2993,8 +3420,8 @@
          snprintf(cwd, sizeof cwd, "?");
  #endif
      n += snprintf(settings + n, sizeof settings - (size_t)n,
@@ -2083,7 +2139,7 @@
      for (i = 0; i < argc && n < (int)sizeof settings - 256; i++)
          n += snprintf(settings + n, sizeof settings - (size_t)n, " %s", argv[i]);
      n += snprintf(settings + n, sizeof settings - (size_t)n,
-@@ -3438,8 +3837,19 @@
+@@ -3438,8 +3865,19 @@
       * TAKEDAWN_UPDATE_REPO points it at another repository, for the tests of
       * the "a newer version is out" answer. Not on Android: no row there. */
      {
@@ -2103,7 +2159,7 @@
      }
  #if defined(__linux__) && !defined(__ANDROID__)
      /* "Add Steam library art" (BO-143): for a player who updated and never sees
-@@ -3566,6 +3976,11 @@
+@@ -3566,6 +4004,11 @@
      bo3_autopilot_start(bo3_flips);
      /* BO-133: interface.menu_entry (menuentry.c). */
      bo3_menu_entry_start();
@@ -4052,7 +4108,7 @@
  #endif
  }
  
-@@ -649,6 +680,130 @@
+@@ -649,6 +680,201 @@
  }
  #endif
  
@@ -4096,6 +4152,77 @@
 +    s_mix_setting = bo3_ps_host_declare(&d, &v) == BM_SETTINGS_OK ? v : -1;
 +    fprintf(stderr, "[SOUNDTRACK] mix of the custom music and EA GAMES TRAX: %s\n", s_mix_setting < 0 ? "setting not available" : v ? "ON" : "OFF");
 +}
++
++/* -- main21 patch 143: PS2 MIX (host setting, default OFF; switch BO3_HOOKREQ_ZPSX) ------------------------------------
++ * Stereo output only: event sounds sent to the centre stop adding up in the fold (toolkit apu_ps2mix.h). */
++#if BO3_HOOKREQ_ZPSX
++int bo3_ps2_sound_on(void);
++
++void bo3_ps2_mix_init(void)
++{
++    extern void mcpx_apu_set_ps2_mix_query(int (*query)(void));
++    mcpx_apu_set_ps2_mix_query(bo3_ps2_sound_on);   /* main21 patch 144: part of PS2 SOUND */
++}
++#endif
++
++/* -- main21 patch 142: PS2 MUSIC (host setting, default OFF; switch BO3_HOOKREQ_ZPSM) ---------------------------------
++ * Streams (music, also speech and films) with the bandwidth the PS2 version's 32 kHz streams have: toolkit apu_softmusic.h. */
++#if BO3_HOOKREQ_ZPSM
++int bo3_ps2_sound_on(void);
++
++void bo3_ps2_music_init(void)
++{
++    extern void mcpx_apu_set_soft_music_query(int (*query)(void));
++    mcpx_apu_set_soft_music_query(bo3_ps2_sound_on);   /* main21 patch 144: part of PS2 SOUND */
++}
++#endif
++
++/* -- main21 patch 140: PS2 SOUND (host setting, default OFF; switch BO3_HOOKREQ_ZPS2) ---------------------------------
++ * The sound effects as the PS2 version plays them: the sound chip's kind of interpolation (toolkit apu_gauss.h, on every
++ * voice but streams: music is a stream and stays as it is) and no Doppler pitch (patch 139's path). */
++#if BO3_HOOKREQ_ZPS2
++static int s_ps2_setting = -1;
++
++int bo3_ps2_sound_on(void)
++{
++    int32_t v = 0;
++    return s_ps2_setting >= 0 && bo3_ps_host_get("ps2_sound", &v) == BM_SETTINGS_OK && v;
++}
++
++void bo3_ps2_sound_init(void)
++{
++    extern void mcpx_apu_set_gauss_query(int (*query)(void));
++    bm_setting_decl d;
++    int32_t v = 0;
++    memset(&d, 0, sizeof d);
++    d.struct_size = (uint32_t)sizeof d;
++    d.kind = BM_SETTING_BOOL;
++    d.key = "ps2_sound";
++    d.label = "PS2 SOUND";
++    d.def = 0;
++    s_ps2_setting = bo3_ps_host_declare(&d, &v) == BM_SETTINGS_OK ? v : -1;
++    mcpx_apu_set_gauss_query(bo3_ps2_sound_on);
++    fprintf(stderr, "[SOUNDTRACK] ps2 sound: %s\n", s_ps2_setting < 0 ? "setting not available" : (s_ps2_setting ? "on" : "off"));
++}
++#else
++int bo3_ps2_sound_on(void) { return 0; }
++#endif
++
++/* -- main21 patch 139: NO SOUND DOPPLER (host setting, default OFF; switch BO3_HOOKREQ_ZDOP) ------------------------
++ * RenderWare Audio's 3D update (sub_001F7BC0) sets a voice's pitch ratio to c / (c + v), c = 340 m/s x the listener's
++ * factor, v = the velocity between listener and emitter along the line between them. Measured: a slam or boost plays
++ * at 0.84 .. 0.93 of its speed at 146 .. 74 mph here and at 1.00 in the PS2 version. On, the ratio stays 1.0. */
++#if BO3_HOOKREQ_ZDOP
++void bo3_doppler_init(void)
++{
++    /* main21 patch 144: no setting of its own, part of PS2 SOUND */
++}
++
++int bo3_doppler_gen_off(void)
++{
++    return bo3_ps2_sound_on();
++}
++#endif
 +
 +static int mix_census(void)
 +{
@@ -4183,7 +4310,7 @@
  void bo3_soundtrack_start_source(bo3_guest_fn title_fn)
  {
      held_folder_in(0);
-@@ -677,8 +832,27 @@
+@@ -677,8 +903,27 @@
              remember_source(source);
              break;
          default:
@@ -4211,7 +4338,7 @@
      }
  #endif
      title_fn();
-@@ -697,6 +871,7 @@
+@@ -697,6 +942,7 @@
      song = MEM32(g_esp + 4);
      title_fn();
      xbox_SoundtrackNoteOpen(g_eax, song);
@@ -4219,7 +4346,7 @@
  }
  
  void bo3_soundtrack_create_decoder(bo3_guest_fn title_fn)
-@@ -744,5 +919,6 @@
+@@ -744,5 +990,6 @@
          MEM32(obj + OBJ_VTABLE + (uint32_t)k * 4) = BO3_SOUNDTRACK_VA_BASE + (uint32_t)k * 4;
      if (out)
          MEM32(out) = obj;

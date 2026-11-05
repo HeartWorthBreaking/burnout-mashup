@@ -1,5 +1,25 @@
 # Changelog
 
+## 0.2.0-alpha.4 - PS2 SOUND setting (experimental alpha)
+- **New setting PS2 SOUND** (MOD SETTINGS, BURNOUT MASHUP; **default off**). It brings the sound closer to the PS2 version; it does not make it equal to it.
+  The mix part works in stereo only. While it is on:
+  - effects are interpolated the way the PS2 sound chip's interpolation works (our own formula; no table of the chip's or of an emulator's is included);
+  - sounds get no Doppler pitch;
+  - the reverb uses the PS2 version's room levels;
+  - music has the bandwidth of the PS2 version's streams;
+  - boost and takedown sounds are no longer summed up by the stereo fold and are kept out of the engine distortion stage.
+  **The safety limiter is off while PS2 SOUND is on, so the loudest moments can clip.**
+- **Host:** main21 patches 139..146. Three new files for xboxrecomp in `host/toolkit/added/src/apu/` (`apu_gauss.h`, `apu_softmusic.h`, `apu_ps2mix.h`;
+  our own files, MIT, with their licence header); `host/marks`: 524 marks (3 new, none changed or removed). CMake switches `BO3_HOOKREQ_ZDOP`,
+  `BO3_HOOKREQ_ZPS2`, `BO3_HOOKREQ_ZPSM`, `BO3_HOOKREQ_ZPSX` (ON in the public build; OFF compiles the part out). `build/EXPECTED.json`: new reference builds.
+  Build Mashup rebuilds the host once after the update. Launcher 1.2.0 and Workbench 0.34 are unchanged.
+- **Licence:** the changes to the xemu-derived LGPL files `apu.h`, `apu_state.h` and `apu_vp.c` are in `host/toolkit/lgpl/` (LGPL-2.1-or-later), each with a dated
+  "Burnout Mashup modification" note in the code and named in `host/toolkit/lgpl/NOTICE`; `host/toolkit/toolkit.patch` (MIT) holds no hunk of a file with an xemu or LGPL header.
+  The patch file there keeps the name `apu_core.patch`. `build/apply_layers.py` reads the list of LGPL files from `host/LAYERS.json`.
+- **Facts:** a tester sent a recording of a race on the earlier host (no written verdict); the project owner listened and judged it good enough. The single-switch change,
+  the boost and takedown change and this exact host have not been started by anyone; tested offline only. No retail data and no game files are in the release.
+  Linux and macOS: not built.
+
 ## 0.2.0-alpha.3 - one-click Update and Build, a new look, custom music on the banner and in the mix, bloom fix (experimental alpha)
 - **Update now:** Help and the Updates window have one button: check, download, prepare, install, restart (and build when one is
   needed). The click is the consent; Cancel stops, Switch back undoes. The single steps stay under Advanced options. There is still no
