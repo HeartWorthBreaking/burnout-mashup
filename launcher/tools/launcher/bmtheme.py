@@ -57,9 +57,15 @@ def state_colour(state):
     return _STATE.get(state, MUTED)
 
 
+_FONT_KEEP = []     # (handle, buffer) of the font in memory: kept for the life of the process, nothing on disk is held open
+
+
 def _load_fonts():
-    """Windows: the shipped font for this process only (nothing is installed). Elsewhere: the system's, by name."""
-    if os.name != "nt":
+    """Windows: the shipped font for this process only (nothing is installed). The file is read and CLOSED, and the bytes are handed to
+    AddFontMemResourceEx (a private font of this process): no handle to anything under app\\launcher stays open, so Update now and
+    Switch back can rename that folder while the launcher runs (AddFontResourceExW kept the file open: WinError 5). If it fails, the
+    system's font is used, without an error. Elsewhere: the system's, by name."""
+    if os.name != "nt" or _FONT_KEEP:
         return
     here = os.path.dirname(os.path.abspath(__file__))
     for d in (os.path.join(here, "..", "..", "fonts"), os.path.join(here, "..", "launcher", "fonts"), os.path.join(here, "..", "app", "launcher", "fonts")):
@@ -67,7 +73,17 @@ def _load_fonts():
         if os.path.isfile(p):
             try:
                 import ctypes
-                ctypes.windll.gdi32.AddFontResourceExW(p, 0x10, 0)     # FR_PRIVATE
+                from ctypes import wintypes
+                with open(p, "rb") as fh:
+                    data = fh.read()
+                buf = ctypes.create_string_buffer(data, len(data))
+                gdi = ctypes.WinDLL("gdi32", use_last_error=True)       # own copy: ctypes.windll's argtypes stay untouched
+                gdi.AddFontMemResourceEx.argtypes = [ctypes.c_void_p, wintypes.DWORD, ctypes.c_void_p, ctypes.POINTER(wintypes.DWORD)]
+                gdi.AddFontMemResourceEx.restype = wintypes.HANDLE
+                n = wintypes.DWORD(0)
+                h = gdi.AddFontMemResourceEx(ctypes.cast(buf, ctypes.c_void_p), len(data), None, ctypes.byref(n))
+                if h:
+                    _FONT_KEEP.append((h, buf))
             except Exception:
                 pass
             return
@@ -78,6 +94,12 @@ def _family(root, *names):
     for n in names:
         if n in have:
             return n
+        # a font loaded from memory (_load_fonts) is not in Tk's list of families, but Tk resolves it by name
+        try:
+            if tkfont.Font(root=root, family=n, size=10).actual("family").lower() == n.lower():
+                return n
+        except tk.TclError:
+            pass
     return None
 
 

@@ -1,5 +1,19 @@
 # Changelog
 
+## 0.2.0-alpha.5 - Update now and Switch back no longer fail because of the launcher's own font (experimental alpha)
+- **Fix:** in 0.2.0-alpha.3 and 0.2.0-alpha.4 the launcher kept its font file (`app\launcher\fonts\RobotoCondensed-Medium.ttf`) open for as long as it ran, so Update now
+  and Switch back could not rename the `app\launcher` folder and stopped with "WinError 5, access denied". The theme (`bmtheme.py`; the Workbench's `wb_theme.py` is the same file)
+  now reads the font file, closes it and hands the bytes to Windows (`AddFontMemResourceEx`, a font of that process only), so no file under `app\launcher` stays open.
+  If that fails the system font is used, without an error. Nothing else changed in the launcher (1.2.0) or the Workbench (0.34).
+- **From 0.2.0-alpha.3 or 0.2.0-alpha.4 you need `fix-update.cmd` once.** The old launcher is the one that runs the update, so it still fails. `fix-update.cmd` is a new file of
+  this release (also in `launcher/`): close the launcher and the Workbench, put it in the folder that holds `Burnout Mashup.exe` and double-click it; it runs the launcher's own
+  check, download, prepare and install, and stops with a plain message at any failure. From 0.2.0-alpha.5 on, Update now and Switch back work from the launcher.
+- **Host:** unchanged from 0.2.0-alpha.4 (the same host files and reference builds). An update from 0.2.0-alpha.4 needs no rebuild; from 0.2.0-alpha.3 Build Mashup rebuilds
+  the host once, as for alpha.4.
+- **Tested:** a real launcher window (no game) was kept open while the shipped `bmupdate.py` did a real install and a real switch back, against a local test channel with a test key (all signature checks on; only the trusted key was the test key). With the 0.2.0-alpha.4 launcher both steps failed with WinError 5 and the install was undone; with the 0.2.0-alpha.5 launcher both worked, also the update from the published 0.2.0-alpha.4 package to this package. `fix-update.cmd` was run on real 0.2.0-alpha.3 packages against the live 0.2.0-alpha.4 channel (fresh, second run, already prepared, after a failed install, a path with spaces, brackets and an ampersand, wrong folder) and once from 0.2.0-alpha.4 to this package. Not tested: the update through the real channel to this release (it is not published yet), the Workbench window, the buttons pressed by a person, Linux and macOS.
+- **Sound:** as far as we know no one has confirmed the PS2 SOUND host of 0.2.0-alpha.4 in the game yet; nothing about the sound changed here and nothing new is claimed.
+  No retail data and no game files are in the release. Linux and macOS: not built.
+
 ## 0.2.0-alpha.4 - PS2 SOUND setting (experimental alpha)
 - **New setting PS2 SOUND** (MOD SETTINGS, BURNOUT MASHUP; **default off**). It brings the sound closer to the PS2 version; it does not make it equal to it.
   The mix part works in stereo only. While it is on:
