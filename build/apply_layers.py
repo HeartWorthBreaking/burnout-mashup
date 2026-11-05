@@ -11,6 +11,7 @@ guess and no fuzz. Hunk position numbers in the patch are informational only.
     host/tree.patch         -> modifies Takedawn files (paths 'tree/<file>')
     host/toolkit/toolkit.patch + host/toolkit/lgpl/apu_core.patch (the hunks of the LGPL files) -> modify xboxrecomp files (paths 'toolkit/<file>')
     host/toolkit/added/**   -> added to the xboxrecomp checkout at the same relative paths (a file that exists already is a collision)
+    host/LAYERS.json tree.deleted -> Takedawn files removed; each must have its pinned sha256
 Run it ONCE per fresh checkout; a second run is refused (pre-image differs). Original code (MIT); the logic is a port of the
 unique-anchor rule of the project's layer tool, so this tree is self-contained.
 """
@@ -196,6 +197,11 @@ def run(argv):
             raise C.Refused("COLLISION: upstream already has host/toolkit/added/%s" % rel)
         if rel in st_x:
             raise C.Refused("host/toolkit/added/%s is added and patched at once" % rel)
+    deleted = lay["tree"].get("deleted", {})
+    for rel, want in deleted.items():
+        p = os.path.join(td, *rel.split("/"))
+        if not os.path.isfile(p) or C.sha_f(p) != want:
+            raise C.Refused("tree.deleted: %s is not the pinned file" % rel)
     # ---- results must be the pinned ones (in memory)
     res = {}
     for root, st in (("tree", st_t), ("toolkit", st_x)):
@@ -206,6 +212,8 @@ def run(argv):
             res[root + "/" + rel] = h
     same_as_private = sum(1 for k, v in res.items() if v == (lay["tree"]["modified"] if k.startswith("tree/") else lay["toolkit"]["modified"])[k.split("/", 1)[1]]["result_sha256"])
     # ---- write (everything checked)
+    for rel in deleted:
+        os.remove(os.path.join(td, *rel.split("/")))
     for root, st, base in (("tree", st_t, td), ("toolkit", st_x, xr)):
         for rel, data in st.items():
             with open(os.path.join(base, *rel.split("/")), "wb") as f:

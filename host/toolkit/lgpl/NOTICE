@@ -2,7 +2,7 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
 (a project record, not legal advice; section numbers refer to LICENSES/LGPL-2.1-or-later.txt)
 
 1. File changed
-   src/apu/apu_core.c of xboxrecomp (https://github.com/xenophobentx/xboxrecomp), commit e3756d1b2fefdae6888038384c748cbdd37a41ba, blob 45c3334f4e33fdc930934a84b6bc7a9f547ae9cd, which xboxrecomp
+   src/apu/apu_core.c of xboxrecomp (https://github.com/xenophobentx/xboxrecomp), commit 03b4f22aa6e737a95405e03979b679127c2c4dcf, blob 88a4cfa9cfbdc962d72d7d9fcbfbb7eb1901516c, which xboxrecomp
    extracted from xemu (https://github.com/xemu-project/xemu).
    Changed by: the Burnout Mashup contributors, 2026-10-28 (guest-memory window enlarged to 256 MB, "MEM256").
    The patch (apu_core.patch) adds a comment in the file that states the modification and its date; the comment sits at the changed
@@ -46,9 +46,9 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
    The xboxrecomp texture upscaler shaders (LGPL-3.0-or-later) are not in this tree; the build fetches them with xboxrecomp.
 
 3. Our hunks
-   host/toolkit/lgpl/apu_core.patch (sha256 e9d91484f722f41c3b25e07a14714fcbadfbe056b6eeb8bfcd821dae5e5d3b68; 4 hunks in src/apu/apu_core.c, 15 hunks in all four files, see 6).
-   Pre-image: the file as checked out by the pinned archive (git archive, core.autocrlf=true), sha256 ded1da83b903d0938b66bc957f592d1a78d8b26aa6efcbe0d61832c7f60a5a42.
-   Post-image: sha256 55c0614aa55c9073aa94245a89b3c2fad570353a99424db31d0277f836f1185f (host/LAYERS.json; build/apply_layers.py refuses anything else).
+   host/toolkit/lgpl/apu_core.patch (sha256 eea882940e46c558860059f43a15e0d2cd22fb5a4443aac7ed14c458fe2a1ba5; 4 hunks in src/apu/apu_core.c, 15 hunks in all four files, see 6).
+   Pre-image: the file as checked out by the pinned archive (git archive, core.autocrlf=true), sha256 37d5a7748d1c34feeb2e4e3064845efc14d1185eb423850eb1a0179984f4e57d.
+   Post-image: sha256 bf036677cab84304242d2e6cb7a59a931c76caf2b97d5e148b901b78a5d115be (host/LAYERS.json; build/apply_layers.py refuses anything else).
 
 4. Corresponding source of the modified file
    Not stored here as a whole file. The complete modified source is the pinned upstream file plus apu_core.patch: fetch xboxrecomp at
@@ -57,8 +57,8 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
 
 5. The 12 LGPL-marked files of xboxrecomp at the pin (git blob id; sha256 of the blob bytes; header wording; copyright as stated)
    src/apu/apu_core.c
-      blob 45c3334f4e33fdc930934a84b6bc7a9f547ae9cd
-      sha256 e81ddc6c76e63aa9bc64452e083ae61946f4358693c436fbd9aae552b658f42b
+      blob 88a4cfa9cfbdc962d72d7d9fcbfbb7eb1901516c
+      sha256 8f4ae895fc2fa25442fd368a99b4353fd70810e8fbf4f801b6e4ca6ab3c356e4
       header says: "GNU Lesser General Public License ... either version 2 of the License, or (at your option) any later version"
       copyright: 2012 espes; 2018-2019 Jannik Vogel; 2019-2025 Matt Borgerson
       here: MODIFIED by Burnout Mashup (4 hunks, MEM256)
@@ -99,8 +99,8 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
       copyright: 2020-2025 Matt Borgerson
       here: unmodified
    src/apu/apu.h
-      blob 03ef1500ba8d6c48d16458b2e8838aec0eb64bfe
-      sha256 f784cc3f6028a3140b606bfb7f96c6e6bc38d067e652eb71f6189b0f5ca9d91d
+      blob 060246d902440a47299dee776e1f9cf737ff19d8
+      sha256 1314df3bf8ac8e1ca8ca36b4a56bd69281d3914d9b06a2ded735966657bb3e21
       header says: "Extracted from xemu (LGPL v2+), adapted for standalone use."
       copyright: none stated in the file (NOTICE lists it with the xemu files)
       here: unmodified
@@ -136,8 +136,8 @@ Burnout Mashup modification notice (GNU LGPL 2.1, section 2(b))
    as pinned (see 5 for blob ids, sha256 and header wording); our files apu_gauss.h, apu_softmusic.h, apu_ps2mix.h (MIT, host/toolkit/added/)
    are new files of ours and not changes to an LGPL file.
    - src/apu/apu.h: 1 hunk(s); three declarations: the host's queries for the PS2 SOUND parts (mcpx_apu_set_gauss_query, mcpx_apu_set_soft_music_query, mcpx_apu_set_ps2_mix_query)
-     pre-image sha256 0aeedf7fb52a1058ab5e344460249262abe5832d0a9d54ad1fe70040e60d8af4
-     post-image sha256 94cacea25c7918ff5558ce5e536f84be2a82a1581be1713367ef99e256d2c266
+     pre-image sha256 10ff81ce0f55388b640a0aa435285d38a6b8fb8e792209502020f9e48e5fd133
+     post-image sha256 c85e61b3f82cb5f95902169530742e448a658471b61b0875c4c92db95f75fb65
    - src/apu/apu_state.h: 2 hunk(s); the include of apu_softmusic.h and two fields of the voice filter state (rs_old: the two source samples before rs_last, for the interpolation; softmusic: the music low-pass state)
      pre-image sha256 165acb6837411f8bbe2f8534f65eebdb0ae2264d20766f94c9a9cf2303de89a9
      post-image sha256 16090273ada02d1b602ddf01430c15127c5732f1e7b4f1f17ed5b0749bc7c794

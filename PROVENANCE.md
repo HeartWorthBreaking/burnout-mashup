@@ -6,7 +6,7 @@
   about its existence. `AUTHORS` records the facts.
 - **Assembled deterministically** by a script from pinned inputs (`PUBLIC_MANIFEST.json` lists every file with its sha256,
   size, origin, licence and provenance row; running the assembler twice gives the identical manifest).
-- **Upstream pins.** The host is stored against Takedawn `4f074e211822` and xboxrecomp `e3756d1b2fef` (`host/PINS.json`); upstream files
+- **Upstream pins.** The host is stored against Takedawn `0dd10432d936` and xboxrecomp `03b4f22aa6e7` (`host/PINS.json`); upstream files
   keep their MIT licence and headers; the LGPL-2.1-or-later hunks are kept apart (`host/toolkit/lgpl/`).
 - **Provenance inventory.** Every file of the private tree was inventoried (1060 rows: origin, licence, evidence, decision).
   Result: INCLUDE 983, INCLUDE as patch hunks 27, INCLUDE_AFTER_FIX 3, EXCLUDE_PENDING_OWNER 39, EXCLUDE 8 (1060 rows). The inventory decisions applied here are listed in the assembly report; this tree carries a

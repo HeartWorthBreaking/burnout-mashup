@@ -7,25 +7,25 @@
   "release_exe": "BurnoutMashup.exe"
  },
  "marks": {
-  "anchors_sha256": "ef1b2ba1f95a313eec0462aa21796e7719be90aacba7210d8a4c6476470870d4",
+  "anchors_sha256": "c8ce6eec7e0142d0be05b9b0ab4ff7c98f52860e4f24391030a0b978ba890760",
   "count": 524,
   "form": "macro",
   "format": "bm-anchors 1",
   "header_sha256": "90af55ef85f8807f49c727e34f67016b46a45ab6753ac3584dfd476d50b57985"
  },
- "pristine_gen_tree_hash": "5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5",
+ "pristine_gen_tree_hash": "e45b7cc243ace723a303e3eecb26908a533dd30dcccb2c263ebf3ae03f219fd6",
  "reference_build_private": {
-  "exe_sha256_identity_on": "4aaa39f9c5e9d65932939cd0f7333b92832be3ef7cefc60fb3006a10b00fe550",
+  "exe_sha256_identity_on": "85dd0755719bb709f4ff2b9d37b362897d2a6fb386113b5e301484e401f72172",
   "note": "private reference of the layers (pfid1 + marks in the original form); the macro form differs in the source digest and the linker build id only"
  },
  "takedawn": {
   "archive": "git archive, core.autocrlf=false",
-  "archive_digest": "97014dbb3f7a7c80ef7898c66f702b3eca314af7f837bdc39452d43601d10448",
+  "archive_digest": "e369c4f09682aef01d8f968668b40c45e1e108ffbf3f20d59ec67ae684e4a9a0",
   "autocrlf": "false",
-  "commit": "4f074e211822eaf43d4a3902c744d5ed0e9c9adf",
-  "files": 419,
+  "commit": "0dd10432d9365f0665483c3fc503e3f9626d29fc",
+  "files": 655,
   "repo": "https://github.com/xenophobentx/takedawn",
-  "tree_id": "26cdbea6f8c4a0f6092900c5715ac18393aeb41f"
+  "tree_id": "d359a06eda0d3ac8352c67bd2842a713eec10344"
  },
  "toolchain": {
   "cmake": "4.4.4",
@@ -38,11 +38,11 @@
  "xbe_signature": "9f497acd82ad (hash only; the executable is the user's own)",
  "xboxrecomp": {
   "archive": "git archive, core.autocrlf=true",
-  "archive_digest": "dfe1d391fd09a6992fa16f006a7db3c00482ebf9fa5f98dc6694d14cfada9f79",
+  "archive_digest": "4438622a6d3fe02609532ede39da40ec96bb88b0c7481576be1669c295cec615",
   "autocrlf": "true",
-  "commit": "e3756d1b2fefdae6888038384c748cbdd37a41ba",
-  "files": 913,
+  "commit": "03b4f22aa6e737a95405e03979b679127c2c4dcf",
+  "files": 1049,
   "repo": "https://github.com/xenophobentx/xboxrecomp",
-  "tree_id": "480d8993bb58fa61ae48ec275d2059536ffe494f"
+  "tree_id": "70817812d13e93995a854d8a3df9b01e46ef75e1"
  }
 }

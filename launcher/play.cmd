@@ -65,6 +65,7 @@ set "HOME="
 set "APPDATA=%ROOT%profile\Roaming"
 set "LOCALAPPDATA=%ROOT%profile\Local"
 set "BMASHUP_DATA=%GD%"
+set "TAKEDAWN_UPSCALE_ENGINE=%ROOT%upscaler"
 set "BMASHUP_MODS=%ROOT%mods\demo;%MODG%;%MODU%"
 if /i "%~1"=="--print-env" goto :printenv
 echo play.cmd: host = %KIND%

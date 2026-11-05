@@ -27,6 +27,10 @@
 #include "bm_settings.h"
 #ifdef XBOXRECOMP_HAVE_OVERLAY
 #include "xbox_settings.h"
+#include "install.h"
+#include "upscale.h"
+#include "platform/recomp_exe_dir.h"
+#include "platform/recomp_save_dir.h"
 #endif
 
 #ifdef XBOXRECOMP_HAVE_OVERLAY
@@ -34,7 +38,7 @@
 enum { PG_MODS = 0, PG_SET = 1, PG_N = 2 };
 enum { V_LIST = 0, V_DETAIL, V_APPROVE };
 enum { R_NONE = 0, R_REVIEW, R_MOD, R_ACT_APPROVE, R_ACT_APPROVE_RESTART, R_ACT_ON, R_ACT_OFF, R_ACT_SETTINGS, R_ACT_BACK,
-       R_ACT_CANCEL, R_SET, R_MSG };
+       R_ACT_CANCEL, R_SET, R_MSG, R_WHERE, R_EXTRA, R_ALL_ON, R_AI_HEAD, R_AI };
 
 #define MAXR XBOX_PORT_ROWS
 typedef struct {
@@ -86,6 +90,37 @@ static int add(int pg, int kind, int what, int mod, unsigned flags, int tone)
     return s_n[pg]++;
 }
 
+/* td030: the lines of upstream's Mods tab (modstab.c, BO-316, BO-327), which this page replaces: the mods folder (the default
+ * one modfs scans, whether it exists yet or not) and the folders TAKEDAWN_MODS adds. */
+static char s_where[420], s_extra[420];
+
+static void make_where(void)
+{
+    char dir[1024], root[1024];
+    const char *env = BM_GETENV("MODS");
+    const char *def = bo3_modfs_default_dir_name();
+    int portable = recomp_portable_root(root, sizeof root);
+
+    s_extra[0] = 0;
+    if (env && *env) {
+        const size_t n = strcspn(env, ";");
+        snprintf(s_extra, sizeof s_extra, "Also read: %.*s%s (TAKEDAWN_MODS).", (int)(n < 300 ? n : 300), env,
+                 strchr(env, ';') ? " and the other folders named" : "");
+    }
+    if (def && *def)
+        snprintf(dir, sizeof dir, "%s", def);
+    else if (portable)
+        snprintf(dir, sizeof dir, "%s/mods", root);
+    else if (recomp_user_dir(RECOMP_DIR_DATA, BO3_USER_DIR, root, sizeof root))
+        snprintf(dir, sizeof dir, "%s/mods", root);
+    else
+        snprintf(dir, sizeof dir, "mods");
+    if (env && !*env)
+        snprintf(s_where, sizeof s_where, "Mods folder: %.380s (off: TAKEDAWN_MODS is set empty)", dir);
+    else
+        snprintf(s_where, sizeof s_where, "Mods folder: %.380s%s", dir, portable ? " (portable mode)" : "");
+}
+
 static void build_mods(void)
 {
     const int nm = mm_count();
@@ -95,12 +130,35 @@ static void build_mods(void)
         if (s_msg[0])
             add(PG_MODS, XBOX_PR_INFO, R_MSG, -1, 0, XBOX_PT_ATTN);      /* the last action's result, above the summary */
         add(PG_MODS, XBOX_PR_INFO, R_NONE, -1, 0, XBOX_PT_PLAIN);
+        if (!s_where[0])
+            make_where();
+        add(PG_MODS, XBOX_PR_INFO, R_WHERE, -1, XBOX_PRF_NOCAPS, XBOX_PT_DIM);
+        if (s_extra[0])
+            add(PG_MODS, XBOX_PR_INFO, R_EXTRA, -1, XBOX_PRF_NOCAPS, XBOX_PT_DIM);
         if (wait && mm_approval_writable())
             add(PG_MODS, XBOX_PR_ITEM, R_REVIEW, -1, XBOX_PRF_ACTION, XBOX_PT_ATTN);
         if (!nm)
             add(PG_MODS, XBOX_PR_TEXT, R_NONE, -1, 0, 0);
         for (int i = 0; i < nm; i++)
             add(PG_MODS, XBOX_PR_ITEM, R_MOD, i, XBOX_PRF_NOCAPS, mm_tone(mm_status_of(i)));
+        {
+            int off = 0, ai = 0;
+            for (int i = 0; i < nm; i++)
+                off += mm_toggle_of(i) == MM_TOGGLE_ON;
+            if (off)
+                add(PG_MODS, XBOX_PR_ITEM, R_ALL_ON, -1, XBOX_PRF_ACTION, 0);
+            for (int k = 0, t = bo3_upscale_row_count(); k < t; k++) {
+                const char *x = bo3_upscale_row(k, 0);      /* a row with no text is not there now */
+                int at;
+                if (!x || !*x)
+                    continue;
+                if (!ai++)
+                    add(PG_MODS, XBOX_PR_HEADER, R_AI_HEAD, -1, 0, 0);
+                at = add(PG_MODS, XBOX_PR_ITEM, R_AI, -1, XBOX_PRF_ACTION, 0);
+                if (at >= 0)
+                    s_r[PG_MODS][at].sp = k;
+            }
+        }
         return;
     }
     if (s_view == V_DETAIL) {
@@ -259,6 +317,24 @@ static void ov_row(int page, int i, xbox_port_row *o)
                      "Select to review %s, one at a time.", w, w == 1 ? "" : "s", w == 1 ? "s" : "", w == 1 ? "it" : "them");
         } else if (r->what == R_MSG) {
             snprintf(o->label, sizeof o->label, "%s", s_msg);
+        } else if (r->what == R_WHERE) {
+            snprintf(o->label, sizeof o->label, "%s", s_where);
+            snprintf(o->hint, sizeof o->hint, "Each mod goes in a folder of its own here, with its mod.toml.");
+        } else if (r->what == R_EXTRA) {
+            snprintf(o->label, sizeof o->label, "%s", s_extra);
+        } else if (r->what == R_ALL_ON) {
+            snprintf(o->label, sizeof o->label, "Turn every mod on");
+            snprintf(o->hint, sizeof o->hint, "Saved at once and used from the next start. A mod with a plugin stays as it is: "
+                     "it needs its approval.");
+        } else if (r->what == R_AI_HEAD) {
+            snprintf(o->label, sizeof o->label, "Sharper menu pictures");
+        } else if (r->what == R_AI) {
+            const char *x = bo3_upscale_row(r->sp, 0);
+            snprintf(o->label, sizeof o->label, "%s", x ? x : "");
+            snprintf(o->hint, sizeof o->hint, "%s", r->sp % 2 == 0
+                     ? "Makes the game's menu pictures and loading screens sharper with an AI upscaler, here on this computer, "
+                       "as a mod of their own that is switched on. It is in the mod list from the next start."
+                     : "Deletes the sharper menu pictures this computer made; the game's own are back.");
         } else if (r->kind == XBOX_PR_INFO) {
             mm_summary(o->label, sizeof o->label);
         } else {
@@ -416,13 +492,13 @@ static unsigned toggle(int mod)
     switch (mm_toggle_of(mod)) {
     case MM_TOGGLE_ON:
         if (mm_turn_on(mod, why, sizeof why))
-            snprintf(s_msg, sizeof s_msg, "%s: on after a restart.", name);
+            snprintf(s_msg, sizeof s_msg, mm_live_now(mod) ? "%s: on now." : "%s: on after a restart.", name);
         else
             snprintf(s_msg, sizeof s_msg, "%s", why);
         return XBOX_PI_DONE;
     case MM_TOGGLE_OFF:
         if (mm_turn_off(mod, why, sizeof why))
-            snprintf(s_msg, sizeof s_msg, "%s: off after a restart.", name);
+            snprintf(s_msg, sizeof s_msg, mm_live_now(mod) ? "%s: off now." : "%s: off after a restart.", name);
         else
             snprintf(s_msg, sizeof s_msg, "%s", why);
         return XBOX_PI_DONE;
@@ -532,6 +608,25 @@ static unsigned ov_input(int page, int i, int act)
         return XBOX_PI_DONE;
     case R_ACT_BACK:
         return back_to_list(r->mod);
+    case R_ALL_ON: {
+        char why[300];
+        int done = 0, failed = 0;
+        for (int k = 0; k < mm_count(); k++)
+            if (mm_toggle_of(k) == MM_TOGGLE_ON) {
+                if (mm_turn_on(k, why, sizeof why))
+                    done++;
+                else
+                    failed++;
+            }
+        if (failed)
+            snprintf(s_msg, sizeof s_msg, "%d turned on; %d not saved: the log says why.", done, failed);
+        else
+            snprintf(s_msg, sizeof s_msg, "%d mod%s on after a restart.", done, done == 1 ? "" : "s");
+        return XBOX_PI_DONE;
+    }
+    case R_AI:
+        bo3_upscale_row(r->sp, 1);
+        return XBOX_PI_DONE;
     case R_ACT_CANCEL:
         snprintf(s_msg, sizeof s_msg, "Nothing was approved.");
         fprintf(stderr, "[MODS] %s: approval cancelled\n", bo3_modfs_mod(r->mod)->manifest.id);
@@ -630,7 +725,7 @@ int bo3_mmov_start(void)
 {
     const char *e = getenv("BMASHUP_MODS_UI"), *h = BM_GETENV("MODS_MENU");
     s_on = 0;
-    if ((h && h[0] == '0' && !h[1]) || bo3_modfs_folder_count() <= 0)
+    if (h && h[0] == '0' && !h[1])
         return 0;
     if (e && !strcmp(e, "native")) {
         fprintf(stderr, "[MODS] BMASHUP_MODS_UI=native: the native MODS page\n");

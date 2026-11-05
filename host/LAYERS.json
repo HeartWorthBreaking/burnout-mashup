@@ -5,8 +5,7 @@
   "added": {
    "src/apu/apu_gauss.h": "8a24e93e520ce555631ff39ef9e4b158ec0f6bf309176caf429d107da68d590d",
    "src/apu/apu_ps2mix.h": "93ef67b43616e3f17edfe477089171674ff826ab4b91168bbc14bf3c6006d7e0",
-   "src/apu/apu_softmusic.h": "e5f68a765aae8b5f4eaad3205211834d30622215896a99024f4d21f3d9b40c1f",
-   "src/d3d/nv2a_rt_shrink.h": "033b580bf743f8c339c1c71337e6976ec0bac57fe2709eb441647cdd4f64ad5c"
+   "src/apu/apu_softmusic.h": "e5f68a765aae8b5f4eaad3205211834d30622215896a99024f4d21f3d9b40c1f"
   },
   "lgpl_file": "src/apu/apu_core.c",
   "lgpl_files": [
@@ -17,19 +16,19 @@
   ],
   "modified": {
    "docs/runtime/overlay.md": {
-    "base_sha256": "547e4da52ea5994c6758159247612acfa3cc37ec003e058b478bec0c804fdc52",
+    "base_sha256": "f1795b4c3cccddb052ba064b914980cc95cf769edaa1f62b7ecd11987003c907",
     "hunks": 1,
-    "result_sha256": "8bcc73450dda890365d076dae358c3aa61ef27fa6ede9a0c28e2fc304d091215"
+    "result_sha256": "03e5ca7cdb14a4776e17ad70adf69ae949f06a2faba6d1090b8f02fb974573ae"
    },
    "src/apu/apu.h": {
-    "base_sha256": "0aeedf7fb52a1058ab5e344460249262abe5832d0a9d54ad1fe70040e60d8af4",
+    "base_sha256": "10ff81ce0f55388b640a0aa435285d38a6b8fb8e792209502020f9e48e5fd133",
     "hunks": 1,
-    "result_sha256": "94cacea25c7918ff5558ce5e536f84be2a82a1581be1713367ef99e256d2c266"
+    "result_sha256": "c85e61b3f82cb5f95902169530742e448a658471b61b0875c4c92db95f75fb65"
    },
    "src/apu/apu_core.c": {
-    "base_sha256": "ded1da83b903d0938b66bc957f592d1a78d8b26aa6efcbe0d61832c7f60a5a42",
+    "base_sha256": "37d5a7748d1c34feeb2e4e3064845efc14d1185eb423850eb1a0179984f4e57d",
     "hunks": 4,
-    "result_sha256": "55c0614aa55c9073aa94245a89b3c2fad570353a99424db31d0277f836f1185f"
+    "result_sha256": "bf036677cab84304242d2e6cb7a59a931c76caf2b97d5e148b901b78a5d115be"
    },
    "src/apu/apu_limit.c": {
     "base_sha256": "a9faa259d423b43ce3bd988838efbff9ca6da5d544d5b34cfdde2dffac56db64",
@@ -57,54 +56,49 @@
     "result_sha256": "2dbbe645d66497420633e97b89d26eaa1287f0799cafec4c30c5851f7c38bb1f"
    },
    "src/d3d/nv2a_pb_metal.m": {
-    "base_sha256": "8458a337514f979c7d8afca595f925bf754e38ed1b3557b02d4ff602c12d30e6",
+    "base_sha256": "686f0cfc801b3d76f895186e149689ad1fd6fad32945b37e6318f98fb62d9f5a",
     "hunks": 5,
-    "result_sha256": "1bb85b7ee2a9937bb4972aad868742bfe5a74ab89a73487d41908e34a3b81d2c"
+    "result_sha256": "42f79ec6ab47ba585cd21e9ff8e68dd66b874fe5e9ca83c67d8bd124e6a093e0"
    },
    "src/d3d/nv2a_pb_vulkan.c": {
-    "base_sha256": "e298ec98646a926e11b95d23d1ea65f637138f8b2cff941cbbbf8afec33a9479",
-    "hunks": 10,
-    "result_sha256": "2452ab2cfb55d1ba3114156e4944cfd2804759571ab8793b188990744f857ad5"
+    "base_sha256": "5e83244593e297fba97d4ca5a65cf8383a05b09e8d4ac89807c44ea5da613ff4",
+    "hunks": 7,
+    "result_sha256": "59f28a38618c1694ee25dccd9c3a7e84504f7d9c479acf3dc7f409d4dec5e9bd"
    },
    "src/kernel/kernel.h": {
-    "base_sha256": "5e27f2239d8cb184663dd9d6895a1dff8b5901d63056f520259cd8bf16d9323e",
+    "base_sha256": "e0b7bca01c495562733e917292cad5c4f579ba6e6ddf64478b5109e085348f90",
     "hunks": 1,
-    "result_sha256": "e5f6797ad3b1f6d5dd5e79cec47b829209aff9efeb21116a137ef7106a9be638"
+    "result_sha256": "184aa947c83c0540298f6bebe1a01beb0f372aba2f9ab171840f11c280d1165d"
    },
    "src/kernel/kernel_bridge.c": {
-    "base_sha256": "e3a8740164e8b1dc04d80a90e289689d4722cf00c7b46f9f39f86be4ee016159",
+    "base_sha256": "f7fcd2dad8602177b2f6756da7c5f2c5a111f085a28be57c70ed8a017672f790",
     "hunks": 5,
-    "result_sha256": "aeaeb5cd4a6f085ff349f96190704bc16a0ed817edd515f9f69b7d900c4304c7"
+    "result_sha256": "e6490ae5d6528a41124cd31c38d614487084212b754f662f65b8e1aa16c0755b"
    },
    "src/kernel/nv2a_backend_common.h": {
-    "base_sha256": "e8efb640fcce311282dbf00df61f02011b635f4ebe91080b209e80d9299e8ad4",
+    "base_sha256": "e82d62fd0c1a139b892d6d49d71403a82d4de605f0d1ba5e4e5b142efe7c65d6",
     "hunks": 2,
-    "result_sha256": "926b7328c672b7fce5852c0d5fb0d2c807a0d6a1b5dbfb3d557b8787b292e2af"
+    "result_sha256": "bde21e8184f01298bdc79680b079c0e29b3e1db9ee6577593799ce8c4941d8e4"
    },
    "src/kernel/xbox_memory_layout.c": {
-    "base_sha256": "46587c03bb48c201764edb501013596b22ca484099e46d9aa33c589d2a334476",
+    "base_sha256": "72416705bfdbf9d7c99894283fad9f8aefa42b27f8776953013039f06c209eea",
     "hunks": 8,
-    "result_sha256": "f6a8fc758f2e90892aca86bc724a2254fec5e876546f992aed63885a980565b2"
+    "result_sha256": "1e868177d2975748aa5ca35fd0b09d25ed8f2ea16ea730657cc94eef0febaec2"
    },
    "src/kernel/xbox_memory_layout.h": {
-    "base_sha256": "6d7372ff0962cd0ebc1a9428a2f7b02d3cba13c46a68febc0071115165730a75",
+    "base_sha256": "f7afb5b065923d362f205bb172e7a14b40fbfb0b471d928b8c7f85976134cc50",
     "hunks": 1,
-    "result_sha256": "b698396b31d7a37cbd2253d2228fdee1926a6e1525c192b9f1629a6d8c7441e4"
+    "result_sha256": "fc03f99ae7cfdbc1ccde4b34b49a8dfd8719906d444a31860bb36fb7d22215da"
    },
    "src/overlay/overlay_ui.cpp": {
-    "base_sha256": "913358977d40c5aeac08eac939e89067e00cb62d275a3d508a610ca1a17d89e5",
-    "hunks": 24,
-    "result_sha256": "0ed702da5353d4ec21809428883a1224fd353ed7b283c04282deaa29cf5466c2"
+    "base_sha256": "f9d7a29e142bbe151d39ae3d6f21675b15abd150bd8bfe1d458709f33eaf308e",
+    "hunks": 25,
+    "result_sha256": "63317bfcd93dd5723f39d258ea2ec11f6b8991f7474f915d64e075b4d7f01b5c"
    },
    "src/overlay/xbox_settings.h": {
-    "base_sha256": "153ddb485e21e84c81cba0e544e36d1db8058527370152a8b867a19dd504d81e",
+    "base_sha256": "f30aab570c766515e4cbc489cd930fa2a30757ea5b1638ff47acbbd7c3d161eb",
     "hunks": 1,
-    "result_sha256": "d90434ff3bdeeddd9512f45e050950f0b7df1482c7b736d5ccb76ec0a870116a"
-   },
-   "src/platform/recomp_env.h": {
-    "base_sha256": "6806288d6bfcdd510d50c236038803f53249ec039b0b2ed6578a28e7797bf4d0",
-    "hunks": 1,
-    "result_sha256": "5a3e9232ea17d0154e8919e3b0adf6362f21ba73c8faa4edd69caeb62970d26b"
+    "result_sha256": "720ceccd320f4240fded7604c9d45b5509317848b1cd7c1077e38128d3eb0b56"
    },
    "src/soundtrack/xbox_soundtrack.h": {
     "base_sha256": "4958d7608c65895c1e1fe5dbd74b735b928d167acd094ec560a9d429e612524e",
@@ -124,7 +118,11 @@
   }
  },
  "tree": {
-  "added": 267,
+  "added": 257,
+  "deleted": {
+   "src/game/modstab.c": "079778939dbf52a824eb6b09889aad3f1fa3b68b818b24b0f11337326620f1b5",
+   "tools/headless/modstab_scene.sh": "2d6692d25f229116538173a7670ae10efba3b1d783e8e634e3de3718f8cf8e71"
+  },
   "excluded_added": [
    "tests/bm_chevron/gen_capfix1.c",
    "tests/bm_chevron/gen_clean1.c",
@@ -132,14 +130,9 @@
   ],
   "modified": {
    "CMakeLists.txt": {
-    "base_sha256": "5ffeab2ab1c24c45cc07842e361c60bdb2d2b73bf53cadd63c9d54fa7540b522",
+    "base_sha256": "3bd96c195e8584beca0c2244576ec9982d4456ef72b8a7a433579f21eb429d1b",
     "hunks": 3,
-    "result_sha256": "6fbe42c50d6dff708f4289b13e79876297d5a79eb507a6042096ee25b776c61e"
-   },
-   "config/patches.json": {
-    "base_sha256": "e32c3975ab95c91d00e849d264d325d9b3b01049caa4a1872edc99d7d6736c07",
-    "hunks": 1,
-    "result_sha256": "43017022a6e113430cc8f1c2b26b0aa1757837e870606d0f1b83f8af0673f822"
+    "result_sha256": "fbed20ad78f597e0c2f9b529117c578f8cfa00f7a1aede96dcf8c3f5d0fcb0ce"
    },
    "docs/custom-music.md": {
     "base_sha256": "10f0d98da5f74b6673edffea4777d9349f26c03568d877c0fd6d551ac16d8295",
@@ -147,24 +140,29 @@
     "result_sha256": "ff376a1b66c4d57fca11873f98ddc662b7459c63d3e1905e426d884579a790e2"
    },
    "docs/mod-folders.md": {
-    "base_sha256": "2e022c63456e08ef1f293a331eaf219fc93006baa3261818c11581ca15c18ac8",
+    "base_sha256": "0e258da5f9e944b8cc8a66ae2f3babbb2208fcef5d7cc25fb70ecf655ebfed8e",
     "hunks": 4,
-    "result_sha256": "36e59c486d6c2cf3cf7367a898fa2f5c1e0dc787e9a0ca44a5fa84a4e59827fa"
+    "result_sha256": "8a95552b39c896ea081b5a06966c8ee0081061b78adf88de4e15eea2619972b7"
+   },
+   "docs/online.md": {
+    "base_sha256": "3bde8ab771fc0526fd3c764e7294bebbcb8a6aa7f516d5ed8c1fb88777942f9b",
+    "hunks": 1,
+    "result_sha256": "9f7c36f1d189d3e29db272f248227c5e1a7e9e3cafd3cc28bbaef3bd50ae5ea4"
    },
    "src/game/CMakeLists.txt": {
-    "base_sha256": "db60228baba02e531fc8623796ec8463764feca3590d3a3c06dcdf18e870bb58",
-    "hunks": 6,
-    "result_sha256": "a3901e3d14879af6c073947798a4db2dcfca26b6098b755794f965623cc74404"
+    "base_sha256": "8aa9220061cbe6c8b157bc346ba076e2a1d9fd0ffbd5a8f53d8bb18c094b61af",
+    "hunks": 7,
+    "result_sha256": "83bf4f9b9ee53f8bd94a03133bc095388e6275c67e0b167aaae152c5455f887b"
    },
    "src/game/autopilot.c": {
-    "base_sha256": "d7dedf24dba17aa8d7aef79957552a79b83c43d3a943ce9b7c2ef41f12019f29",
+    "base_sha256": "c031de5505f2394c97d5c42c896d7d49f1468b4eaad03f6c0eeff985168fe6e0",
     "hunks": 4,
-    "result_sha256": "5190ce06b1b0d4bb0b11a0dd67089a6a9d0dba4d7c9d164a218ccad440aa9b9b"
+    "result_sha256": "40a531e3b68f946f546b2afedb3c052e6132c2e176dd3025f37f6064d8d7032b"
    },
    "src/game/controls.c": {
-    "base_sha256": "e004d697735981dd3b4e52f1a161b0474301b69bbda6386fc646778bc1406a7b",
+    "base_sha256": "23e2393aad921277ae550af1206a4c8295db1ecba64a7fe96061027e8af24622",
     "hunks": 3,
-    "result_sha256": "ef347e7dd5d2708fa058e1b08101b2a7fece01a228c32b3a9c4fd898f4f6d98a"
+    "result_sha256": "e22838d5add991dd9f7720bfa0871b0a9064fd53228caeb45633e74ecb13c5a1"
    },
    "src/game/fatal.c": {
     "base_sha256": "3b73512b707de2f38455a258302fd4cabe9b95077310d66e9253f8e2c1e6767f",
@@ -172,54 +170,89 @@
     "result_sha256": "bac76b43a572eb461e45e9767a402bb081b8279974edbb254323ccd5843704a9"
    },
    "src/game/hirefresh.c": {
-    "base_sha256": "063cc9abbd0d6d5fdd85debfced0029dc8b81259173339b1f02311eb89eb0d55",
+    "base_sha256": "2415def2914dd776f91bc623fa0ec92839b758801c050a2d0a65803582730560",
     "hunks": 5,
-    "result_sha256": "5f1c995a4e3496fc4efc6691f28cae67df794f63073c7f9f243bb27f95fb3af1"
+    "result_sha256": "f1ea987a239d1e72f5ac61ca943084f3e7ab922892894a21682ea20cb1fe4591"
    },
    "src/game/install.c": {
-    "base_sha256": "928c5f6d2f3dd24a89f558154cd0ca80a4b792a5caf7da11d7fcc9e471a84e7e",
+    "base_sha256": "7a76d9a0bdd6588386f3e6f2c97af30c3d392712efd4ca2218202541cfdc7e66",
     "hunks": 11,
-    "result_sha256": "29572cc64d89316474aea2a89982691634376ce60e2b762007e3227eba8123b7"
+    "result_sha256": "050b132d3b16e261da9b1c84dc0bb859a31d61e06a104d0f270f3ff3fdf4554a"
    },
    "src/game/install.h": {
-    "base_sha256": "996b1ee880152523fa4ac9b0a6aeac0a43beefd7fdf7843d510d5a2bcd424759",
+    "base_sha256": "1fe0ef6a452977e1a09fb5eaf5d636fa64ef16cbdb720a1064df836951f70362",
     "hunks": 1,
-    "result_sha256": "482a931f5ab7f583beba7421e09a214a1cb2dcf2fe1113bed17f76d63a53c2ae"
+    "result_sha256": "baf2bd75c77eee522b68f08cc6fc32abbd375a850cbdd902cebc264f3771c8a6"
    },
    "src/game/main.c": {
-    "base_sha256": "6fcc397a1c45c52066f9238e5a447fa6fb81cd79a337a89794e13c0f9b452ab4",
-    "hunks": 17,
-    "result_sha256": "facb5cbb931ab91a1b283563fe7f9447245e0c53f7d93af0a80a67a1d31b9ffc"
+    "base_sha256": "9224f5ab0f9644c72ecd8bc739d3b6972ddbfba715a633f3256ede32068226e5",
+    "hunks": 21,
+    "result_sha256": "d91b0f4a7dc0889b00ad3a4f966b302be21f93e477c3377f9dfd65600c8eeb77"
    },
    "src/game/menuentry.c": {
-    "base_sha256": "8d5c27faae570e2c5818335a8ec58995243b792b8346b13574a085a31a6866e1",
+    "base_sha256": "7436b24264c63b0b7790032baf6938e3fb5088bc9ef7ba1b58602a4654b59a4f",
     "hunks": 5,
-    "result_sha256": "c9490c3f51c8bb80e031dac63f0469dc283666ffff7e6cf003901fdf5559ba34"
+    "result_sha256": "3824c7e94abdc20bc9ddb22b61c7d165b3cee85513f2af6e1aa99cd8555f082a"
    },
    "src/game/modfs.c": {
-    "base_sha256": "608ef2615c6128963cb7b69946241aa89afd12edb3272ff0692ab382c34c83f4",
-    "hunks": 8,
-    "result_sha256": "0774149e1afd89c5716c3b8ca47cdd47e1160ded63cda4515912119c49702a6e"
+    "base_sha256": "84c7d40243c533bb22a9328c25297bef0ac4c8e0bf6d9007284ccaf22b20d397",
+    "hunks": 28,
+    "result_sha256": "91dcc82e0be76bc280f2cd843f7faf3372e72b600d7881bab38bcba5c77be238"
+   },
+   "src/game/modfs.h": {
+    "base_sha256": "eb42556fb445c1ca2ad57657dad25ec6b7021a0c134091c9f746fac2c58e5328",
+    "hunks": 3,
+    "result_sha256": "332636649e54cba8badbc083158e1f586b12d24ebfea476b62803dc84c049439"
+   },
+   "src/game/modmanifest.c": {
+    "base_sha256": "5789c0def4974b6db0dc42aeade7ddbcdd85cd33a573d5d8b893ee181fe56e48",
+    "hunks": 4,
+    "result_sha256": "b5fdac3a5d232907783e9e420b76b4d5a78d34f231e1ff60cc3d7740c4d75d77"
+   },
+   "src/game/modmanifest.h": {
+    "base_sha256": "faccc2f6921f6d814240d193bee4ac664ceaee2961dc01c7417eee16cf607c47",
+    "hunks": 3,
+    "result_sha256": "b4efc710c78d79288457d48e83089ecb3d2928b3cfd94a8771560c59f41d42e5"
+   },
+   "src/game/modsmenu.c": {
+    "base_sha256": "5a7a34013d34a1c4e9c4a9dd53ef7966ca3f35da6cacf13e5426401da76943e3",
+    "hunks": 25,
+    "result_sha256": "16b1717f0bd97aeb75e767d05dfc66021c7715f7828c52167c8c8cd2b2e41735"
+   },
+   "src/game/modsmodel.h": {
+    "base_sha256": "3ec0fcdaa70dc852796918c362a2c8a0d7b8b383b21cb72c505645e018981d1c",
+    "hunks": 1,
+    "result_sha256": "f18f1746bb945a3052b8f6f8c8ab107c8595ab10eacbb40746514fa28eaa3009"
    },
    "src/game/soundtrack.c": {
-    "base_sha256": "edc9913ae212905f752617ba03751825b9cd1049d78cf4a5c59fac73109e3564",
+    "base_sha256": "ecfc6425b3a2a88ae60dba3e526bcda1fe942b60ebb4c239b3e5d010a529e29d",
     "hunks": 6,
-    "result_sha256": "8f2f0befcd96a2edca07719f04369510ffbc1cd7f59214d97d876b45128ce649"
+    "result_sha256": "c6ff8a8dbae7d4ae0c17298ac4f9e84de5e2c6302813c8866aec62695dbfcf0c"
    },
    "src/game/soundtrack_start.h": {
     "base_sha256": "77ba1a299bae3000f5ba3a6cc8d06f3359ce973e0e46fa59723e41cc9512c08d",
     "hunks": 1,
     "result_sha256": "5a4e759f53f5fba482f6444fdb93ecfc7d80f357709956c94fd8fa835f92e473"
    },
-   "tests/modfs/CMakeLists.txt": {
-    "base_sha256": "7fc4d742fb626a7ffc6b19784d65b78874dd422640f034a83bee59f4bbc098f5",
-    "hunks": 1,
-    "result_sha256": "8e0138a4883e76608acdf6f38866ffd0db4e9e08486d5f960c42c2bc5561993d"
-   },
    "tests/modfs/test_main.c": {
-    "base_sha256": "1e13a3cfa3d2ca0ba1ccedc612b35266b7a2f4993ef5f4175d7af4b62e410887",
-    "hunks": 8,
-    "result_sha256": "e8992474aa751cfb0d8b9a19ba981ab2f4a14737c6aa0cac27a2efd362f798a4"
+    "base_sha256": "62630ea63437c38595d5a2f4840fe00226ee69b97614f79d1737bd58e25ab645",
+    "hunks": 6,
+    "result_sha256": "da1752b95b12fcfc09383d71c821f690581e460ed9a47f2863c191ed22739e8b"
+   },
+   "tests/modmanifest/test_main.c": {
+    "base_sha256": "67081bbce6b854fddcccb85f3529cf168bee3555ad57c805f4f5bbf10a64b5af",
+    "hunks": 5,
+    "result_sha256": "a5dc36d2b46d517cbf98718eef6f33241513654ae52d5a511c1b3a4bdd4a0b7b"
+   },
+   "tests/modsmenu/CMakeLists.txt": {
+    "base_sha256": "82a94d9af31d0195a03866f43822db302eafc4967608b6b232cebf68ef5714c8",
+    "hunks": 2,
+    "result_sha256": "ae8bd61a77e092fca6f181cd0877e7314d62489dd56c044e0cb2f2a6e1e81791"
+   },
+   "tests/modsmenu/test_main.c": {
+    "base_sha256": "bbe9975e7374b3fcb74769e57de45de9c8151cc1df2202b856542f25e1adcb55",
+    "hunks": 6,
+    "result_sha256": "095c609513d839b4ac8e9dcd28eae5c4c0dfe283198bae3a2358ed0e467360f4"
    }
   }
  }

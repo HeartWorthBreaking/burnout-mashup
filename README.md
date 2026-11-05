@@ -54,7 +54,7 @@ Nothing here is legal advice, and nothing here claims legal clearance.
 ## How the source is organised
 | folder | what is inside |
 |---|---|
-| `host/` | the Mashup host, stored as changes on top of pinned upstream commits (Takedawn `4f074e211822`, xboxrecomp `e3756d1b2fef`) |
+| `host/` | the Mashup host, stored as changes on top of pinned upstream commits (Takedawn `0dd10432d936`, xboxrecomp `03b4f22aa6e7`) |
 | `sdk/` | the plugin SDK: headers, examples and CMake helpers |
 | `launcher/` | the launcher, including Build Mashup and the updater (it checks the signed releases of this repository only when you ask) |
 | `workbench/` | the Workbench |

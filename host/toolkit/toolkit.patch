@@ -1,8 +1,8 @@
-# um layer toolkit (MIT files): 17 modified file(s); position-free hunks, each old block unique in its file
+# um layer toolkit (MIT files): 16 modified file(s); position-free hunks, each old block unique in its file
 #
 --- a/toolkit/docs/runtime/overlay.md
 +++ b/toolkit/docs/runtime/overlay.md
-@@ -457,6 +457,21 @@
+@@ -585,6 +585,21 @@
  is no row, and the foot shows the yellow line "Restart the game to apply N
  changes" instead (nothing to press).
  
@@ -95,7 +95,7 @@
              continue;   /* the texture decodes from the title's bytes */
 --- a/toolkit/src/d3d/nv2a_pb_metal.m
 +++ b/toolkit/src/d3d/nv2a_pb_metal.m
-@@ -2890,10 +2890,10 @@
+@@ -3311,10 +3311,10 @@
       * evicted name) is written back first, so the decode sees what was
       * drawn there. */
      if (bytes) {
@@ -108,7 +108,7 @@
              if (rt->tex && rt->dirty && rt->pitch
                      && lo < rlo + rt->pitch * rt->h && rlo < hi) {
                  if (rt_drop_if_stale(rt, "sync"))
-@@ -4122,7 +4122,7 @@
+@@ -4576,7 +4576,7 @@
      int i;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -117,7 +117,7 @@
              continue;
          if (rt_drop_if_stale(rt, "bind"))
              continue;   /* the title rewrote it: the face decodes from memory */
-@@ -4287,7 +4287,7 @@
+@@ -4741,7 +4741,7 @@
          return NULL;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -126,7 +126,7 @@
              continue;
          /* 16-bit textures only on 16-bit surfaces of the same size, a linear
           * one at the same pitch, a swizzled one only on a swizzled surface
-@@ -4937,7 +4937,7 @@
+@@ -5498,7 +5498,7 @@
  static void metal_sync_guest(uint32_t offset, uint32_t pitch, uint32_t w, uint32_t h)
  {
      RenderTarget *rt = NULL;
@@ -135,7 +135,7 @@
      int i;
  
      guard_open();
-@@ -4949,7 +4949,7 @@
+@@ -5510,7 +5510,7 @@
      if (!rt) {
          for (i = 0; i < RT_MAX; i++) {
              RenderTarget *c = &s_rt[i];
@@ -146,15 +146,7 @@
          }
 --- a/toolkit/src/d3d/nv2a_pb_vulkan.c
 +++ b/toolkit/src/d3d/nv2a_pb_vulkan.c
-@@ -69,6 +69,7 @@
- #include "../video/hdr_shaders.h"   /* BO-244: the HDR maths shared with Metal */
- #include "d3d8_swizzle.h"
- #include "nv2a_texrep.h"
-+#include "nv2a_rt_shrink.h"
- #include "nv2a_texscale.h"
- #include "nv2a_texmip.h"
- #include "kernel_pause.h"
-@@ -2429,7 +2430,7 @@
+@@ -2464,7 +2464,7 @@
  /* ---- textures: Metal's cache, key and invalidation ------------------------- */
  
  #define TEX_MAX_TEXELS (2048u * 2048u)
@@ -163,7 +155,7 @@
  typedef struct {
      uint32_t         offset, color, width, height, pitch, palette, levels;
      uint32_t         sign;          /* nv2a_tex_signed_mask the bytes carry */
-@@ -4413,10 +4414,10 @@
+@@ -5312,10 +5312,10 @@
      /* A render target over the bytes is written back first (Metal's decode
       * sync). */
      if (bytes) {
@@ -176,7 +168,7 @@
              if (rt->im.img && rt->dirty && rt->pitch
                      && lo < rlo + rt->pitch * rt->h && rlo < hi) {
                  if (rt_drop_if_stale(rt, "sync"))
-@@ -4445,7 +4446,7 @@
+@@ -5351,7 +5351,7 @@
          return s_magenta.view;
      }
      /* BO-277: the entry this stage's key found last, checked, before the
@@ -185,127 +177,7 @@
       * walk was ~0.25 ms a frame of the render thread). A miss walks as
       * before, for the entry or the victim. */
      hk = tc_hint_key(t);
-@@ -4748,6 +4749,119 @@
-     nvk_image_to(s_cmd, im, VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
- }
- 
-+/* main21 patch 133 (takedawn issue 78): a scaled target read by a smaller one goes through a copy reduced to its guest size
-+ * (nv2a_rt_shrink.h), remade when the target was drawn since. NV2A_RT_SHRINK_NATIVE=0 (CMake BO3_RT_SHRINK_NATIVE=OFF) compiles
-+ * this out; RECOMP_DEBUG=rt_shrink=0 turns it off at the start. */
-+#ifndef NV2A_RT_SHRINK_NATIVE
-+#define NV2A_RT_SHRINK_NATIVE 1
-+#endif
-+#if NV2A_RT_SHRINK_NATIVE
-+typedef struct {
-+    int              n;
-+    uint64_t         gen;       /* the target's gen when copied */
-+    uint32_t         hw, hh;
-+    uint32_t         w, h;
-+    VkFormat         format;
-+    struct nvk_image step[NV2A_RT_SHRINK_STEPS];
-+} RtShrink;
-+static RtShrink s_rts[RT_MAX];
-+static uint64_t s_rts_copies;
-+
-+static int rts_format_ok(VkFormat f)
-+{
-+    const VkFormatFeatureFlags need = VK_FORMAT_FEATURE_BLIT_SRC_BIT | VK_FORMAT_FEATURE_BLIT_DST_BIT
-+                                      | VK_FORMAT_FEATURE_SAMPLED_IMAGE_FILTER_LINEAR_BIT;
-+    VkFormatProperties fp;
-+    vkGetPhysicalDeviceFormatProperties(nvk_core_get()->phys, f, &fp);
-+    return (fp.optimalTilingFeatures & need) == need;
-+}
-+
-+static void rts_drop(RtShrink *c)
-+{
-+    int i;
-+    for (i = 0; i < c->n; i++)
-+        garbage_push(&c->step[i], VK_NULL_HANDLE, NULL);
-+    c->n = 0;
-+}
-+
-+/* The reduced copy of rt, up to date and readable; VK_NULL_HANDLE: read rt itself, as before. */
-+static VkImageView rt_shrink_view(RenderTarget *rt)
-+{
-+    static int off = -1, said;
-+    RtShrink *c = &s_rts[rt - s_rt];
-+    const struct nvk_image *prev;
-+    uint32_t sz_w[NV2A_RT_SHRINK_STEPS], sz_h[NV2A_RT_SHRINK_STEPS];
-+    int32_t pw, ph;
-+    int i, n;
-+
-+    if (off < 0) {
-+        const char *e = recomp_env(RENV_RT_SHRINK);
-+        off = e && *e == '0';
-+    }
-+    if (off)
-+        return VK_NULL_HANDLE;
-+    n = nv2a_rt_shrink_plan(rt->w, rt->h, rt->hw, rt->hh, sz_w, sz_h);
-+    if (!n)
-+        return VK_NULL_HANDLE;
-+    if (c->n && c->w == rt->w && c->h == rt->h && c->hw == rt->hw && c->hh == rt->hh && c->format == rt->im.format) {
-+        if (c->gen == rt->gen)
-+            return c->step[c->n - 1].view;
-+    } else {
-+        rts_drop(c);
-+        if (!rts_format_ok(rt->im.format))
-+            return VK_NULL_HANDLE;
-+        for (i = 0; i < n; i++)
-+            if (!nvk_image_new(&c->step[i], rt->im.format, sz_w[i], sz_h[i], 1,
-+                               VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT,
-+                               VK_IMAGE_ASPECT_COLOR_BIT)) {
-+                memset(&c->step[i], 0, sizeof c->step[i]);
-+                c->n = i;
-+                rts_drop(c);
-+                return VK_NULL_HANDLE;
-+            }
-+        c->n = n;
-+        c->w = rt->w;
-+        c->h = rt->h;
-+        c->hw = rt->hw;
-+        c->hh = rt->hh;
-+        c->format = rt->im.format;
-+    }
-+    end_encoder();
-+    ensure_cmd();
-+    nvk_image_to(s_cmd, &rt->im, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL);
-+    prev = &rt->im;
-+    pw = (int32_t)rt->hw;
-+    ph = (int32_t)rt->hh;
-+    for (i = 0; i < c->n; i++) {
-+        VkImageBlit b;
-+        nvk_image_to(s_cmd, &c->step[i], VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL);
-+        memset(&b, 0, sizeof b);
-+        b.srcSubresource.aspectMask = b.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-+        b.srcSubresource.layerCount = b.dstSubresource.layerCount = 1;
-+        b.srcOffsets[1].x = pw;
-+        b.srcOffsets[1].y = ph;
-+        b.srcOffsets[1].z = 1;
-+        b.dstOffsets[1].x = (int32_t)sz_w[i];
-+        b.dstOffsets[1].y = (int32_t)sz_h[i];
-+        b.dstOffsets[1].z = 1;
-+        vkCmdBlitImage(s_cmd, prev->img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL, c->step[i].img,
-+                       VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL, 1, &b, VK_FILTER_LINEAR);
-+        nvk_image_to(s_cmd, &c->step[i], i + 1 < c->n ? VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL
-+                                                      : VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL);
-+        prev = &c->step[i];
-+        pw = (int32_t)sz_w[i];
-+        ph = (int32_t)sz_h[i];
-+    }
-+    rt_to_sampled(&rt->im);
-+    c->gen = rt->gen;
-+    s_rts_copies++;
-+    if (!said++)
-+        fprintf(stderr, LOGP "surface 0x%08X (%ux%u, host %ux%u) read by a smaller target: through its guest-size copy,"
-+                " %d blit(s)\n", rt->offset, rt->w, rt->h, rt->hw, rt->hh, c->n);
-+    return c->step[c->n - 1].view;
-+}
-+#endif
-+
- static RenderTarget *rt_texture(const Stage *t, RenderTarget *cur, VkImageView *view,
-                                 uint32_t *sw, uint32_t *sh)
- {
-@@ -4764,7 +4878,7 @@
+@@ -5714,7 +5714,7 @@
          return NULL;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -314,21 +186,7 @@
              continue;
          if (r565 && (rt->pitch / rt->w != 2u || rt->w != t->width || rt->h != t->height
                       || (t->color == 0x11 ? rt->swz || t->pitch != rt->pitch : !rt->swz)))
-@@ -4784,6 +4898,13 @@
-         } else {
-             *view = rt->im.view;
-         }
-+#if NV2A_RT_SHRINK_NATIVE
-+        if (!r565 && cur && nv2a_rt_shrink_wanted(rt->w, rt->h, rt->hw, rt->hh, cur->w, cur->h)) {
-+            VkImageView sv = rt_shrink_view(rt);
-+            if (sv)
-+                *view = sv;
-+        }
-+#endif
-         rt_to_sampled(&rt->im);
-         *sw = rt->w;
-         *sh = rt->h;
-@@ -4878,7 +4999,7 @@
+@@ -6067,7 +6067,7 @@
      int i;
      for (i = 0; i < RT_MAX; i++) {
          RenderTarget *rt = &s_rt[i];
@@ -337,7 +195,7 @@
              continue;
          if (rt_drop_if_stale(rt, "bind"))
              continue;
-@@ -6397,7 +6518,7 @@
+@@ -7655,7 +7655,7 @@
  static void vk_sync_guest(uint32_t offset, uint32_t pitch, uint32_t w, uint32_t h)
  {
      RenderTarget *rt = NULL;
@@ -346,7 +204,7 @@
      int i;
  
      if (s_failed)
-@@ -6408,7 +6529,7 @@
+@@ -7666,7 +7666,7 @@
      if (!rt) {
          for (i = 0; i < RT_MAX; i++) {
              RenderTarget *c = &s_rt[i];
@@ -383,7 +241,7 @@
  #define XBOX_GPU_INSTANCE_DEFAULT (128u * 1024u)
 --- a/toolkit/src/kernel/kernel_bridge.c
 +++ b/toolkit/src/kernel/kernel_bridge.c
-@@ -1088,6 +1088,23 @@
+@@ -1137,6 +1137,23 @@
  /* ── MmAllocateContiguousMemory (ordinal 165) ─────────────
   * PVOID MmAllocateContiguousMemory(ULONG NumberOfBytes)
   */
@@ -407,7 +265,7 @@
  static void bridge_MmAllocateContiguousMemory(void)
  {
      uint32_t size = STACK_ARG(0);
-@@ -1098,6 +1115,10 @@
+@@ -1147,6 +1164,10 @@
       * hands the hardware. See xbox_ContiguousAlloc. */
      uint32_t xbox_va = xbox_ContiguousAlloc(size, 4096);
  
@@ -418,7 +276,7 @@
      if (KERNEL_LOG_ON_HALF()) {
          fprintf(stderr, "  [KERNEL] MmAllocateContiguousMemory: size=%u → Xbox VA 0x%08X\n",
                  size, xbox_va);
-@@ -1217,6 +1238,10 @@
+@@ -1266,6 +1287,10 @@
                  fprintf(stderr, " %08X", STACK_ARG(k));
              fprintf(stderr, "\n");
          }
@@ -429,7 +287,7 @@
      }
      if (KERNEL_LOG_ON_HALF()) {
          fprintf(stderr, "  [KERNEL] MmAllocateContiguousMemoryEx: size=%u align=%u → Xbox VA 0x%08X\n",
-@@ -2290,7 +2315,7 @@
+@@ -2375,7 +2400,7 @@
           * directly lands in the loaded image instead, which is why the window
           * showed black while the executor was clearing and rasterising
           * correctly a few megabytes away. */
@@ -438,7 +296,7 @@
              fb_va = XBOX_CONTIG_BASE + fb_va;
  
          xbox_FramebufferWindowSet(fb_va, pitch);
-@@ -3470,7 +3495,7 @@
+@@ -3575,7 +3600,7 @@
      if (padding_va) {
          BRIDGE_MEM32(padding_va) = 0;
      }
@@ -494,7 +352,7 @@
  
 --- a/toolkit/src/kernel/xbox_memory_layout.c
 +++ b/toolkit/src/kernel/xbox_memory_layout.c
-@@ -2339,8 +2339,8 @@
+@@ -2351,8 +2351,8 @@
           * 0xF... address is the only one that sees those writes, since a
           * protection on one view does not trap writes through another. */
          { g_tiled_view,    XBOX_TILED_BASE,
@@ -505,7 +363,7 @@
          { g_nv2a_memory,   XBOX_NV2A_BASE,    XBOX_NV2A_SIZE },
          { g_mcpx_memory,   XBOX_MCPX_BASE,    XBOX_MCPX_SIZE },
          { g_flash_memory,  XBOX_FLASH_BASE,   XBOX_FLASH_SIZE },
-@@ -2859,9 +2859,9 @@
+@@ -2871,9 +2871,9 @@
      /* The same page in the other view of the contiguous pages. */
      g_watch_alias = NULL;
      if (g_tiled_view && g_contig_memory) {
@@ -517,7 +375,7 @@
          if (va >= XBOX_CONTIG_BASE && va - XBOX_CONTIG_BASE < tiled_size)
              g_watch_alias = (uint8_t *)g_tiled_view + (va - XBOX_CONTIG_BASE);
          else if (va >= XBOX_TILED_BASE && va - XBOX_TILED_BASE < tiled_size)
-@@ -4097,8 +4097,8 @@
+@@ -4111,8 +4111,8 @@
           * texture at 0x81C63000, and the sampler read zeros: 1.8 billion black
           * pixels rasterised, perfectly, from an empty texture.
           */
@@ -528,7 +386,7 @@
          g_tiled_view = g_contig_mapping
              ? layout_map_view(g_contig_mapping, tiled_size,
                                (LPVOID)tiled_native)
-@@ -4505,7 +4505,8 @@
+@@ -4549,7 +4549,8 @@
   * Locked: textures are created from loader threads as well as the main one. */
  #define CONTIG_PAGE       4096u
  #define CONTIG_PAGES      (XBOX_CONTIG_SIZE / CONTIG_PAGE)
@@ -538,7 +396,7 @@
  
  /* The last megabyte below 16 MB is kept for requests that must sit there.
   *
-@@ -4548,6 +4549,10 @@
+@@ -4592,6 +4593,10 @@
  static uint32_t g_contig_first_free = 1;       /* no free page below this */
  static uint32_t g_contig_allocs, g_contig_frees;
  static uint32_t g_contig_peak_pages;
@@ -549,7 +407,7 @@
  static DWORD    g_contig_t0;
  static volatile LONG g_contig_lock;
  
-@@ -4595,6 +4600,15 @@
+@@ -4639,6 +4644,15 @@
      g_contig_pages_in_use += n;
      if (g_contig_pages_in_use > g_contig_peak_pages)
          g_contig_peak_pages = g_contig_pages_in_use;
@@ -565,7 +423,7 @@
      if (end > g_contig_high)
          g_contig_high = end;
      while (g_contig_first_free < CONTIG_PAGES
-@@ -4672,6 +4686,78 @@
+@@ -4716,6 +4730,78 @@
  {
      return xbox_ContiguousAllocEx(size, alignment, 0, 0xFFFFFFFFu);
  }
@@ -644,7 +502,7 @@
  
  /* A block the caller placed itself (MmAllocateContiguousMemoryEx with a range
   * exactly one allocation wide). Recorded so nothing else is handed the same
-@@ -4725,6 +4811,10 @@
+@@ -4769,6 +4855,10 @@
      memset(&g_contig_used[first], 0, n);
      g_contig_len[first] = 0;
      g_contig_pages_in_use -= n;
@@ -682,8 +540,8 @@
                           uint32_t put_off, uint32_t get_ptr_off);
 --- a/toolkit/src/overlay/overlay_ui.cpp
 +++ b/toolkit/src/overlay/overlay_ui.cpp
-@@ -129,8 +129,33 @@
-     "Display", "Graphics", "Audio", "Input", "Power", "Advanced"
+@@ -328,15 +328,54 @@
+     "Display", "Graphics", "Game", "Audio", "Controls", "Mods", "System"
  };
  static int s_page;
 -static int s_sel[P_COUNT];
@@ -697,9 +555,23 @@
 +static int s_port_x, s_port_jump;      /* X, and LT / RT (a screen of rows up / down) */
 +static unsigned s_port_view;           /* counts the port's view changes (the hint band starts again) */
 +static bool is_port(int page) { return page >= P_COUNT && page < P_COUNT + s_nport; }
-+static int page_total() { return P_COUNT + s_nport; }
-+static int page_at(int pos) { return pos < s_nport ? P_COUNT + pos : pos - s_nport; }   /* tab position -> page */
-+static int page_pos(int page) { return page >= P_COUNT ? page - P_COUNT : page + s_nport; }
++/* td030: without a host page (xbox_OverlaySetHostPage) P_HOST has no tab. */
++static bool host_page_set();
++static int page_hidden() { return host_page_set() ? 0 : 1; }
++static int page_total() { return P_COUNT + s_nport - page_hidden(); }
++static int page_at(int pos)    /* tab position -> page */
++{
++    if (pos < s_nport)
++        return P_COUNT + pos;
++    pos -= s_nport;
++    return page_hidden() && pos >= P_HOST ? pos + 1 : pos;
++}
++static int page_pos(int page)
++{
++    if (page >= P_COUNT)
++        return page - P_COUNT;
++    return page + s_nport - (page_hidden() && page > P_HOST ? 1 : 0);
++}
 +static const char *page_name(int page)
 +{
 +    if (is_port(page)) {
@@ -715,9 +587,17 @@
 +    return page_at((page_pos(page) + (d > 0 ? 1 : -1) + n) % n);
 +}
  
+ /* BO-338: each page keeps its expert rows behind a "Show advanced settings"
+  * switch (this session only: not a setting, so no settings.toml key). The
+  * rows are tagged `adv` where page_rows makes them; a page that has none
+  * has no switch. The Controls page also has a sub-page, the
+  * keyboard's keys (s_keys_page). */
+-static bool s_adv[P_COUNT];
++static bool s_adv[P_COUNT + XBOX_PORT_PAGES];   /* td030: indexed by s_page, which can be a port page */
+ static bool s_keys_page;
+ 
  /* Settings written a moment after the last change. */
- static bool s_save_pending;
-@@ -349,9 +374,18 @@
+@@ -576,9 +615,18 @@
   * slot: the port's reason (a music folder) must not overwrite it. */
  static char s_restart_cheat[200];
  
@@ -737,7 +617,7 @@
  }
  
  /* How many changes wait for a restart: the settings changed that are read at
-@@ -364,7 +398,8 @@
+@@ -591,7 +639,8 @@
          if ((s->flags & XS_RESTART) && s->value != s->launch)
              n++;
      }
@@ -747,7 +627,15 @@
  }
  
  /* Why: the settings changed that are read at start, by their table flag,
-@@ -1043,6 +1078,21 @@
+@@ -611,6 +660,7 @@
+ /* ── the host's own page (xbox_OverlaySetHostPage) ─────────────────── */
+ 
+ static const xbox_overlay_hostpage *s_hp;
++static bool host_page_set() { return s_hp != NULL; }
+ static char s_hp_text[XBOX_OVERLAY_HOSTPAGE_ROWS][200];
+ 
+ void xbox_OverlaySetHostPage(const xbox_overlay_hostpage *page)
+@@ -1342,6 +1392,21 @@
                   xr_log_source());
      else
          snprintf(s_diag_info, sizeof s_diag_info, "Log: %s", shown);
@@ -768,8 +656,8 @@
 +    return n;
  }
  
- static int page_rows(int page, Row *r)
-@@ -1377,14 +1427,7 @@
+ static bool keys_locked();
+@@ -1902,14 +1967,7 @@
       * last rows; see pin_count): Quit game always, and Restart only while a
       * restart is pending (the one place for it: there is no Restart row in
       * the pages). Each asks once more before it acts. */
@@ -783,9 +671,9 @@
 -                : s_cs != CS_NONE ? "Quit game (progress made with cheats is not saved)" : "Quit game");
 +    n = foot_rows(r, n, staged);
  #undef SET
+ #undef SUB
  #undef ACT
- #undef INFO
-@@ -1404,8 +1447,22 @@
+@@ -1968,8 +2026,22 @@
      FILE *f = fopen(path, "w");
      if (!f)
          return;
@@ -806,10 +694,10 @@
 +        fclose(f);
 +        return;
 +    }
+     if (s_keys_page && s_page == P_CONTROLS && keys_shown())
+         fprintf(f, "subpage Keyboard keys\n");
      if (xsb_is_open()) {
-         /* The folder browser, over the page: where it is and its rows. */
-         char where[1024], c[48];
-@@ -1439,6 +1496,17 @@
+@@ -2022,6 +2094,17 @@
   * with `prefix` is, -1 when it has none. */
  int xbox_OverlayTestRowIndex(const char *prefix)
  {
@@ -827,7 +715,7 @@
      Row r[OVERLAY_ROWS];
      int n = page_rows(s_page, r);
      for (int i = 0; i < n; i++) {
-@@ -1876,6 +1944,7 @@
+@@ -2616,6 +2699,7 @@
      memset(s_key, 0, sizeof s_key);
      memset(s_steps, 0, sizeof s_steps);
      s_activate = s_back = s_page_delta = s_reset = 0;
@@ -835,7 +723,7 @@
      s_confirm = 0;
  }
  
-@@ -1959,7 +2028,12 @@
+@@ -2711,7 +2795,12 @@
      if (s_restart_save[0] && at < n)
          at += (size_t)snprintf(out + at, n - at, "%s%s", at ? " " : "", s_restart_save);
      if (s_restart_cheat[0] && at < n)
@@ -849,7 +737,7 @@
  }
  
  /* The overlay closes as at any time (the settings are written), then the
-@@ -2014,6 +2088,83 @@
+@@ -2766,6 +2855,83 @@
          return 0;
      s_open_request.store(1);
      return 1;
@@ -933,7 +821,7 @@
  }
  
  /* A direction goes down or up on one of the three sources. A press counts a
-@@ -2102,6 +2253,7 @@
+@@ -2861,6 +3027,7 @@
          case SDLK_ESCAPE: s_back++; break;
          case SDLK_DELETE:
          case SDLK_BACKSPACE: s_reset++; break;
@@ -941,7 +829,7 @@
          default:
              /* Page Up and Down, [ and ], Q and E, Tab and Shift+Tab. */
              s_page_delta += xbox_overlay_page_key(k, ev->key.keysym.mod);
-@@ -2164,6 +2316,7 @@
+@@ -2923,6 +3090,7 @@
          case SDL_CONTROLLER_BUTTON_A: if (down) s_activate++; break;
          case SDL_CONTROLLER_BUTTON_B: if (down) s_back++; break;
          case SDL_CONTROLLER_BUTTON_Y: if (down) s_reset++; break;
@@ -949,7 +837,7 @@
          case SDL_CONTROLLER_BUTTON_LEFTSHOULDER:  if (down) s_page_delta--; break;
          case SDL_CONTROLLER_BUTTON_RIGHTSHOULDER: if (down) s_page_delta++; break;
          default: break;
-@@ -2176,6 +2329,15 @@
+@@ -2935,6 +3103,15 @@
          if (ev->caxis.axis == SDL_CONTROLLER_AXIS_LEFTX || ev->caxis.axis == SDL_CONTROLLER_AXIS_LEFTY) {
              s_last_input_pad = true;
              stick_axis(ev->caxis.axis, ev->caxis.value);
@@ -965,9 +853,9 @@
          }
          return 1;
  
-@@ -2318,8 +2480,14 @@
-     std::lock_guard<std::mutex> g(s_ov_mu);
-     test_poll();
+@@ -3088,8 +3265,14 @@
+     if (s_url_want.exchange(false))
+         update_open_page_now();
  
 -    if (s_open_request.exchange(0) && !s_open)
 +    if (s_open_request.exchange(0) && !s_open) {
@@ -981,7 +869,7 @@
      /* The on-screen controls' menu button. */
      if (xbox_InputTouchTakeMenu() && !s_open)
          set_open(true);
-@@ -2378,6 +2546,8 @@
+@@ -3155,6 +3338,8 @@
                  s_fb_sel = sel;
                  s_fb_scroll = true;
              }
@@ -990,7 +878,7 @@
          } else if (s_open)
              set_open(false);
      }
-@@ -3862,12 +4032,14 @@
+@@ -4755,12 +4940,14 @@
   * the folder browser. */
  static const char *s_foot_keys;
  static bool s_foot_attn, s_foot_prompts;
@@ -1005,7 +893,7 @@
  }
  
  /* After foot_set: the page's footer is B Back, Y Default, d-pad Change, A Select. */
-@@ -3927,10 +4099,68 @@
+@@ -4820,10 +5007,68 @@
      }
  }
  
@@ -1074,7 +962,7 @@
      if (s_foot_prompts && art_on()) {
          draw_prompts(dl);
          return;
-@@ -4043,21 +4273,24 @@
+@@ -4936,21 +5181,24 @@
  {
      dl->AddRectFilled(ImVec2(0, 0), ImVec2(LY.W, LY.y_rule), col(T->head_band, 0.55f));
      {
@@ -1104,7 +992,7 @@
          const float sz = LY.head, cy = 0.105f * LY.H;
          const float ar = sz * 0.22f, nw = tw(sz, name) + sz * SHEAR * 0.5f, right = LY.cx + 0.944f * LY.cw;
          const float xn = right - ar * 2.8f - nw;
-@@ -4075,7 +4308,7 @@
+@@ -4968,7 +5216,7 @@
              ImGui::PushID(k + 100);
              ImGui::InvisibleButton("##pg", ImVec2(x1 - x0, sz * 1.2f));
              if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
@@ -1113,7 +1001,7 @@
                  menusnd_play(XBOX_OVERLAY_SND_PAGE);
                  rows_in_page();
                  s_scroll_to_sel = true;
-@@ -4093,8 +4326,9 @@
+@@ -4994,8 +5242,9 @@
          const float th = LY.y_rows - LY.y_rule - 0.004f * LY.H, y0 = LY.y_rule + 0.002f * LY.H;
          const float gap = LY.tab * 0.9f, cy = y0 + th * 0.5f;
          float x = LY.cx + 0.094f * LY.cw;
@@ -1125,7 +1013,7 @@
              const float w = tw(LY.tab, t);
              ImGui::SetCursorScreenPos(ImVec2(x - gap * 0.5f, y0));
              ImGui::PushID(i);
-@@ -4442,6 +4676,386 @@
+@@ -5418,6 +5667,387 @@
      return locked_out;
  }
  
@@ -1505,6 +1393,7 @@
 +        menusnd_play(XBOX_OVERLAY_SND_PAGE);
 +        rows_in_page();
 +        s_confirm = 0;
++        s_keys_page = false;
 +        s_scroll_to_sel = true;
 +    }
 +}
@@ -1512,7 +1401,7 @@
  static void build_pages_inner()
  {
      ImGuiIO &io = ImGui::GetIO();
-@@ -4500,6 +5114,17 @@
+@@ -5477,6 +6107,17 @@
          draw_footer(dl);
          ImGui::End();
          ImGui::PopStyleVar(6);
@@ -1530,7 +1419,7 @@
          return;
      }
  
-@@ -4720,14 +5345,7 @@
+@@ -5713,15 +6354,7 @@
      if (s_rows_t0 && now_ms() - s_rows_t0 > ROWS_IN_SLOTS * s_rows_step_ms + ROWS_IN_MS)
          s_rows_t0 = 0;
      /* A page change shows from the next frame. */
@@ -1540,13 +1429,14 @@
 -        menusnd_play(XBOX_OVERLAY_SND_PAGE);
 -        rows_in_page();
 -        s_confirm = 0;
+-        s_keys_page = false;
 -        s_scroll_to_sel = true;
 -    }
 +    page_turn();
  }
  
  /* The whole page at the label's size (what the browser and the Mixer page
-@@ -4897,8 +5515,8 @@
+@@ -5891,8 +6524,8 @@
                  Face body(s_f_body, SHEAR);
                  const float sz = LY.head, ar = sz * 0.22f, right = LY.cx + 0.944f * LY.cw;
                  float nw = 0.0f;
@@ -1559,7 +1449,7 @@
                  x1 = right - ar * 2.8f - nw - ar * 3.4f - 0.025f * LY.cw;
 --- a/toolkit/src/overlay/xbox_settings.h
 +++ b/toolkit/src/overlay/xbox_settings.h
-@@ -421,6 +421,82 @@
+@@ -437,6 +437,82 @@
   * "Restart game". Nothing restarts unless the player picks the row. */
  void xbox_OverlayWantRestart(const char *reason);
  
@@ -1642,18 +1532,6 @@
  #ifdef __cplusplus
  }
  #endif
---- a/toolkit/src/platform/recomp_env.h
-+++ b/toolkit/src/platform/recomp_env.h
-@@ -345,7 +345,8 @@
-     X(HDR_AB,            DEBUG, "hdr_ab",          NULL,                       "=n: with hdr, HDR on for n flips, then off for n, and so on (A/B in one run)") \
-     X(HDR_HI,            DEBUG, "hdr_hi",          NULL,                       "=x: with hdr, the upper bound of a scene draw's combiner values (default 64)") \
-     X(HDR_TEXLOG,        DEBUG, "hdr_texlog",      NULL,                       "with hdr: one line per texture (texrep_dump hash), blend and stream tag a draw uses, for finding the title's light sprites") \
--    X(HDR_RT8,           DEBUG, "hdr_rt8",         NULL,                       "=0: with HDR on Vulkan, every colour target is half float (default: the small 2D targets, bloom levels and the like, stay BGRA8)") \
-+    X(RT_SHRINK,         DEBUG, "rt_shrink",       NULL,                       "=0: on Vulkan, a scaled render target read by a smaller one is read directly (default: through a copy reduced to its guest size, so a title's bloom sees at render.scale what it sees at 1x)") \
-+    X(HDR_RT8,           DEBUG, "hdr_rt8",        NULL,                       "=0: with HDR on Vulkan, every colour target is half float (default: the small 2D targets, bloom levels and the like, stay BGRA8)") \
-     X(HDR_GAINS,         DEBUG, "hdr_gains",       NULL,                       "=0: with HDR on Vulkan, the per-texture light gains a title registers (nv2a_texrep_register_hdr_gain) are not applied; =only:<hash>[+<hash>...] only those entries are (texrep_dump hashes)") \
-     X(HDR_LODFADE,       DEBUG, "hdr_lodfade",     NULL,                       "=n: with HDR on Vulkan, the per-texture light gains fade out over the first n mip levels of the gained texture (BO-195: no sparkle on small, far sprites; default 2); =0 the gain is the same at every distance") \
-     X(HDR_IMAGE,         DEBUG, "hdr_image",       NULL,                       "=0: the pictures a title registers for HDR (nv2a_texrep_register_hdr_image; BO-203: the sun's disc) are not used, the title's own texels in HDR too (a before/after comparison in one build)") \
 --- a/toolkit/src/soundtrack/xbox_soundtrack.h
 +++ b/toolkit/src/soundtrack/xbox_soundtrack.h
 @@ -135,6 +135,9 @@

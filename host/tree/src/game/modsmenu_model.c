@@ -21,6 +21,21 @@ static unsigned char s_entry[BO3_MODFS_MAX_MODS];       /* the approval file nam
 static char s_sha[BO3_MODFS_MAX_MODS][65];              /* its module as hashed here ("" not yet: as this start hashed it) */
 static char s_start_sha[BO3_MODFS_MAX_MODS][65];
 static bo3_approvals_state s_appr;
+static int (*s_live)(const char *id, int on);           /* td030: mm_set_live */
+static signed char s_live_on[BO3_MODFS_MAX_MODS];       /* 0 not asked; 1 in use off, 2 in use on */
+
+void mm_set_live(int (*fn)(const char *id, int on)) { s_live = fn; }
+
+int mm_live_now(int i)
+{
+    return i >= 0 && i < BO3_MODFS_MAX_MODS && s_live_on[i] && s_live_on[i] - 1 == s_next[i];
+}
+
+static void ask_live(int i, const bo3_mod *m, int on)
+{
+    if (i < BO3_MODFS_MAX_MODS && s_live && s_live(m->manifest.id, on))
+        s_live_on[i] = (signed char)(on + 1);
+}
 
 static int nmods(void)
 {
@@ -75,7 +90,8 @@ mm_status mm_status_of(int i)
     if (!m->usable)
         return m->needs ? MM_NEEDS_MOD : m->conflict ? MM_CONFLICT : MM_UNUSABLE;
     if (!mm_has_plugin(i))
-        return s_next[i] == m->enabled ? (m->enabled ? MM_ON : MM_OFF) : (s_next[i] ? MM_ON_RESTART : MM_OFF_RESTART);
+        return mm_live_now(i) ? (s_next[i] ? MM_ON : MM_OFF)
+             : s_next[i] == m->enabled ? (m->enabled ? MM_ON : MM_OFF) : (s_next[i] ? MM_ON_RESTART : MM_OFF_RESTART);
     if (bo3_plugins_off())
         return MM_PLUGINS_OFF;
     {
@@ -362,6 +378,7 @@ int mm_turn_on(int i, char *why, size_t n)
     }
     fprintf(stderr, "[MODS] %s: on from the next start (MODS page)\n", m->manifest.id);
     mm_refresh();
+    ask_live(i, m, 1);
     return 1;
 }
 
@@ -389,6 +406,8 @@ int mm_turn_off(int i, char *why, size_t n)
     fprintf(stderr, "[MODS] %s: off from the next start%s (MODS page)\n", m->manifest.id,
             mm_has_plugin(i) ? ", its approval removed" : "");
     mm_refresh();
+    if (!mm_has_plugin(i))
+        ask_live(i, m, 0);
     return 1;
 }
 

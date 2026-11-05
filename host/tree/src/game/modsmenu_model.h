@@ -71,5 +71,9 @@ int mm_approve_and_on(int i, const char *sha, char *why, size_t n);
 
 /* The mods whose next start differs from this one (counted in the overlay's "Restart now to apply N changes"). */
 int mm_restart_count(char *why, size_t n);
+/* td030: a mod the game can put to use at once (upstream's bo3_upscale_mods_live: the pack made on this computer): the hook is
+ * asked after a turn on / off is saved; 1 = in use now, no restart for it. */
+void mm_set_live(int (*fn)(const char *id, int on));
+int  mm_live_now(int i);                     /* mod i's saved choice is already in use through the hook */
 
 #endif

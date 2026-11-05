@@ -14,13 +14,13 @@ meant to be placed into a Takedawn tree, and `docs/upstream/` holds Takedawn's R
     Copyright (c) 2026 sp00nz
     Copyright (c) 2026 xenophobentx
 
-The full licence text is `LICENSES/Takedawn-MIT.txt` (a verbatim copy of upstream's `LICENSE` at commit `4f074e211822`).
+The full licence text is `LICENSES/Takedawn-MIT.txt` (a verbatim copy of upstream's `LICENSE` at commit `0dd10432d936`).
 Takedawn's own third-party notices are in `docs/upstream/THIRD_PARTY_NOTICES.md`.
 
 ## 2. xboxrecomp (MIT)
 `host/toolkit/toolkit.patch` quotes xboxrecomp (https://github.com/xenophobentx/xboxrecomp) files as context, and `tools/bmpack/host_readers/xboxrecomp/` holds two
 inherited source files of it. xboxrecomp is MIT licensed, `Copyright (c) 2026 sp00nz`; the licence text is
-`LICENSES/xboxrecomp-MIT.txt` (verbatim, commit `e3756d1b2fef`).
+`LICENSES/xboxrecomp-MIT.txt` (verbatim, commit `03b4f22aa6e7`).
 
 ## 3. GNU Lesser General Public License: the modified files `src/apu/apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c` (from xemu)
 `host/toolkit/lgpl/apu_core.patch` (the name is kept) is a set of modifications of four files that xboxrecomp extracted from xemu
@@ -31,7 +31,7 @@ redistribute it and/or modify it under the terms of the GNU Lesser General Publi
 Foundation; either version 2 of the License, or (at your option) any later version." and "WITHOUT ANY WARRANTY"; the whole header
 is reproduced in `host/toolkit/lgpl/NOTICE`. The licence text shipped here is version 2.1 of the GNU Lesser General Public License
 (`LICENSES/LGPL-2.1-or-later.txt`, byte-equal to <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt> and to
-`LICENSES/LGPL-2.1.txt` of xboxrecomp `e3756d1b2fef`). Identifier, from the evidence: the authors' header grants "version 2 ... or any
+`LICENSES/LGPL-2.1.txt` of xboxrecomp `03b4f22aa6e7`). Identifier, from the evidence: the authors' header grants "version 2 ... or any
 later version" (literal SPDX form `LGPL-2.0-or-later`; xemu's own copy has the same wording and no SPDX line); xboxrecomp, from
 which this tree takes the files, distributes them as `LGPL-2.1-or-later` (its NOTICE), a version selection the header permits.
 The Burnout Mashup hunks are offered under the same terms as the file as received: `LGPL-2.1-or-later`, not MIT; the header is
@@ -45,22 +45,23 @@ and no binary is distributed here).
 ## 4. Third-party entries of the xboxrecomp NOTICE
 The build that a user makes from this fork pulls xboxrecomp (and with it the components below) from upstream. This repository
 itself carries none of those components except as quoted in section 3, but their notices are reproduced in full so that
-nothing that applies is lost: the NOTICE of xboxrecomp at `e3756d1b2fef` follows verbatim (LGPL-2.1-or-later xemu APU / NV2A files,
+nothing that applies is lost: the NOTICE of xboxrecomp at `03b4f22aa6e7` follows verbatim (LGPL-2.1-or-later xemu APU / NV2A files,
 BSD-3-Clause ADPCM-XQ, MIT Dear ImGui / SMAA / Super-xBR, the CAS reference, dr_libs / stb_vorbis, DejaVu / Roboto Condensed
 fonts, upscale shaders, derived algorithms). The ADPCM-XQ BSD-3-Clause text is `LICENSES/ADPCM-XQ-BSD-3-Clause.txt`.
 
 ## 5. Licence texts in `LICENSES/` (exactly these files; `REUSE.toml` uses exactly these identifiers)
 | file | sha256 | text from |
 |---|---|---|
-| `LICENSES/ADPCM-XQ-BSD-3-Clause.txt` | `034041463fae701573c94fe56ebdc3cdaf5f7eb1e8de12730eb2de4bb15c892c` | xboxrecomp `LICENSES/ADPCM-XQ-BSD-3-Clause.txt` at `e3756d1b2fef` (carries David Bryant's own copyright line) |
+| `LICENSES/ADPCM-XQ-BSD-3-Clause.txt` | `034041463fae701573c94fe56ebdc3cdaf5f7eb1e8de12730eb2de4bb15c892c` | xboxrecomp `LICENSES/ADPCM-XQ-BSD-3-Clause.txt` at `03b4f22aa6e7` (carries David Bryant's own copyright line) |
 | `LICENSES/CC-BY-4.0.txt` | `d557539df68e771cc1eedcc91d13f70fca930e508d11eedcafa4b15db49e3744` | SPDX license-list-data `text/CC-BY-4.0.txt` (31846481de7e) |
 | `LICENSES/CC0-1.0.txt` | `a2010f343487d3f7618affe54f789f5487602331c0a8d03f49e9a7c547cf0499` | SPDX license-list-data `text/CC0-1.0.txt` (31846481de7e) |
 | `LICENSES/LGPL-2.1-or-later.txt` | `20e50fe7aae3e56378ebf0417d9de904f55a0e61e4df315333e632a4d3555d95` | GNU, <https://www.gnu.org/licenses/old-licenses/lgpl-2.1.txt> (the LGPL version 2.1 text; also xboxrecomp `LICENSES/LGPL-2.1.txt`) |
 | `LICENSES/OFL-1.1.txt` | `e794b23d9e437659ce254bd516111d75b580a75352c4446e103b72b78561f838` | Roboto Condensed `OFL.txt` at google/fonts `69d0549` (same bytes as `launcher/fonts/OFL.txt`) |
 | `LICENSES/LicenseRef-BurnoutMashup-Artwork.txt` | `06853491ecaae3dbc2237e261c1c72899f3160c601037449b1fcce51be1d43c0` | written for this project |
+| `LICENSES/LicenseRef-BurnoutMashup-Upscaler.txt` | `5533f01180c75fb619ea518911dfa0534b082df1f394b2636a2a0d69d12040a3` | the licence texts of the upscaler's parts, from Takedawn 0.3.0 `tools/release/licenses` (`launcher/upscaler`) |
 | `LICENSES/MIT.txt` | `b05785f9f18e6716bab63424b11454513b9943a222595b70411009202fc592b5` | SPDX license-list-data `text/MIT.txt` (31846481de7e) |
-| `LICENSES/Takedawn-MIT.txt` | `0de8327ee50d7638222c6590a40aed91f2d2565557a72f134061b65fe918da99` | Takedawn `LICENSE` at `4f074e211822` |
-| `LICENSES/xboxrecomp-MIT.txt` | `de6601cea3a6bf2d821b6b89f59b9d6e719cc017e530bcb4bbe2fcf7306e6dda` | xboxrecomp `LICENSE` at `e3756d1b2fef` |
+| `LICENSES/Takedawn-MIT.txt` | `0de8327ee50d7638222c6590a40aed91f2d2565557a72f134061b65fe918da99` | Takedawn `LICENSE` at `0dd10432d936` |
+| `LICENSES/xboxrecomp-MIT.txt` | `de6601cea3a6bf2d821b6b89f59b9d6e719cc017e530bcb4bbe2fcf7306e6dda` | xboxrecomp `LICENSE` at `03b4f22aa6e7` |
 
 `LICENSES/MIT.txt`, `LICENSES/CC-BY-4.0.txt` and `LICENSES/CC0-1.0.txt` are the unmodified texts of SPDX license-list-data (commit
 `31846481de7e`, 2026-10-29); the MIT text keeps its `<copyright holders>` placeholder, the copyright line of this project is in
@@ -77,7 +78,7 @@ SDL2 (zlib licence), llvm-mingw, CMake, Ninja, glslang and the Vulkan headers ar
 part of this tree.
 
 ---
-# Verbatim: NOTICE of xboxrecomp at commit e3756d1b2fef
+# Verbatim: NOTICE of xboxrecomp at commit 03b4f22aa6e7
 
 xboxrecomp — third-party attribution
 ====================================
@@ -317,6 +318,36 @@ MIT - Super-xBR (2D art scaler)
   THE SOFTWARE.
 
 
+MIT - AMD FidelityFX Super Resolution 1 (film upscaler, BO-136)
+---------------------------------------------------------------
+
+  EASU and RCAS of AMD's FSR 1.0.2, as agyild's mpv port runs them on one
+  plane (MIT, https://gist.github.com/agyild), written here as compute
+  passes in src/d3d/film_shaders (film_easu.comp, film_rcas.comp) and
+  compiled into the program through src/d3d/nv2a_filmup_shaders.h. Used by
+  graphics.film_upscale's Cheap mode. The notice, which this file carries
+  with every binary:
+
+  Copyright (c) 2021 Advanced Micro Devices, Inc. All rights reserved.
+
+  Permission is hereby granted, free of charge, to any person obtaining a copy
+  of this software and associated documentation files (the "Software"), to deal
+  in the Software without restriction, including without limitation the rights
+  to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+  copies of the Software, and to permit persons to whom the Software is
+  furnished to do so, subject to the following conditions:
+
+  The above copyright notice and this permission notice shall be included in
+  all copies or substantial portions of the Software.
+
+  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+  IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+  AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+  THE SOFTWARE.
+
 Public domain - dr_libs and stb_vorbis (music decoders)
 -------------------------------------------------------
 
@@ -387,3 +418,15 @@ LGPL-3.0-or-later — texture upscaler shaders (third_party/upscale_shaders)
   compiled into any binary. Provenance, hashes, changes and how to replace
   them: third_party/upscale_shaders/NOTICE.md; licence texts:
   third_party/upscale_shaders/COPYING.LESSER and COPYING.
+  graphics.film_upscale's Best mode (BO-136) runs the same FSRCNNX files
+  on the films' frames.
+
+
+BSD-3-Clause — miniupnpc (third_party/miniupnpc)
+------------------------------------------------
+
+  miniupnpc 2.2.8, Copyright (c) 2005-2024, Thomas BERNARD
+  (https://github.com/miniupnp/miniupnp). The library's sources, unchanged,
+  with miniupnpcstrings.h written from its template. Used by
+  src/kernel/xnet_upnp.c to forward the online race port on the router.
+  Licence text: third_party/miniupnpc/LICENSE.

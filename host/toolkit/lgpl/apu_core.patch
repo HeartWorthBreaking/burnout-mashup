@@ -2,11 +2,10 @@
 #
 --- a/toolkit/src/apu/apu.h
 +++ b/toolkit/src/apu/apu.h
-@@ -75,6 +75,16 @@
-  * dry; this keeps it down. Stereo does not use it. */
+@@ -93,6 +93,16 @@
  void mcpx_apu_set_fx_bins(uint32_t mask);
  void mcpx_apu_set_fx_level(float level);
-+
+ 
 +/* Burnout Mashup modification, 2026-11-05: the host's question, once a VP frame, whether the voices that are not streams
 + * interpolate as apu_gauss.h does; NULL (the default) is no. */
 +void mcpx_apu_set_gauss_query(int (*query)(void));
@@ -16,9 +15,10 @@
 +
 +/* Burnout Mashup modification, 2026-11-05: the host's question, once a VP frame, whether voices go through apu_ps2mix.h; NULL (the default) is no. */
 +void mcpx_apu_set_ps2_mix_query(int (*query)(void));
- 
++
  /* A title whose GP effects image has been read wires it with apu_gp.h
   * (apu_gp_direct, _eq, _drive, _export, before mcpx_apu_init_standalone):
+  * the speaker feeds then come from that model of the image, in 5.1 and in
 --- a/toolkit/src/apu/apu_core.c
 +++ b/toolkit/src/apu/apu_core.c
 @@ -113,6 +113,18 @@

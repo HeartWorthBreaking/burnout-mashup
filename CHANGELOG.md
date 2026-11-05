@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.3.0-alpha.1 - On Takedawn 0.3.0 (experimental alpha)
+- **Now built on Takedawn 0.3.0.** The Mashup's host changes moved from Takedawn 0.2.1 to 0.3.0 (Takedawn `0dd10432d936`, xboxrecomp `03b4f22aa6e7`). Saves and mods stay where they are. **Build Mashup has to rebuild the host once** after this update.
+- **Online play is included but off by default.** Turn it on in Settings > System > Online play (it asks for a restart). Internet uses the Takedawn community server; Local network needs no server. Not tested against Takedawn players.
+- **Bloom:** Takedawn's own fix for glow dots at a render scale replaces ours.
+- **Mods:** one mods page, the Mashup's. Takedawn's Mods tab is not included; its functions are on the MODS page: the mods folder, Turn every mod on, and Sharper menu pictures.
+- **Sharper menu pictures:** the AI upscaler ships with the launcher (`launcher\upscaler`, about 42 MB, licences in `LICENSES`). The pictures are made on your PC from your own disc.
+- **Also from 0.3.0:** soft-body damage (off by default), Language, 16:10 and more; see Takedawn's release notes. Only the North American disc is supported here: the European discs are not.
+- **Tested:** one game run by the maintainer on an earlier build of this host, with no problem seen, and one automated game run of this release host: White Mountain driven by the autopilot demo for about five minutes at render scale 3, with no errors, Takedawn's bloom fix active, PS2 SOUND on and the sound playing without gaps. **Not confirmed:** whether the bloom looks better, how PS2 SOUND sounds by ear, a finished lap, the Online and MODS pages on screen, and approving a plugin on the MODS page (plugins loaded from approvals saved beforehand; in the maintainer's run the approval was not saved). No retail data and no game files are in the release. Linux and macOS: not built.
+
 ## 0.2.0-alpha.5 - Update now and Switch back no longer fail because of the launcher's own font (experimental alpha)
 - **Fix:** in 0.2.0-alpha.3 and 0.2.0-alpha.4 the launcher kept its font file (`app\launcher\fonts\RobotoCondensed-Medium.ttf`) open for as long as it ran, so Update now
   and Switch back could not rename the `app\launcher` folder and stopped with "WinError 5, access denied". The theme (`bmtheme.py`; the Workbench's `wb_theme.py` is the same file)

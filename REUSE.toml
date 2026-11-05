@@ -118,8 +118,6 @@ path = [
   "host/tree/tests/bm_chevron/README.md",
   "host/tree/tests/bm_events/CMakeLists.txt",
   "host/tree/tests/bm_vphysics/README.md",
-  "host/tree/tests/modmanifest/CMakeLists.txt",
-  "host/tree/tests/modsmenu/CMakeLists.txt",
   "host/tree/tests/plugins/CMakeLists.txt",
   "host/tree/tests/race/CMakeLists.txt",
   "host/tree/tools/migrate/README.md",
@@ -328,6 +326,20 @@ SPDX-License-Identifier = "LicenseRef-BurnoutMashup-Artwork"
 
 [[annotations]]
 path = [
+  "launcher/upscaler/UPSCALER.json",
+  "launcher/upscaler/models/realesr-general-dn030-x4v3.bin",
+  "launcher/upscaler/models/realesr-general-dn030-x4v3.param",
+  "launcher/upscaler/models/realesrgan-x4plus.bin",
+  "launcher/upscaler/models/realesrgan-x4plus.param",
+  "launcher/upscaler/realesrgan-ncnn-vulkan.exe",
+  "launcher/upscaler/vcomp140.dll",
+]
+precedence = "aggregate"
+SPDX-FileCopyrightText = "see LICENSES/LicenseRef-BurnoutMashup-Upscaler.txt"
+SPDX-License-Identifier = "LicenseRef-BurnoutMashup-Upscaler"
+
+[[annotations]]
+path = [
   "tools/bmpack/host_readers/xboxrecomp/LICENSE.txt",
   "tools/bmpack/host_readers/xboxrecomp/src/enhance/recomp_cfg.c",
   "tools/bmpack/host_readers/xboxrecomp/src/enhance/recomp_cfg.h",
@@ -418,7 +430,6 @@ path = [
   "host/toolkit/added/src/apu/apu_gauss.h",
   "host/toolkit/added/src/apu/apu_ps2mix.h",
   "host/toolkit/added/src/apu/apu_softmusic.h",
-  "host/toolkit/added/src/d3d/nv2a_rt_shrink.h",
   "host/tree/BUILD_COMMIT",
   "host/tree/assets/icon/make_bmashup_ico.py",
   "host/tree/cmake/bo3_source_id.cmake",
@@ -625,10 +636,6 @@ path = [
   "host/tree/src/game/bo3_wt4_gen.h",
   "host/tree/src/game/bo3_wtour_gen.h",
   "host/tree/src/game/bo3_xevents_gen.h",
-  "host/tree/src/game/modfs.h",
-  "host/tree/src/game/modmanifest.c",
-  "host/tree/src/game/modmanifest.h",
-  "host/tree/src/game/modsmenu.c",
   "host/tree/src/game/modsmenu_model.c",
   "host/tree/src/game/modsmenu_model.h",
   "host/tree/src/game/modsmenu_ov.c",
@@ -641,7 +648,6 @@ path = [
   "host/tree/tests/bm_chevron/test_main.c",
   "host/tree/tests/bm_events/test_main.c",
   "host/tree/tests/bm_vphysics/test_main.c",
-  "host/tree/tests/modsmenu/test_main.c",
   "host/tree/tests/plugins/test_main.c",
   "host/tree/tools/migrate/bmashup_migrate.py",
   "host/tree/tools/release/windows/bmashup.rc.in",
@@ -1114,7 +1120,6 @@ SPDX-License-Identifier = "MIT"
 
 [[annotations]]
 path = [
-  "host/tree/cmake/modsmenu_marks.cmake",
   "host/tree/examples/plugins/bmashup-boost/bm_boost_demo.c",
   "host/tree/examples/plugins/bmashup-boost/mod.toml",
   "host/tree/examples/plugins/bmashup-events/a/mod.toml",
@@ -1134,8 +1139,6 @@ path = [
   "host/tree/src/game/plugins_posix.c",
   "host/tree/src/game/plugins_win32.c",
   "host/tree/src/game/race_service.h",
-  "host/tree/tests/modmanifest/test_main.c",
-  "host/tree/tests/modsmenu/marks_test.cmake",
   "host/tree/tests/plugins/test_module.c",
   "host/tree/tests/race/test_main.c",
   "sdk/include/takedawn_plugin.h",

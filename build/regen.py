@@ -42,6 +42,7 @@ def steps(py, xbe, tree, out, gen):
                          "--func-id-dir", os.path.join(out, "func_id"), "--abi-dir", os.path.join(out, "abi"),
                          "--exclude-manual", os.path.join(tree, "src", "game", "recomp", "recomp_manual.c"),
                          "--spin-waits", os.path.join(cfg, "spin_waits.json"), "--patches", os.path.join(cfg, "patches.json"),
+                         "--mem-order", os.path.join(cfg, "mem_order.json"),
                          "--gen-dir", gen, "-o", os.path.join(out, "recomp")]),
     ]
 

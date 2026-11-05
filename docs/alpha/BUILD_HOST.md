@@ -49,9 +49,9 @@ build-host.cmd [--git <git.exe>]                                         -> host
 preflight.cmd                                                            must end with RESULT PASS (host in use = your build)
 ```
 - `build-host.cmd` runs `host-source\build_from_source.py` (unchanged host source package): clones upstream Takedawn at
-  **4f074e211822eaf43d4a3902c744d5ed0e9c9adf** and xboxrecomp at **e3756d1b2fefdae6888038384c748cbdd37a41ba**, applies our patch
+  **0dd10432d936eaf43d4a3902c744d5ed0e9c9adf** and xboxrecomp at **03b4f22aa6e7dae6888038384c748cbdd37a41ba**, applies our patch
   (`host-source\patches\bmashup-host-main19_final-vs-takedawn-4f074e2.patch`, sha256 `c4bb497ee834c5689475aec1dc07896000fafcfe1f7d589a964b5d49bbd45b6e`),
-  regenerates the game code from your `default.xbe` (checks the generated tree `5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5`),
+  regenerates the game code from your `default.xbe` (checks the generated tree `e45b7cc243ac186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5`),
   applies the 453 hook marks (`host-source\marks\marks_main19_final.json`, sha256 `1e99f47379b73d4070c5cb15f1c8fd13d866d2993df419a93034661263c2a068`;
   refuses on any hash mismatch), configures + builds, and installs the result into `host-local\` (beside the prebuilt `host\`).
 - No network? `--takedawn <local clone> --xboxrecomp <local clone>`. Disc instead of installed data? `--xbe <disc folder>\default.xbe`,
@@ -66,7 +66,7 @@ preflight.cmd                                                            must en
 | host exe `host-local\burnout3_bmashup.exe` (identical to the prebuilt `host\burnout3_bmashup.exe`) | sha256 **f0b9c8a9bf3baa7ed41703569a23236efd2b7e503fdbf6a73cf8c0d3d5f27656** (reference build main21), 27,380,224 bytes |
 | build identity (log line `[PLATFORM] host: Burnout Mashup platform 0.1.9, build ...`) | **bmp-0.1.9+2c8142e65f20** |
 | SDL2.dll (from the SDL2 devel package) | sha256 53e8fa7e9ed43c30bd650c39396f0d9d2067d2fff0b926c9433b75202592e4aa |
-| generated game-code tree (your recompile, before the marks) | 5f8203841651186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5 |
+| generated game-code tree (your recompile, before the marks) | e45b7cc243ac186bc670dc68e36a0d5529b6a2ebab7b35f014494b608bc29ae5 |
 
 `build-host.cmd` exits 0 only when the exe equals the reference; 2 = built but different (unsupported; check the pins); 3 = a step
 failed (log `build\work-<n>\build_from_source.log`). Your glslang libraries will differ from ours in their object time stamps only;

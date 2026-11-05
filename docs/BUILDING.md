@@ -93,7 +93,7 @@ cd C:\bm\repo
 $py = 'C:\Python314\python.exe'          # any Python 3.8+
 ```
 
-**Step 1 - fetch upstream at the pinned commits** (`host/PINS.json`): Takedawn `4f074e211822` and xboxrecomp `e3756d1b2fef`.
+**Step 1 - fetch upstream at the pinned commits** (`host/PINS.json`): Takedawn `0dd10432d936` and xboxrecomp `03b4f22aa6e7`.
 Give a git URL or a local clone for each (a URL is cloned bare into the work folder and removed again; a local clone is only
 read with `rev-parse` and `archive`).
 ```powershell
@@ -123,7 +123,7 @@ that already exists, an edited layer file or a result that is not the pinned res
 This runs upstream's recompiler (the five steps of its `regen.sh`: `xbe_parser`, `disasm`, `func_id`, `abi_analysis`, `recomp`,
 with the guest patches of `config/patches.json` and the spin-wait list on) on your executable. It must run **after** step 2
 (the Mashup layer changes `config/patches.json`, an input of the recompiler). The executable is only read. The output is
-`C:\bm\work\gen_pristine`; the script then checks the generated tree hash (`5f8203841651...`, from `host/PINS.json`), the
+`C:\bm\work\gen_pristine`; the script then checks the generated tree hash (`e45b7cc243ac...`, from `host/PINS.json`), the
 recompiler's patch report (117 of 117 sites) and the number of spin waits, and refuses (deleting the output) if anything
 differs: another `default.xbe` build, another recompiler or capstone version.
 
@@ -230,7 +230,7 @@ your option) any later version"; xboxrecomp distributes it as `LGPL-2.1-or-later
 evidence is in `host/toolkit/lgpl/NOTICE`). This section is about the **source** only.
 
 - **Where the modified source is.** This repository holds the modification, not the whole file: `host/toolkit/lgpl/apu_core.patch`
-  (the name is kept; 4 hunks in `apu_core.c`, the "MEM256" window, dated 2026-10-28 in the file itself, and the hunks of the other three files, each dated 2026-11-05 in the file) against the pinned upstream file (xboxrecomp `e3756d1b2fef`,
+  (the name is kept; 4 hunks in `apu_core.c`, the "MEM256" window, dated 2026-10-28 in the file itself, and the hunks of the other three files, each dated 2026-11-05 in the file) against the pinned upstream file (xboxrecomp `03b4f22aa6e7`,
   blob `45c3334f4e33`). After step 2 above the complete modified files are in `C:\bm\work\xboxrecomp\src\apu\` (`apu_core.c`, `apu.h`, `apu_state.h`, `apu_vp.c`). The licence
   text, the header of the file, the change notice and the blob / sha256 pins of the twelve LGPL-marked files are in
   `host/toolkit/lgpl/NOTICE` and `LICENSES/LGPL-2.1-or-later.txt`.
