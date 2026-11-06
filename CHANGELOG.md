@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.3.0-alpha.2 - Build Mashup no longer fails after an update (experimental alpha)
+- **Fix:** after updating to 0.3.0-alpha.1, Build Mashup stopped with "ended with exit 3" for anyone who had built before. Git's read-only files were left in the build folder and could not be deleted when the sources were fetched again. Build Mashup now removes them.
+- **If you are stuck on exit 3:** press Update now. It installs this version and finishes the build; you don't need to delete anything by hand. If you have 0.2.0-alpha.3 or 0.2.0-alpha.4, `fix-update.cmd` is still needed once.
+- **Repository:** the two upscaler programs that 0.3.0-alpha.1's commit left out (`realesrgan-ncnn-vulkan.exe`, `vcomp140.dll`) are now in the repository. The packages always had them.
+- **Host:** the same as 0.3.0-alpha.1 (the same host files and reference builds).
+
 ## 0.3.0-alpha.1 - On Takedawn 0.3.0 (experimental alpha)
 - **Now built on Takedawn 0.3.0.** The Mashup's host changes moved from Takedawn 0.2.1 to 0.3.0 (Takedawn `0dd10432d936`, xboxrecomp `03b4f22aa6e7`). Saves and mods stay where they are. **Build Mashup has to rebuild the host once** after this update.
 - **Online play is included but off by default.** Turn it on in Settings > System > Online play (it asks for a restart). Internet uses the Takedawn community server; Local network needs no server. Not tested against Takedawn players.

@@ -682,6 +682,7 @@ path = [
   "launcher/tests/test_build.py",
   "launcher/tests/test_build_isolation.py",
   "launcher/tests/test_build_now.py",
+  "launcher/tests/test_build_readonly.py",
   "launcher/tests/test_build_real.py",
   "launcher/tests/test_diag.py",
   "launcher/tests/test_exe.py",

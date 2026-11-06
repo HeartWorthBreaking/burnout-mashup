@@ -45,6 +45,7 @@ import hashlib
 import json
 import os
 import shutil
+import stat
 import subprocess
 import sys
 import time
@@ -87,6 +88,24 @@ RECOVERY = {
                "Mashup again (only the install step runs).",
     "cancelled": "Cancelled. Completed steps are kept and verified before they are reused: run Build Mashup again to continue.",
 }
+
+
+def rm_tree(path, ignore_errors=False):
+    """shutil.rmtree that also removes read-only files: git's pack files are read-only on Windows. Left behind, they made the next fetch in
+    the same build folder fail with WinError 5 (BUILD MASHUP exit 3 after an update that moves the upstream pins). Only a refused delete of
+    a file or an empty folder is retried; links and junctions are treated as by shutil.rmtree."""
+    def retry(func, p, err):
+        e = err[1] if isinstance(err, tuple) else err
+        if func not in (os.unlink, os.remove, os.rmdir) or not isinstance(e, PermissionError):
+            raise e
+        os.chmod(p, stat.S_IWRITE)
+        func(p)
+    kw = {"onexc": retry} if sys.version_info >= (3, 12) else {"onerror": retry}
+    try:
+        shutil.rmtree(path, **kw)
+    except OSError:
+        if not ignore_errors:
+            raise
 
 
 class Refused(Exception):
@@ -227,12 +246,12 @@ def probe_alias(link, target):
         step = "replace a file"
         os.replace(os.path.join(via, "a", "sub", "f.tmp"), os.path.join(via, "a", "sub", "f.json"))
         step = "remove"
-        shutil.rmtree(via)
+        rm_tree(via)
         return None
     except OSError as e:
         return "%s: %s" % (step, e)
     finally:
-        shutil.rmtree(real, ignore_errors=True)      # through the real path: works even where the junction did not
+        rm_tree(real, ignore_errors=True)      # through the real path: works even where the junction did not
 
 
 def ascii_alias(path, mode="auto", alias_root=None, roots=None):
@@ -490,7 +509,7 @@ class Build:
     def slot(self, ctx, step, fresh=False):
         d = os.path.join(ctx["A"], SLOT[step])
         if fresh and os.path.exists(d):
-            shutil.rmtree(d)
+            rm_tree(d)
         if fresh:
             os.makedirs(d)
         return d
@@ -502,7 +521,7 @@ class Build:
                                                      "--takedawn", src["takedawn"], "--xboxrecomp", src["xboxrecomp"]), ctx)
         if rc or not (v or {}).get("ok"):
             raise StepFailed("fetch", "fetch_upstream.py: %s" % ((v or {}).get("reason") or "rc %s" % rc))
-        shutil.rmtree(os.path.join(s, "_git"), ignore_errors=True)       # a URL source's bare clone: not needed once verified
+        rm_tree(os.path.join(s, "_git"), ignore_errors=True)       # a URL source's bare clone: not needed once verified
         return {"takedawn": v["fetched"]["takedawn"]["archive_digest"], "xboxrecomp": v["fetched"]["xboxrecomp"]["archive_digest"]}
 
     def ok_fetch(self, ctx, rec):
@@ -549,7 +568,7 @@ class Build:
         for n in os.listdir(xr):
             if n.endswith((".log", ".json")) and os.path.isfile(os.path.join(xr, n)):
                 shutil.copy2(os.path.join(xr, n), os.path.join(keep, n))
-        shutil.rmtree(xr)
+        rm_tree(xr)
         gen = os.path.join(s, "gen_pristine")
         return {"gen_tree_hash": v["gen_tree_hash"], "stamp": sha_f(os.path.join(gen, "regen.stamp")), "files": v["files"]}
 
@@ -656,7 +675,7 @@ class Build:
             r = bmhost.install(pay, self.launcher, fault=os.environ.get("BMBUILD_FAULT_INSTALL"), log=self.say)
         except bmhost.InstallError as e:
             raise StepFailed("install", str(e))
-        shutil.rmtree(pay, ignore_errors=True)
+        rm_tree(pay, ignore_errors=True)
         return {"sha256": r["sha256"], "identity": r["identity"], "host_info": ctx["state"]["host_info"]["out"]["sha256"]}
 
     def ok_install(self, ctx, rec):
@@ -814,7 +833,7 @@ class Build:
                 out = getattr(self, "do_" + s)(ctx)
             except Cancelled:
                 st[s].update(status="cancelled", seconds=round(time.time() - t0, 1))
-                shutil.rmtree(os.path.join(ctx["A"], SLOT[s]), ignore_errors=True)
+                rm_tree(os.path.join(ctx["A"], SLOT[s]), ignore_errors=True)
                 jsave(statep, doc)
                 self.ev(ev="step", name=s, status="cancelled")
                 raise
@@ -957,7 +976,7 @@ def remove_build_dir(bd, yes=False, out=print):
             else:
                 keep.append(x)
         dn[:] = keep
-    shutil.rmtree(bd)
+    rm_tree(bd)
     out("removed %s (%d junctions unlinked first)" % (bd, links))
     return {"removed": True, "junctions": links}
 
