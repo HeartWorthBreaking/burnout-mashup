@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.3.0-alpha.3 - Easier to read in-game menus (experimental alpha)
+- **Mods page:** after you approve a plugin or change a mod, the result stays in the help text at the bottom until you reopen the page. Before, it could be scrolled out of sight. The Mods folder lines are larger, in the normal text colour, and wrap instead of shrinking.
+- **Long lists:** rows now fade out at an edge where the list carries on, instead of being cut in half.
+- **Section titles and notes:** a soft dark band behind them keeps the background's blue streak from running through the text.
+- **Help text:** the setting for the entry in the game's menu no longer names TAKEDAWN SETTINGS; the entry itself already read MASHUP SETTINGS.
+- **Host:** this release has a new host, so Update now rebuilds it after installing.
+
 ## 0.3.0-alpha.2 - Build Mashup no longer fails after an update (experimental alpha)
 - **Fix:** after updating to 0.3.0-alpha.1, Build Mashup stopped with "ended with exit 3" for anyone who had built before. Git's read-only files were left in the build folder and could not be deleted when the sources were fetched again. Build Mashup now removes them.
 - **If you are stuck on exit 3:** press Update now. It installs this version and finishes the build; you don't need to delete anything by hand. If you have 0.2.0-alpha.3 or 0.2.0-alpha.4, `fix-update.cmd` is still needed once.

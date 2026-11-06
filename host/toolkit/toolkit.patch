@@ -1447,6 +1447,105 @@
                      if (w > nw) nw = w;
                  }
                  x1 = right - ar * 2.8f - nw - ar * 3.4f - 0.025f * LY.cw;
+@@ -522,1 +522,1 @@
+-    /* XS_INTERFACE_MENU_ENTRY */ { XS_INTERFACE_MENU_ENTRY, "Entry in the game's menu", "Adds TAKEDAWN SETTINGS to the game's Settings menu (Driver Details > Settings). It opens this menu, like the hotkey. From the next time that menu opens.", 1, FMT_PLAIN, NULL, 0 },
++    /* XS_INTERFACE_MENU_ENTRY */ { XS_INTERFACE_MENU_ENTRY, "Entry in the game's menu", "Adds an entry for this menu to the game's Settings menu (Driver Details > Settings). It opens this menu, like the hotkey. From the next time that menu opens.", 1, FMT_PLAIN, NULL, 0 },
+@@ -4618,1 +4618,34 @@
++/* rel027: a soft dark band behind small text (section titles, notes, the mods folder), so the
++ * title's blue arc does not run through it; it thins out to the right, where the arc is not. */
++static void text_plate(ImDrawList *dl, float x0, float x1, float y0, float y1)
++{
++    const ImU32 on = col(T->head_band, 0.5f), off = col(T->head_band, 0.0f);
++    const float xa = x0 + (y1 - y0), xb = x0 + (x1 - x0) * 0.45f;
++    dl->AddRectFilledMultiColor(ImVec2(x0, y0), ImVec2(xa, y1), off, on, on, off);
++    dl->AddRectFilled(ImVec2(xa, y0), ImVec2(xb, y1), on);
++    dl->AddRectFilledMultiColor(ImVec2(xb, y0), ImVec2(x1, y1), on, off, off, on);
++}
++
++/* rel027: a list that runs on past its window fades at that edge instead of cutting a row in
++ * half. Call before EndChild, with the draw list's vertex count from before the rows. */
++static void scroll_edge_fade(ImDrawList *dl, int v0, float y0, float y1, float band)
++{
++    const float sy = ImGui::GetScrollY();
++    const bool top = sy > 0.5f, bot = sy < ImGui::GetScrollMaxY() - 0.5f;
++    if ((!top && !bot) || band <= 0.0f)
++        return;
++    for (int i = v0; i < dl->VtxBuffer.Size; i++) {
++        ImDrawVert &v = dl->VtxBuffer[i];
++        float k = 1.0f;
++        if (top && v.pos.y < y0 + band)
++            k = fmaxf(0.0f, (v.pos.y - y0) / band);
++        if (bot && v.pos.y > y1 - band)
++            k = fminf(k, fmaxf(0.0f, (y1 - v.pos.y) / band));
++        if (k < 1.0f) {
++            const unsigned a = (unsigned)(((v.col & IM_COL32_A_MASK) >> IM_COL32_A_SHIFT) * k);
++            v.col = (v.col & ~(ImU32)IM_COL32_A_MASK) | ((ImU32)a << IM_COL32_A_SHIFT);
++        }
++    }
++}
++
+ static void draw_row(const Row &r, int idx, bool sel, float width, float rh, float fs, ImDrawList *dl,
+@@ -4682,3 +4682,4 @@
+     if (r.kind == R_INFO) {
++        text_plate(dl, lx - fs * 0.4f, LY.x_val1, p.y, p.y + rh);
+         Face ui(s_f_ui);
+         txt_fit(dl, LY.hint, ImVec2(lx, top_for(cy, LY.hint)), r.action ? col(T->attn) : col(T->hint), r.text,
+@@ -4692,2 +4692,3 @@
++        text_plate(dl, lx - fs * 0.4f, LY.x_val1, p.y, p.y + rh);
+         Face it(s_f_body, SHEAR);
+         const float hs = fs * 0.78f, hy = top_for(cy + rh * 0.12f, hs);
+@@ -5918,3 +5918,4 @@
+         ImDrawList *cdl = ImGui::GetWindowDrawList();
++        const int fade_v0 = cdl->VtxBuffer.Size;
+         const float rw = ImGui::GetContentRegionAvail().x;
+         const float view0 = ImGui::GetScrollY(), view1 = view0 + rows_h;
+@@ -5954,2 +5954,3 @@
++                text_plate(cdl, lx - fs * 0.4f, vr, p.y, p.y + rh);
+                 Face it(s_f_body, SHEAR);
+                 const float hsz = fs * 0.8f;
+@@ -5960,3 +5960,4 @@
+             } else if (r.kind == XBOX_PR_INFO) {
++                text_plate(cdl, lx - fs * 0.4f, vr, p.y, p.y + rh);
+                 Face ui(s_f_ui);
+                 txt_fit(cdl, LY.hint, ImVec2(lx, top_for(cy, LY.hint)), r.tone ? port_tone(r.tone, false) : col(T->hint),
+@@ -5965,3 +5965,4 @@
+             } else if (r.kind == XBOX_PR_TEXT) {
++                text_plate(cdl, lx - fs * 0.4f, vr, p.y, p.y + rh);
+                 Face body(s_f_body);
+                 txt(cdl, LY.hint * 1.1f, ImVec2(lx, p.y + pitch * 0.12f), r.tone ? port_tone(r.tone, false) : col(T->text),
+@@ -6018,4 +6018,5 @@
+             y += rh;
+         }
++        scroll_edge_fade(cdl, fade_v0, LY.y_rows, LY.y_rows + rows_h, pitch * 0.9f);
+         ImGui::EndChild();
+         if (np || note_only) {
+@@ -6292,3 +6292,4 @@
+     ImDrawList *cdl = ImGui::GetWindowDrawList();
++    const int fade_v0 = cdl->VtxBuffer.Size;
+     const float rw = ImGui::GetContentRegionAvail().x;
+     auto rows_run = [&](int from, int to, ImDrawList *rdl) {
+@@ -6353,2 +6353,3 @@
+     rows_run(0, n - pins, cdl);
++    scroll_edge_fade(cdl, fade_v0, LY.y_rows, LY.y_rows + rows_h, pitch * 0.9f);
+     ImGui::EndChild();
+@@ -4620,8 +4620,12 @@
+ static void text_plate(ImDrawList *dl, float x0, float x1, float y0, float y1)
+ {
+-    const ImU32 on = col(T->head_band, 0.5f), off = col(T->head_band, 0.0f);
+-    const float xa = x0 + (y1 - y0), xb = x0 + (x1 - x0) * 0.45f;
+-    dl->AddRectFilledMultiColor(ImVec2(x0, y0), ImVec2(xa, y1), off, on, on, off);
+-    dl->AddRectFilled(ImVec2(xa, y0), ImVec2(xb, y1), on);
+-    dl->AddRectFilledMultiColor(ImVec2(xb, y0), ImVec2(x1, y1), on, off, off, on);
++    /* rel028: clear on all four sides. Three by three cells: the outer grid lines are clear, the inner two of each way are full. */
++    const ImU32 on = col(T->head_band, 0.5f), off = col(T->head_band, 0.0f);
++    const float h = y1 - y0;
++    const float xs[4] = { x0 - h, x0, x0 + (x1 - x0) * 0.45f, x1 };
++    const float ys[4] = { y0, y0 + h * 0.3f, y1 - h * 0.3f, y1 };
++    const auto c = [&](int i, int j) { return (i == 1 || i == 2) && (j == 1 || j == 2) ? on : off; };
++    for (int j = 0; j < 3; j++)
++        for (int i = 0; i < 3; i++)
++            dl->AddRectFilledMultiColor(ImVec2(xs[i], ys[j]), ImVec2(xs[i + 1], ys[j + 1]), c(i, j), c(i + 1, j), c(i + 1, j + 1), c(i, j + 1));
+ }
 --- a/toolkit/src/overlay/xbox_settings.h
 +++ b/toolkit/src/overlay/xbox_settings.h
 @@ -437,6 +437,82 @@

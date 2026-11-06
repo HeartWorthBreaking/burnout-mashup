@@ -92,8 +92,8 @@
    },
    "src/overlay/overlay_ui.cpp": {
     "base_sha256": "f9d7a29e142bbe151d39ae3d6f21675b15abd150bd8bfe1d458709f33eaf308e",
-    "hunks": 25,
-    "result_sha256": "63317bfcd93dd5723f39d258ea2ec11f6b8991f7474f915d64e075b4d7f01b5c"
+    "hunks": 37,
+    "result_sha256": "ef4128ebc6bee53a62f1f4801a5ce3d45ffff8f609f6e7b1577dbd218862941d"
    },
    "src/overlay/xbox_settings.h": {
     "base_sha256": "f30aab570c766515e4cbc489cd930fa2a30757ea5b1638ff47acbbd7c3d161eb",

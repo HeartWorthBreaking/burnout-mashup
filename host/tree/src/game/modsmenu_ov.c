@@ -132,9 +132,9 @@ static void build_mods(void)
         add(PG_MODS, XBOX_PR_INFO, R_NONE, -1, 0, XBOX_PT_PLAIN);
         if (!s_where[0])
             make_where();
-        add(PG_MODS, XBOX_PR_INFO, R_WHERE, -1, XBOX_PRF_NOCAPS, XBOX_PT_DIM);
+        add(PG_MODS, XBOX_PR_TEXT, R_WHERE, -1, XBOX_PRF_NOCAPS, XBOX_PT_PLAIN);
         if (s_extra[0])
-            add(PG_MODS, XBOX_PR_INFO, R_EXTRA, -1, XBOX_PRF_NOCAPS, XBOX_PT_DIM);
+            add(PG_MODS, XBOX_PR_TEXT, R_EXTRA, -1, XBOX_PRF_NOCAPS, XBOX_PT_PLAIN);
         if (wait && mm_approval_writable())
             add(PG_MODS, XBOX_PR_ITEM, R_REVIEW, -1, XBOX_PRF_ACTION, XBOX_PT_ATTN);
         if (!nm)
@@ -340,6 +340,10 @@ static void ov_row(int page, int i, xbox_port_row *o)
         } else {
             snprintf(o->label, sizeof o->label, "No mods installed. Put a mod's folder (with its mod.toml) in your mods "
                      "folder, then start the game again.");
+        }
+        if (s_msg[0] && r->what != R_MSG) {     /* rel027: row 0 may be out of view; the hint band never is */
+            snprintf(a, sizeof a, "%s", o->hint);
+            snprintf(o->hint, sizeof o->hint, "%s%s%s", s_msg, a[0] ? "  " : "", a);
         }
         return;
     }

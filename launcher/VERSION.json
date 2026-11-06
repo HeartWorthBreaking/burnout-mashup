@@ -3,5 +3,5 @@
  "launcher": "1.3.1",
  "note": "release: the version of this Burnout Mashup source release (release manifests of the update channel name it; the maintainer sets it before tagging a release, docs/OWNER_UPDATE_CHANNEL.md). launcher: the launcher / updater format version (a release manifest's requires.launcher is compared with it); 1.1.0 = the Windows package layout (Burnout Mashup.exe, Burnout Mashup Workbench.exe, gamedata\\, app\\) and package updates; 1.2.0 = one-click Update now and Build Mashup.",
  "product": "BurnoutMashup",
- "release": "0.3.0-alpha.2"
+ "release": "0.3.0-alpha.3"
 }
